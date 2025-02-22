@@ -13,12 +13,14 @@ var projectServiceResetFrequency = []string{
 }
 
 type ProjectService struct {
-	ProjectID      pgtype.Int4
-	ServiceID      pgtype.Int4
+	ProjectID pgtype.Int4
+	ServiceID pgtype.Int4
+
 	MaxRequest     pgtype.Int4
-	ResetFrequency pgtype.Text
 	NextReset      pgtype.Timestamptz
-	CreatedAt      pgtype.Timestamptz
+	ResetFrequency pgtype.Text
+
+	CreatedAt pgtype.Timestamptz
 }
 
 func (ps *ProjectService) ValidateModel() error {

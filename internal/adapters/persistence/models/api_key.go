@@ -11,13 +11,15 @@ import (
 var apiKeyStatus = []string{"active", "deactivated"}
 
 type APIKey struct {
-	ID            pgtype.Int4
-	EnvironmentID pgtype.Int4
+	ID pgtype.Int4
+
 	Key           pgtype.Text
-	ExpiresAt     pgtype.Timestamptz
-	LastUsed      pgtype.Timestamptz
 	Status        pgtype.Text
-	CreatedAt     pgtype.Timestamptz
+	LastUsed      pgtype.Timestamptz
+	ExpiresAt     pgtype.Timestamptz
+	EnvironmentID pgtype.Int4
+
+	CreatedAt pgtype.Timestamptz
 }
 
 func (k *APIKey) ValidateModel() error {

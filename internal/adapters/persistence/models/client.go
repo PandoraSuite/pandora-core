@@ -11,10 +11,12 @@ import (
 var clientType = []string{"organization", "developer"}
 
 type Client struct {
-	ID        pgtype.Int4
-	Type      pgtype.Text
-	Name      pgtype.Text
-	Email     pgtype.Text
+	ID pgtype.Int4
+
+	Type  pgtype.Text
+	Name  pgtype.Text
+	Email pgtype.Text
+
 	CreatedAt pgtype.Timestamptz
 }
 

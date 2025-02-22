@@ -13,13 +13,15 @@ var requestLogExecutionStatus = []string{
 }
 
 type RequestLog struct {
-	ID              pgtype.Int4
-	EnvironmentID   pgtype.Int4
-	ServiceID       pgtype.Int4
+	ID pgtype.Int4
+
 	APIKey          pgtype.Text
+	ServiceID       pgtype.Int4
 	RequestTime     pgtype.Timestamptz
+	EnvironmentID   pgtype.Int4
 	ExecutionStatus pgtype.Text
-	CreatedAt       pgtype.Timestamptz
+
+	CreatedAt pgtype.Timestamptz
 }
 
 func (p *RequestLog) ValidateModel() error {

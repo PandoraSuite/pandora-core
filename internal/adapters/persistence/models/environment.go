@@ -11,10 +11,12 @@ import (
 var environmentStatus = []string{"active", "deactivated"}
 
 type Environment struct {
-	ID        pgtype.Int4
-	ProjectID pgtype.Int4
+	ID pgtype.Int4
+
 	Name      pgtype.Text
 	Status    pgtype.Text
+	ProjectID pgtype.Int4
+
 	CreatedAt pgtype.Timestamptz
 }
 

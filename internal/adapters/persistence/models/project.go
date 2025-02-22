@@ -11,10 +11,12 @@ import (
 var projectStatus = []string{"in_production", "in_development", "deactivated"}
 
 type Project struct {
-	ID        pgtype.Int4
-	ClientID  pgtype.Int4
-	Name      pgtype.Text
-	Status    pgtype.Text
+	ID pgtype.Int4
+
+	Name     pgtype.Text
+	Status   pgtype.Text
+	ClientID pgtype.Int4
+
 	CreatedAt pgtype.Timestamptz
 }
 

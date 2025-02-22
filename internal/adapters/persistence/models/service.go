@@ -11,10 +11,12 @@ import (
 var serviceStatus = []string{"active", "deactivated", "deprecated"}
 
 type Service struct {
-	ID        pgtype.Int4
-	Name      pgtype.Text
-	Version   pgtype.Text
-	Status    pgtype.Text
+	ID pgtype.Int4
+
+	Name    pgtype.Text
+	Status  pgtype.Text
+	Version pgtype.Text
+
 	CreatedAt pgtype.Timestamptz
 }
 
