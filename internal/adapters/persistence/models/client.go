@@ -19,12 +19,12 @@ type Client struct {
 }
 
 func (c *Client) ValidateModel() error {
-	return c.validateStatus()
+	return c.validateType()
 }
 
-func (c *Client) validateStatus() error {
-	if status, _ := c.Type.Value(); status != nil {
-		if slices.Contains(clientType, status.(string)) {
+func (c *Client) validateType() error {
+	if t, _ := c.Type.Value(); t != nil {
+		if slices.Contains(clientType, t.(string)) {
 			return nil
 		}
 	}
