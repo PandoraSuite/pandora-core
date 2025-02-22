@@ -7,6 +7,8 @@ CREATE TABLE IF NOT EXISTS service (
     name TEXT NOT NULL,
     version VARCHAR(11) NOT NULL,
     status TEXT CHECK (status IN ('active', 'deactivated', 'deprecated')) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     UNIQUE(name, version)
 );
 
@@ -14,7 +16,9 @@ CREATE TABLE IF NOT EXISTS client (
     id SERIAL PRIMARY KEY,
     type TEXT CHECK (type IN ('organization', 'developer')) NOT NULL,
     name TEXT NOT NULL,
-    email TEXT NOT NULL UNIQUE
+    email TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS project (
@@ -22,6 +26,8 @@ CREATE TABLE IF NOT EXISTS project (
     client_id INT NOT NULL,
     name TEXT NOT NULL,
     status TEXT CHECK (status IN ('in_production', 'in_development', 'deactivated')) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE
 );
 
@@ -30,6 +36,8 @@ CREATE TABLE IF NOT EXISTS environment (
     project_id INT NOT NULL,
     name TEXT NOT NULL,
     status TEXT CHECK (status IN ('active', 'deactivated')) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
 );
 
@@ -40,6 +48,8 @@ CREATE TABLE IF NOT EXISTS api_key (
     expires_at TIMESTAMP WITH TIME ZONE NULL,
     last_used TIMESTAMP WITH TIME ZONE NULL,
     status TEXT CHECK (status IN ('active', 'deactivated')) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     FOREIGN KEY (environment_id) REFERENCES environment(id) ON DELETE CASCADE
 );
 
@@ -49,6 +59,8 @@ CREATE TABLE IF NOT EXISTS project_service (
     max_calls INT NULL,
     reset_frequency TEXT CHECK (reset_frequency IN ('daily', 'weekly', 'biweekly', 'monthly')) NULL,
     next_reset TIMESTAMP WITH TIME ZONE NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     PRIMARY KEY (project_id, service_id),
     FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
     FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE
@@ -59,6 +71,8 @@ CREATE TABLE IF NOT EXISTS environment_service (
     service_id INT NOT NULL,
     max_calls INT NULL,
     available_calls INT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     PRIMARY KEY (environment_id, service_id),
     FOREIGN KEY (environment_id) REFERENCES environment(id) ON DELETE CASCADE,
     FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE
@@ -71,6 +85,8 @@ CREATE TABLE IF NOT EXISTS request_logs (
     api_key TEXT NOT NULL,
     request_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     execution_status TEXT CHECK (execution_status IN ('success', 'failed', 'unauthorized', 'server error')) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     FOREIGN KEY (environment_id) REFERENCES environment(id) ON DELETE CASCADE,
     FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE,
     FOREIGN KEY (api_key) REFERENCES api_key(key) ON DELETE CASCADE

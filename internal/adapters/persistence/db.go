@@ -12,7 +12,9 @@ type Database struct {
 	pool *pgxpool.Pool
 }
 
-func (p *Database) Close() { p.pool.Close() }
+func (db *Database) Close() { db.pool.Close() }
+
+func (db *Database) Pool() *pgxpool.Pool { return db.pool }
 
 func NewDatabase(dns string) (*Database, error) {
 	config, err := pgxpool.ParseConfig(dns)
