@@ -30,7 +30,10 @@ func (r *EnvironmentServiceRepository) Create(
 	).Scan(&newEnvironmentService.CreatedAt)
 
 	if err != nil {
-		return fmt.Errorf("error when inserting the client: %w", err)
+		return fmt.Errorf(
+			"error when inserting the environment service: %w",
+			err,
+		)
 	}
 
 	return nil
