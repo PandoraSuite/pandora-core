@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  pandora-db:
+    image: pandora-db
+    build:
+      context: ../db
+      dockerfile: dockerfile
+    ports:
+      - "5436:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
