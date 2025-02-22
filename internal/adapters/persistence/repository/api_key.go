@@ -20,7 +20,7 @@ func (r *APIKeyRepository) Create(
 	}
 
 	query := `
-		INSERT INTO APIKey (environment_id, key, expires_at, last_used, status)
+		INSERT INTO api_key (environment_id, key, expires_at, last_used, status)
 		VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at;
 	`
 

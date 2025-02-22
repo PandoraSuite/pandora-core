@@ -20,12 +20,12 @@ type APIKey struct {
 	CreatedAt     pgtype.Timestamptz
 }
 
-func (s *APIKey) ValidateModel() error {
-	return s.validateStatus()
+func (k *APIKey) ValidateModel() error {
+	return k.validateStatus()
 }
 
-func (s *APIKey) validateStatus() error {
-	if status, _ := s.Status.Value(); status != nil {
+func (k *APIKey) validateStatus() error {
+	if status, _ := k.Status.Value(); status != nil {
 		if slices.Contains(apiKeyStatus, status.(string)) {
 			return nil
 		}
