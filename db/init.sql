@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS api_key (
 CREATE TABLE IF NOT EXISTS project_service (
     project_id INT NOT NULL,
     service_id INT NOT NULL,
-    max_calls INT NULL,
+    max_request INT NULL,
     reset_frequency TEXT CHECK (reset_frequency IN ('daily', 'weekly', 'biweekly', 'monthly')) NULL,
     next_reset TIMESTAMP WITH TIME ZONE NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -63,8 +63,8 @@ CREATE TABLE IF NOT EXISTS project_service (
 CREATE TABLE IF NOT EXISTS environment_service (
     environment_id INT NOT NULL,
     service_id INT NOT NULL,
-    max_calls INT NULL,
-    available_calls INT NULL,
+    max_request INT NULL,
+    available_request INT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     PRIMARY KEY (environment_id, service_id),
     FOREIGN KEY (environment_id) REFERENCES environment(id) ON DELETE CASCADE,
