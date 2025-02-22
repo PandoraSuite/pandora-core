@@ -30,6 +30,6 @@ func (c *Client) validateType() error {
 	}
 
 	return fmt.Errorf(
-		"invalid status: must be %s", strings.Join(clientType, ", "),
+		"invalid type: must be %s", strings.Join(clientType, ", "),
 	)
 }

@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS environment_service (
     FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS request_logs (
+CREATE TABLE IF NOT EXISTS request_log (
     id SERIAL PRIMARY KEY,
     environment_id INT NOT NULL,
     service_id INT NOT NULL,
@@ -85,4 +85,4 @@ CREATE TABLE IF NOT EXISTS request_logs (
 );
 
 CREATE INDEX IF NOT EXISTS idx_api_key_key ON api_key (key);
-CREATE INDEX IF NOT EXISTS idx_request_logs_api_key ON request_logs (api_key);
+CREATE INDEX IF NOT EXISTS idx_request_log_api_key ON request_log (api_key);
