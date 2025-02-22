@@ -15,6 +15,10 @@ type ServiceRepository struct {
 func (r *ServiceRepository) Create(
 	ctx context.Context, newService *models.Service,
 ) error {
+	if err := newService.ValidateModel(); err != nil {
+		return err
+	}
+
 	query := `
 		INSERT INTO service (name, version, status)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
@@ -41,7 +45,7 @@ func (r *ServiceRepository) GetByID(
 	query := `
 		SELECT id, name, version, status, created_at
 		FROM service
-		WHERE id = $1
+		WHERE id = $1;
 	`
 
 	var service models.Service
