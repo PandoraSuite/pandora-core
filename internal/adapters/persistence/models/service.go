@@ -30,7 +30,6 @@ func (s *Service) validateStatus() error {
 	}
 
 	return fmt.Errorf(
-		"invalid status: must be %s",
-		strings.Join(serviceStatus, ", "),
+		"invalid status: must be %s", strings.Join(serviceStatus, ", "),
 	)
 }

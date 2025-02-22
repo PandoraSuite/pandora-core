@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS environment (
 );
 
 CREATE TABLE IF NOT EXISTS api_key (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id SERIAL PRIMARY KEY,
     environment_id INT NOT NULL,
     key TEXT NOT NULL UNIQUE,
     expires_at TIMESTAMP WITH TIME ZONE NULL,
