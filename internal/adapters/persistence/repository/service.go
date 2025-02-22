@@ -34,3 +34,28 @@ func (r *ServiceRepository) Create(
 
 	return nil
 }
+
+func (r *ServiceRepository) GetByID(
+	ctx context.Context, id string,
+) (*models.Service, error) {
+	query := `
+		SELECT id, name, version, status, created_at
+		FROM service
+		WHERE id = $1
+	`
+
+	var service models.Service
+	err := r.pool.QueryRow(ctx, query, id).Scan(
+		&service.ID,
+		&service.Name,
+		&service.Version,
+		&service.Status,
+		&service.CreatedAt,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("error obtaining service: %w", err)
+	}
+
+	return &service, nil
+}
