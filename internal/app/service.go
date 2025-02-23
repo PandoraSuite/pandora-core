@@ -24,7 +24,7 @@ func (s *ServiceUseCase) Create(
 		ctx,
 		&entities.Service{
 			Name:    req.Name,
-			Status:  req.Status,
+			Status:  string(req.Status),
 			Version: req.Version,
 		},
 	)
@@ -35,7 +35,7 @@ func (s *ServiceUseCase) Create(
 	return &dto.ServiceResponse{
 		ID:        service.ID,
 		Name:      service.Name,
-		Status:    service.Status,
+		Status:    dto.ServiceStatus(service.Status),
 		Version:   service.Version,
 		CreatedAt: service.CreatedAt,
 	}, nil

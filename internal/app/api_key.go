@@ -50,7 +50,7 @@ func (s *APIKeyUseCase) Create(
 	return &dto.APIKeyResponse{
 		ID:            apiKey.ID,
 		Key:           apiKey.Key,
-		Status:        apiKey.Status,
+		Status:        dto.APIKeyStatus(apiKey.Status),
 		ExpiresAt:     apiKey.ExpiresAt,
 		EnvironmentID: apiKey.EnvironmentID,
 		CreatedAt:     apiKey.CreatedAt,
