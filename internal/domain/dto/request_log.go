@@ -1,14 +1,9 @@
 package dto
 
-import "time"
+import (
+	"time"
 
-type RequestLogStatus string
-
-const (
-	RequestLogSuccess      RequestLogStatus = "success"
-	RequestLogFailed       RequestLogStatus = "failed"
-	RequestLogUnauthorized RequestLogStatus = "unauthorized"
-	RequestLogServerError  RequestLogStatus = "server error"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
 type RequestLogCreate struct {
@@ -18,11 +13,11 @@ type RequestLogCreate struct {
 }
 
 type RequestLogResponse struct {
-	ID              int              `json:"id"`
-	APIKey          string           `json:"api_key"`
-	ServiceID       int              `json:"service_id"`
-	RequestTime     time.Time        `json:"request_time"`
-	EnvironmentID   int              `json:"environment_id"`
-	ExecutionStatus RequestLogStatus `json:"execution_status"`
-	CreatedAt       time.Time        `json:"created_at"`
+	ID              int                             `json:"id"`
+	APIKey          string                          `json:"api_key"`
+	ServiceID       int                             `json:"service_id"`
+	RequestTime     time.Time                       `json:"request_time"`
+	EnvironmentID   int                             `json:"environment_id"`
+	ExecutionStatus enums.RequestLogExecutionStatus `json:"execution_status"`
+	CreatedAt       time.Time                       `json:"created_at"`
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -40,23 +41,28 @@ func (k *APIKey) validateStatus() error {
 	)
 }
 
-func (k *APIKey) ToEntity() *entities.APIKey {
+func (k *APIKey) ToEntity() (*entities.APIKey, error) {
+	status, err := enums.ParseAPIKeyStatus(utils.PgtypeTextToString(k.Status))
+	if err != nil {
+		return nil, err
+	}
+
 	return &entities.APIKey{
 		ID:            utils.PgtypeInt4ToInt(k.ID),
 		Key:           utils.PgtypeTextToString(k.Key),
-		Status:        utils.PgtypeTextToString(k.Status),
+		Status:        status,
 		LastUsed:      utils.PgtypeTimestamptzToTime(k.LastUsed),
 		ExpiresAt:     utils.PgtypeTimestamptzToTime(k.ExpiresAt),
 		EnvironmentID: utils.PgtypeInt4ToInt(k.EnvironmentID),
 		CreatedAt:     utils.PgtypeTimestamptzToTime(k.CreatedAt),
-	}
+	}, nil
 }
 
 func APIKeyFromEntity(apiKey *entities.APIKey) *APIKey {
 	return &APIKey{
 		ID:            utils.IntToPgtypeInt4(apiKey.ID),
 		Key:           utils.StringToPgtypeText(apiKey.Key),
-		Status:        utils.StringToPgtypeText(apiKey.Status),
+		Status:        utils.StringToPgtypeText(apiKey.Status.String()),
 		LastUsed:      utils.TimeToPgtypeTimestamptz(apiKey.LastUsed),
 		ExpiresAt:     utils.TimeToPgtypeTimestamptz(apiKey.ExpiresAt),
 		EnvironmentID: utils.IntToPgtypeInt4(apiKey.EnvironmentID),

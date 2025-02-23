@@ -7,6 +7,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -43,16 +44,23 @@ func (rl *RequestLog) validateExecutionStatus() error {
 	)
 }
 
-func (rl *RequestLog) ToEntity() *entities.RequestLog {
+func (rl *RequestLog) ToEntity() (*entities.RequestLog, error) {
+	executionStatus, err := enums.ParseRequestLogExecutionStatus(
+		utils.PgtypeTextToString(rl.ExecutionStatus),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return &entities.RequestLog{
 		ID:              utils.PgtypeInt4ToInt(rl.ID),
 		APIKey:          utils.PgtypeTextToString(rl.APIKey),
 		ServiceID:       utils.PgtypeInt4ToInt(rl.ServiceID),
 		RequestTime:     utils.PgtypeTimestamptzToTime(rl.RequestTime),
 		EnvironmentID:   utils.PgtypeInt4ToInt(rl.EnvironmentID),
-		ExecutionStatus: utils.PgtypeTextToString(rl.ExecutionStatus),
+		ExecutionStatus: executionStatus,
 		CreatedAt:       utils.PgtypeTimestamptzToTime(rl.CreatedAt),
-	}
+	}, nil
 }
 
 func RequestLogFromEntity(requestLog *entities.RequestLog) *RequestLog {
@@ -62,7 +70,7 @@ func RequestLogFromEntity(requestLog *entities.RequestLog) *RequestLog {
 		ServiceID:       utils.IntToPgtypeInt4(requestLog.ServiceID),
 		RequestTime:     utils.TimeToPgtypeTimestamptz(requestLog.RequestTime),
 		EnvironmentID:   utils.IntToPgtypeInt4(requestLog.EnvironmentID),
-		ExecutionStatus: utils.StringToPgtypeText(requestLog.ExecutionStatus),
+		ExecutionStatus: utils.StringToPgtypeText(requestLog.ExecutionStatus.String()),
 		CreatedAt:       utils.TimeToPgtypeTimestamptz(requestLog.CreatedAt),
 	}
 }

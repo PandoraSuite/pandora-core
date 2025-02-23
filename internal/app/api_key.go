@@ -7,6 +7,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -38,7 +39,7 @@ func (s *APIKeyUseCase) Create(
 		ctx,
 		&entities.APIKey{
 			Key:           key,
-			Status:        "active",
+			Status:        enums.APIKeyActive,
 			ExpiresAt:     req.ExpiresAt,
 			EnvironmentID: req.EnvironmentID,
 		},
@@ -50,7 +51,7 @@ func (s *APIKeyUseCase) Create(
 	return &dto.APIKeyResponse{
 		ID:            apiKey.ID,
 		Key:           apiKey.Key,
-		Status:        dto.APIKeyStatus(apiKey.Status),
+		Status:        apiKey.Status,
 		ExpiresAt:     apiKey.ExpiresAt,
 		EnvironmentID: apiKey.EnvironmentID,
 		CreatedAt:     apiKey.CreatedAt,

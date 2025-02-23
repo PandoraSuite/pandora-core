@@ -7,6 +7,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -38,20 +39,25 @@ func (c *Client) validateType() error {
 	)
 }
 
-func (c *Client) ToEntity() *entities.Client {
+func (c *Client) ToEntity() (*entities.Client, error) {
+	clientType, err := enums.ParseClientType(utils.PgtypeTextToString(c.Type))
+	if err != nil {
+		return nil, err
+	}
+
 	return &entities.Client{
 		ID:        utils.PgtypeInt4ToInt(c.ID),
-		Type:      utils.PgtypeTextToString(c.Type),
+		Type:      clientType,
 		Name:      utils.PgtypeTextToString(c.Name),
 		Email:     utils.PgtypeTextToString(c.Email),
 		CreatedAt: utils.PgtypeTimestamptzToTime(c.CreatedAt),
-	}
+	}, nil
 }
 
 func ClientFromEntity(client *entities.Client) *Client {
 	return &Client{
 		ID:        utils.IntToPgtypeInt4(client.ID),
-		Type:      utils.StringToPgtypeText(client.Type),
+		Type:      utils.StringToPgtypeText(client.Type.String()),
 		Name:      utils.StringToPgtypeText(client.Name),
 		Email:     utils.StringToPgtypeText(client.Email),
 		CreatedAt: utils.TimeToPgtypeTimestamptz(client.CreatedAt),

@@ -6,6 +6,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -24,8 +25,8 @@ func (s *ServiceUseCase) Create(
 		ctx,
 		&entities.Service{
 			Name:    req.Name,
-			Status:  string(req.Status),
 			Version: req.Version,
+			Status:  enums.ServiceActive,
 		},
 	)
 	if err != nil {
@@ -35,7 +36,7 @@ func (s *ServiceUseCase) Create(
 	return &dto.ServiceResponse{
 		ID:        service.ID,
 		Name:      service.Name,
-		Status:    dto.ServiceStatus(service.Status),
+		Status:    service.Status,
 		Version:   service.Version,
 		CreatedAt: service.CreatedAt,
 	}, nil

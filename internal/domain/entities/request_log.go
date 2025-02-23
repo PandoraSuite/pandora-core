@@ -1,6 +1,10 @@
 package entities
 
-import "time"
+import (
+	"time"
+
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
+)
 
 type RequestLog struct {
 	ID int
@@ -9,7 +13,7 @@ type RequestLog struct {
 	ServiceID       int
 	RequestTime     time.Time
 	EnvironmentID   int
-	ExecutionStatus string
+	ExecutionStatus enums.RequestLogExecutionStatus
 
 	CreatedAt time.Time
 }

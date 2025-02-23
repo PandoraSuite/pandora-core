@@ -7,6 +7,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -38,21 +39,28 @@ func (e *Environment) validateStatus() error {
 	)
 }
 
-func (e *Environment) ToEntity() *entities.Environment {
+func (e *Environment) ToEntity() (*entities.Environment, error) {
+	status, err := enums.ParseEnvironmentStatus(
+		utils.PgtypeTextToString(e.Status),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return &entities.Environment{
 		ID:        utils.PgtypeInt4ToInt(e.ID),
 		Name:      utils.PgtypeTextToString(e.Name),
-		Status:    utils.PgtypeTextToString(e.Status),
+		Status:    status,
 		ProjectID: utils.PgtypeInt4ToInt(e.ProjectID),
 		CreatedAt: utils.PgtypeTimestamptzToTime(e.CreatedAt),
-	}
+	}, nil
 }
 
 func EnvironmentFromEntity(environment *entities.Environment) *Environment {
 	return &Environment{
 		ID:        utils.IntToPgtypeInt4(environment.ID),
 		Name:      utils.StringToPgtypeText(environment.Name),
-		Status:    utils.StringToPgtypeText(environment.Status),
+		Status:    utils.StringToPgtypeText(environment.Status.String()),
 		ProjectID: utils.IntToPgtypeInt4(environment.ProjectID),
 		CreatedAt: utils.TimeToPgtypeTimestamptz(environment.CreatedAt),
 	}

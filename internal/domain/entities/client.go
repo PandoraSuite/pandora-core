@@ -1,11 +1,15 @@
 package entities
 
-import "time"
+import (
+	"time"
+
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
+)
 
 type Client struct {
 	ID int
 
-	Type  string
+	Type  enums.ClientType
 	Name  string
 	Email string
 

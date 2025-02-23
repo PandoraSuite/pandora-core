@@ -36,11 +36,12 @@ func (r *APIKeyRepository) Exists(ctx context.Context, key string) (bool, error)
 func (r *APIKeyRepository) Save(
 	ctx context.Context, apiKey *entities.APIKey,
 ) (*entities.APIKey, error) {
-	key := models.APIKeyFromEntity(apiKey)
-	if err := r.save(ctx, key); err != nil {
+	model := models.APIKeyFromEntity(apiKey)
+	if err := r.save(ctx, model); err != nil {
 		return nil, err
 	}
-	return key.ToEntity(), nil
+
+	return model.ToEntity()
 }
 
 func (r *APIKeyRepository) save(ctx context.Context, apiKey *models.APIKey) error {

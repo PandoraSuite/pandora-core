@@ -7,6 +7,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -38,21 +39,26 @@ func (s *Service) validateStatus() error {
 	)
 }
 
-func (s *Service) ToEntity() *entities.Service {
+func (s *Service) ToEntity() (*entities.Service, error) {
+	status, err := enums.ParseServiceStatus(utils.PgtypeTextToString(s.Status))
+	if err != nil {
+		return nil, err
+	}
+
 	return &entities.Service{
 		ID:        utils.PgtypeInt4ToInt(s.ID),
 		Name:      utils.PgtypeTextToString(s.Name),
-		Status:    utils.PgtypeTextToString(s.Status),
+		Status:    status,
 		Version:   utils.PgtypeTextToString(s.Version),
 		CreatedAt: utils.PgtypeTimestamptzToTime(s.CreatedAt),
-	}
+	}, nil
 }
 
 func ServiceFromEntity(service *entities.Service) *Service {
 	return &Service{
 		ID:        utils.IntToPgtypeInt4(service.ID),
 		Name:      utils.StringToPgtypeText(service.Name),
-		Status:    utils.StringToPgtypeText(service.Status),
+		Status:    utils.StringToPgtypeText(service.Status.String()),
 		Version:   utils.StringToPgtypeText(service.Version),
 		CreatedAt: utils.TimeToPgtypeTimestamptz(service.CreatedAt),
 	}

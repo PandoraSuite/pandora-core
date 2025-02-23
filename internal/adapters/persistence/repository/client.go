@@ -17,11 +17,12 @@ type ClientRepository struct {
 func (r *ClientRepository) Save(
 	ctx context.Context, client *entities.Client,
 ) (*entities.Client, error) {
-	c := models.ClientFromEntity(client)
-	if err := r.save(ctx, c); err != nil {
+	model := models.ClientFromEntity(client)
+	if err := r.save(ctx, model); err != nil {
 		return nil, err
 	}
-	return c.ToEntity(), nil
+
+	return model.ToEntity()
 }
 
 func (r *ClientRepository) save(ctx context.Context, client *models.Client) error {

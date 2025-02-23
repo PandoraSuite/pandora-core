@@ -16,11 +16,12 @@ type ProjectRepository struct {
 func (r *ProjectRepository) Save(
 	ctx context.Context, prioject *entities.Project,
 ) (*entities.Project, error) {
-	p := models.ProjectFromEntity(prioject)
-	if err := r.save(ctx, p); err != nil {
+	model := models.ProjectFromEntity(prioject)
+	if err := r.save(ctx, model); err != nil {
 		return nil, err
 	}
-	return p.ToEntity(), nil
+
+	return model.ToEntity()
 }
 
 func (r *ProjectRepository) save(

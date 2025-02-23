@@ -16,11 +16,12 @@ type RequestLogRepository struct {
 func (r *RequestLogRepository) Save(
 	ctx context.Context, requestLog *entities.RequestLog,
 ) (*entities.RequestLog, error) {
-	rl := models.RequestLogFromEntity(requestLog)
-	if err := r.save(ctx, rl); err != nil {
+	model := models.RequestLogFromEntity(requestLog)
+	if err := r.save(ctx, model); err != nil {
 		return nil, err
 	}
-	return rl.ToEntity(), nil
+
+	return model.ToEntity()
 }
 
 func (r *RequestLogRepository) save(

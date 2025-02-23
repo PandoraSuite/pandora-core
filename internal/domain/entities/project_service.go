@@ -1,6 +1,10 @@
 package entities
 
-import "time"
+import (
+	"time"
+
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
+)
 
 type ProjectService struct {
 	ProjectID int
@@ -8,7 +12,7 @@ type ProjectService struct {
 
 	MaxRequest     int
 	NextReset      time.Time
-	ResetFrequency string
+	ResetFrequency enums.ProjectServiceResetFrequency
 
 	CreatedAt time.Time
 }

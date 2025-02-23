@@ -7,6 +7,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -42,15 +43,22 @@ func (ps *ProjectService) validateResetFrequency() error {
 	)
 }
 
-func (ps *ProjectService) ToEntity() *entities.ProjectService {
+func (ps *ProjectService) ToEntity() (*entities.ProjectService, error) {
+	resetFrequency, err := enums.ParseProjectServiceResetFrequency(
+		utils.PgtypeTextToString(ps.ResetFrequency),
+	)
+	if err != nil {
+		return nil, err
+	}
+
 	return &entities.ProjectService{
 		ProjectID:      utils.PgtypeInt4ToInt(ps.ProjectID),
 		ServiceID:      utils.PgtypeInt4ToInt(ps.ServiceID),
 		MaxRequest:     utils.PgtypeInt4ToInt(ps.MaxRequest),
 		NextReset:      utils.PgtypeTimestamptzToTime(ps.NextReset),
-		ResetFrequency: utils.PgtypeTextToString(ps.ResetFrequency),
+		ResetFrequency: resetFrequency,
 		CreatedAt:      utils.PgtypeTimestamptzToTime(ps.CreatedAt),
-	}
+	}, nil
 }
 
 func ProjectServiceFromEntity(
@@ -61,7 +69,7 @@ func ProjectServiceFromEntity(
 		ServiceID:      utils.IntToPgtypeInt4(projectService.ServiceID),
 		MaxRequest:     utils.IntToPgtypeInt4(projectService.MaxRequest),
 		NextReset:      utils.TimeToPgtypeTimestamptz(projectService.NextReset),
-		ResetFrequency: utils.StringToPgtypeText(projectService.ResetFrequency),
+		ResetFrequency: utils.StringToPgtypeText(projectService.ResetFrequency.String()),
 		CreatedAt:      utils.TimeToPgtypeTimestamptz(projectService.CreatedAt),
 	}
 }

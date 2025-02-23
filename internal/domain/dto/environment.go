@@ -1,12 +1,9 @@
 package dto
 
-import "time"
+import (
+	"time"
 
-type EnvironmentStatus string
-
-const (
-	EnvironmentActive      EnvironmentStatus = "active"
-	EnvironmentDeactivated EnvironmentStatus = "deactivated"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
 type EnvironmentCreate struct {
@@ -15,9 +12,9 @@ type EnvironmentCreate struct {
 }
 
 type EnvironmentResponse struct {
-	ID        int               `json:"id"`
-	Name      string            `json:"name"`
-	Status    EnvironmentStatus `json:"status"`
-	ProjectID int               `json:"project_id"`
-	CreatedAt time.Time         `json:"created_at"`
+	ID        int                     `json:"id"`
+	Name      string                  `json:"name"`
+	Status    enums.EnvironmentStatus `json:"status"`
+	ProjectID int                     `json:"project_id"`
+	CreatedAt time.Time               `json:"created_at"`
 }

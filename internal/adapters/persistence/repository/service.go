@@ -16,11 +16,12 @@ type ServiceRepository struct {
 func (r *ServiceRepository) Save(
 	ctx context.Context, service *entities.Service,
 ) (*entities.Service, error) {
-	s := models.ServiceFromEntity(service)
-	if err := r.save(ctx, s); err != nil {
+	model := models.ServiceFromEntity(service)
+	if err := r.save(ctx, model); err != nil {
 		return nil, err
 	}
-	return s.ToEntity(), nil
+
+	return model.ToEntity()
 }
 
 func (r *ServiceRepository) save(

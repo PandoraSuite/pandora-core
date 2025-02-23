@@ -7,6 +7,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -38,21 +39,26 @@ func (p *Project) validateStatus() error {
 	)
 }
 
-func (p *Project) ToEntity() *entities.Project {
+func (p *Project) ToEntity() (*entities.Project, error) {
+	status, err := enums.ParseProjectStatus(utils.PgtypeTextToString(p.Status))
+	if err != nil {
+		return nil, err
+	}
+
 	return &entities.Project{
 		ID:        utils.PgtypeInt4ToInt(p.ID),
 		Name:      utils.PgtypeTextToString(p.Name),
-		Status:    utils.PgtypeTextToString(p.Status),
+		Status:    status,
 		ClientID:  utils.PgtypeInt4ToInt(p.ClientID),
 		CreatedAt: utils.PgtypeTimestamptzToTime(p.CreatedAt),
-	}
+	}, nil
 }
 
 func ProjectFromEntity(project *entities.Project) *Project {
 	return &Project{
 		ID:        utils.IntToPgtypeInt4(project.ID),
 		Name:      utils.StringToPgtypeText(project.Name),
-		Status:    utils.StringToPgtypeText(project.Status),
+		Status:    utils.StringToPgtypeText(project.Status.String()),
 		ClientID:  utils.IntToPgtypeInt4(project.ClientID),
 		CreatedAt: utils.TimeToPgtypeTimestamptz(project.CreatedAt),
 	}

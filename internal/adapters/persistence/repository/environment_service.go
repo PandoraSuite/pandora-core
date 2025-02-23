@@ -16,11 +16,12 @@ type EnvironmentServiceRepository struct {
 func (r *EnvironmentServiceRepository) Save(
 	ctx context.Context, environmentService *entities.EnvironmentService,
 ) (*entities.EnvironmentService, error) {
-	es := models.EnvironmentServiceFromEntity(environmentService)
-	if err := r.save(ctx, es); err != nil {
+	model := models.EnvironmentServiceFromEntity(environmentService)
+	if err := r.save(ctx, model); err != nil {
 		return nil, err
 	}
-	return es.ToEntity(), nil
+
+	return model.ToEntity(), nil
 }
 
 func (r *EnvironmentServiceRepository) save(
