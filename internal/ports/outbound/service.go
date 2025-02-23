@@ -7,6 +7,7 @@ import (
 )
 
 type APIKeyRepositoryPort interface {
+	Exists(ctx context.Context, key string) (bool, error)
 	Save(ctx context.Context, service *entities.APIKey) (*entities.APIKey, error)
 }
 

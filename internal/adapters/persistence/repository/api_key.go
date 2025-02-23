@@ -14,6 +14,25 @@ type APIKeyRepository struct {
 	pool *pgxpool.Pool
 }
 
+func (r *APIKeyRepository) Exists(ctx context.Context, key string) (bool, error) {
+	var exists bool
+
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM api_key
+			WHERE key = $1
+		);
+	`
+
+	err := r.pool.QueryRow(ctx, query, key).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
+
 func (r *APIKeyRepository) Save(
 	ctx context.Context, apiKey *entities.APIKey,
 ) (*entities.APIKey, error) {
