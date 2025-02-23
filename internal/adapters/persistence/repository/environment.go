@@ -13,24 +13,24 @@ type EnvironmentRepository struct {
 }
 
 func (r *EnvironmentRepository) Create(
-	ctx context.Context, newEnvironment *models.Environment,
+	ctx context.Context, environment *models.Environment,
 ) error {
-	if err := newEnvironment.ValidateModel(); err != nil {
+	if err := environment.ValidateModel(); err != nil {
 		return err
 	}
 
 	query := `
-		INSERT INTO client (project_id, name, status)
+		INSERT INTO environment (project_id, name, status)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
 	`
 
 	err := r.pool.QueryRow(
 		ctx,
 		query,
-		newEnvironment.ProjectID,
-		newEnvironment.Name,
-		newEnvironment.Status,
-	).Scan(&newEnvironment.ID, &newEnvironment.CreatedAt)
+		environment.ProjectID,
+		environment.Name,
+		environment.Status,
+	).Scan(&environment.ID, &environment.CreatedAt)
 
 	if err != nil {
 		return fmt.Errorf("error when inserting the environment: %w", err)

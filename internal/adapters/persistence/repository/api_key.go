@@ -12,10 +12,8 @@ type APIKeyRepository struct {
 	pool *pgxpool.Pool
 }
 
-func (r *APIKeyRepository) Create(
-	ctx context.Context, newAPIKey *models.APIKey,
-) error {
-	if err := newAPIKey.ValidateModel(); err != nil {
+func (r *APIKeyRepository) Create(ctx context.Context, apiKey *models.APIKey) error {
+	if err := apiKey.ValidateModel(); err != nil {
 		return err
 	}
 
@@ -27,12 +25,12 @@ func (r *APIKeyRepository) Create(
 	err := r.pool.QueryRow(
 		ctx,
 		query,
-		newAPIKey.EnvironmentID,
-		newAPIKey.Key,
-		newAPIKey.ExpiresAt,
-		newAPIKey.LastUsed,
-		newAPIKey.Status,
-	).Scan(&newAPIKey.ID, &newAPIKey.CreatedAt)
+		apiKey.EnvironmentID,
+		apiKey.Key,
+		apiKey.ExpiresAt,
+		apiKey.LastUsed,
+		apiKey.Status,
+	).Scan(&apiKey.ID, &apiKey.CreatedAt)
 
 	if err != nil {
 		return fmt.Errorf("error when inserting the api key: %w", err)

@@ -13,21 +13,21 @@ type EnvironmentServiceRepository struct {
 }
 
 func (r *EnvironmentServiceRepository) Create(
-	ctx context.Context, newEnvironmentService *models.EnvironmentService,
+	ctx context.Context, environmentService *models.EnvironmentService,
 ) error {
 	query := `
-		INSERT INTO client (environment_id, service_id, max_request, available_request)
+		INSERT INTO environment_service (environment_id, service_id, max_request, available_request)
 		VALUES ($1, $2, $3, $4) RETURNING created_at;
 	`
 
 	err := r.pool.QueryRow(
 		ctx,
 		query,
-		newEnvironmentService.EnvironmentID,
-		newEnvironmentService.ServiceID,
-		newEnvironmentService.MaxRequest,
-		newEnvironmentService.AvailableRequest,
-	).Scan(&newEnvironmentService.CreatedAt)
+		environmentService.EnvironmentID,
+		environmentService.ServiceID,
+		environmentService.MaxRequest,
+		environmentService.AvailableRequest,
+	).Scan(&environmentService.CreatedAt)
 
 	if err != nil {
 		return fmt.Errorf(

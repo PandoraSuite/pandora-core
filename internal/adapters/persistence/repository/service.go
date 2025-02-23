@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
+	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -12,10 +13,20 @@ type ServiceRepository struct {
 	pool *pgxpool.Pool
 }
 
-func (r *ServiceRepository) Create(
-	ctx context.Context, newService *models.Service,
+func (r *ServiceRepository) Save(
+	ctx context.Context, service *entities.Service,
+) (*entities.Service, error) {
+	s := models.ServiceFromEntity(service)
+	if err := r.save(ctx, s); err != nil {
+		return nil, err
+	}
+	return s.ToEntity(), nil
+}
+
+func (r *ServiceRepository) save(
+	ctx context.Context, service *models.Service,
 ) error {
-	if err := newService.ValidateModel(); err != nil {
+	if err := service.ValidateModel(); err != nil {
 		return err
 	}
 
@@ -27,10 +38,10 @@ func (r *ServiceRepository) Create(
 	err := r.pool.QueryRow(
 		ctx,
 		query,
-		newService.Name,
-		newService.Version,
-		newService.Status,
-	).Scan(&newService.ID, &newService.CreatedAt)
+		service.Name,
+		service.Version,
+		service.Status,
+	).Scan(&service.ID, &service.CreatedAt)
 
 	if err != nil {
 		return fmt.Errorf("error when inserting the service: %w", err)

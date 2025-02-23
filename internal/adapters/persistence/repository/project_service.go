@@ -13,26 +13,26 @@ type ProjectServiceRepository struct {
 }
 
 func (r *ProjectServiceRepository) Create(
-	ctx context.Context, newProjectService *models.ProjectService,
+	ctx context.Context, projectService *models.ProjectService,
 ) error {
-	if err := newProjectService.ValidateModel(); err != nil {
+	if err := projectService.ValidateModel(); err != nil {
 		return err
 	}
 
 	query := `
-		INSERT INTO client (project_id, service_id, max_request, reset_frequency, next_reset)
+		INSERT INTO project_service (project_id, service_id, max_request, reset_frequency, next_reset)
 		VALUES ($1, $2, $3, $4, $5) RETURNING created_at;
 	`
 
 	err := r.pool.QueryRow(
 		ctx,
 		query,
-		newProjectService.ProjectID,
-		newProjectService.ServiceID,
-		newProjectService.MaxRequest,
-		newProjectService.ResetFrequency,
-		newProjectService.NextReset,
-	).Scan(&newProjectService.CreatedAt)
+		projectService.ProjectID,
+		projectService.ServiceID,
+		projectService.MaxRequest,
+		projectService.ResetFrequency,
+		projectService.NextReset,
+	).Scan(&projectService.CreatedAt)
 
 	if err != nil {
 		return fmt.Errorf("error when inserting the project service: %w", err)

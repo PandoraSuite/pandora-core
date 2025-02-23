@@ -12,10 +12,8 @@ type ClientRepository struct {
 	pool *pgxpool.Pool
 }
 
-func (r *ClientRepository) Create(
-	ctx context.Context, newClient *models.Client,
-) error {
-	if err := newClient.ValidateModel(); err != nil {
+func (r *ClientRepository) Create(ctx context.Context, client *models.Client) error {
+	if err := client.ValidateModel(); err != nil {
 		return err
 	}
 
@@ -27,10 +25,10 @@ func (r *ClientRepository) Create(
 	err := r.pool.QueryRow(
 		ctx,
 		query,
-		newClient.Type,
-		newClient.Name,
-		newClient.Email,
-	).Scan(&newClient.ID, &newClient.CreatedAt)
+		client.Type,
+		client.Name,
+		client.Email,
+	).Scan(&client.ID, &client.CreatedAt)
 
 	if err != nil {
 		return fmt.Errorf("error when inserting the client: %w", err)
