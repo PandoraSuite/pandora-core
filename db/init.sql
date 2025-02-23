@@ -8,13 +8,13 @@ CREATE TABLE IF NOT EXISTS service (
     version VARCHAR(11) NOT NULL,
     status TEXT CHECK (status IN ('active', 'deactivated', 'deprecated')) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(name, version)
+    CONSTRAINT unique_name_version UNIQUE(name, version)
 );
 
 CREATE TABLE IF NOT EXISTS client (
     id SERIAL PRIMARY KEY,
     type TEXT CHECK (type IN ('organization', 'developer')) NOT NULL,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS project (
     status TEXT CHECK (status IN ('in_production', 'in_development', 'deactivated')) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE
+    CONSTRAINT unique_name_client_id UNIQUE(name, client_id)
 );
 
 CREATE TABLE IF NOT EXISTS environment (
@@ -35,6 +36,7 @@ CREATE TABLE IF NOT EXISTS environment (
     status TEXT CHECK (status IN ('active', 'deactivated')) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
+    CONSTRAINT unique_name_project_id UNIQUE(name, project_id)
 );
 
 CREATE TABLE IF NOT EXISTS api_key (
