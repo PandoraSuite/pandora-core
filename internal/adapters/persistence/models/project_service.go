@@ -5,6 +5,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
+	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -38,4 +40,28 @@ func (ps *ProjectService) validateResetFrequency() error {
 		"invalid reset frequency: must be %s",
 		strings.Join(projectServiceResetFrequency, ", "),
 	)
+}
+
+func (ps *ProjectService) ToEntity() *entities.ProjectService {
+	return &entities.ProjectService{
+		ProjectID:      utils.PgtypeInt4ToInt(ps.ProjectID),
+		ServiceID:      utils.PgtypeInt4ToInt(ps.ServiceID),
+		MaxRequest:     utils.PgtypeInt4ToInt(ps.MaxRequest),
+		NextReset:      utils.PgtypeTimestamptzToTime(ps.NextReset),
+		ResetFrequency: utils.PgtypeTextToString(ps.ResetFrequency),
+		CreatedAt:      utils.PgtypeTimestamptzToTime(ps.CreatedAt),
+	}
+}
+
+func ProjectServiceFromEntity(
+	projectService *entities.ProjectService,
+) *ProjectService {
+	return &ProjectService{
+		ProjectID:      utils.IntToPgtypeInt4(projectService.ProjectID),
+		ServiceID:      utils.IntToPgtypeInt4(projectService.ServiceID),
+		MaxRequest:     utils.IntToPgtypeInt4(projectService.MaxRequest),
+		NextReset:      utils.TimeToPgtypeTimestamptz(projectService.NextReset),
+		ResetFrequency: utils.StringToPgtypeText(projectService.ResetFrequency),
+		CreatedAt:      utils.TimeToPgtypeTimestamptz(projectService.CreatedAt),
+	}
 }

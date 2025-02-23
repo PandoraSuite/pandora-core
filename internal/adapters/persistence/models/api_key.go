@@ -5,6 +5,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
+	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -36,4 +38,28 @@ func (k *APIKey) validateStatus() error {
 	return fmt.Errorf(
 		"invalid status: must be %s", strings.Join(apiKeyStatus, ", "),
 	)
+}
+
+func (k *APIKey) ToEntity() *entities.APIKey {
+	return &entities.APIKey{
+		ID:            utils.PgtypeInt4ToInt(k.ID),
+		Key:           utils.PgtypeTextToString(k.Key),
+		Status:        utils.PgtypeTextToString(k.Status),
+		LastUsed:      utils.PgtypeTimestamptzToTime(k.LastUsed),
+		ExpiresAt:     utils.PgtypeTimestamptzToTime(k.ExpiresAt),
+		EnvironmentID: utils.PgtypeInt4ToInt(k.EnvironmentID),
+		CreatedAt:     utils.PgtypeTimestamptzToTime(k.CreatedAt),
+	}
+}
+
+func APIKeyFromEntity(apiKey *entities.APIKey) *APIKey {
+	return &APIKey{
+		ID:            utils.IntToPgtypeInt4(apiKey.ID),
+		Key:           utils.StringToPgtypeText(apiKey.Key),
+		Status:        utils.StringToPgtypeText(apiKey.Status),
+		LastUsed:      utils.TimeToPgtypeTimestamptz(apiKey.LastUsed),
+		ExpiresAt:     utils.TimeToPgtypeTimestamptz(apiKey.ExpiresAt),
+		EnvironmentID: utils.IntToPgtypeInt4(apiKey.EnvironmentID),
+		CreatedAt:     utils.TimeToPgtypeTimestamptz(apiKey.CreatedAt),
+	}
 }

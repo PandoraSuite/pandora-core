@@ -5,6 +5,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
+	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -34,4 +36,24 @@ func (e *Environment) validateStatus() error {
 	return fmt.Errorf(
 		"invalid status: must be %s", strings.Join(environmentStatus, ", "),
 	)
+}
+
+func (e *Environment) ToEntity() *entities.Environment {
+	return &entities.Environment{
+		ID:        utils.PgtypeInt4ToInt(e.ID),
+		Name:      utils.PgtypeTextToString(e.Name),
+		Status:    utils.PgtypeTextToString(e.Status),
+		ProjectID: utils.PgtypeInt4ToInt(e.ProjectID),
+		CreatedAt: utils.PgtypeTimestamptzToTime(e.CreatedAt),
+	}
+}
+
+func EnvironmentFromEntity(environment *entities.Environment) *Environment {
+	return &Environment{
+		ID:        utils.IntToPgtypeInt4(environment.ID),
+		Name:      utils.StringToPgtypeText(environment.Name),
+		Status:    utils.StringToPgtypeText(environment.Status),
+		ProjectID: utils.IntToPgtypeInt4(environment.ProjectID),
+		CreatedAt: utils.TimeToPgtypeTimestamptz(environment.CreatedAt),
+	}
 }

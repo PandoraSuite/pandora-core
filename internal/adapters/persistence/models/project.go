@@ -5,6 +5,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
+	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -34,4 +36,24 @@ func (p *Project) validateStatus() error {
 	return fmt.Errorf(
 		"invalid status: must be %s", strings.Join(projectStatus, ", "),
 	)
+}
+
+func (p *Project) ToEntity() *entities.Project {
+	return &entities.Project{
+		ID:        utils.PgtypeInt4ToInt(p.ID),
+		Name:      utils.PgtypeTextToString(p.Name),
+		Status:    utils.PgtypeTextToString(p.Status),
+		ClientID:  utils.PgtypeInt4ToInt(p.ClientID),
+		CreatedAt: utils.PgtypeTimestamptzToTime(p.CreatedAt),
+	}
+}
+
+func ProjectFromEntity(project *entities.Project) *Project {
+	return &Project{
+		ID:        utils.IntToPgtypeInt4(project.ID),
+		Name:      utils.StringToPgtypeText(project.Name),
+		Status:    utils.StringToPgtypeText(project.Status),
+		ClientID:  utils.IntToPgtypeInt4(project.ClientID),
+		CreatedAt: utils.TimeToPgtypeTimestamptz(project.CreatedAt),
+	}
 }

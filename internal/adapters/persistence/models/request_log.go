@@ -5,6 +5,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
+	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -24,12 +26,12 @@ type RequestLog struct {
 	CreatedAt pgtype.Timestamptz
 }
 
-func (p *RequestLog) ValidateModel() error {
-	return p.validateExecutionStatus()
+func (rl *RequestLog) ValidateModel() error {
+	return rl.validateExecutionStatus()
 }
 
-func (p *RequestLog) validateExecutionStatus() error {
-	if executionStatus, _ := p.ExecutionStatus.Value(); executionStatus != nil {
+func (rl *RequestLog) validateExecutionStatus() error {
+	if executionStatus, _ := rl.ExecutionStatus.Value(); executionStatus != nil {
 		if slices.Contains(requestLogExecutionStatus, executionStatus.(string)) {
 			return nil
 		}
@@ -39,4 +41,28 @@ func (p *RequestLog) validateExecutionStatus() error {
 		"invalid execution status: must be %s",
 		strings.Join(requestLogExecutionStatus, ", "),
 	)
+}
+
+func (rl *RequestLog) ToEntity() *entities.RequestLog {
+	return &entities.RequestLog{
+		ID:              utils.PgtypeInt4ToInt(rl.ID),
+		APIKey:          utils.PgtypeTextToString(rl.APIKey),
+		ServiceID:       utils.PgtypeInt4ToInt(rl.ServiceID),
+		RequestTime:     utils.PgtypeTimestamptzToTime(rl.RequestTime),
+		EnvironmentID:   utils.PgtypeInt4ToInt(rl.EnvironmentID),
+		ExecutionStatus: utils.PgtypeTextToString(rl.ExecutionStatus),
+		CreatedAt:       utils.PgtypeTimestamptzToTime(rl.CreatedAt),
+	}
+}
+
+func RequestLogFromEntity(requestLog *entities.RequestLog) *RequestLog {
+	return &RequestLog{
+		ID:              utils.IntToPgtypeInt4(requestLog.ID),
+		APIKey:          utils.StringToPgtypeText(requestLog.APIKey),
+		ServiceID:       utils.IntToPgtypeInt4(requestLog.ServiceID),
+		RequestTime:     utils.TimeToPgtypeTimestamptz(requestLog.RequestTime),
+		EnvironmentID:   utils.IntToPgtypeInt4(requestLog.EnvironmentID),
+		ExecutionStatus: utils.StringToPgtypeText(requestLog.ExecutionStatus),
+		CreatedAt:       utils.TimeToPgtypeTimestamptz(requestLog.CreatedAt),
+	}
 }

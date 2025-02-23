@@ -5,6 +5,8 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
+	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -34,4 +36,24 @@ func (c *Client) validateType() error {
 	return fmt.Errorf(
 		"invalid type: must be %s", strings.Join(clientType, ", "),
 	)
+}
+
+func (c *Client) ToEntity() *entities.Client {
+	return &entities.Client{
+		ID:        utils.PgtypeInt4ToInt(c.ID),
+		Type:      utils.PgtypeTextToString(c.Type),
+		Name:      utils.PgtypeTextToString(c.Name),
+		Email:     utils.PgtypeTextToString(c.Email),
+		CreatedAt: utils.PgtypeTimestamptzToTime(c.CreatedAt),
+	}
+}
+
+func ClientFromEntity(client *entities.Client) *Client {
+	return &Client{
+		ID:        utils.IntToPgtypeInt4(client.ID),
+		Type:      utils.StringToPgtypeText(client.Type),
+		Name:      utils.StringToPgtypeText(client.Name),
+		Email:     utils.StringToPgtypeText(client.Email),
+		CreatedAt: utils.TimeToPgtypeTimestamptz(client.CreatedAt),
+	}
 }
