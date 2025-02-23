@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
+	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -13,7 +14,17 @@ type APIKeyRepository struct {
 	pool *pgxpool.Pool
 }
 
-func (r *APIKeyRepository) Save(ctx context.Context, apiKey *models.APIKey) error {
+func (r *APIKeyRepository) Save(
+	ctx context.Context, apiKey *entities.APIKey,
+) (*entities.APIKey, error) {
+	key := models.APIKeyFromEntity(apiKey)
+	if err := r.save(ctx, key); err != nil {
+		return nil, err
+	}
+	return key.ToEntity(), nil
+}
+
+func (r *APIKeyRepository) save(ctx context.Context, apiKey *models.APIKey) error {
 	if err := apiKey.ValidateModel(); err != nil {
 		return err
 	}
@@ -40,6 +51,6 @@ func (r *APIKeyRepository) Save(ctx context.Context, apiKey *models.APIKey) erro
 	return nil
 }
 
-func NewServiceRepository(pool *pgxpool.Pool) outbound.ServiceRepositoryPort {
+func NewAPIKeyRepository(pool *pgxpool.Pool) outbound.APIKeyRepositoryPort {
 	return &APIKeyRepository{pool: pool}
 }

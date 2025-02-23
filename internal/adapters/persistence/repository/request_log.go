@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
+	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -12,7 +13,17 @@ type RequestLogRepository struct {
 	pool *pgxpool.Pool
 }
 
-func (r *RequestLogRepository) Create(
+func (r *RequestLogRepository) Save(
+	ctx context.Context, requestLog *entities.RequestLog,
+) (*entities.RequestLog, error) {
+	rl := models.RequestLogFromEntity(requestLog)
+	if err := r.save(ctx, rl); err != nil {
+		return nil, err
+	}
+	return rl.ToEntity(), nil
+}
+
+func (r *RequestLogRepository) save(
 	ctx context.Context, requestLog *models.RequestLog,
 ) error {
 	if err := requestLog.ValidateModel(); err != nil {

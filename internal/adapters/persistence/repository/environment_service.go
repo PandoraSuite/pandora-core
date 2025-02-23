@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
+	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -12,7 +13,17 @@ type EnvironmentServiceRepository struct {
 	pool *pgxpool.Pool
 }
 
-func (r *EnvironmentServiceRepository) Create(
+func (r *EnvironmentServiceRepository) Save(
+	ctx context.Context, environmentService *entities.EnvironmentService,
+) (*entities.EnvironmentService, error) {
+	es := models.EnvironmentServiceFromEntity(environmentService)
+	if err := r.save(ctx, es); err != nil {
+		return nil, err
+	}
+	return es.ToEntity(), nil
+}
+
+func (r *EnvironmentServiceRepository) save(
 	ctx context.Context, environmentService *models.EnvironmentService,
 ) error {
 	query := `

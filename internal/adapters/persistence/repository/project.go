@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
+	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -12,7 +13,17 @@ type ProjectRepository struct {
 	pool *pgxpool.Pool
 }
 
-func (r *ProjectRepository) Create(
+func (r *ProjectRepository) Save(
+	ctx context.Context, prioject *entities.Project,
+) (*entities.Project, error) {
+	p := models.ProjectFromEntity(prioject)
+	if err := r.save(ctx, p); err != nil {
+		return nil, err
+	}
+	return p.ToEntity(), nil
+}
+
+func (r *ProjectRepository) save(
 	ctx context.Context, project *models.Project,
 ) error {
 	if err := project.ValidateModel(); err != nil {
