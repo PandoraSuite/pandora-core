@@ -6,6 +6,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -51,4 +52,8 @@ func (r *ProjectServiceRepository) save(
 	}
 
 	return nil
+}
+
+func NewProjectServiceRepository(pool *pgxpool.Pool) outbound.ProjectServiceRepositoryPort {
+	return &ProjectServiceRepository{pool: pool}
 }

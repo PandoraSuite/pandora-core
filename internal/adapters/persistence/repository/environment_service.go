@@ -6,11 +6,18 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type EnvironmentServiceRepository struct {
 	pool *pgxpool.Pool
+}
+
+func (r *EnvironmentServiceRepository) DecrementAvailableRequest(
+	ctx context.Context, environmentID, serviceID int,
+) error {
+	return nil
 }
 
 func (r *EnvironmentServiceRepository) Save(
@@ -49,4 +56,10 @@ func (r *EnvironmentServiceRepository) save(
 	}
 
 	return nil
+}
+
+func NewEnvironmentServiceRepository(
+	pool *pgxpool.Pool,
+) outbound.EnvironmentServiceRepositoryPort {
+	return &EnvironmentServiceRepository{pool: pool}
 }

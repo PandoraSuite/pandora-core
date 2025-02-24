@@ -6,11 +6,18 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ServiceRepository struct {
 	pool *pgxpool.Pool
+}
+
+func (r *ServiceRepository) FindByNameAndVersion(
+	ctx context.Context, name, version string,
+) (*entities.Service, error) {
+	return nil, nil
 }
 
 func (r *ServiceRepository) Save(
@@ -74,4 +81,8 @@ func (r *ServiceRepository) GetByID(
 	}
 
 	return &service, nil
+}
+
+func NewServiceRepository(pool *pgxpool.Pool) outbound.ServiceRepositoryPort {
+	return &ServiceRepository{pool: pool}
 }

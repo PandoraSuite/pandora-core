@@ -6,6 +6,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -49,4 +50,8 @@ func (r *EnvironmentRepository) save(
 	}
 
 	return nil
+}
+
+func NewEnvironmentRepository(pool *pgxpool.Pool) outbound.EnvironmentRepositoryPort {
+	return &EnvironmentRepository{pool: pool}
 }
