@@ -14,6 +14,28 @@ type APIKeyRepository struct {
 	pool *pgxpool.Pool
 }
 
+func (r *APIKeyRepository) FindByKey(
+	ctx context.Context, key string,
+) (*entities.APIKey, error) {
+	query := "SELECT * FROM api_key WHERE key = $1;"
+
+	var apiKey models.APIKey
+	err := r.pool.QueryRow(ctx, query, key).Scan(
+		&apiKey.ID,
+		&apiKey.EnvironmentID,
+		&apiKey.Key,
+		&apiKey.ExpiresAt,
+		&apiKey.LastUsed,
+		&apiKey.Status,
+		&apiKey.CreatedAt,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error obtaining api key: %w", err)
+	}
+
+	return apiKey.ToEntity()
+}
+
 func (r *APIKeyRepository) Exists(ctx context.Context, key string) (bool, error) {
 	var exists bool
 
