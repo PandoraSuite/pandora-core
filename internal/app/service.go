@@ -25,8 +25,8 @@ func (s *ServiceUseCase) Create(
 		ctx,
 		&entities.Service{
 			Name:    req.Name,
-			Version: req.Version,
 			Status:  enums.ServiceActive,
+			Version: req.Version,
 		},
 	)
 	if err != nil {
