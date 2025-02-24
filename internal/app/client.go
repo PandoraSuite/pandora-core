@@ -14,7 +14,7 @@ type ClientUseCase struct {
 	clientRepo outbound.ClientRepositoryPort
 }
 
-func (c *ClientUseCase) Create(
+func (u *ClientUseCase) Create(
 	ctx context.Context, req *dto.ClientCreate,
 ) (*dto.ClientResponse, error) {
 	if req.Name == "" {
@@ -25,7 +25,7 @@ func (c *ClientUseCase) Create(
 		return nil, errors.New("invalid email")
 	}
 
-	client, err := c.clientRepo.Save(
+	client, err := u.clientRepo.Save(
 		ctx,
 		&entities.Client{
 			Type:  req.Type,

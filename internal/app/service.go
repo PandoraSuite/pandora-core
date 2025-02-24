@@ -14,14 +14,14 @@ type ServiceUseCase struct {
 	serviceRepo outbound.ServiceRepositoryPort
 }
 
-func (s *ServiceUseCase) Create(
+func (u *ServiceUseCase) Create(
 	ctx context.Context, req *dto.ServiceCreate,
 ) (*dto.ServiceResponse, error) {
 	if req.Name == "" {
 		return nil, errors.New("name of the service cannot be empty")
 	}
 
-	service, err := s.serviceRepo.Save(
+	service, err := u.serviceRepo.Save(
 		ctx,
 		&entities.Service{
 			Name:    req.Name,

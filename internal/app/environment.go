@@ -14,14 +14,14 @@ type EnvironmentUseCase struct {
 	clientRepo outbound.EnvironmentRepositoryPort
 }
 
-func (c *EnvironmentUseCase) Create(
+func (u *EnvironmentUseCase) Create(
 	ctx context.Context, req *dto.EnvironmentCreate,
 ) (*dto.EnvironmentResponse, error) {
 	if req.Name == "" {
 		return nil, errors.New("name of the environment cannot be empty")
 	}
 
-	client, err := c.clientRepo.Save(
+	client, err := u.clientRepo.Save(
 		ctx,
 		&entities.Environment{
 			Name:      req.Name,

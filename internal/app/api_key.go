@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -12,20 +13,75 @@ import (
 )
 
 type APIKeyUseCase struct {
-	apiKeyRepo outbound.APIKeyRepositoryPort
+	apiKeyRepo         outbound.APIKeyRepositoryPort
+	requestLog         outbound.RequestLogRepositoryPort
+	serviceRepo        outbound.ServiceRepositoryPort
+	environmentService outbound.EnvironmentServiceRepositoryPort
 }
 
-func (s *APIKeyUseCase) Create(
+func (u *APIKeyUseCase) ValidateAndConsume(
+	ctx context.Context, req *dto.APIKeyValidateAndConsume,
+) (*dto.RequestLogResponse, error) {
+	service, err := u.serviceRepo.FindByNameAndVersion(
+		ctx, req.ServiceName, req.ServiceVersion,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if service.Status != enums.ServiceActive {
+		return nil, fmt.Errorf("service is %s", service.Status)
+	}
+
+	apiKey, err := u.apiKeyRepo.FindByKey(ctx, req.Key)
+	if err != nil {
+		return nil, err
+
+	}
+
+	err = u.environmentService.DecrementAvailableRequest(
+		ctx, apiKey.EnvironmentID, service.ID,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	requestLog, err := u.requestLog.Save(
+		ctx,
+		&entities.RequestLog{
+			APIKey:          apiKey.Key,
+			ServiceID:       service.ID,
+			RequestTime:     req.RequestTime,
+			EnvironmentID:   apiKey.EnvironmentID,
+			ExecutionStatus: enums.RequestLogPending,
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.RequestLogResponse{
+		ID:              requestLog.ID,
+		APIKey:          requestLog.APIKey,
+		ServiceID:       requestLog.ServiceID,
+		RequestTime:     requestLog.RequestTime,
+		EnvironmentID:   requestLog.EnvironmentID,
+		ExecutionStatus: requestLog.ExecutionStatus,
+		CreatedAt:       requestLog.CreatedAt,
+	}, nil
+}
+
+func (u *APIKeyUseCase) Create(
 	ctx context.Context, req *dto.APIKeyCreate,
 ) (*dto.APIKeyResponse, error) {
 	var key string
 	for {
-		key, err := s.generateKey()
+		key, err := u.generateKey()
 		if err != nil {
 			return nil, err // TODO: handle error
 		}
 
-		exists, err := s.apiKeyRepo.Exists(ctx, key)
+		exists, err := u.apiKeyRepo.Exists(ctx, key)
 		if err != nil {
 			return nil, err // TODO: handle error
 		}
@@ -35,7 +91,7 @@ func (s *APIKeyUseCase) Create(
 		}
 	}
 
-	apiKey, err := s.apiKeyRepo.Save(
+	apiKey, err := u.apiKeyRepo.Save(
 		ctx,
 		&entities.APIKey{
 			Key:           key,
@@ -58,7 +114,7 @@ func (s *APIKeyUseCase) Create(
 	}, nil
 }
 
-func (s *APIKeyUseCase) generateKey() (string, error) {
+func (u *APIKeyUseCase) generateKey() (string, error) {
 	bytes := make([]byte, 32)
 	_, err := rand.Read(bytes)
 	if err != nil {

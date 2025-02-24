@@ -13,14 +13,14 @@ type ProjectUseCase struct {
 	clientRepo outbound.ProjectRepositoryPort
 }
 
-func (c *ProjectUseCase) Create(
+func (u *ProjectUseCase) Create(
 	ctx context.Context, req *dto.ProjectCreate,
 ) (*dto.ProjectResponse, error) {
 	if req.Name == "" {
 		return nil, errors.New("name of the project cannot be empty")
 	}
 
-	client, err := c.clientRepo.Save(
+	client, err := u.clientRepo.Save(
 		ctx,
 		&entities.Project{
 			Name:     req.Name,

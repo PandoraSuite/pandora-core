@@ -10,6 +10,7 @@ type RequestLogExecutionStatus int
 const (
 	RequestLogSuccess RequestLogExecutionStatus = iota
 	RequestLogFailed
+	RequestLogPending
 	RequestLogUnauthorized
 	RequestLogServerError
 )
@@ -20,6 +21,8 @@ func (es RequestLogExecutionStatus) String() string {
 		return "success"
 	case RequestLogFailed:
 		return "failed"
+	case RequestLogPending:
+		return "pending"
 	case RequestLogUnauthorized:
 		return "unauthorized"
 	case RequestLogServerError:
@@ -52,6 +55,8 @@ func ParseRequestLogExecutionStatus(es string) (RequestLogExecutionStatus, error
 		return RequestLogSuccess, nil
 	case "failed":
 		return RequestLogFailed, nil
+	case "pending":
+		return RequestLogPending, nil
 	case "unauthorized":
 		return RequestLogUnauthorized, nil
 	case "server error":
