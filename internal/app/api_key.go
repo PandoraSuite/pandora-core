@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
+	"strconv"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -21,29 +21,45 @@ type APIKeyUseCase struct {
 
 func (u *APIKeyUseCase) ValidateAndConsume(
 	ctx context.Context, req *dto.APIKeyValidateAndConsume,
-) (*dto.RequestLogResponse, error) {
+) *dto.APIKeyValidateResponse {
+	apiKey, err := u.apiKeyRepo.FindByKey(ctx, req.Key)
+	if err != nil {
+		return &dto.APIKeyValidateResponse{
+			Valid:   false,
+			Message: err.Error(),
+		}
+	}
+
 	service, err := u.serviceRepo.FindByNameAndVersion(
 		ctx, req.ServiceName, req.ServiceVersion,
 	)
 	if err != nil {
-		return nil, err
+		return &dto.APIKeyValidateResponse{
+			Valid:   false,
+			Message: err.Error(),
+		}
 	}
 
-	if service.Status != enums.ServiceActive {
-		return nil, fmt.Errorf("service is %s", service.Status)
+	if service.Status == enums.ServiceDeprecated {
+		return &dto.APIKeyValidateResponse{
+			Valid:   false,
+			Message: "service is deprecated",
+		}
+	} else if service.Status == enums.ServiceDeactivated {
+		return &dto.APIKeyValidateResponse{
+			Valid:   false,
+			Message: "service is not available",
+		}
 	}
 
-	apiKey, err := u.apiKeyRepo.FindByKey(ctx, req.Key)
-	if err != nil {
-		return nil, err
-
-	}
-
-	err = u.environmentService.DecrementAvailableRequest(
+	environmentService, err := u.environmentService.DecrementAvailableRequest(
 		ctx, apiKey.EnvironmentID, service.ID,
 	)
 	if err != nil {
-		return nil, err
+		return &dto.APIKeyValidateResponse{
+			Valid:   false,
+			Message: err.Error(),
+		}
 	}
 
 	requestLog, err := u.requestLog.Save(
@@ -57,18 +73,24 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 		},
 	)
 	if err != nil {
-		return nil, err
+		return &dto.APIKeyValidateResponse{
+			Valid:   false,
+			Message: err.Error(),
+		}
 	}
 
-	return &dto.RequestLogResponse{
-		ID:              requestLog.ID,
-		APIKey:          requestLog.APIKey,
-		ServiceID:       requestLog.ServiceID,
-		RequestTime:     requestLog.RequestTime,
-		EnvironmentID:   requestLog.EnvironmentID,
-		ExecutionStatus: requestLog.ExecutionStatus,
-		CreatedAt:       requestLog.CreatedAt,
-	}, nil
+	var availableRequest string
+	if environmentService.MaxRequest == 0 {
+		availableRequest = "unlimited"
+	} else {
+		availableRequest = strconv.Itoa(environmentService.AvailableRequest)
+	}
+
+	return &dto.APIKeyValidateResponse{
+		Valid:            true,
+		AvailableRequest: availableRequest,
+		RequestLogID:     requestLog.ID,
+	}
 }
 
 func (u *APIKeyUseCase) Create(

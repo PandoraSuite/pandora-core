@@ -7,6 +7,6 @@ import (
 )
 
 type EnvironmentServiceRepositoryPort interface {
-	DecrementAvailableRequest(ctx context.Context, environmentID, serviceID int) error
+	DecrementAvailableRequest(ctx context.Context, environmentID, serviceID int) (*entities.EnvironmentService, error)
 	Save(ctx context.Context, service *entities.EnvironmentService) (*entities.EnvironmentService, error)
 }

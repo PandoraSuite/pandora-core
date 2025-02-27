@@ -2,11 +2,13 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -16,8 +18,37 @@ type EnvironmentServiceRepository struct {
 
 func (r *EnvironmentServiceRepository) DecrementAvailableRequest(
 	ctx context.Context, environmentID, serviceID int,
-) error {
-	return nil
+) (*entities.EnvironmentService, error) {
+	query := `
+		UPDATE environment_service
+		SET available_request =
+			CASE
+				WHEN available_request IS NOT NULL AND available_request > 0
+				THEN available_request - 1
+				ELSE available_request
+			END
+		WHERE environment_id = $1 AND service_id = $2
+		AND (available_request IS NULL OR available_request > 0)
+		RETURNING *;
+	`
+
+	environmentService := new(models.EnvironmentService)
+	err := r.pool.QueryRow(ctx, query, environmentID, serviceID).
+		Scan(
+			&environmentService.EnvironmentID,
+			&environmentService.ServiceID,
+			&environmentService.MaxRequest,
+			&environmentService.AvailableRequest,
+			&environmentService.CreatedAt,
+		)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return nil, errors.New("no more requests available")
+		}
+		return nil, err
+	}
+
+	return environmentService.ToEntity(), nil
 }
 
 func (r *EnvironmentServiceRepository) Save(

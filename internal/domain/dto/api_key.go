@@ -18,6 +18,13 @@ type APIKeyCreate struct {
 	EnvironmentID int       `json:"environment_id"`
 }
 
+type APIKeyValidateResponse struct {
+	Valid            bool   `json:"valid"`
+	Message          string `json:"message,omitempty"`
+	AvailableRequest string `json:"available_request"`
+	RequestLogID     int    `json:"request_log_id"`
+}
+
 type APIKeyResponse struct {
 	ID            int                `json:"id"`
 	Key           string             `json:"key"`
