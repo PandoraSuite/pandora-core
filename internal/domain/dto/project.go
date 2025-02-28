@@ -6,6 +6,13 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
+type AssignServiceToProject struct {
+	ProjectID      int                                `json:"project_id"`
+	ServiceID      int                                `json:"service_id"`
+	MaxRequest     int                                `json:"max_request"`
+	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency"`
+}
+
 type ProjectCreate struct {
 	Name     string              `json:"name"`
 	Status   enums.ProjectStatus `json:"status"`

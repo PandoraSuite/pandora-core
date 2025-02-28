@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"strconv"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -30,6 +31,13 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 		}
 	}
 
+	if apiKey.ExpiresAt.Before(time.Now()) {
+		return &dto.APIKeyValidateResponse{
+			Valid:   false,
+			Message: "api key has expired",
+		}
+	}
+
 	service, err := u.serviceRepo.FindByNameAndVersion(
 		ctx, req.ServiceName, req.ServiceVersion,
 	)
@@ -45,7 +53,8 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 			Valid:   false,
 			Message: "service is deprecated",
 		}
-	} else if service.Status == enums.ServiceDeactivated {
+	}
+	if service.Status == enums.ServiceDeactivated {
 		return &dto.APIKeyValidateResponse{
 			Valid:   false,
 			Message: "service is not available",

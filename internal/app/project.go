@@ -10,7 +10,27 @@ import (
 )
 
 type ProjectUseCase struct {
-	clientRepo outbound.ProjectRepositoryPort
+	projectRepo        outbound.ProjectRepositoryPort
+	projectServiceRepo outbound.ProjectServiceRepositoryPort
+}
+
+func (u *ProjectUseCase) AssignService(
+	ctx context.Context, req *dto.AssignServiceToProject,
+) error {
+	projectService := &entities.ProjectService{
+		ProjectID:      req.ProjectID,
+		ServiceID:      req.ServiceID,
+		MaxRequest:     req.MaxRequest,
+		ResetFrequency: req.ResetFrequency,
+	}
+
+	projectService.CalculateNextReset()
+	_, err := u.projectServiceRepo.Save(ctx, projectService)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (u *ProjectUseCase) Create(
@@ -20,7 +40,7 @@ func (u *ProjectUseCase) Create(
 		return nil, errors.New("name of the project cannot be empty")
 	}
 
-	client, err := u.clientRepo.Save(
+	client, err := u.projectRepo.Save(
 		ctx,
 		&entities.Project{
 			Name:     req.Name,

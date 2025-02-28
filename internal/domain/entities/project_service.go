@@ -16,3 +16,25 @@ type ProjectService struct {
 
 	CreatedAt time.Time
 }
+
+func (p *ProjectService) CalculateNextReset() {
+	now := time.Now()
+	startOfDay := time.Date(
+		now.Year(),
+		now.Month(),
+		now.Day(),
+		0, 0, 0, 0,
+		now.Location(),
+	)
+
+	switch p.ResetFrequency {
+	case enums.ProjectServiceDaily:
+		p.NextReset = startOfDay.AddDate(0, 0, 1)
+	case enums.ProjectServiceWeekly:
+		p.NextReset = startOfDay.AddDate(0, 0, 7)
+	case enums.ProjectServiceBiweekly:
+		p.NextReset = startOfDay.AddDate(0, 0, 14)
+	case enums.ProjectServiceMonthly:
+		p.NextReset = startOfDay.AddDate(0, 1, 0)
+	}
+}

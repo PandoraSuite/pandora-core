@@ -8,7 +8,8 @@ import (
 type ProjectServiceResetFrequency int
 
 const (
-	ProjectServiceDaily ProjectServiceResetFrequency = iota
+	ProjectServiceNull ProjectServiceResetFrequency = iota
+	ProjectServiceDaily
 	ProjectServiceWeekly
 	ProjectServiceBiweekly
 	ProjectServiceMonthly
@@ -16,6 +17,8 @@ const (
 
 func (rf ProjectServiceResetFrequency) String() string {
 	switch rf {
+	case ProjectServiceNull:
+		return "null"
 	case ProjectServiceDaily:
 		return "daily"
 	case ProjectServiceWeekly:
@@ -48,6 +51,8 @@ func (rf *ProjectServiceResetFrequency) MarshalJSON() ([]byte, error) {
 
 func ParseProjectServiceResetFrequency(rf string) (ProjectServiceResetFrequency, error) {
 	switch rf {
+	case "":
+		return ProjectServiceNull, nil
 	case "daily":
 		return ProjectServiceDaily, nil
 	case "weekly":
