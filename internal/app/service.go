@@ -20,18 +20,15 @@ func (u *ServiceUseCase) GetActiveServices(ctx context.Context) ([]*dto.ServiceR
 		return nil, err
 	}
 
-	var serviceResponses []*dto.ServiceResponse
-	for _, service := range services {
-		serviceResponses = append(
-			serviceResponses,
-			&dto.ServiceResponse{
-				ID:        service.ID,
-				Name:      service.Name,
-				Status:    service.Status,
-				Version:   service.Version,
-				CreatedAt: service.CreatedAt,
-			},
-		)
+	serviceResponses := make([]*dto.ServiceResponse, len(services))
+	for i, service := range services {
+		serviceResponses[i] = &dto.ServiceResponse{
+			ID:        service.ID,
+			Name:      service.Name,
+			Status:    service.Status,
+			Version:   service.Version,
+			CreatedAt: service.CreatedAt,
+		}
 	}
 
 	return serviceResponses, nil

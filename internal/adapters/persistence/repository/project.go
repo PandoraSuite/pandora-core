@@ -14,6 +14,42 @@ type ProjectRepository struct {
 	pool *pgxpool.Pool
 }
 
+func (r *ProjectRepository) FindByClientID(
+	ctx context.Context, clientID int,
+) ([]*entities.Project, error) {
+	query := "SELECT * FROM project WHERE client_id = $1;"
+	rows, err := r.pool.Query(ctx, query, clientID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var projects []*models.Project
+	for rows.Next() {
+		project := new(models.Project)
+
+		err = rows.Scan(
+			&project.ID,
+			&project.ClientID,
+			&project.Name,
+			&project.Status,
+			&project.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		projects = append(projects, project)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return models.ProjectsToEntity(projects)
+}
+
 func (r *ProjectRepository) Save(
 	ctx context.Context, prioject *entities.Project,
 ) (*entities.Project, error) {

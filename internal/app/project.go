@@ -33,6 +33,28 @@ func (u *ProjectUseCase) AssignService(
 	return nil
 }
 
+func (u *ProjectUseCase) GetProjectsByClient(
+	ctx context.Context, clientID int,
+) ([]*dto.ProjectResponse, error) {
+	projects, err := u.projectRepo.FindByClientID(ctx, clientID)
+	if err != nil {
+		return nil, err
+	}
+
+	projectResponses := make([]*dto.ProjectResponse, len(projects))
+	for i, project := range projects {
+		projectResponses[i] = &dto.ProjectResponse{
+			ID:        project.ID,
+			Name:      project.Name,
+			Status:    project.Status,
+			ClientID:  project.ClientID,
+			CreatedAt: project.CreatedAt,
+		}
+	}
+
+	return projectResponses, nil
+}
+
 func (u *ProjectUseCase) Create(
 	ctx context.Context, req *dto.ProjectCreate,
 ) (*dto.ProjectResponse, error) {

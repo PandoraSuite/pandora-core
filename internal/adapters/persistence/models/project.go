@@ -54,6 +54,18 @@ func (p *Project) ToEntity() (*entities.Project, error) {
 	}, nil
 }
 
+func ProjectsToEntity(array []*Project) ([]*entities.Project, error) {
+	result := make([]*entities.Project, len(array))
+	for i, v := range array {
+		vv, err := v.ToEntity()
+		if err != nil {
+			return nil, err
+		}
+		result[i] = vv
+	}
+	return result, nil
+}
+
 func ProjectFromEntity(project *entities.Project) *Project {
 	return &Project{
 		ID:        utils.IntToPgtypeInt4(project.ID),

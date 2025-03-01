@@ -7,5 +7,6 @@ import (
 )
 
 type ProjectRepositoryPort interface {
+	FindByClientID(ctx context.Context, clientID int) ([]*entities.Project, error)
 	Save(ctx context.Context, service *entities.Project) (*entities.Project, error)
 }
