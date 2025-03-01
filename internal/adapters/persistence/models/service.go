@@ -54,6 +54,18 @@ func (s *Service) ToEntity() (*entities.Service, error) {
 	}, nil
 }
 
+func ServicesToEntity(array []*Service) ([]*entities.Service, error) {
+	result := make([]*entities.Service, len(array))
+	for i, v := range array {
+		vv, err := v.ToEntity()
+		if err != nil {
+			return nil, err
+		}
+		result[i] = vv
+	}
+	return result, nil
+}
+
 func ServiceFromEntity(service *entities.Service) *Service {
 	return &Service{
 		ID:        utils.IntToPgtypeInt4(service.ID),

@@ -17,7 +17,55 @@ type ServiceRepository struct {
 func (r *ServiceRepository) FindByNameAndVersion(
 	ctx context.Context, name, version string,
 ) (*entities.Service, error) {
-	return nil, nil
+	query := `SELECT * FROM service WHERE name = $1 AND version = $2;`
+
+	var service models.Service
+	err := r.pool.QueryRow(ctx, query, name, version).Scan(
+		&service.ID,
+		&service.Name,
+		&service.Version,
+		&service.Status,
+		&service.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return service.ToEntity()
+}
+
+func (r *ServiceRepository) FindActiveServices(ctx context.Context) ([]*entities.Service, error) {
+	query := "SELECT * FROM service WHERE status = 'active';"
+	rows, err := r.pool.Query(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var services []*models.Service
+	for rows.Next() {
+		service := new(models.Service)
+
+		err = rows.Scan(
+			&service.ID,
+			&service.Name,
+			&service.Version,
+			&service.Status,
+			&service.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		services = append(services, service)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return models.ServicesToEntity(services)
 }
 
 func (r *ServiceRepository) Save(
@@ -56,31 +104,6 @@ func (r *ServiceRepository) save(
 	}
 
 	return nil
-}
-
-func (r *ServiceRepository) GetByID(
-	ctx context.Context, id string,
-) (*models.Service, error) {
-	query := `
-		SELECT id, name, version, status, created_at
-		FROM service
-		WHERE id = $1;
-	`
-
-	var service models.Service
-	err := r.pool.QueryRow(ctx, query, id).Scan(
-		&service.ID,
-		&service.Name,
-		&service.Version,
-		&service.Status,
-		&service.CreatedAt,
-	)
-
-	if err != nil {
-		return nil, fmt.Errorf("error obtaining service: %w", err)
-	}
-
-	return &service, nil
 }
 
 func NewServiceRepository(pool *pgxpool.Pool) outbound.ServiceRepositoryPort {
