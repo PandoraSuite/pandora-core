@@ -2,8 +2,6 @@ package app
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/base64"
 	"strconv"
 	"time"
 
@@ -105,14 +103,19 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 func (u *APIKeyUseCase) Create(
 	ctx context.Context, req *dto.APIKeyCreate,
 ) (*dto.APIKeyResponse, error) {
-	var key string
+	apiKey := &entities.APIKey{
+		Status:        enums.APIKeyActive,
+		ExpiresAt:     req.ExpiresAt,
+		EnvironmentID: req.EnvironmentID,
+	}
+
 	for {
-		key, err := u.generateKey()
+		err := apiKey.GenerateKey()
 		if err != nil {
 			return nil, err // TODO: handle error
 		}
 
-		exists, err := u.apiKeyRepo.Exists(ctx, key)
+		exists, err := u.apiKeyRepo.Exists(ctx, apiKey.Key)
 		if err != nil {
 			return nil, err // TODO: handle error
 		}
@@ -122,15 +125,7 @@ func (u *APIKeyUseCase) Create(
 		}
 	}
 
-	apiKey, err := u.apiKeyRepo.Save(
-		ctx,
-		&entities.APIKey{
-			Key:           key,
-			Status:        enums.APIKeyActive,
-			ExpiresAt:     req.ExpiresAt,
-			EnvironmentID: req.EnvironmentID,
-		},
-	)
+	apiKey, err := u.apiKeyRepo.Save(ctx, apiKey)
 	if err != nil {
 		return nil, err
 	}
@@ -143,13 +138,4 @@ func (u *APIKeyUseCase) Create(
 		EnvironmentID: apiKey.EnvironmentID,
 		CreatedAt:     apiKey.CreatedAt,
 	}, nil
-}
-
-func (u *APIKeyUseCase) generateKey() (string, error) {
-	bytes := make([]byte, 32)
-	_, err := rand.Read(bytes)
-	if err != nil {
-		return "", err
-	}
-	return base64.RawURLEncoding.EncodeToString(bytes), nil
 }
