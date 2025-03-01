@@ -14,7 +14,7 @@ type ProjectRepository struct {
 	pool *pgxpool.Pool
 }
 
-func (r *ProjectRepository) FindByClientID(
+func (r *ProjectRepository) FindByClient(
 	ctx context.Context, clientID int,
 ) ([]*entities.Project, error) {
 	query := "SELECT * FROM project WHERE client_id = $1;"

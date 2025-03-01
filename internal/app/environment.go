@@ -64,6 +64,28 @@ func (u *EnvironmentUseCase) AssignService(
 	return nil
 }
 
+func (u *EnvironmentUseCase) GetEnvironmentByProject(
+	ctx context.Context, projectID int,
+) ([]*dto.EnvironmentResponse, error) {
+	environments, err := u.environmentRepo.FindByProject(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
+
+	environmentResponses := make([]*dto.EnvironmentResponse, len(environments))
+	for i, environment := range environments {
+		environmentResponses[i] = &dto.EnvironmentResponse{
+			ID:        environment.ID,
+			Name:      environment.Name,
+			Status:    environment.Status,
+			ProjectID: environment.ProjectID,
+			CreatedAt: environment.CreatedAt,
+		}
+	}
+
+	return environmentResponses, nil
+}
+
 func (u *EnvironmentUseCase) Create(
 	ctx context.Context, req *dto.EnvironmentCreate,
 ) (*dto.EnvironmentResponse, error) {

@@ -36,7 +36,7 @@ func (u *ProjectUseCase) AssignService(
 func (u *ProjectUseCase) GetProjectsByClient(
 	ctx context.Context, clientID int,
 ) ([]*dto.ProjectResponse, error) {
-	projects, err := u.projectRepo.FindByClientID(ctx, clientID)
+	projects, err := u.projectRepo.FindByClient(ctx, clientID)
 	if err != nil {
 		return nil, err
 	}

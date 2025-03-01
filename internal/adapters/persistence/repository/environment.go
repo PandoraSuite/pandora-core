@@ -34,6 +34,43 @@ func (r *EnvironmentRepository) FindByID(
 	return environment.ToEntity()
 }
 
+func (r *EnvironmentRepository) FindByProject(
+	ctx context.Context, projectID int,
+) ([]*entities.Environment, error) {
+	query := "SELECT * FROM environment WHERE project_id = $1;"
+
+	rows, err := r.pool.Query(ctx, query, projectID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var environments []*models.Environment
+	for rows.Next() {
+		environment := new(models.Environment)
+
+		err = rows.Scan(
+			&environment.ID,
+			&environment.ProjectID,
+			&environment.Name,
+			&environment.Status,
+			&environment.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		environments = append(environments, environment)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return models.EnvironmentToEntity(environments)
+}
+
 func (r *EnvironmentRepository) Save(
 	ctx context.Context, environment *entities.Environment,
 ) (*entities.Environment, error) {

@@ -56,6 +56,18 @@ func (e *Environment) ToEntity() (*entities.Environment, error) {
 	}, nil
 }
 
+func EnvironmentToEntity(array []*Environment) ([]*entities.Environment, error) {
+	result := make([]*entities.Environment, len(array))
+	for i, v := range array {
+		vv, err := v.ToEntity()
+		if err != nil {
+			return nil, err
+		}
+		result[i] = vv
+	}
+	return result, nil
+}
+
 func EnvironmentFromEntity(environment *entities.Environment) *Environment {
 	return &Environment{
 		ID:        utils.IntToPgtypeInt4(environment.ID),
