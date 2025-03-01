@@ -8,12 +8,15 @@ import (
 type ClientType int
 
 const (
-	ClientDeveloper ClientType = iota
+	ClientTypeNull ClientType = iota
+	ClientDeveloper
 	ClientOrganization
 )
 
 func (t ClientType) String() string {
 	switch t {
+	case ClientTypeNull:
+		return ""
 	case ClientDeveloper:
 		return "developer"
 	case ClientOrganization:
@@ -42,6 +45,8 @@ func (t *ClientType) MarshalJSON() ([]byte, error) {
 
 func ParseClientType(t string) (ClientType, error) {
 	switch t {
+	case "":
+		return ClientTypeNull, nil
 	case "developer":
 		return ClientDeveloper, nil
 	case "organization":

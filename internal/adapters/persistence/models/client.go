@@ -54,6 +54,18 @@ func (c *Client) ToEntity() (*entities.Client, error) {
 	}, nil
 }
 
+func ClientsToEntity(array []*Client) ([]*entities.Client, error) {
+	result := make([]*entities.Client, len(array))
+	for i, v := range array {
+		vv, err := v.ToEntity()
+		if err != nil {
+			return nil, err
+		}
+		result[i] = vv
+	}
+	return result, nil
+}
+
 func ClientFromEntity(client *entities.Client) *Client {
 	return &Client{
 		ID:        utils.IntToPgtypeInt4(client.ID),

@@ -7,11 +7,33 @@ import (
 	"github.com/MAD-py/pandora-core/internal/app/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
 type ClientUseCase struct {
 	clientRepo outbound.ClientRepositoryPort
+}
+
+func (u *ClientUseCase) GetClients(
+	ctx context.Context, clientType enums.ClientType,
+) ([]*dto.ClientResponse, error) {
+	clients, err := u.clientRepo.FindAll(ctx, clientType)
+	if err != nil {
+		return nil, err
+	}
+
+	clientResponses := make([]*dto.ClientResponse, len(clients))
+	for i, client := range clients {
+		clientResponses[i] = &dto.ClientResponse{
+			ID:        client.ID,
+			Type:      client.Type,
+			Name:      client.Name,
+			CreatedAt: client.CreatedAt,
+		}
+	}
+
+	return clientResponses, nil
 }
 
 func (u *ClientUseCase) Create(

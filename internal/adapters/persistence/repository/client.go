@@ -6,12 +6,57 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ClientRepository struct {
 	pool *pgxpool.Pool
+}
+
+func (r *ClientRepository) FindAll(
+	ctx context.Context, clientType enums.ClientType,
+) ([]*entities.Client, error) {
+	query := "SELECT * FROM client"
+
+	var args []any
+	if clientType != enums.ClientTypeNull {
+		query += " WHERE type = $1;"
+		args = append(args, clientType)
+	} else {
+		query += ";"
+	}
+
+	rows, err := r.pool.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var clients []*models.Client
+	for rows.Next() {
+		client := new(models.Client)
+
+		err = rows.Scan(
+			&client.ID,
+			&client.Type,
+			&client.Name,
+			&client.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		clients = append(clients, client)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return models.ClientsToEntity(clients)
 }
 
 func (r *ClientRepository) Save(
