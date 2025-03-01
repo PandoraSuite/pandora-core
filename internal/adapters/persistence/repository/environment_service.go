@@ -16,6 +16,51 @@ type EnvironmentServiceRepository struct {
 	pool *pgxpool.Pool
 }
 
+func (r *EnvironmentServiceRepository) FindByProjectAndService(
+	ctx context.Context, projectID, serviceID int,
+) ([]*entities.EnvironmentService, error) {
+	query := `
+		SELECT *
+		FROM environment_service
+		WHERE environment_id in (
+			SELECT id
+			FROM environment
+			WHERE project_id = $1;
+		) AND service_id = $2;
+	`
+
+	rows, err := r.pool.Query(ctx, query, projectID, serviceID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var environmentServices []*models.EnvironmentService
+	for rows.Next() {
+		environmentService := new(models.EnvironmentService)
+
+		err = rows.Scan(
+			&environmentService.EnvironmentID,
+			&environmentService.ServiceID,
+			&environmentService.MaxRequest,
+			&environmentService.AvailableRequest,
+			&environmentService.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		environmentServices = append(environmentServices, environmentService)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return models.EnvironmentServicesToEntity(environmentServices)
+}
+
 func (r *EnvironmentServiceRepository) DecrementAvailableRequest(
 	ctx context.Context, environmentID, serviceID int,
 ) (*entities.EnvironmentService, error) {

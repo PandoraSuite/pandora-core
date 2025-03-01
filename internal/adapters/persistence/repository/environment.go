@@ -14,6 +14,26 @@ type EnvironmentRepository struct {
 	pool *pgxpool.Pool
 }
 
+func (r *EnvironmentRepository) FindByID(
+	ctx context.Context, id int,
+) (*entities.Environment, error) {
+	query := "SELECT * FROM environment WHERE id = $1;"
+
+	var environment models.Environment
+	err := r.pool.QueryRow(ctx, query, id).Scan(
+		&environment.ID,
+		&environment.ProjectID,
+		&environment.Name,
+		&environment.Status,
+		&environment.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return environment.ToEntity()
+}
+
 func (r *EnvironmentRepository) Save(
 	ctx context.Context, environment *entities.Environment,
 ) (*entities.Environment, error) {

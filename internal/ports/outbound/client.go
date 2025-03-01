@@ -9,5 +9,5 @@ import (
 
 type ClientRepositoryPort interface {
 	FindAll(ctx context.Context, clientType enums.ClientType) ([]*entities.Client, error)
-	Save(ctx context.Context, service *entities.Client) (*entities.Client, error)
+	Save(ctx context.Context, client *entities.Client) (*entities.Client, error)
 }

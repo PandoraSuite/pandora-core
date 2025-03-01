@@ -14,10 +14,35 @@ type ProjectServiceRepository struct {
 	pool *pgxpool.Pool
 }
 
-func (r *ProjectServiceRepository) Save(
-	ctx context.Context, priojectService *entities.ProjectService,
+func (r *ProjectServiceRepository) FindByProjectAndService(
+	ctx context.Context, projectID, serviceID int,
 ) (*entities.ProjectService, error) {
-	model := models.ProjectServiceFromEntity(priojectService)
+	query := `
+		SELECT *
+		FROM project_service
+		WHERE project_id = $1 AND service_id = $2;
+	`
+
+	var projectService models.ProjectService
+	err := r.pool.QueryRow(ctx, query, projectID, serviceID).Scan(
+		&projectService.ProjectID,
+		&projectService.ServiceID,
+		&projectService.MaxRequest,
+		&projectService.ResetFrequency,
+		&projectService.NextReset,
+		&projectService.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return projectService.ToEntity()
+}
+
+func (r *ProjectServiceRepository) Save(
+	ctx context.Context, projectService *entities.ProjectService,
+) (*entities.ProjectService, error) {
+	model := models.ProjectServiceFromEntity(projectService)
 	if err := r.save(ctx, model); err != nil {
 		return nil, err
 	}

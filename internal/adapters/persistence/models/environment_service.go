@@ -26,6 +26,16 @@ func (es *EnvironmentService) ToEntity() *entities.EnvironmentService {
 	}
 }
 
+func EnvironmentServicesToEntity(
+	array []*EnvironmentService,
+) ([]*entities.EnvironmentService, error) {
+	result := make([]*entities.EnvironmentService, len(array))
+	for i, v := range array {
+		result[i] = v.ToEntity()
+	}
+	return result, nil
+}
+
 func EnvironmentServiceFromEntity(
 	environmentService *entities.EnvironmentService,
 ) *EnvironmentService {

@@ -6,6 +6,12 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
+type AssignServiceToEnvironment struct {
+	ServiceID     int `json:"service_id"`
+	EnvironmentID int `json:"environment_id"`
+	MaxRequest    int `json:"max_request"`
+}
+
 type EnvironmentCreate struct {
 	Name      string `json:"name"`
 	ProjectID int    `json:"project_id"`

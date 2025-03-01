@@ -37,16 +37,9 @@ func (r *APIKeyRepository) FindByKey(
 }
 
 func (r *APIKeyRepository) Exists(ctx context.Context, key string) (bool, error) {
+	query := "SELECT EXISTS (SELECT 1 FROM api_key WHERE key = $1;);"
+
 	var exists bool
-
-	query := `
-		SELECT EXISTS (
-			SELECT 1
-			FROM api_key
-			WHERE key = $1
-		);
-	`
-
 	err := r.pool.QueryRow(ctx, query, key).Scan(&exists)
 	if err != nil {
 		return false, err

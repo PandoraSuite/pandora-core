@@ -7,5 +7,6 @@ import (
 )
 
 type EnvironmentRepositoryPort interface {
-	Save(ctx context.Context, service *entities.Environment) (*entities.Environment, error)
+	FindByID(ctx context.Context, id int) (*entities.Environment, error)
+	Save(ctx context.Context, environment *entities.Environment) (*entities.Environment, error)
 }
