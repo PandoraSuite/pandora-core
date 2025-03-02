@@ -2,10 +2,10 @@ package app
 
 import (
 	"context"
-	"errors"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -59,7 +59,7 @@ func (u *ProjectUseCase) Create(
 	ctx context.Context, req *dto.ProjectCreate,
 ) (*dto.ProjectResponse, error) {
 	if req.Name == "" {
-		return nil, errors.New("name of the project cannot be empty")
+		return nil, domainErr.ErrNameCannotBeEmpty
 	}
 
 	client, err := u.projectRepo.Save(

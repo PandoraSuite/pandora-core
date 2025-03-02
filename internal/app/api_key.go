@@ -2,12 +2,14 @@ package app
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
+	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -20,53 +22,43 @@ type APIKeyUseCase struct {
 
 func (u *APIKeyUseCase) ValidateAndConsume(
 	ctx context.Context, req *dto.APIKeyValidateAndConsume,
-) *dto.APIKeyValidateResponse {
+) (*dto.APIKeyValidateResponse, error) {
+	resp := &dto.APIKeyValidateResponse{Valid: false}
+
 	apiKey, err := u.apiKeyRepo.FindByKey(ctx, req.Key)
 	if err != nil {
-		return &dto.APIKeyValidateResponse{
-			Valid:   false,
-			Message: err.Error(),
+		if errors.Is(err, domainErr.ErrNotFound) {
+			err = domainErr.ErrAPIKeyNotFound
 		}
+		return resp, err
 	}
 
 	if apiKey.ExpiresAt.Before(time.Now()) {
-		return &dto.APIKeyValidateResponse{
-			Valid:   false,
-			Message: "api key has expired",
-		}
+		return resp, domainErr.ErrAPIKeyExpired
 	}
 
 	service, err := u.serviceRepo.FindByNameAndVersion(
 		ctx, req.ServiceName, req.ServiceVersion,
 	)
 	if err != nil {
-		return &dto.APIKeyValidateResponse{
-			Valid:   false,
-			Message: err.Error(),
+		if errors.Is(err, domainErr.ErrNotFound) {
+			err = domainErr.ErrServiceNotFound
 		}
+		return resp, err
 	}
 
 	if service.Status == enums.ServiceDeprecated {
-		return &dto.APIKeyValidateResponse{
-			Valid:   false,
-			Message: "service is deprecated",
-		}
+		return resp, domainErr.ErrServiceDeprecated
 	}
 	if service.Status == enums.ServiceDeactivated {
-		return &dto.APIKeyValidateResponse{
-			Valid:   false,
-			Message: "service is not available",
-		}
+		return resp, domainErr.ErrServiceDeactivated
 	}
 
 	environmentService, err := u.environmentService.DecrementAvailableRequest(
 		ctx, apiKey.EnvironmentID, service.ID,
 	)
 	if err != nil {
-		return &dto.APIKeyValidateResponse{
-			Valid:   false,
-			Message: err.Error(),
-		}
+		return resp, domainErr.ErrNoAvailableRequests
 	}
 
 	requestLog, err := u.requestLog.Save(
@@ -80,10 +72,7 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 		},
 	)
 	if err != nil {
-		return &dto.APIKeyValidateResponse{
-			Valid:   false,
-			Message: err.Error(),
-		}
+		return resp, err
 	}
 
 	var availableRequest string
@@ -97,7 +86,7 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 		Valid:            true,
 		AvailableRequest: availableRequest,
 		RequestLogID:     requestLog.ID,
-	}
+	}, nil
 }
 
 func (u *APIKeyUseCase) GetAPIKeysByEnvironment(
@@ -136,12 +125,12 @@ func (u *APIKeyUseCase) Create(
 	for {
 		err := apiKey.GenerateKey()
 		if err != nil {
-			return nil, err // TODO: handle error
+			return nil, domainErr.ErrAPIKeyGenerationFailed
 		}
 
 		exists, err := u.apiKeyRepo.Exists(ctx, apiKey.Key)
 		if err != nil {
-			return nil, err // TODO: handle error
+			return nil, err
 		}
 
 		if !exists {

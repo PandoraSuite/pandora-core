@@ -2,11 +2,11 @@ package app
 
 import (
 	"context"
-	"errors"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
+	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -38,7 +38,7 @@ func (u *ServiceUseCase) Create(
 	ctx context.Context, req *dto.ServiceCreate,
 ) (*dto.ServiceResponse, error) {
 	if req.Name == "" {
-		return nil, errors.New("name of the service cannot be empty")
+		return nil, domainErr.ErrNameCannotBeEmpty
 	}
 
 	service, err := u.serviceRepo.Save(

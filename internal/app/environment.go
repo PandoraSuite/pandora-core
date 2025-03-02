@@ -7,6 +7,7 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
+	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -21,6 +22,9 @@ func (u *EnvironmentUseCase) AssignService(
 ) error {
 	environment, err := u.environmentRepo.FindByID(ctx, req.EnvironmentID)
 	if err != nil {
+		if errors.Is(err, domainErr.ErrNotFound) {
+			err = domainErr.ErrEnvironmentNotFound
+		}
 		return err
 	}
 
@@ -28,6 +32,9 @@ func (u *EnvironmentUseCase) AssignService(
 		ctx, environment.ProjectID, req.ServiceID,
 	)
 	if err != nil {
+		if errors.Is(err, domainErr.ErrNotFound) {
+			err = domainErr.ErrProjectServiceNotFound
+		}
 		return err
 	}
 
@@ -36,6 +43,9 @@ func (u *EnvironmentUseCase) AssignService(
 			ctx, environment.ProjectID, req.ServiceID,
 		)
 		if err != nil {
+			if errors.Is(err, domainErr.ErrNotFound) {
+				err = domainErr.ErrEnvironmentServiceNotFound
+			}
 			return err
 		}
 
@@ -45,7 +55,7 @@ func (u *EnvironmentUseCase) AssignService(
 		}
 
 		if req.MaxRequest+totalMaxRequest > projectService.MaxRequest {
-			return errors.New("the limit of requests allowed for the service in the project has been exceeded")
+			return domainErr.ErrMaxRequestExceededForServiceInProyect
 		}
 	}
 

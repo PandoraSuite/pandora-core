@@ -2,12 +2,12 @@ package app
 
 import (
 	"context"
-	"errors"
 
 	"github.com/MAD-py/pandora-core/internal/app/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
+	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -40,11 +40,11 @@ func (u *ClientUseCase) Create(
 	ctx context.Context, req *dto.ClientCreate,
 ) (*dto.ClientResponse, error) {
 	if req.Name == "" {
-		return nil, errors.New("name of the client cannot be empty")
+		return nil, domainErr.ErrNameCannotBeEmpty
 	}
 
 	if utils.ValidateEmail(req.Email) {
-		return nil, errors.New("invalid email")
+		return nil, domainErr.ErrInvalidEmailFormat
 	}
 
 	client, err := u.clientRepo.Save(
