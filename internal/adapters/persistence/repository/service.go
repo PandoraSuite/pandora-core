@@ -36,6 +36,17 @@ func (r *ServiceRepository) FindByNameAndVersion(
 
 func (r *ServiceRepository) FindActiveServices(ctx context.Context) ([]*entities.Service, error) {
 	query := "SELECT * FROM service WHERE status = 'active';"
+	return r.find(ctx, query)
+}
+
+func (r *ServiceRepository) FindAll(ctx context.Context) ([]*entities.Service, error) {
+	query := "SELECT * FROM service;"
+	return r.find(ctx, query)
+}
+
+func (r *ServiceRepository) find(
+	ctx context.Context, query string,
+) ([]*entities.Service, error) {
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
 		return nil, persistence.ConvertPgxError(err)

@@ -14,6 +14,26 @@ type ServiceUseCase struct {
 	serviceRepo outbound.ServiceRepositoryPort
 }
 
+func (u *ServiceUseCase) GetServices(ctx context.Context) ([]*dto.ServiceResponse, error) {
+	services, err := u.serviceRepo.FindAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	serviceResponses := make([]*dto.ServiceResponse, len(services))
+	for i, service := range services {
+		serviceResponses[i] = &dto.ServiceResponse{
+			ID:        service.ID,
+			Name:      service.Name,
+			Status:    service.Status,
+			Version:   service.Version,
+			CreatedAt: service.CreatedAt,
+		}
+	}
+
+	return serviceResponses, nil
+}
+
 func (u *ServiceUseCase) GetActiveServices(ctx context.Context) ([]*dto.ServiceResponse, error) {
 	services, err := u.serviceRepo.FindActiveServices(ctx)
 	if err != nil {
