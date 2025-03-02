@@ -12,7 +12,7 @@ import (
 )
 
 type ClientUseCase struct {
-	clientRepo outbound.ClientRepositoryPort
+	clientRepo outbound.ClientPort
 }
 
 func (u *ClientUseCase) GetClients(

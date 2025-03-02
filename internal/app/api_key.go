@@ -14,10 +14,10 @@ import (
 )
 
 type APIKeyUseCase struct {
-	apiKeyRepo         outbound.APIKeyRepositoryPort
-	requestLog         outbound.RequestLogRepositoryPort
-	serviceRepo        outbound.ServiceRepositoryPort
-	environmentService outbound.EnvironmentServiceRepositoryPort
+	apiKeyRepo         outbound.APIKeyPort
+	requestLog         outbound.RequestLogPort
+	serviceRepo        outbound.ServiceFindPort
+	environmentService outbound.EnvironmentServiceQuotaPort
 }
 
 func (u *APIKeyUseCase) ValidateAndConsume(

@@ -10,8 +10,8 @@ import (
 )
 
 type ProjectUseCase struct {
-	projectRepo        outbound.ProjectRepositoryPort
-	projectServiceRepo outbound.ProjectServiceRepositoryPort
+	projectRepo        outbound.ProjectPort
+	projectServiceRepo outbound.ProjectServicePort
 }
 
 func (u *ProjectUseCase) AssignService(

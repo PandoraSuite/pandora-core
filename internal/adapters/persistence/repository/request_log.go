@@ -6,7 +6,6 @@ import (
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
-	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -54,6 +53,6 @@ func (r *RequestLogRepository) save(
 	return nil
 }
 
-func NewRequestLogRepository(pool *pgxpool.Pool) outbound.RequestLogRepositoryPort {
+func NewRequestLogRepository(pool *pgxpool.Pool) *RequestLogRepository {
 	return &RequestLogRepository{pool: pool}
 }

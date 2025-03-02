@@ -6,7 +6,10 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 )
 
-type ProjectServiceRepositoryPort interface {
-	FindByProjectAndService(ctx context.Context, projectID, serviceID int) (*entities.ProjectService, error)
+type ProjectServicePort interface {
 	Save(ctx context.Context, projectService *entities.ProjectService) (*entities.ProjectService, error)
+}
+
+type ProjectServiceFindPort interface {
+	FindByProjectAndService(ctx context.Context, projectID, serviceID int) (*entities.ProjectService, error)
 }

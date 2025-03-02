@@ -11,7 +11,7 @@ import (
 )
 
 type ServiceUseCase struct {
-	serviceRepo outbound.ServiceRepositoryPort
+	serviceRepo outbound.ServicePort
 }
 
 func (u *ServiceUseCase) GetServices(ctx context.Context) ([]*dto.ServiceResponse, error) {

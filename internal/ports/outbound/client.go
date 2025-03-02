@@ -7,7 +7,7 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
-type ClientRepositoryPort interface {
-	FindAll(ctx context.Context, clientType enums.ClientType) ([]*entities.Client, error)
+type ClientPort interface {
 	Save(ctx context.Context, client *entities.Client) (*entities.Client, error)
+	FindAll(ctx context.Context, clientType enums.ClientType) ([]*entities.Client, error)
 }

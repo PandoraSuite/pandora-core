@@ -12,9 +12,9 @@ import (
 )
 
 type EnvironmentUseCase struct {
-	environmentRepo        outbound.EnvironmentRepositoryPort
-	projectServiceRepo     outbound.ProjectServiceRepositoryPort
-	environmentServiceRepo outbound.EnvironmentServiceRepositoryPort
+	environmentRepo        outbound.EnvironmentPort
+	projectServiceRepo     outbound.ProjectServiceFindPort
+	environmentServiceRepo outbound.EnvironmentServicePort
 }
 
 func (u *EnvironmentUseCase) AssignService(
