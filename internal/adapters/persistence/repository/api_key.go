@@ -49,7 +49,7 @@ func (r *APIKeyRepository) FindByEnvironment(
 		return nil, err
 	}
 
-	return models.EnvironmentsToEntity(apiKeys)
+	return models.APIKeysToEntity(apiKeys)
 }
 
 func (r *APIKeyRepository) FindByKey(
