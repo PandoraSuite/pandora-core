@@ -8,15 +8,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Database struct {
+type Persistence struct {
 	pool *pgxpool.Pool
 }
 
-func (db *Database) Close() { db.pool.Close() }
+func (db *Persistence) Close() { db.pool.Close() }
 
-func (db *Database) Pool() *pgxpool.Pool { return db.pool }
+func (db *Persistence) Pool() *pgxpool.Pool { return db.pool }
 
-func NewDatabase(dns string) (*Database, error) {
+func NewPersistence(dns string) (*Persistence, error) {
 	config, err := pgxpool.ParseConfig(dns)
 	if err != nil {
 		return nil, fmt.Errorf("error when parsing DB configuration: %w", err)
@@ -29,5 +29,5 @@ func NewDatabase(dns string) (*Database, error) {
 		return nil, fmt.Errorf("error when creating the connection pool: %w", err)
 	}
 
-	return &Database{pool: pool}, nil
+	return &Persistence{pool: pool}, nil
 }
