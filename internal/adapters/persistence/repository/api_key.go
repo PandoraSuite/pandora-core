@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
@@ -20,7 +20,7 @@ func (r *APIKeyRepository) FindByEnvironment(
 	query := "SELECT * FROM api_key WHERE environment_id = $1;"
 	rows, err := r.pool.Query(ctx, query, environmentID)
 	if err != nil {
-		return nil, err
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	defer rows.Close()
@@ -39,14 +39,14 @@ func (r *APIKeyRepository) FindByEnvironment(
 			&apiKey.CreatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, persistence.ConvertPgxError(err)
 		}
 
 		apiKeys = append(apiKeys, apiKey)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	return models.APIKeysToEntity(apiKeys)
@@ -68,7 +68,7 @@ func (r *APIKeyRepository) FindByKey(
 		&apiKey.CreatedAt,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("error obtaining api key: %w", err)
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	return apiKey.ToEntity()
@@ -80,7 +80,7 @@ func (r *APIKeyRepository) Exists(ctx context.Context, key string) (bool, error)
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, key).Scan(&exists)
 	if err != nil {
-		return false, err
+		return false, persistence.ConvertPgxError(err)
 	}
 
 	return exists, nil
@@ -118,7 +118,7 @@ func (r *APIKeyRepository) save(ctx context.Context, apiKey *models.APIKey) erro
 	).Scan(&apiKey.ID, &apiKey.CreatedAt)
 
 	if err != nil {
-		return fmt.Errorf("error when inserting the api key: %w", err)
+		return persistence.ConvertPgxError(err)
 	}
 
 	return nil

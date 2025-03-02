@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
@@ -28,7 +28,7 @@ func (r *ServiceRepository) FindByNameAndVersion(
 		&service.CreatedAt,
 	)
 	if err != nil {
-		return nil, err
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	return service.ToEntity()
@@ -38,7 +38,7 @@ func (r *ServiceRepository) FindActiveServices(ctx context.Context) ([]*entities
 	query := "SELECT * FROM service WHERE status = 'active';"
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
-		return nil, err
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	defer rows.Close()
@@ -55,14 +55,14 @@ func (r *ServiceRepository) FindActiveServices(ctx context.Context) ([]*entities
 			&service.CreatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, persistence.ConvertPgxError(err)
 		}
 
 		services = append(services, service)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	return models.ServicesToEntity(services)
@@ -100,7 +100,7 @@ func (r *ServiceRepository) save(
 	).Scan(&service.ID, &service.CreatedAt)
 
 	if err != nil {
-		return fmt.Errorf("error when inserting the service: %w", err)
+		return persistence.ConvertPgxError(err)
 	}
 
 	return nil

@@ -2,13 +2,11 @@ package repository
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -31,7 +29,7 @@ func (r *EnvironmentServiceRepository) FindByProjectAndService(
 
 	rows, err := r.pool.Query(ctx, query, projectID, serviceID)
 	if err != nil {
-		return nil, err
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	defer rows.Close()
@@ -48,14 +46,14 @@ func (r *EnvironmentServiceRepository) FindByProjectAndService(
 			&environmentService.CreatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, persistence.ConvertPgxError(err)
 		}
 
 		environmentServices = append(environmentServices, environmentService)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	return models.EnvironmentServicesToEntity(environmentServices)
@@ -87,10 +85,7 @@ func (r *EnvironmentServiceRepository) DecrementAvailableRequest(
 			&environmentService.CreatedAt,
 		)
 	if err != nil {
-		if err == pgx.ErrNoRows {
-			return nil, errors.New("no more requests available")
-		}
-		return nil, err
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	return environmentService.ToEntity(), nil
@@ -125,10 +120,7 @@ func (r *EnvironmentServiceRepository) save(
 	).Scan(&environmentService.CreatedAt)
 
 	if err != nil {
-		return fmt.Errorf(
-			"error when inserting the environment service: %w",
-			err,
-		)
+		return persistence.ConvertPgxError(err)
 	}
 
 	return nil

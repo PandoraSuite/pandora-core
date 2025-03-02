@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
@@ -30,7 +30,7 @@ func (r *ClientRepository) FindAll(
 
 	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	defer rows.Close()
@@ -46,14 +46,14 @@ func (r *ClientRepository) FindAll(
 			&client.CreatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, persistence.ConvertPgxError(err)
 		}
 
 		clients = append(clients, client)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	return models.ClientsToEntity(clients)
@@ -89,7 +89,7 @@ func (r *ClientRepository) save(ctx context.Context, client *models.Client) erro
 	).Scan(&client.ID, &client.CreatedAt)
 
 	if err != nil {
-		return fmt.Errorf("error when inserting the client: %w", err)
+		return persistence.ConvertPgxError(err)
 	}
 
 	return nil

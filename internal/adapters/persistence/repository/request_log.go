@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
@@ -48,7 +48,7 @@ func (r *RequestLogRepository) save(
 	).Scan(&requestLog.ID, &requestLog.CreatedAt)
 
 	if err != nil {
-		return fmt.Errorf("error when inserting the request log: %w", err)
+		return persistence.ConvertPgxError(err)
 	}
 
 	return nil

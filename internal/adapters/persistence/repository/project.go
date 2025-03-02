@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
@@ -20,7 +20,7 @@ func (r *ProjectRepository) FindByClient(
 	query := "SELECT * FROM project WHERE client_id = $1;"
 	rows, err := r.pool.Query(ctx, query, clientID)
 	if err != nil {
-		return nil, err
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	defer rows.Close()
@@ -37,14 +37,14 @@ func (r *ProjectRepository) FindByClient(
 			&project.CreatedAt,
 		)
 		if err != nil {
-			return nil, err
+			return nil, persistence.ConvertPgxError(err)
 		}
 
 		projects = append(projects, project)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	return models.ProjectsToEntity(projects)
@@ -82,7 +82,7 @@ func (r *ProjectRepository) save(
 	).Scan(&project.ID, &project.CreatedAt)
 
 	if err != nil {
-		return fmt.Errorf("error when inserting the project: %w", err)
+		return persistence.ConvertPgxError(err)
 	}
 
 	return nil

@@ -2,8 +2,8 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
@@ -33,7 +33,7 @@ func (r *ProjectServiceRepository) FindByProjectAndService(
 		&projectService.CreatedAt,
 	)
 	if err != nil {
-		return nil, err
+		return nil, persistence.ConvertPgxError(err)
 	}
 
 	return projectService.ToEntity()
@@ -73,7 +73,7 @@ func (r *ProjectServiceRepository) save(
 	).Scan(&projectService.CreatedAt)
 
 	if err != nil {
-		return fmt.Errorf("error when inserting the project service: %w", err)
+		return persistence.ConvertPgxError(err)
 	}
 
 	return nil
