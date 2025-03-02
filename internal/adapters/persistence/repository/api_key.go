@@ -14,6 +14,44 @@ type APIKeyRepository struct {
 	pool *pgxpool.Pool
 }
 
+func (r *APIKeyRepository) FindByEnvironment(
+	ctx context.Context, environmentID int,
+) ([]*entities.APIKey, error) {
+	query := "SELECT * FROM api_key WHERE environment_id = $1;"
+	rows, err := r.pool.Query(ctx, query, environmentID)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var apiKeys []*models.APIKey
+	for rows.Next() {
+		apiKey := new(models.APIKey)
+
+		err = rows.Scan(
+			&apiKey.ID,
+			&apiKey.EnvironmentID,
+			&apiKey.Key,
+			&apiKey.ExpiresAt,
+			&apiKey.LastUsed,
+			&apiKey.Status,
+			&apiKey.CreatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		apiKeys = append(apiKeys, apiKey)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return models.EnvironmentsToEntity(apiKeys)
+}
+
 func (r *APIKeyRepository) FindByKey(
 	ctx context.Context, key string,
 ) (*entities.APIKey, error) {

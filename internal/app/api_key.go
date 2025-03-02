@@ -100,6 +100,30 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 	}
 }
 
+func (u *APIKeyUseCase) GetAPIKeysByEnvironment(
+	ctx context.Context, environmentID int,
+) ([]*dto.APIKeyResponse, error) {
+	apiKeys, err := u.apiKeyRepo.FindByEnvironment(ctx, environmentID)
+	if err != nil {
+		return nil, err
+	}
+
+	apiKeysResponses := make([]*dto.APIKeyResponse, len(apiKeys))
+	for i, apiKey := range apiKeys {
+		apiKeysResponses[i] = &dto.APIKeyResponse{
+			ID:            apiKey.ID,
+			Key:           apiKey.Key,
+			Status:        apiKey.Status,
+			LastUsed:      apiKey.LastUsed,
+			ExpiresAt:     apiKey.ExpiresAt,
+			EnvironmentID: apiKey.EnvironmentID,
+			CreatedAt:     apiKey.CreatedAt,
+		}
+	}
+
+	return apiKeysResponses, nil
+}
+
 func (u *APIKeyUseCase) Create(
 	ctx context.Context, req *dto.APIKeyCreate,
 ) (*dto.APIKeyResponse, error) {

@@ -58,6 +58,18 @@ func (k *APIKey) ToEntity() (*entities.APIKey, error) {
 	}, nil
 }
 
+func APIKeysToEntity(array []*APIKey) ([]*entities.APIKey, error) {
+	result := make([]*entities.APIKey, len(array))
+	for i, v := range array {
+		vv, err := v.ToEntity()
+		if err != nil {
+			return nil, err
+		}
+		result[i] = vv
+	}
+	return result, nil
+}
+
 func APIKeyFromEntity(apiKey *entities.APIKey) *APIKey {
 	return &APIKey{
 		ID:            utils.IntToPgtypeInt4(apiKey.ID),

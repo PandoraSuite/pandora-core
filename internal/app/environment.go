@@ -64,7 +64,7 @@ func (u *EnvironmentUseCase) AssignService(
 	return nil
 }
 
-func (u *EnvironmentUseCase) GetEnvironmentByProject(
+func (u *EnvironmentUseCase) GetEnvironmentsByProject(
 	ctx context.Context, projectID int,
 ) ([]*dto.EnvironmentResponse, error) {
 	environments, err := u.environmentRepo.FindByProject(ctx, projectID)
