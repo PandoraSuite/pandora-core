@@ -1,38 +1,25 @@
 package main
 
 import (
-	"sync"
-	"time"
+	"github.com/MAD-py/pandora-core/internal/adapters/http"
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence/repository"
+	"github.com/MAD-py/pandora-core/internal/app"
 )
 
 func main() {
-	t := new(test)
+	db, err := persistence.NewPersistence("host=localhost port=5436 user=postgres password=postgres dbname=pandora sslmode=disable")
+	if err != nil {
+		panic(err)
+	}
 
-	go t.function1()
-	go t.function2()
+	apiKeyRepo := repository.NewAPIKeyRepository(db.Pool(), db.HandlerErr())
+	serviceRepo := repository.NewServiceRepository(db.Pool(), db.HandlerErr())
 
-	time.Sleep(time.Minute * 3)
-}
+	apiKeyUseCase := app.NewAPIKeyUseCase(apiKeyRepo, nil, nil, nil)
+	serviceUseCase := app.NewServiceUseCase(serviceRepo)
 
-type test struct {
-	mu sync.Mutex
-}
+	srv := http.NewServer(":8080", serviceUseCase, apiKeyUseCase)
 
-func (t *test) function1() {
-	println("Start test function1")
-	t.mu.Lock()
-	println("middle test function1")
-	time.Sleep(time.Second * 10)
-	t.mu.Unlock()
-	println("end test function1")
-}
-
-func (t *test) function2() {
-	time.Sleep(time.Second * 2)
-	println("Start test function2")
-	t.mu.Lock()
-	println("middle test function2")
-	time.Sleep(time.Second * 120)
-	t.mu.Unlock()
-	println("end test function2")
+	srv.Run()
 }

@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,6 +10,8 @@ import (
 
 type EnvironmentServiceRepository struct {
 	pool *pgxpool.Pool
+
+	handlerErr func(error) error
 }
 
 func (r *EnvironmentServiceRepository) FindByProjectAndService(
@@ -28,7 +29,7 @@ func (r *EnvironmentServiceRepository) FindByProjectAndService(
 
 	rows, err := r.pool.Query(ctx, query, projectID, serviceID)
 	if err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	defer rows.Close()
@@ -45,14 +46,14 @@ func (r *EnvironmentServiceRepository) FindByProjectAndService(
 			&environmentService.CreatedAt,
 		)
 		if err != nil {
-			return nil, persistence.ConvertPgxError(err)
+			return nil, r.handlerErr(err)
 		}
 
 		environmentServices = append(environmentServices, environmentService)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	return models.EnvironmentServicesToEntity(environmentServices)
@@ -84,7 +85,7 @@ func (r *EnvironmentServiceRepository) DecrementAvailableRequest(
 			&environmentService.CreatedAt,
 		)
 	if err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	return environmentService.ToEntity(), nil
@@ -119,12 +120,17 @@ func (r *EnvironmentServiceRepository) save(
 	).Scan(&environmentService.CreatedAt)
 
 	if err != nil {
-		return persistence.ConvertPgxError(err)
+		return r.handlerErr(err)
 	}
 
 	return nil
 }
 
-func NewEnvironmentServiceRepository(pool *pgxpool.Pool) *EnvironmentServiceRepository {
-	return &EnvironmentServiceRepository{pool: pool}
+func NewEnvironmentServiceRepository(
+	pool *pgxpool.Pool, handlerErr func(error) error,
+) *EnvironmentServiceRepository {
+	return &EnvironmentServiceRepository{
+		pool:       pool,
+		handlerErr: handlerErr,
+	}
 }

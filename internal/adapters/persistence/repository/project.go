@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,6 +10,8 @@ import (
 
 type ProjectRepository struct {
 	pool *pgxpool.Pool
+
+	handlerErr func(error) error
 }
 
 func (r *ProjectRepository) FindByClient(
@@ -19,7 +20,7 @@ func (r *ProjectRepository) FindByClient(
 	query := "SELECT * FROM project WHERE client_id = $1;"
 	rows, err := r.pool.Query(ctx, query, clientID)
 	if err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	defer rows.Close()
@@ -36,14 +37,14 @@ func (r *ProjectRepository) FindByClient(
 			&project.CreatedAt,
 		)
 		if err != nil {
-			return nil, persistence.ConvertPgxError(err)
+			return nil, r.handlerErr(err)
 		}
 
 		projects = append(projects, project)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	return models.ProjectsToEntity(projects)
@@ -81,12 +82,17 @@ func (r *ProjectRepository) save(
 	).Scan(&project.ID, &project.CreatedAt)
 
 	if err != nil {
-		return persistence.ConvertPgxError(err)
+		return r.handlerErr(err)
 	}
 
 	return nil
 }
 
-func NewProjectRepository(pool *pgxpool.Pool) *ProjectRepository {
-	return &ProjectRepository{pool: pool}
+func NewProjectRepository(
+	pool *pgxpool.Pool, handlerErr func(error) error,
+) *ProjectRepository {
+	return &ProjectRepository{
+		pool:       pool,
+		handlerErr: handlerErr,
+	}
 }

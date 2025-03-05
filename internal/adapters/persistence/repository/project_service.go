@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,6 +10,8 @@ import (
 
 type ProjectServiceRepository struct {
 	pool *pgxpool.Pool
+
+	handlerErr func(error) error
 }
 
 func (r *ProjectServiceRepository) FindByProjectAndService(
@@ -32,7 +33,7 @@ func (r *ProjectServiceRepository) FindByProjectAndService(
 		&projectService.CreatedAt,
 	)
 	if err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	return projectService.ToEntity()
@@ -72,12 +73,17 @@ func (r *ProjectServiceRepository) save(
 	).Scan(&projectService.CreatedAt)
 
 	if err != nil {
-		return persistence.ConvertPgxError(err)
+		return r.handlerErr(err)
 	}
 
 	return nil
 }
 
-func NewProjectServiceRepository(pool *pgxpool.Pool) *ProjectServiceRepository {
-	return &ProjectServiceRepository{pool: pool}
+func NewProjectServiceRepository(
+	pool *pgxpool.Pool, handlerErr func(error) error,
+) *ProjectServiceRepository {
+	return &ProjectServiceRepository{
+		pool:       pool,
+		handlerErr: handlerErr,
+	}
 }

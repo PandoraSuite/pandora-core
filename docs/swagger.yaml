@@ -1,0 +1,213 @@
+definitions:
+  dto.APIKeyCreate:
+    properties:
+      environment_id:
+        type: integer
+      expires_at:
+        type: string
+    type: object
+  dto.APIKeyResponse:
+    properties:
+      created_at:
+        type: string
+      environment_id:
+        type: integer
+      expires_at:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      last_used:
+        type: string
+      status:
+        $ref: '#/definitions/enums.APIKeyStatus'
+    type: object
+  dto.ServiceCreate:
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+    type: object
+  dto.ServiceResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      status:
+        $ref: '#/definitions/enums.ServiceStatus'
+      version:
+        type: string
+    type: object
+  enums.APIKeyStatus:
+    enum:
+    - 0
+    - 1
+    type: integer
+    x-enum-varnames:
+    - APIKeyActive
+    - APIKeyDeactivated
+  enums.ServiceStatus:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ServiceActive
+    - ServiceDeactivated
+    - ServiceDeprecated
+info:
+  contact: {}
+paths:
+  /api/v1/api-keys:
+    post:
+      consumes:
+      - application/json
+      description: Generates an API Key for a specific environment
+      parameters:
+      - description: API Key creation data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.APIKeyCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.APIKeyResponse'
+        "400":
+          description: Invalid input data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Creates a new API Key
+      tags:
+      - API Keys
+  /api/v1/environments/{environment_id}/api-keys:
+    get:
+      description: Returns a list of API Keys associated with a specific environment
+      parameters:
+      - description: Environment ID
+        in: path
+        name: environment_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.APIKeyResponse'
+            type: array
+        "400":
+          description: Invalid environment ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Retrieves all API Keys for an environment
+      tags:
+      - Environments
+  /api/v1/services:
+    get:
+      description: Fetches a list of all registered services
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/dto.ServiceResponse'
+              type: array
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Retrieves all services
+      tags:
+      - Services
+    post:
+      consumes:
+      - application/json
+      description: Adds a new service to the system
+      parameters:
+      - description: Service creation data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ServiceCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ServiceResponse'
+        "400":
+          description: Invalid input data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Creates a new service
+      tags:
+      - Services
+  /api/v1/services/active:
+    get:
+      description: Fetches a list of all active services
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/dto.ServiceResponse'
+              type: array
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Retrieves active services
+      tags:
+      - Services
+swagger: "2.0"

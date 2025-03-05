@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,6 +10,8 @@ import (
 
 type RequestLogRepository struct {
 	pool *pgxpool.Pool
+
+	handlerErr func(error) error
 }
 
 func (r *RequestLogRepository) Save(
@@ -47,12 +48,17 @@ func (r *RequestLogRepository) save(
 	).Scan(&requestLog.ID, &requestLog.CreatedAt)
 
 	if err != nil {
-		return persistence.ConvertPgxError(err)
+		return r.handlerErr(err)
 	}
 
 	return nil
 }
 
-func NewRequestLogRepository(pool *pgxpool.Pool) *RequestLogRepository {
-	return &RequestLogRepository{pool: pool}
+func NewRequestLogRepository(
+	pool *pgxpool.Pool, handlerErr func(error) error,
+) *RequestLogRepository {
+	return &RequestLogRepository{
+		pool:       pool,
+		handlerErr: handlerErr,
+	}
 }

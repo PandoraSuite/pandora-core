@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,6 +10,8 @@ import (
 
 type ServiceRepository struct {
 	pool *pgxpool.Pool
+
+	handlerErr func(error) error
 }
 
 func (r *ServiceRepository) FindByNameAndVersion(
@@ -27,7 +28,7 @@ func (r *ServiceRepository) FindByNameAndVersion(
 		&service.CreatedAt,
 	)
 	if err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	return service.ToEntity()
@@ -48,7 +49,7 @@ func (r *ServiceRepository) find(
 ) ([]*entities.Service, error) {
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	defer rows.Close()
@@ -65,14 +66,14 @@ func (r *ServiceRepository) find(
 			&service.CreatedAt,
 		)
 		if err != nil {
-			return nil, persistence.ConvertPgxError(err)
+			return nil, r.handlerErr(err)
 		}
 
 		services = append(services, service)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	return models.ServicesToEntity(services)
@@ -110,12 +111,17 @@ func (r *ServiceRepository) save(
 	).Scan(&service.ID, &service.CreatedAt)
 
 	if err != nil {
-		return persistence.ConvertPgxError(err)
+		return r.handlerErr(err)
 	}
 
 	return nil
 }
 
-func NewServiceRepository(pool *pgxpool.Pool) *ServiceRepository {
-	return &ServiceRepository{pool: pool}
+func NewServiceRepository(
+	pool *pgxpool.Pool, handlerErr func(error) error,
+) *ServiceRepository {
+	return &ServiceRepository{
+		pool:       pool,
+		handlerErr: handlerErr,
+	}
 }

@@ -81,3 +81,7 @@ func (u *ServiceUseCase) Create(
 		CreatedAt: service.CreatedAt,
 	}, nil
 }
+
+func NewServiceUseCase(serviceRepo outbound.ServicePort) *ServiceUseCase {
+	return &ServiceUseCase{serviceRepo: serviceRepo}
+}

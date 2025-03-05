@@ -152,3 +152,17 @@ func (u *APIKeyUseCase) Create(
 		CreatedAt:     apiKey.CreatedAt,
 	}, nil
 }
+
+func NewAPIKeyUseCase(
+	apiKeyRepo outbound.APIKeyPort,
+	requestLog outbound.RequestLogPort,
+	serviceRepo outbound.ServiceFindPort,
+	environmentService outbound.EnvironmentServiceQuotaPort,
+) *APIKeyUseCase {
+	return &APIKeyUseCase{
+		apiKeyRepo:         apiKeyRepo,
+		requestLog:         requestLog,
+		serviceRepo:        serviceRepo,
+		environmentService: environmentService,
+	}
+}

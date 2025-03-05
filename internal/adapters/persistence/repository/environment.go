@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,6 +10,8 @@ import (
 
 type EnvironmentRepository struct {
 	pool *pgxpool.Pool
+
+	handlerErr func(error) error
 }
 
 func (r *EnvironmentRepository) FindByID(
@@ -27,7 +28,7 @@ func (r *EnvironmentRepository) FindByID(
 		&environment.CreatedAt,
 	)
 	if err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	return environment.ToEntity()
@@ -40,7 +41,7 @@ func (r *EnvironmentRepository) FindByProject(
 
 	rows, err := r.pool.Query(ctx, query, projectID)
 	if err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	defer rows.Close()
@@ -57,14 +58,14 @@ func (r *EnvironmentRepository) FindByProject(
 			&environment.CreatedAt,
 		)
 		if err != nil {
-			return nil, persistence.ConvertPgxError(err)
+			return nil, r.handlerErr(err)
 		}
 
 		environments = append(environments, environment)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	return models.EnvironmentToEntity(environments)
@@ -102,12 +103,17 @@ func (r *EnvironmentRepository) save(
 	).Scan(&environment.ID, &environment.CreatedAt)
 
 	if err != nil {
-		return persistence.ConvertPgxError(err)
+		return r.handlerErr(err)
 	}
 
 	return nil
 }
 
-func NewEnvironmentRepository(pool *pgxpool.Pool) *EnvironmentRepository {
-	return &EnvironmentRepository{pool: pool}
+func NewEnvironmentRepository(
+	pool *pgxpool.Pool, handlerErr func(error) error,
+) *EnvironmentRepository {
+	return &EnvironmentRepository{
+		pool:       pool,
+		handlerErr: handlerErr,
+	}
 }

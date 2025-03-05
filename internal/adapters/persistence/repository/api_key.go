@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -11,6 +10,8 @@ import (
 
 type APIKeyRepository struct {
 	pool *pgxpool.Pool
+
+	handlerErr func(error) error
 }
 
 func (r *APIKeyRepository) FindByEnvironment(
@@ -19,7 +20,7 @@ func (r *APIKeyRepository) FindByEnvironment(
 	query := "SELECT * FROM api_key WHERE environment_id = $1;"
 	rows, err := r.pool.Query(ctx, query, environmentID)
 	if err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	defer rows.Close()
@@ -38,14 +39,14 @@ func (r *APIKeyRepository) FindByEnvironment(
 			&apiKey.CreatedAt,
 		)
 		if err != nil {
-			return nil, persistence.ConvertPgxError(err)
+			return nil, r.handlerErr(err)
 		}
 
 		apiKeys = append(apiKeys, apiKey)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	return models.APIKeysToEntity(apiKeys)
@@ -67,7 +68,7 @@ func (r *APIKeyRepository) FindByKey(
 		&apiKey.CreatedAt,
 	)
 	if err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	return apiKey.ToEntity()
@@ -79,7 +80,7 @@ func (r *APIKeyRepository) Exists(ctx context.Context, key string) (bool, error)
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, key).Scan(&exists)
 	if err != nil {
-		return false, persistence.ConvertPgxError(err)
+		return false, r.handlerErr(err)
 	}
 
 	return exists, nil
@@ -117,12 +118,17 @@ func (r *APIKeyRepository) save(ctx context.Context, apiKey *models.APIKey) erro
 	).Scan(&apiKey.ID, &apiKey.CreatedAt)
 
 	if err != nil {
-		return persistence.ConvertPgxError(err)
+		return r.handlerErr(err)
 	}
 
 	return nil
 }
 
-func NewAPIKeyRepository(pool *pgxpool.Pool) *APIKeyRepository {
-	return &APIKeyRepository{pool: pool}
+func NewAPIKeyRepository(
+	pool *pgxpool.Pool, handlerErr func(error) error,
+) *APIKeyRepository {
+	return &APIKeyRepository{
+		pool:       pool,
+		handlerErr: handlerErr,
+	}
 }

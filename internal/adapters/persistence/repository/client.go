@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
@@ -12,6 +11,8 @@ import (
 
 type ClientRepository struct {
 	pool *pgxpool.Pool
+
+	handlerErr func(error) error
 }
 
 func (r *ClientRepository) FindAll(
@@ -29,7 +30,7 @@ func (r *ClientRepository) FindAll(
 
 	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	defer rows.Close()
@@ -45,14 +46,14 @@ func (r *ClientRepository) FindAll(
 			&client.CreatedAt,
 		)
 		if err != nil {
-			return nil, persistence.ConvertPgxError(err)
+			return nil, r.handlerErr(err)
 		}
 
 		clients = append(clients, client)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, persistence.ConvertPgxError(err)
+		return nil, r.handlerErr(err)
 	}
 
 	return models.ClientsToEntity(clients)
@@ -88,12 +89,17 @@ func (r *ClientRepository) save(ctx context.Context, client *models.Client) erro
 	).Scan(&client.ID, &client.CreatedAt)
 
 	if err != nil {
-		return persistence.ConvertPgxError(err)
+		return r.handlerErr(err)
 	}
 
 	return nil
 }
 
-func NewClientRepository(pool *pgxpool.Pool) *ClientRepository {
-	return &ClientRepository{pool: pool}
+func NewClientRepository(
+	pool *pgxpool.Pool, handlerErr func(error) error,
+) *ClientRepository {
+	return &ClientRepository{
+		pool:       pool,
+		handlerErr: handlerErr,
+	}
 }
