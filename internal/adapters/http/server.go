@@ -18,11 +18,11 @@ type Server struct {
 
 	server *http.Server
 
-	srvService    inbound.ServiceHTTPPort
-	apiKeyService inbound.APIKeyHTTPPort
-	// clientService inbound.ClientHTTPPort
-	// environmentService inbound.EnvironmentHTTPPort
-	// projectService inbound.ProjectHTTPPort
+	srvService         inbound.ServiceHTTPPort
+	apiKeyService      inbound.APIKeyHTTPPort
+	clientService      inbound.ClientHTTPPort
+	projectService     inbound.ProjectHTTPPort
+	environmentService inbound.EnvironmentHTTPPort
 }
 
 func (srv *Server) setupRoutes(router *gin.RouterGroup) {
@@ -34,7 +34,7 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 	environments := router.Group("/environments")
 	{
 		environments.GET(
-			"/:environment_id/api-keys",
+			"/:id/api-keys",
 			handlers.GetAPIKeysByEnvironment(srv.apiKeyService),
 		)
 	}
@@ -44,6 +44,23 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 		services.POST("", handlers.CreateService(srv.srvService))
 		services.GET("", handlers.GetAllServices(srv.srvService))
 		services.GET("/active", handlers.GetActiveServices(srv.srvService))
+	}
+
+	projects := router.Group("/projects")
+	{
+		projects.POST("", handlers.CreateProject(srv.projectService))
+		projects.POST(
+			"/:project_id/services/:service_id/assign",
+			handlers.AssignServiceToProject(srv.projectService),
+		)
+	}
+
+	clients := router.Group("/clients")
+	{
+		clients.GET(
+			":id/projects",
+			handlers.GetProjectsByClient(srv.projectService),
+		)
 	}
 }
 
@@ -69,10 +86,12 @@ func NewServer(
 	addr string,
 	srvService inbound.ServiceHTTPPort,
 	apiKeyService inbound.APIKeyHTTPPort,
+	projectService inbound.ProjectHTTPPort,
 ) *Server {
 	return &Server{
-		addr:          addr,
-		srvService:    srvService,
-		apiKeyService: apiKeyService,
+		addr:           addr,
+		srvService:     srvService,
+		apiKeyService:  apiKeyService,
+		projectService: projectService,
 	}
 }

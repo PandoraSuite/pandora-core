@@ -7,8 +7,8 @@ import (
 )
 
 type AssignServiceToProject struct {
-	ProjectID      int                                `json:"project_id"`
-	ServiceID      int                                `json:"service_id"`
+	ProjectID      int                                `json:"-" swaggerignore:"true"`
+	ServiceID      int                                `json:"-" swaggerignore:"true"`
 	MaxRequest     int                                `json:"max_request"`
 	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency"`
 }

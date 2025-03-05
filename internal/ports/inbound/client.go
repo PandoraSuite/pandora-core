@@ -7,7 +7,7 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
-type ClientPort interface {
+type ClientHTTPPort interface {
 	Create(ctx context.Context, req *dto.ClientCreate) (*dto.ClientResponse, error)
 	GetClients(ctx context.Context, clientType enums.ClientType) ([]*dto.ClientResponse, error)
 }
