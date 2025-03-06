@@ -82,3 +82,13 @@ func (u *ProjectUseCase) Create(
 		CreatedAt: client.CreatedAt,
 	}, nil
 }
+
+func NewProjectUseCase(
+	projectRepo outbound.ProjectPort,
+	projectServiceRepo outbound.ProjectServicePort,
+) *ProjectUseCase {
+	return &ProjectUseCase{
+		projectRepo:        projectRepo,
+		projectServiceRepo: projectServiceRepo,
+	}
+}

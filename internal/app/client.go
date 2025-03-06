@@ -67,3 +67,7 @@ func (u *ClientUseCase) Create(
 		CreatedAt: client.CreatedAt,
 	}, nil
 }
+
+func NewClientUseCase(clientRepo outbound.ClientPort) *ClientUseCase {
+	return &ClientUseCase{clientRepo: clientRepo}
+}

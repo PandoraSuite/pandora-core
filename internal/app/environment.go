@@ -123,3 +123,15 @@ func (u *EnvironmentUseCase) Create(
 		CreatedAt: client.CreatedAt,
 	}, nil
 }
+
+func NewEnvironmentUseCase(
+	environmentRepo outbound.EnvironmentPort,
+	projectServiceRepo outbound.ProjectServiceFindPort,
+	environmentServiceRepo outbound.EnvironmentServicePort,
+) *EnvironmentUseCase {
+	return &EnvironmentUseCase{
+		environmentRepo:        environmentRepo,
+		projectServiceRepo:     projectServiceRepo,
+		environmentServiceRepo: environmentServiceRepo,
+	}
+}
