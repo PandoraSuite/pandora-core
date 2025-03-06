@@ -53,7 +53,7 @@ func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 // @Param project_id path int true "Project ID"
 // @Param service_id path int true "Service ID"
 // @Param request body dto.AssignServiceToProject true "Service assignment data"
-// @Success 201 {object} dto.ProjectServiceResponse
+// @Success 204 "No Content"
 // @Failure 400 {object} map[string]string "Invalid input data"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Router /api/v1/projects/{project_id}/services/{service_id}/assign [post]

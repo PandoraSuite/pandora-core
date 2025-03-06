@@ -83,7 +83,7 @@ func CreateEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.Handl
 // @Param environment_id path int true "Environment ID"
 // @Param service_id path int true "Environment ID"
 // @Param request body dto.AssignServiceToEnvironment true "Service assignment data"
-// @Success 201 {object} dto.EnvironmentServiceResponse
+// @Success 204 "No Content"
 // @Failure 400 {object} map[string]string "Invalid input data"
 // @Failure 500 {object} map[string]string "Internal server error"
 // @Router /api/v1/environments/{environment_id}/services/{service_id}/assign [post]

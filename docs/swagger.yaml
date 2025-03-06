@@ -23,6 +23,86 @@ definitions:
       status:
         $ref: '#/definitions/enums.APIKeyStatus'
     type: object
+  dto.AssignServiceToEnvironment:
+    properties:
+      environment_id:
+        type: integer
+      max_request:
+        type: integer
+      service_id:
+        type: integer
+    type: object
+  dto.AssignServiceToProject:
+    properties:
+      max_request:
+        type: integer
+      reset_frequency:
+        $ref: '#/definitions/enums.ProjectServiceResetFrequency'
+    type: object
+  dto.ClientCreate:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      type:
+        $ref: '#/definitions/enums.ClientType'
+    type: object
+  dto.ClientResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      type:
+        $ref: '#/definitions/enums.ClientType'
+    type: object
+  dto.EnvironmentCreate:
+    properties:
+      name:
+        type: string
+      project_id:
+        type: integer
+    type: object
+  dto.EnvironmentResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      project_id:
+        type: integer
+      status:
+        $ref: '#/definitions/enums.EnvironmentStatus'
+    type: object
+  dto.ProjectCreate:
+    properties:
+      client_id:
+        type: integer
+      name:
+        type: string
+      status:
+        $ref: '#/definitions/enums.ProjectStatus'
+    type: object
+  dto.ProjectResponse:
+    properties:
+      client_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      status:
+        $ref: '#/definitions/enums.ProjectStatus'
+    type: object
   dto.ServiceCreate:
     properties:
       name:
@@ -51,6 +131,48 @@ definitions:
     x-enum-varnames:
     - APIKeyActive
     - APIKeyDeactivated
+  enums.ClientType:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ClientTypeNull
+    - ClientDeveloper
+    - ClientOrganization
+  enums.EnvironmentStatus:
+    enum:
+    - 0
+    - 1
+    type: integer
+    x-enum-varnames:
+    - EnvironmentActive
+    - EnvironmentDeactivated
+  enums.ProjectServiceResetFrequency:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-varnames:
+    - ProjectServiceNull
+    - ProjectServiceDaily
+    - ProjectServiceWeekly
+    - ProjectServiceBiweekly
+    - ProjectServiceMonthly
+  enums.ProjectStatus:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ProjectInProduction
+    - ProjectInDevelopment
+    - ProjectDeactivated
   enums.ServiceStatus:
     enum:
     - 0
@@ -98,13 +220,187 @@ paths:
       summary: Creates a new API Key
       tags:
       - API Keys
-  /api/v1/environments/{environment_id}/api-keys:
+  /api/v1/clients:
+    get:
+      description: Fetches a list of clients, optionally filtered by client type
+      parameters:
+      - description: Filter by client type (organization, developer)
+        in: query
+        name: type
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ClientResponse'
+            type: array
+        "400":
+          description: Invalid query parameter
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Retrieves all clients with optional filtering by type
+      tags:
+      - Clients
+    post:
+      consumes:
+      - application/json
+      description: Adds a new client to the system
+      parameters:
+      - description: Client creation data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ClientCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ClientResponse'
+        "400":
+          description: Invalid input data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Creates a new client
+      tags:
+      - Clients
+  /api/v1/clients/{id}/projects:
+    get:
+      description: Fetches a list of projects associated with a given client
+      parameters:
+      - description: Client ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.ProjectResponse'
+            type: array
+        "400":
+          description: Invalid client ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Retrieves all projects for a specific client
+      tags:
+      - Projects
+  /api/v1/environments:
+    post:
+      consumes:
+      - application/json
+      description: Adds a new environment to the system
+      parameters:
+      - description: Environment creation data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EnvironmentCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.EnvironmentResponse'
+        "400":
+          description: Invalid input data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Creates a new environment
+      tags:
+      - Environments
+  /api/v1/environments/{environment_id}/services/{service_id}/assign:
+    post:
+      consumes:
+      - application/json
+      description: Associates a service with a given environment
+      parameters:
+      - description: Environment ID
+        in: path
+        name: environment_id
+        required: true
+        type: integer
+      - description: Environment ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      - description: Service assignment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AssignServiceToEnvironment'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid input data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Assigns a service to an environment
+      tags:
+      - Environments
+  /api/v1/environments/{id}/api-keys:
     get:
       description: Returns a list of API Keys associated with a specific environment
       parameters:
       - description: Environment ID
         in: path
-        name: environment_id
+        name: id
         required: true
         type: integer
       produces:
@@ -131,6 +427,115 @@ paths:
       summary: Retrieves all API Keys for an environment
       tags:
       - Environments
+  /api/v1/projects:
+    post:
+      consumes:
+      - application/json
+      description: Adds a new project to the system
+      parameters:
+      - description: Project creation data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProjectCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.ProjectResponse'
+        "400":
+          description: Invalid input data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Creates a new project
+      tags:
+      - Projects
+  /api/v1/projects/{id}/environments:
+    get:
+      description: Fetches a list of environments associated with a given project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.EnvironmentResponse'
+            type: array
+        "400":
+          description: Invalid project ID
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Retrieves all environments for a specific project
+      tags:
+      - Environments
+  /api/v1/projects/{project_id}/services/{service_id}/assign:
+    post:
+      consumes:
+      - application/json
+      description: Associates a service with a given project
+      parameters:
+      - description: Project ID
+        in: path
+        name: project_id
+        required: true
+        type: integer
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      - description: Service assignment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AssignServiceToProject'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid input data
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Assigns a service to a project
+      tags:
+      - Projects
   /api/v1/services:
     get:
       description: Fetches a list of all registered services
