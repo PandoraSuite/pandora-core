@@ -28,7 +28,7 @@ type Server struct {
 func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 	apiKeys := router.Group("/api-keys")
 	{
-		apiKeys.POST("/", handlers.CreateAPIKey(srv.apiKeyService))
+		apiKeys.POST("", handlers.CreateAPIKey(srv.apiKeyService))
 	}
 
 	environments := router.Group("/environments")
@@ -57,6 +57,8 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 
 	clients := router.Group("/clients")
 	{
+		clients.POST("", handlers.CreateClient(srv.clientService))
+		clients.GET("", handlers.GetAllClients(srv.clientService))
 		clients.GET(
 			":id/projects",
 			handlers.GetProjectsByClient(srv.projectService),
@@ -86,12 +88,16 @@ func NewServer(
 	addr string,
 	srvService inbound.ServiceHTTPPort,
 	apiKeyService inbound.APIKeyHTTPPort,
+	clientService inbound.ClientHTTPPort,
 	projectService inbound.ProjectHTTPPort,
+	environmentService inbound.EnvironmentHTTPPort,
 ) *Server {
 	return &Server{
-		addr:           addr,
-		srvService:     srvService,
-		apiKeyService:  apiKeyService,
-		projectService: projectService,
+		addr:               addr,
+		srvService:         srvService,
+		apiKeyService:      apiKeyService,
+		clientService:      clientService,
+		projectService:     projectService,
+		environmentService: environmentService,
 	}
 }

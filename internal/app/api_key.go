@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"strconv"
-	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -33,7 +32,7 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 		return resp, err
 	}
 
-	if apiKey.ExpiresAt.Before(time.Now()) {
+	if apiKey.IsExpired() {
 		return resp, domainErr.ErrAPIKeyExpired
 	}
 

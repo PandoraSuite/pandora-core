@@ -30,3 +30,7 @@ func (a *APIKey) GenerateKey() error {
 	a.Key = base64.RawURLEncoding.EncodeToString(bytes)
 	return nil
 }
+
+func (a *APIKey) IsExpired() bool {
+	return a.ExpiresAt.Before(time.Now())
+}
