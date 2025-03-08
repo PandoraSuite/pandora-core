@@ -20,7 +20,7 @@ import (
 // @Success 200 {array} dto.APIKeyResponse
 // @Failure 400 {object} map[string]string "Invalid environment ID"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /environments/{id}/api-keys [get]
+// @Router /api/v1/environments/{id}/api-keys [get]
 func GetAPIKeysByEnvironment(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, err := strconv.Atoi(c.Param("id"))
@@ -52,7 +52,7 @@ func GetAPIKeysByEnvironment(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFu
 // @Success 201 {object} dto.EnvironmentResponse
 // @Failure 400 {object} map[string]string "Invalid input data"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /environments [post]
+// @Router /api/v1/environments [post]
 func CreateEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.EnvironmentCreate
@@ -89,7 +89,7 @@ func CreateEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.Handl
 // @Success 204 "No Content"
 // @Failure 400 {object} map[string]string "Invalid input data"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /environments/{environment_id}/services/{service_id}/assign [post]
+// @Router /api/v1/environments/{environment_id}/services/{service_id}/assign [post]
 func AssignServiceToEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, err := strconv.Atoi(c.Param("environment_id"))

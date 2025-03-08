@@ -21,7 +21,7 @@ import (
 // @Success 200 {array} dto.ProjectResponse
 // @Failure 400 {object} map[string]string "Invalid client ID"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /clients/{id}/projects [get]
+// @Router /api/v1/clients/{id}/projects [get]
 func GetProjectsByClient(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientID, err := strconv.Atoi(c.Param("id"))
@@ -51,7 +51,7 @@ func GetProjectsByClient(projectService inbound.ProjectHTTPPort) gin.HandlerFunc
 // @Success 201 {object} dto.ClientResponse
 // @Failure 400 {object} map[string]string "Invalid input data"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /clients [post]
+// @Router /api/v1/clients [post]
 func CreateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ClientCreate
@@ -86,7 +86,7 @@ func CreateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 // @Success 200 {array} dto.ClientResponse
 // @Failure 400 {object} map[string]string "Invalid query parameter"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /clients [get]
+// @Router /api/v1/clients [get]
 func GetAllClients(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientType, err := enums.ParseClientType(c.Query("type"))

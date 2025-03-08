@@ -1,4 +1,3 @@
-basePath: /api/v1
 definitions:
   dto.APIKeyCreate:
     properties:
@@ -49,6 +48,13 @@ definitions:
       token_type:
         type: string
       username:
+        type: string
+    type: object
+  dto.ChangePassword:
+    properties:
+      confirm_password:
+        type: string
+      new_password:
         type: string
     type: object
   dto.ClientCreate:
@@ -195,7 +201,6 @@ definitions:
     - ServiceActive
     - ServiceDeactivated
     - ServiceDeprecated
-host: localhost:8080
 info:
   contact:
     email: support@example.com
@@ -209,7 +214,7 @@ info:
   title: Pandora Core
   version: "1.0"
 paths:
-  /api-keys:
+  /api/v1/api-keys:
     post:
       consumes:
       - application/json
@@ -245,7 +250,47 @@ paths:
       summary: Creates a new API Key
       tags:
       - API Keys
-  /auth/login:
+  /api/v1/auth/change-password:
+    post:
+      consumes:
+      - application/json
+      description: Allows an authenticated user to change their password.
+      parameters:
+      - description: New password and confirmation
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ChangePassword'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Validation error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - OAuth2Password: []
+      summary: Change password
+      tags:
+      - Authentication
+  /api/v1/auth/login:
     post:
       consumes:
       - application/x-www-form-urlencoded
@@ -289,7 +334,7 @@ paths:
       summary: Authenticate user
       tags:
       - Authentication
-  /clients:
+  /api/v1/clients:
     get:
       description: Fetches a list of clients, optionally filtered by client type
       parameters:
@@ -358,7 +403,7 @@ paths:
       summary: Creates a new client
       tags:
       - Clients
-  /clients/{id}/projects:
+  /api/v1/clients/{id}/projects:
     get:
       description: Fetches a list of projects associated with a given client
       parameters:
@@ -393,7 +438,7 @@ paths:
       summary: Retrieves all projects for a specific client
       tags:
       - Projects
-  /environments:
+  /api/v1/environments:
     post:
       consumes:
       - application/json
@@ -429,7 +474,7 @@ paths:
       summary: Creates a new environment
       tags:
       - Environments
-  /environments/{environment_id}/services/{service_id}/assign:
+  /api/v1/environments/{environment_id}/services/{service_id}/assign:
     post:
       consumes:
       - application/json
@@ -473,7 +518,7 @@ paths:
       summary: Assigns a service to an environment
       tags:
       - Environments
-  /environments/{id}/api-keys:
+  /api/v1/environments/{id}/api-keys:
     get:
       description: Returns a list of API Keys associated with a specific environment
       parameters:
@@ -508,7 +553,7 @@ paths:
       summary: Retrieves all API Keys for an environment
       tags:
       - Environments
-  /projects:
+  /api/v1/projects:
     post:
       consumes:
       - application/json
@@ -544,7 +589,7 @@ paths:
       summary: Creates a new project
       tags:
       - Projects
-  /projects/{id}/environments:
+  /api/v1/projects/{id}/environments:
     get:
       description: Fetches a list of environments associated with a given project
       parameters:
@@ -579,7 +624,7 @@ paths:
       summary: Retrieves all environments for a specific project
       tags:
       - Environments
-  /projects/{project_id}/services/{service_id}/assign:
+  /api/v1/projects/{project_id}/services/{service_id}/assign:
     post:
       consumes:
       - application/json
@@ -623,7 +668,7 @@ paths:
       summary: Assigns a service to a project
       tags:
       - Projects
-  /services:
+  /api/v1/services:
     get:
       description: Fetches a list of all registered services
       produces:
@@ -678,10 +723,12 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - OAuth2Password: []
       summary: Creates a new service
       tags:
       - Services
-  /services/active:
+  /api/v1/services/active:
     get:
       description: Fetches a list of all active services
       produces:
@@ -710,6 +757,6 @@ securityDefinitions:
   OAuth2Password:
     description: Enter your username and password to generate a token.
     flow: password
-    tokenUrl: http://localhost:8080/api/v1/auth/login
+    tokenUrl: /api/v1/auth/login
     type: oauth2
 swagger: "2.0"

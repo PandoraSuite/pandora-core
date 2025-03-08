@@ -20,7 +20,7 @@ import (
 // @Success 201 {object} dto.ServiceResponse
 // @Failure 400 {object} map[string]string "Invalid input data"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /services [post]
+// @Router /api/v1/services [post]
 func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ServiceCreate
@@ -52,7 +52,7 @@ func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 // @Produce json
 // @Success 200 {array} []dto.ServiceResponse
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /services [get]
+// @Router /api/v1/services [get]
 func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		services, err := srvService.GetServices(c.Request.Context())
@@ -73,7 +73,7 @@ func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 // @Produce json
 // @Success 200 {array} []dto.ServiceResponse
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /services/active [get]
+// @Router /api/v1/services/active [get]
 func GetActiveServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		services, err := srvService.GetActiveServices(c.Request.Context())

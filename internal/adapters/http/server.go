@@ -26,11 +26,8 @@ import (
 // @license.name MIT
 // @license.url https://opensource.org/licenses/MIT
 
-// @host localhost:8080
-// @BasePath /api/v1
-
 // @securitydefinitions.oauth2.password OAuth2Password
-// @tokenUrl http://localhost:8080/api/v1/auth/login
+// @tokenUrl /api/v1/auth/login
 // @in header
 // @name Authorization
 // @description Enter your username and password to generate a token.
@@ -58,6 +55,11 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 	protected := router.Group("")
 	protected.Use(middleware.ValidateToken(srv.authService))
 	{
+		auth := protected.Group("/auth")
+		{
+			auth.POST("/change-password", handlers.ChangePassword(srv.authService))
+		}
+
 		apiKeys := protected.Group("/api-keys")
 		{
 			apiKeys.POST("", handlers.CreateAPIKey(srv.apiKeyService))

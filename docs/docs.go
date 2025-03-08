@@ -24,7 +24,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api-keys": {
+        "/api/v1/api-keys": {
             "post": {
                 "security": [
                     {
@@ -81,7 +81,70 @@ const docTemplate = `{
                 }
             }
         },
-        "/auth/login": {
+        "/api/v1/auth/change-password": {
+            "post": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Allows an authenticated user to change their password.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Change password",
+                "parameters": [
+                    {
+                        "description": "New password and confirmation",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ChangePassword"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Validation error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/login": {
             "post": {
                 "description": "Authenticates the administrator and returns a token.",
                 "consumes": [
@@ -147,7 +210,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/clients": {
+        "/api/v1/clients": {
             "get": {
                 "security": [
                     {
@@ -256,7 +319,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/clients/{id}/projects": {
+        "/api/v1/clients/{id}/projects": {
             "get": {
                 "security": [
                     {
@@ -311,7 +374,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/environments": {
+        "/api/v1/environments": {
             "post": {
                 "security": [
                     {
@@ -368,7 +431,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/environments/{environment_id}/services/{service_id}/assign": {
+        "/api/v1/environments/{environment_id}/services/{service_id}/assign": {
             "post": {
                 "security": [
                     {
@@ -436,7 +499,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/environments/{id}/api-keys": {
+        "/api/v1/environments/{id}/api-keys": {
             "get": {
                 "security": [
                     {
@@ -491,7 +554,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/projects": {
+        "/api/v1/projects": {
             "post": {
                 "security": [
                     {
@@ -548,7 +611,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/projects/{id}/environments": {
+        "/api/v1/projects/{id}/environments": {
             "get": {
                 "security": [
                     {
@@ -603,7 +666,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/projects/{project_id}/services/{service_id}/assign": {
+        "/api/v1/projects/{project_id}/services/{service_id}/assign": {
             "post": {
                 "security": [
                     {
@@ -671,7 +734,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/services": {
+        "/api/v1/services": {
             "get": {
                 "security": [
                     {
@@ -711,6 +774,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
                 "description": "Adds a new service to the system",
                 "consumes": [
                     "application/json"
@@ -761,7 +829,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/services/active": {
+        "/api/v1/services/active": {
             "get": {
                 "security": [
                     {
@@ -878,6 +946,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ChangePassword": {
+            "type": "object",
+            "properties": {
+                "confirm_password": {
+                    "type": "string"
+                },
+                "new_password": {
                     "type": "string"
                 }
             }
@@ -1096,7 +1175,7 @@ const docTemplate = `{
             "description": "Enter your username and password to generate a token.",
             "type": "oauth2",
             "flow": "password",
-            "tokenUrl": "http://localhost:8080/api/v1/auth/login"
+            "tokenUrl": "/api/v1/auth/login"
         }
     }
 }`
@@ -1104,8 +1183,8 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "localhost:8080",
-	BasePath:         "/api/v1",
+	Host:             "",
+	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "Pandora Core",
 	Description:      "API for centralized API key management and service access control.",

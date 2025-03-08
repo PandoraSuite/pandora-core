@@ -19,7 +19,7 @@ import (
 // @Success 201 {object} dto.APIKeyResponse
 // @Failure 400 {object} map[string]string "Invalid input data"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api-keys [post]
+// @Router /api/v1/api-keys [post]
 func CreateAPIKey(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.APIKeyCreate
