@@ -24,7 +24,7 @@ import (
 // @Router /auth/login [post]
 func Authenticate(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req dto.AuthenticateRequest
+		var req dto.Authenticate
 
 		if err := c.ShouldBind(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

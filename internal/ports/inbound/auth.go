@@ -7,6 +7,7 @@ import (
 )
 
 type AuthHTTPPort interface {
-	Authenticate(ctx context.Context, req *dto.AuthenticateRequest) (*dto.AuthenticateResponse, error)
+	Authenticate(ctx context.Context, req *dto.Authenticate) (*dto.AuthenticateResponse, error)
 	ValidateToken(ctx context.Context, req *dto.TokenRequest) (string, error)
+	ChangePassword(ctx context.Context, req *dto.ChangePassword) error
 }

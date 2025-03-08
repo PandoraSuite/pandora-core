@@ -2,7 +2,7 @@ package dto
 
 import "time"
 
-type AuthenticateRequest struct {
+type Authenticate struct {
 	Username string `form:"username"`
 	Password string `form:"password"`
 }
@@ -12,6 +12,12 @@ type AuthenticateResponse struct {
 	Username  string    `json:"username"`
 	TokenType string    `json:"token_type"`
 	ExpiresAt time.Time `json:"expires_at"`
+}
+
+type ChangePassword struct {
+	Username        string `json:"-"`
+	NewPassword     string `json:"new_password"`
+	ConfirmPassword string `json:"confirm_password"`
 }
 
 type TokenRequest struct {

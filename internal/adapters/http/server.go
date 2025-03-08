@@ -41,6 +41,7 @@ type Server struct {
 	server *http.Server
 
 	srvService         inbound.ServiceHTTPPort
+	authService        inbound.AuthHTTPPort
 	apiKeyService      inbound.APIKeyHTTPPort
 	clientService      inbound.ClientHTTPPort
 	projectService     inbound.ProjectHTTPPort
@@ -51,11 +52,11 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 
 	auth := router.Group("/auth")
 	{
-		auth.POST("/login", handlers.Authenticate(nil))
+		auth.POST("/login", handlers.Authenticate(srv.authService))
 	}
 
 	protected := router.Group("")
-	protected.Use(middleware.ValidateToken(nil))
+	protected.Use(middleware.ValidateToken(srv.authService))
 	{
 		apiKeys := protected.Group("/api-keys")
 		{
@@ -119,6 +120,7 @@ func (srv *Server) Run() {
 func NewServer(
 	addr string,
 	srvService inbound.ServiceHTTPPort,
+	authService inbound.AuthHTTPPort,
 	apiKeyService inbound.APIKeyHTTPPort,
 	clientService inbound.ClientHTTPPort,
 	projectService inbound.ProjectHTTPPort,
@@ -127,6 +129,7 @@ func NewServer(
 	return &Server{
 		addr:               addr,
 		srvService:         srvService,
+		authService:        authService,
 		apiKeyService:      apiKeyService,
 		clientService:      clientService,
 		projectService:     projectService,

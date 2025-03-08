@@ -7,5 +7,6 @@ import (
 )
 
 type CredentialsPort interface {
-	FindCredentials(ctx context.Context, username string) (*entities.Credential, error)
+	ChangePassword(ctx context.Context, credentials *entities.Credentials) error
+	FindCredentials(ctx context.Context, username string) (*entities.Credentials, error)
 }
