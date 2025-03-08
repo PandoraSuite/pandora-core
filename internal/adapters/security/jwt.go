@@ -40,7 +40,11 @@ func (p *JWTProvider) GenerateToken(ctx context.Context, subject string) (*dto.A
 }
 
 func (p *JWTProvider) ValidateToken(ctx context.Context, token *dto.TokenRequest) (string, error) {
-	t, err := jwt.Parse(token.Token, func(token *jwt.Token) (any, error) {
+	if token.Type != "Bearer" {
+		return "", domainErr.ErrInvalidTokenType
+	}
+
+	t, err := jwt.Parse(token.Key, func(token *jwt.Token) (any, error) {
 		return p.secret, nil
 	})
 

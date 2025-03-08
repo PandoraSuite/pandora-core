@@ -37,4 +37,8 @@ func (u *AuthUseCase) Authenticate(
 	return token, nil
 }
 
-func (u *AuthUseCase) ValidateToken(ctx context.Context)
+func (u *AuthUseCase) ValidateToken(
+	ctx context.Context, req *dto.TokenRequest,
+) (string, error) {
+	return u.tokenProvider.ValidateToken(ctx, req)
+}

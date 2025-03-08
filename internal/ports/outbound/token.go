@@ -8,5 +8,5 @@ import (
 
 type TokenPort interface {
 	GenerateToken(ctx context.Context, subject string) (*dto.AuthenticateResponse, error)
-	ValidateToken(ctx context.Context, tokenStr string) (string, error)
+	ValidateToken(ctx context.Context, token *dto.TokenRequest) (string, error)
 }
