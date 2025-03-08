@@ -3,8 +3,8 @@ package dto
 import "time"
 
 type AuthenticateRequest struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string `form:"username"`
+	Password string `form:"password"`
 }
 
 type AuthenticateResponse struct {

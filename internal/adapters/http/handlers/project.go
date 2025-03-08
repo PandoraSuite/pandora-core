@@ -14,13 +14,14 @@ import (
 // @Summary Creates a new project
 // @Description Adds a new project to the system
 // @Tags Projects
+// @Security OAuth2Password
 // @Accept json
 // @Produce json
 // @Param request body dto.ProjectCreate true "Project creation data"
 // @Success 201 {object} dto.ProjectResponse
 // @Failure 400 {object} map[string]string "Invalid input data"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/v1/projects [post]
+// @Router /projects [post]
 func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ProjectCreate
@@ -48,6 +49,7 @@ func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 // @Summary Assigns a service to a project
 // @Description Associates a service with a given project
 // @Tags Projects
+// @Security OAuth2Password
 // @Accept json
 // @Produce json
 // @Param project_id path int true "Project ID"
@@ -56,7 +58,7 @@ func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 // @Success 204 "No Content"
 // @Failure 400 {object} map[string]string "Invalid input data"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/v1/projects/{project_id}/services/{service_id}/assign [post]
+// @Router /projects/{project_id}/services/{service_id}/assign [post]
 func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, err := strconv.Atoi(c.Param("project_id"))
@@ -94,12 +96,13 @@ func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerF
 // @Summary Retrieves all environments for a specific project
 // @Description Fetches a list of environments associated with a given project
 // @Tags Environments
+// @Security OAuth2Password
 // @Produce json
 // @Param id path int true "Project ID"
 // @Success 200 {array} dto.EnvironmentResponse
 // @Failure 400 {object} map[string]string "Invalid project ID"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/v1/projects/{id}/environments [get]
+// @Router /projects/{id}/environments [get]
 func GetEnvironmentsByProject(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, err := strconv.Atoi(c.Param("id"))

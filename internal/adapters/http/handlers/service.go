@@ -13,13 +13,14 @@ import (
 // @Summary Creates a new service
 // @Description Adds a new service to the system
 // @Tags Services
+// @Security OAuth2Password
 // @Accept json
 // @Produce json
 // @Param request body dto.ServiceCreate true "Service creation data"
 // @Success 201 {object} dto.ServiceResponse
 // @Failure 400 {object} map[string]string "Invalid input data"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/v1/services [post]
+// @Router /services [post]
 func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ServiceCreate
@@ -47,10 +48,11 @@ func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 // @Summary Retrieves all services
 // @Description Fetches a list of all registered services
 // @Tags Services
+// @Security OAuth2Password
 // @Produce json
 // @Success 200 {array} []dto.ServiceResponse
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/v1/services [get]
+// @Router /services [get]
 func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		services, err := srvService.GetServices(c.Request.Context())
@@ -67,10 +69,11 @@ func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 // @Summary Retrieves active services
 // @Description Fetches a list of all active services
 // @Tags Services
+// @Security OAuth2Password
 // @Produce json
 // @Success 200 {array} []dto.ServiceResponse
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/v1/services/active [get]
+// @Router /services/active [get]
 func GetActiveServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		services, err := srvService.GetActiveServices(c.Request.Context())

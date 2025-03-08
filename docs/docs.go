@@ -9,14 +9,28 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "termsOfService": "http://example.com/terms/",
+        "contact": {
+            "name": "Pandora Core Support",
+            "url": "http://example.com/support",
+            "email": "support@example.com"
+        },
+        "license": {
+            "name": "MIT",
+            "url": "https://opensource.org/licenses/MIT"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/api-keys": {
+        "/api-keys": {
             "post": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
                 "description": "Generates an API Key for a specific environment",
                 "consumes": [
                     "application/json"
@@ -67,8 +81,79 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/clients": {
+        "/auth/login": {
+            "post": {
+                "description": "Authenticates the administrator and returns a token.",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Authenticate user",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Login username",
+                        "name": "username",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Login password",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AuthenticateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request format",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid username or password",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/clients": {
             "get": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
                 "description": "Fetches a list of clients, optionally filtered by client type",
                 "produces": [
                     "application/json"
@@ -116,6 +201,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
                 "description": "Adds a new client to the system",
                 "consumes": [
                     "application/json"
@@ -166,8 +256,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/clients/{id}/projects": {
+        "/clients/{id}/projects": {
             "get": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
                 "description": "Fetches a list of projects associated with a given client",
                 "produces": [
                     "application/json"
@@ -216,8 +311,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/environments": {
+        "/environments": {
             "post": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
                 "description": "Adds a new environment to the system",
                 "consumes": [
                     "application/json"
@@ -268,8 +368,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/environments/{environment_id}/services/{service_id}/assign": {
+        "/environments/{environment_id}/services/{service_id}/assign": {
             "post": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
                 "description": "Associates a service with a given environment",
                 "consumes": [
                     "application/json"
@@ -331,8 +436,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/environments/{id}/api-keys": {
+        "/environments/{id}/api-keys": {
             "get": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
                 "description": "Returns a list of API Keys associated with a specific environment",
                 "produces": [
                     "application/json"
@@ -381,8 +491,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/projects": {
+        "/projects": {
             "post": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
                 "description": "Adds a new project to the system",
                 "consumes": [
                     "application/json"
@@ -433,8 +548,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/projects/{id}/environments": {
+        "/projects/{id}/environments": {
             "get": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
                 "description": "Fetches a list of environments associated with a given project",
                 "produces": [
                     "application/json"
@@ -483,8 +603,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/projects/{project_id}/services/{service_id}/assign": {
+        "/projects/{project_id}/services/{service_id}/assign": {
             "post": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
                 "description": "Associates a service with a given project",
                 "consumes": [
                     "application/json"
@@ -546,8 +671,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/services": {
+        "/services": {
             "get": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
                 "description": "Fetches a list of all registered services",
                 "produces": [
                     "application/json"
@@ -631,8 +761,13 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/services/active": {
+        "/services/active": {
             "get": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
                 "description": "Fetches a list of all active services",
                 "produces": [
                     "application/json"
@@ -727,6 +862,23 @@ const docTemplate = `{
                 },
                 "reset_frequency": {
                     "$ref": "#/definitions/enums.ProjectServiceResetFrequency"
+                }
+            }
+        },
+        "dto.AuthenticateResponse": {
+            "type": "object",
+            "properties": {
+                "expires_at": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "token_type": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
@@ -938,17 +1090,25 @@ const docTemplate = `{
                 "ServiceDeprecated"
             ]
         }
+    },
+    "securityDefinitions": {
+        "OAuth2Password": {
+            "description": "Enter your username and password to generate a token.",
+            "type": "oauth2",
+            "flow": "password",
+            "tokenUrl": "http://localhost:8080/api/v1/auth/login"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
+	Version:          "1.0",
+	Host:             "localhost:8080",
+	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Pandora Core",
+	Description:      "API for centralized API key management and service access control.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

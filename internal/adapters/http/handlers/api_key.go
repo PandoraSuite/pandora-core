@@ -12,13 +12,14 @@ import (
 // @Summary Creates a new API Key
 // @Description Generates an API Key for a specific environment
 // @Tags API Keys
+// @Security OAuth2Password
 // @Accept json
 // @Produce json
 // @Param request body dto.APIKeyCreate true "API Key creation data"
 // @Success 201 {object} dto.APIKeyResponse
 // @Failure 400 {object} map[string]string "Invalid input data"
 // @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/v1/api-keys [post]
+// @Router /api-keys [post]
 func CreateAPIKey(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.APIKeyCreate

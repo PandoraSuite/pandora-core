@@ -10,8 +10,30 @@ import (
 
 	_ "github.com/MAD-py/pandora-core/docs"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers"
+	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/middleware"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 )
+
+// @title Pandora Core
+// @version 1.0
+// @description API for centralized API key management and service access control.
+// @termsOfService http://example.com/terms/
+
+// @contact.name Pandora Core Support
+// @contact.url http://example.com/support
+// @contact.email support@example.com
+
+// @license.name MIT
+// @license.url https://opensource.org/licenses/MIT
+
+// @host localhost:8080
+// @BasePath /api/v1
+
+// @securitydefinitions.oauth2.password OAuth2Password
+// @tokenUrl http://localhost:8080/api/v1/auth/login
+// @in header
+// @name Authorization
+// @description Enter your username and password to generate a token.
 
 type Server struct {
 	addr string
@@ -26,43 +48,53 @@ type Server struct {
 }
 
 func (srv *Server) setupRoutes(router *gin.RouterGroup) {
-	apiKeys := router.Group("/api-keys")
+
+	auth := router.Group("/auth")
 	{
-		apiKeys.POST("", handlers.CreateAPIKey(srv.apiKeyService))
+		auth.POST("/login", handlers.Authenticate(nil))
 	}
 
-	environments := router.Group("/environments")
+	protected := router.Group("")
+	protected.Use(middleware.ValidateToken(nil))
 	{
-		environments.GET(
-			"/:id/api-keys",
-			handlers.GetAPIKeysByEnvironment(srv.apiKeyService),
-		)
-	}
+		apiKeys := protected.Group("/api-keys")
+		{
+			apiKeys.POST("", handlers.CreateAPIKey(srv.apiKeyService))
+		}
 
-	services := router.Group("/services")
-	{
-		services.POST("", handlers.CreateService(srv.srvService))
-		services.GET("", handlers.GetAllServices(srv.srvService))
-		services.GET("/active", handlers.GetActiveServices(srv.srvService))
-	}
+		environments := protected.Group("/environments")
+		{
+			environments.GET(
+				"/:id/api-keys",
+				handlers.GetAPIKeysByEnvironment(srv.apiKeyService),
+			)
+		}
 
-	projects := router.Group("/projects")
-	{
-		projects.POST("", handlers.CreateProject(srv.projectService))
-		projects.POST(
-			"/:project_id/services/:service_id/assign",
-			handlers.AssignServiceToProject(srv.projectService),
-		)
-	}
+		services := protected.Group("/services")
+		{
+			services.POST("", handlers.CreateService(srv.srvService))
+			services.GET("", handlers.GetAllServices(srv.srvService))
+			services.GET("/active", handlers.GetActiveServices(srv.srvService))
+		}
 
-	clients := router.Group("/clients")
-	{
-		clients.POST("", handlers.CreateClient(srv.clientService))
-		clients.GET("", handlers.GetAllClients(srv.clientService))
-		clients.GET(
-			":id/projects",
-			handlers.GetProjectsByClient(srv.projectService),
-		)
+		projects := protected.Group("/projects")
+		{
+			projects.POST("", handlers.CreateProject(srv.projectService))
+			projects.POST(
+				"/:project_id/services/:service_id/assign",
+				handlers.AssignServiceToProject(srv.projectService),
+			)
+		}
+
+		clients := protected.Group("/clients")
+		{
+			clients.POST("", handlers.CreateClient(srv.clientService))
+			clients.GET("", handlers.GetAllClients(srv.clientService))
+			clients.GET(
+				":id/projects",
+				handlers.GetProjectsByClient(srv.projectService),
+			)
+		}
 	}
 }
 
