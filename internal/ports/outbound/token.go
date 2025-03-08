@@ -1,0 +1,12 @@
+package outbound
+
+import (
+	"context"
+
+	"github.com/MAD-py/pandora-core/internal/domain/entities"
+)
+
+type TokenPort interface {
+	GenerateToken(ctx context.Context, subject string) (*entities.Token, error)
+	ValidateToken(ctx context.Context, tokenStr string) (string, error)
+}
