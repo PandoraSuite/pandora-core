@@ -42,3 +42,10 @@ func getDBDNS() (string, error) {
 
 	return "", errors.New("database DNS is required")
 }
+
+func getHTTPPort() string {
+	if value, exists := os.LookupEnv("PANDORA_HTTP_PORT"); exists {
+		return value
+	}
+	return "80"
+}

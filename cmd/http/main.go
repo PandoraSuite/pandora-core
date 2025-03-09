@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/MAD-py/pandora-core/cmd/http/config"
 	"github.com/MAD-py/pandora-core/internal/adapters/http"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
@@ -60,7 +62,7 @@ func main() {
 	)
 
 	srv := http.NewServer(
-		":8080",
+		fmt.Sprintf(":%s", config.HTTPPort()),
 		serviceUseCase,
 		authUseCase,
 		apiKeyUseCase,

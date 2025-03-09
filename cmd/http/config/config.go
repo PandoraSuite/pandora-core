@@ -8,14 +8,18 @@ import (
 type Config struct {
 	dir string
 
-	jwtScret string
-
 	dbDNS string
+
+	httpPort string
+
+	jwtSecret string
 }
+
+func (c *Config) HTTPPort() string { return c.httpPort }
 
 func (c *Config) DBDNS() string { return c.dbDNS }
 
-func (c *Config) JWTSecret() string { return c.jwtScret }
+func (c *Config) JWTSecret() string { return c.jwtSecret }
 
 func (c *Config) CredentialsFile() (string, error) {
 	dir := c.dir + "/adminPanel"
@@ -45,10 +49,9 @@ func (c *Config) createCredentials(credentialsFile string) (string, error) {
 	}
 
 	credentials := struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-
-		ForcePasswordReset bool `json:"force_password_reset"`
+		Username           string `json:"username"`
+		Password           string `json:"password"`
+		ForcePasswordReset bool   `json:"force_password_reset"`
 	}{
 		Username:           "Admin",
 		Password:           passwordHash,
@@ -80,7 +83,7 @@ func LoadConfig() (*Config, error) {
 		}
 	}
 
-	jwtScret, err := getJWTSecrt()
+	jwtSecret, err := getJWTSecrt()
 	if err != nil {
 		return nil, err
 	}
@@ -90,9 +93,12 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
+	httpPort := getHTTPPort()
+
 	return &Config{
-		dir:      dir,
-		dbDNS:    dbDNS,
-		jwtScret: jwtScret,
+		dir:       dir,
+		dbDNS:     dbDNS,
+		httpPort:  httpPort,
+		jwtSecret: jwtSecret,
 	}, nil
 }
