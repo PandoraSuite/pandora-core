@@ -42,3 +42,34 @@ func ValidateToken(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func ForcePasswordReset(authService inbound.AuthHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		username := c.GetString("username")
+		if username == "" {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "username not found in context"})
+			c.Abort()
+			return
+		}
+
+		ok, err := authService.IsPasswordResetRequired(
+			c.Request.Context(), username,
+		)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.Abort()
+			return
+		}
+
+		if ok {
+			c.JSON(
+				http.StatusForbidden,
+				gin.H{"error": "Password change required before continuing"},
+			)
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}

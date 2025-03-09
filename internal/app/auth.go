@@ -62,6 +62,16 @@ func (u *AuthUseCase) ValidateToken(
 	return u.tokenProvider.ValidateToken(ctx, req)
 }
 
+func (u *AuthUseCase) IsPasswordResetRequired(
+	ctx context.Context, username string,
+) (bool, error) {
+	credentials, err := u.credentialsRepo.FindCredentials(ctx, username)
+	if err != nil {
+		return false, err
+	}
+	return credentials.ForcePasswordReset, nil
+}
+
 func NewAuthUseCase(
 	tokenProvider outbound.TokenPort,
 	credentialsRepo outbound.CredentialsPort,

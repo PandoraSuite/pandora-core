@@ -62,7 +62,10 @@ func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		username := c.GetString("username")
 		if username == "" {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "username not found in context"})
+			c.JSON(
+				http.StatusInternalServerError,
+				gin.H{"error": "username not found in context"},
+			)
 			return
 		}
 

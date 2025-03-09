@@ -57,6 +57,7 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 			auth.POST("/change-password", handlers.ChangePassword(srv.authService))
 		}
 
+		protected.Use(middleware.ForcePasswordReset(srv.authService))
 		apiKeys := protected.Group("/api-keys")
 		{
 			apiKeys.POST("", handlers.CreateAPIKey(srv.apiKeyService))
@@ -113,7 +114,7 @@ func (srv *Server) Run() {
 	}
 
 	log.Printf("[INFO] API is running on port: %s\n", srv.addr)
-	log.Println("[INFO] Pandora Core is fully initialized and ready to accept requests.")
+	log.Printf("[INFO] Pandora Core is fully initialized and ready to accept requests.\n\n")
 	if err := srv.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("[ERROR] Failed to start server: %v", err)
 	}
