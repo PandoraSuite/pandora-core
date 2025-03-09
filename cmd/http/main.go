@@ -1,14 +1,21 @@
 package main
 
 import (
+	"github.com/MAD-py/pandora-core/cmd/http/config"
 	"github.com/MAD-py/pandora-core/internal/adapters/http"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/repository"
+	"github.com/MAD-py/pandora-core/internal/adapters/security"
 	"github.com/MAD-py/pandora-core/internal/app"
 )
 
 func main() {
-	db, err := persistence.NewPersistence("host=localhost port=5436 user=postgres password=postgres dbname=pandora sslmode=disable")
+	config, err := config.LoadConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	db, err := persistence.NewPersistence(config.DBDNS())
 	if err != nil {
 		panic(err)
 	}
@@ -17,6 +24,7 @@ func main() {
 	clientRepo := repository.NewClientRepository(db.Pool(), db.HandlerErr())
 	serviceRepo := repository.NewServiceRepository(db.Pool(), db.HandlerErr())
 	projectRepo := repository.NewProjectRepository(db.Pool(), db.HandlerErr())
+	jwtProvider := security.NewJWTProvider([]byte(config.JWTSecret()))
 	requestLogRepo := repository.NewRequestLogRepository(
 		db.Pool(), db.HandlerErr(),
 	)
@@ -30,6 +38,17 @@ func main() {
 		db.Pool(), db.HandlerErr(),
 	)
 
+	credentialsFile, err := config.CredentialsFile()
+	if err != nil {
+		panic(err)
+	}
+
+	credentialsRepo, err := security.NewCredentialsRepository(credentialsFile)
+	if err != nil {
+		panic(err)
+	}
+
+	authUseCase := app.NewAuthUseCase(jwtProvider, credentialsRepo)
 	clientUseCase := app.NewClientUseCase(clientRepo)
 	serviceUseCase := app.NewServiceUseCase(serviceRepo)
 	projectUseCase := app.NewProjectUseCase(projectRepo, projectServiceRepo)
@@ -43,6 +62,7 @@ func main() {
 	srv := http.NewServer(
 		":8080",
 		serviceUseCase,
+		authUseCase,
 		apiKeyUseCase,
 		clientUseCase,
 		projectUseCase,

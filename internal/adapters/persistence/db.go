@@ -3,7 +3,6 @@ package persistence
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
@@ -51,14 +50,14 @@ func (db *Persistence) HandlerErr() func(error) error {
 func NewPersistence(dns string) (*Persistence, error) {
 	config, err := pgxpool.ParseConfig(dns)
 	if err != nil {
-		return nil, fmt.Errorf("error when parsing DB configuration: %w", err)
+		return nil, err
 	}
 
 	config.HealthCheckPeriod = 1 * time.Minute
 
 	pool, err := pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {
-		return nil, fmt.Errorf("error when creating the connection pool: %w", err)
+		return nil, err
 	}
 
 	return &Persistence{pool: pool}, nil
