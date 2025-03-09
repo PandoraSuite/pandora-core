@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/MAD-py/pandora-core/cmd/http/config"
 	"github.com/MAD-py/pandora-core/internal/adapters/http"
@@ -12,12 +13,16 @@ import (
 )
 
 func main() {
-	config, err := config.LoadConfig()
+	log.Println("[INFO] Starting Pandora Core...")
+
+	AppConfig, err := config.LoadConfig()
 	if err != nil {
 		panic(err)
 	}
 
-	db, err := persistence.NewPersistence(config.DBDNS())
+	log.Println("[INFO] Configuration loaded successfully from environment variables and configuration files.")
+
+	db, err := persistence.NewPersistence(AppConfig.DBDNS())
 	if err != nil {
 		panic(err)
 	}
@@ -26,7 +31,7 @@ func main() {
 	clientRepo := repository.NewClientRepository(db.Pool(), db.HandlerErr())
 	serviceRepo := repository.NewServiceRepository(db.Pool(), db.HandlerErr())
 	projectRepo := repository.NewProjectRepository(db.Pool(), db.HandlerErr())
-	jwtProvider := security.NewJWTProvider([]byte(config.JWTSecret()))
+	jwtProvider := security.NewJWTProvider([]byte(AppConfig.JWTSecret()))
 	requestLogRepo := repository.NewRequestLogRepository(
 		db.Pool(), db.HandlerErr(),
 	)
@@ -40,7 +45,7 @@ func main() {
 		db.Pool(), db.HandlerErr(),
 	)
 
-	credentialsFile, err := config.CredentialsFile()
+	credentialsFile, err := AppConfig.CredentialsFile()
 	if err != nil {
 		panic(err)
 	}
@@ -62,7 +67,7 @@ func main() {
 	)
 
 	srv := http.NewServer(
-		fmt.Sprintf(":%s", config.HTTPPort()),
+		fmt.Sprintf(":%s", AppConfig.HTTPPort()),
 		serviceUseCase,
 		authUseCase,
 		apiKeyUseCase,

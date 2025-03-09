@@ -8,10 +8,9 @@ type Authenticate struct {
 }
 
 type AuthenticateResponse struct {
-	Token     string    `json:"token"`
-	Username  string    `json:"username"`
+	Token     string    `json:"access_token"`
 	TokenType string    `json:"token_type"`
-	ExpiresAt time.Time `json:"expires_at"`
+	ExpiresIn time.Time `json:"expires_in"`
 }
 
 type ChangePassword struct {

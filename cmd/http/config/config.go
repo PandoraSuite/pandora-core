@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 )
 
@@ -38,6 +39,7 @@ func (c *Config) CredentialsFile() (string, error) {
 }
 
 func (c *Config) createCredentials(credentialsFile string) (string, error) {
+	log.Println("[WARNING] No admin credentials were found, generating default credentials.")
 	password, err := generateRandom(12)
 	if err != nil {
 		return "", err
@@ -68,15 +70,16 @@ func (c *Config) createCredentials(credentialsFile string) (string, error) {
 		return "", err
 	}
 
+	log.Println("[INFO] Default admin credentials:")
+	log.Printf("        - Username: Admin\n")
+	log.Printf("        - Password: %s\n", password)
+	log.Println("[SECURITY] It is highly recommended to change the default password immediately.")
+
 	return credentialsFile, nil
 }
 
 func LoadConfig() (*Config, error) {
-	dir, err := getConfigDir()
-	if err != nil {
-		return nil, err
-	}
-
+	dir := getConfigDir()
 	if !existPath(dir) {
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			return nil, err

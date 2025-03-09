@@ -34,7 +34,6 @@ func (u *AuthUseCase) Authenticate(
 		return nil, err
 	}
 
-	token.Username = req.Username
 	return token, nil
 }
 

@@ -936,16 +936,13 @@ const docTemplate = `{
         "dto.AuthenticateResponse": {
             "type": "object",
             "properties": {
-                "expires_at": {
+                "access_token": {
                     "type": "string"
                 },
-                "token": {
+                "expires_in": {
                     "type": "string"
                 },
                 "token_type": {
-                    "type": "string"
-                },
-                "username": {
                     "type": "string"
                 }
             }
@@ -1172,7 +1169,6 @@ const docTemplate = `{
     },
     "securityDefinitions": {
         "OAuth2Password": {
-            "description": "Enter your username and password to generate a token.",
             "type": "oauth2",
             "flow": "password",
             "tokenUrl": "/api/v1/auth/login"

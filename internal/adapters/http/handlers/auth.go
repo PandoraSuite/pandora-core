@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
-	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 	"github.com/gin-gonic/gin"
@@ -77,7 +76,7 @@ func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 		err := authService.ChangePassword(c.Request.Context(), &req)
 		if err != nil {
 			switch err {
-			case errors.ErrPasswordTooShort, errors.ErrPasswordMismatch:
+			case domainErr.ErrPasswordTooShort, domainErr.ErrPasswordMismatch:
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			default:
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

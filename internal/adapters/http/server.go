@@ -28,9 +28,6 @@ import (
 
 // @securitydefinitions.oauth2.password OAuth2Password
 // @tokenUrl /api/v1/auth/login
-// @in header
-// @name Authorization
-// @description Enter your username and password to generate a token.
 
 type Server struct {
 	addr string
@@ -102,6 +99,8 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 }
 
 func (srv *Server) Run() {
+	gin.SetMode(gin.ReleaseMode)
+
 	router := gin.Default()
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -113,9 +112,10 @@ func (srv *Server) Run() {
 		Handler: router,
 	}
 
-	log.Printf("HTTP Server running on :%s\n", srv.addr)
+	log.Printf("[INFO] API is running on port: %s\n", srv.addr)
+	log.Println("[INFO] Pandora Core is fully initialized and ready to accept requests.")
 	if err := srv.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("HTTP Server error: %v\n", err)
+		log.Fatalf("[ERROR] Failed to start server: %v", err)
 	}
 }
 

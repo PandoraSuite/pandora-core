@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"log"
 	"os"
 )
 
@@ -10,36 +11,29 @@ func getJWTSecrt() (string, error) {
 		return value, nil
 	}
 
+	log.Println("[WARNING] No JWT secret was provided. Using a randomly generated secret.")
+
 	randomKey, err := generateRandom(64)
 	if err != nil {
-		return "", err
-	}
-
-	if err := os.Setenv("PANDORA_JWT_SECRET", randomKey); err != nil {
 		return "", err
 	}
 
 	return randomKey, nil
 }
 
-func getConfigDir() (string, error) {
+func getConfigDir() string {
 	if value, exists := os.LookupEnv("PANDORA_CONFIG_DIR"); exists {
-		return value, nil
+		return value
 	}
 
-	defaultDir := "/etc/pandora"
-	if err := os.Setenv("PANDORA_JWT_SECRET", defaultDir); err != nil {
-		return "", err
-	}
-
-	return defaultDir, nil
+	log.Println("[WARNING] No configuration directory was provided. Using default path: /etc/pandora")
+	return "/etc/pandora"
 }
 
 func getDBDNS() (string, error) {
 	if value, exists := os.LookupEnv("PANDORA_DB_DNS"); exists {
 		return value, nil
 	}
-
 	return "", errors.New("database DNS is required")
 }
 

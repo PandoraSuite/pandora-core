@@ -35,7 +35,7 @@ func (p *JWTProvider) GenerateToken(ctx context.Context, subject string) (*dto.A
 	return &dto.AuthenticateResponse{
 		Token:     tokenStr,
 		TokenType: "Bearer",
-		ExpiresAt: expTime,
+		ExpiresIn: expTime,
 	}, nil
 }
 
