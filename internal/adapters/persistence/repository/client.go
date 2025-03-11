@@ -43,6 +43,7 @@ func (r *ClientRepository) FindAll(
 			&client.ID,
 			&client.Type,
 			&client.Name,
+			&client.Email,
 			&client.CreatedAt,
 		)
 		if err != nil {

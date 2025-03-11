@@ -32,9 +32,10 @@ func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 
 		service, err := srvService.Create(c.Request.Context(), &req)
 		if err != nil {
-			if err == domainErr.ErrNameCannotBeEmpty {
+			switch err {
+			case domainErr.ErrNameCannotBeEmpty, domainErr.ErrUniqueViolation:
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			} else {
+			default:
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			}
 			return

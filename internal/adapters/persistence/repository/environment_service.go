@@ -23,7 +23,7 @@ func (r *EnvironmentServiceRepository) FindByProjectAndService(
 		WHERE environment_id in (
 			SELECT id
 			FROM environment
-			WHERE project_id = $1;
+			WHERE project_id = $1 AND status <> 'active' ;
 		) AND service_id = $2;
 	`
 

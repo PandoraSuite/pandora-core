@@ -7,14 +7,14 @@ import (
 )
 
 type ClientCreate struct {
-	Type  enums.ClientType `json:"type"`
+	Type  enums.ClientType `json:"type" enums:"developer,organization" swaggertype:"string"`
 	Name  string           `json:"name"`
 	Email string           `json:"email"`
 }
 
 type ClientResponse struct {
 	ID        int              `json:"id"`
-	Type      enums.ClientType `json:"type"`
+	Type      enums.ClientType `json:"type" enums:"developer,organization" swaggertype:"string"`
 	Name      string           `json:"name"`
 	Email     string           `json:"email"`
 	CreatedAt time.Time        `json:"created_at"`

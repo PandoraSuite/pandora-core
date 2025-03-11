@@ -82,7 +82,7 @@ func CreateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 // @Tags Clients
 // @Security OAuth2Password
 // @Produce json
-// @Param type query string false "Filter by client type (organization, developer)"
+// @Param type query string false "Filter by client type (developer, organization)"
 // @Success 200 {array} dto.ClientResponse
 // @Failure 400 {object} map[string]string "Invalid query parameter"
 // @Failure 500 {object} map[string]string "Internal server error"

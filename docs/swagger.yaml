@@ -21,7 +21,10 @@ definitions:
       last_used:
         type: string
       status:
-        $ref: '#/definitions/enums.APIKeyStatus'
+        enum:
+        - active
+        - deactivated
+        type: string
     type: object
   dto.AssignServiceToEnvironment:
     properties:
@@ -37,7 +40,13 @@ definitions:
       max_request:
         type: integer
       reset_frequency:
-        $ref: '#/definitions/enums.ProjectServiceResetFrequency'
+        enum:
+        - "null"
+        - daily
+        - weekly
+        - biweekly
+        - monthly
+        type: string
     type: object
   dto.AuthenticateResponse:
     properties:
@@ -62,7 +71,10 @@ definitions:
       name:
         type: string
       type:
-        $ref: '#/definitions/enums.ClientType'
+        enum:
+        - developer
+        - organization
+        type: string
     type: object
   dto.ClientResponse:
     properties:
@@ -75,7 +87,10 @@ definitions:
       name:
         type: string
       type:
-        $ref: '#/definitions/enums.ClientType'
+        enum:
+        - developer
+        - organization
+        type: string
     type: object
   dto.EnvironmentCreate:
     properties:
@@ -95,7 +110,10 @@ definitions:
       project_id:
         type: integer
       status:
-        $ref: '#/definitions/enums.EnvironmentStatus'
+        enum:
+        - active
+        - deactivated
+        type: string
     type: object
   dto.ProjectCreate:
     properties:
@@ -104,7 +122,10 @@ definitions:
       name:
         type: string
       status:
-        $ref: '#/definitions/enums.ProjectStatus'
+        enum:
+        - in_production
+        - in_development
+        type: string
     type: object
   dto.ProjectResponse:
     properties:
@@ -117,7 +138,11 @@ definitions:
       name:
         type: string
       status:
-        $ref: '#/definitions/enums.ProjectStatus'
+        enum:
+        - in_production
+        - in_development
+        - deactivated
+        type: string
     type: object
   dto.ServiceCreate:
     properties:
@@ -135,70 +160,13 @@ definitions:
       name:
         type: string
       status:
-        $ref: '#/definitions/enums.ServiceStatus'
+        enum:
+        - active
+        - deactivated
+        type: string
       version:
         type: string
     type: object
-  enums.APIKeyStatus:
-    enum:
-    - 0
-    - 1
-    type: integer
-    x-enum-varnames:
-    - APIKeyActive
-    - APIKeyDeactivated
-  enums.ClientType:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ClientTypeNull
-    - ClientDeveloper
-    - ClientOrganization
-  enums.EnvironmentStatus:
-    enum:
-    - 0
-    - 1
-    type: integer
-    x-enum-varnames:
-    - EnvironmentActive
-    - EnvironmentDeactivated
-  enums.ProjectServiceResetFrequency:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    type: integer
-    x-enum-varnames:
-    - ProjectServiceNull
-    - ProjectServiceDaily
-    - ProjectServiceWeekly
-    - ProjectServiceBiweekly
-    - ProjectServiceMonthly
-  enums.ProjectStatus:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ProjectInProduction
-    - ProjectInDevelopment
-    - ProjectDeactivated
-  enums.ServiceStatus:
-    enum:
-    - 0
-    - 1
-    - 2
-    type: integer
-    x-enum-varnames:
-    - ServiceActive
-    - ServiceDeactivated
-    - ServiceDeprecated
 info:
   contact:
     email: support@example.com
@@ -336,7 +304,7 @@ paths:
     get:
       description: Fetches a list of clients, optionally filtered by client type
       parameters:
-      - description: Filter by client type (organization, developer)
+      - description: Filter by client type (developer, organization)
         in: query
         name: type
         type: string

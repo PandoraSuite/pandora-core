@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS project (
     name TEXT NOT NULL,
     status TEXT CHECK (status IN ('in_production', 'in_development', 'deactivated')) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE
+    FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE,
     CONSTRAINT unique_name_client_id UNIQUE(name, client_id)
 );
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS environment (
     name TEXT NOT NULL,
     status TEXT CHECK (status IN ('active', 'deactivated')) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE
+    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
     CONSTRAINT unique_name_project_id UNIQUE(name, project_id)
 );
 

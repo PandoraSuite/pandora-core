@@ -29,6 +29,7 @@ func (u *ClientUseCase) GetClients(
 			ID:        client.ID,
 			Type:      client.Type,
 			Name:      client.Name,
+			Email:     client.Email,
 			CreatedAt: client.CreatedAt,
 		}
 	}
@@ -43,7 +44,7 @@ func (u *ClientUseCase) Create(
 		return nil, domainErr.ErrNameCannotBeEmpty
 	}
 
-	if utils.ValidateEmail(req.Email) {
+	if !utils.ValidateEmail(req.Email) {
 		return nil, domainErr.ErrInvalidEmailFormat
 	}
 

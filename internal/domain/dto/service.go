@@ -14,7 +14,7 @@ type ServiceCreate struct {
 type ServiceResponse struct {
 	ID        int                 `json:"id"`
 	Name      string              `json:"name"`
-	Status    enums.ServiceStatus `json:"status"`
+	Status    enums.ServiceStatus `json:"status" enums:"active,deactivated" swaggertype:"string"`
 	Version   string              `json:"version"`
 	CreatedAt time.Time           `json:"created_at"`
 }

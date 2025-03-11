@@ -18,6 +18,6 @@ type RequestLogResponse struct {
 	ServiceID       int                             `json:"service_id"`
 	RequestTime     time.Time                       `json:"request_time"`
 	EnvironmentID   int                             `json:"environment_id"`
-	ExecutionStatus enums.RequestLogExecutionStatus `json:"execution_status"`
+	ExecutionStatus enums.RequestLogExecutionStatus `json:"execution_status" enums:"success,failed,pending,unauthorized,server error" swaggertype:"string"`
 	CreatedAt       time.Time                       `json:"created_at"`
 }

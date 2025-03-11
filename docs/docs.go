@@ -228,7 +228,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Filter by client type (organization, developer)",
+                        "description": "Filter by client type (developer, organization)",
                         "name": "type",
                         "in": "query"
                     }
@@ -904,7 +904,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/enums.APIKeyStatus"
+                    "type": "string",
+                    "enum": [
+                        "active",
+                        "deactivated"
+                    ]
                 }
             }
         },
@@ -929,7 +933,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "reset_frequency": {
-                    "$ref": "#/definitions/enums.ProjectServiceResetFrequency"
+                    "type": "string",
+                    "enum": [
+                        "null",
+                        "daily",
+                        "weekly",
+                        "biweekly",
+                        "monthly"
+                    ]
                 }
             }
         },
@@ -968,7 +979,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/enums.ClientType"
+                    "type": "string",
+                    "enum": [
+                        "developer",
+                        "organization"
+                    ]
                 }
             }
         },
@@ -988,7 +1003,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/enums.ClientType"
+                    "type": "string",
+                    "enum": [
+                        "developer",
+                        "organization"
+                    ]
                 }
             }
         },
@@ -1019,7 +1038,11 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "status": {
-                    "$ref": "#/definitions/enums.EnvironmentStatus"
+                    "type": "string",
+                    "enum": [
+                        "active",
+                        "deactivated"
+                    ]
                 }
             }
         },
@@ -1033,7 +1056,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/enums.ProjectStatus"
+                    "type": "string",
+                    "enum": [
+                        "in_production",
+                        "in_development"
+                    ]
                 }
             }
         },
@@ -1053,7 +1080,12 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/enums.ProjectStatus"
+                    "type": "string",
+                    "enum": [
+                        "in_production",
+                        "in_development",
+                        "deactivated"
+                    ]
                 }
             }
         },
@@ -1081,90 +1113,16 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/enums.ServiceStatus"
+                    "type": "string",
+                    "enum": [
+                        "active",
+                        "deactivated"
+                    ]
                 },
                 "version": {
                     "type": "string"
                 }
             }
-        },
-        "enums.APIKeyStatus": {
-            "type": "integer",
-            "enum": [
-                0,
-                1
-            ],
-            "x-enum-varnames": [
-                "APIKeyActive",
-                "APIKeyDeactivated"
-            ]
-        },
-        "enums.ClientType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ClientTypeNull",
-                "ClientDeveloper",
-                "ClientOrganization"
-            ]
-        },
-        "enums.EnvironmentStatus": {
-            "type": "integer",
-            "enum": [
-                0,
-                1
-            ],
-            "x-enum-varnames": [
-                "EnvironmentActive",
-                "EnvironmentDeactivated"
-            ]
-        },
-        "enums.ProjectServiceResetFrequency": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4
-            ],
-            "x-enum-varnames": [
-                "ProjectServiceNull",
-                "ProjectServiceDaily",
-                "ProjectServiceWeekly",
-                "ProjectServiceBiweekly",
-                "ProjectServiceMonthly"
-            ]
-        },
-        "enums.ProjectStatus": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ProjectInProduction",
-                "ProjectInDevelopment",
-                "ProjectDeactivated"
-            ]
-        },
-        "enums.ServiceStatus": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ServiceActive",
-                "ServiceDeactivated",
-                "ServiceDeprecated"
-            ]
         }
     },
     "securityDefinitions": {

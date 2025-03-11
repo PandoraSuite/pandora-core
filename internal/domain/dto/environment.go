@@ -20,7 +20,7 @@ type EnvironmentCreate struct {
 type EnvironmentResponse struct {
 	ID        int                     `json:"id"`
 	Name      string                  `json:"name"`
-	Status    enums.EnvironmentStatus `json:"status"`
+	Status    enums.EnvironmentStatus `json:"status" enums:"active,deactivated" swaggertype:"string"`
 	ProjectID int                     `json:"project_id"`
 	CreatedAt time.Time               `json:"created_at"`
 }

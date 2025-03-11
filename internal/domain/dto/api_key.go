@@ -27,7 +27,7 @@ type APIKeyValidateResponse struct {
 type APIKeyResponse struct {
 	ID            int                `json:"id"`
 	Key           string             `json:"key"`
-	Status        enums.APIKeyStatus `json:"status"`
+	Status        enums.APIKeyStatus `json:"status" enums:"active,deactivated" swaggertype:"string"`
 	LastUsed      time.Time          `json:"last_used"`
 	ExpiresAt     time.Time          `json:"expires_at"`
 	EnvironmentID int                `json:"environment_id"`
