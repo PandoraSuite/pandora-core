@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -25,6 +26,14 @@ type RequestLog struct {
 	ExecutionStatus pgtype.Text
 
 	CreatedAt pgtype.Timestamptz
+}
+
+func (rl *RequestLog) EntityID() int {
+	return utils.PgtypeInt4ToInt(rl.ID)
+}
+
+func (rl *RequestLog) EntityCreatedAt() time.Time {
+	return utils.PgtypeTimestamptzToTime(rl.CreatedAt)
 }
 
 func (rl *RequestLog) ValidateModel() error {
@@ -63,8 +72,8 @@ func (rl *RequestLog) ToEntity() (*entities.RequestLog, error) {
 	}, nil
 }
 
-func RequestLogFromEntity(requestLog *entities.RequestLog) *RequestLog {
-	return &RequestLog{
+func RequestLogFromEntity(requestLog *entities.RequestLog) RequestLog {
+	return RequestLog{
 		ID:              utils.IntToPgtypeInt4(requestLog.ID),
 		APIKey:          utils.StringToPgtypeText(requestLog.APIKey),
 		ServiceID:       utils.IntToPgtypeInt4(requestLog.ServiceID),

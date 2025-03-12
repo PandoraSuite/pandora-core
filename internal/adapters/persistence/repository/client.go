@@ -60,15 +60,15 @@ func (r *ClientRepository) FindAll(
 	return models.ClientsToEntity(clients)
 }
 
-func (r *ClientRepository) Save(
-	ctx context.Context, client *entities.Client,
-) (*entities.Client, error) {
+func (r *ClientRepository) Save(ctx context.Context, client *entities.Client) error {
 	model := models.ClientFromEntity(client)
-	if err := r.save(ctx, model); err != nil {
-		return nil, err
+	if err := r.save(ctx, &model); err != nil {
+		return err
 	}
 
-	return model.ToEntity()
+	client.ID = model.EntityID()
+	client.CreatedAt = model.EntityCreatedAt()
+	return nil
 }
 
 func (r *ClientRepository) save(ctx context.Context, client *models.Client) error {

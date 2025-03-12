@@ -73,13 +73,15 @@ func (r *EnvironmentRepository) FindByProject(
 
 func (r *EnvironmentRepository) Save(
 	ctx context.Context, environment *entities.Environment,
-) (*entities.Environment, error) {
+) error {
 	model := models.EnvironmentFromEntity(environment)
-	if err := r.save(ctx, model); err != nil {
-		return nil, err
+	if err := r.save(ctx, &model); err != nil {
+		return err
 	}
 
-	return model.ToEntity()
+	environment.ID = model.EntityID()
+	environment.CreatedAt = model.EntityCreatedAt()
+	return nil
 }
 
 func (r *EnvironmentRepository) save(

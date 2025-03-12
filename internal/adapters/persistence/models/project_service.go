@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -24,6 +25,10 @@ type ProjectService struct {
 	ResetFrequency pgtype.Text
 
 	CreatedAt pgtype.Timestamptz
+}
+
+func (ps *ProjectService) EntityCreatedAt() time.Time {
+	return utils.PgtypeTimestamptzToTime(ps.CreatedAt)
 }
 
 func (ps *ProjectService) ValidateModel() error {
@@ -63,8 +68,8 @@ func (ps *ProjectService) ToEntity() (*entities.ProjectService, error) {
 
 func ProjectServiceFromEntity(
 	projectService *entities.ProjectService,
-) *ProjectService {
-	return &ProjectService{
+) ProjectService {
+	return ProjectService{
 		ProjectID:      utils.IntToPgtypeInt4(projectService.ProjectID),
 		ServiceID:      utils.IntToPgtypeInt4(projectService.ServiceID),
 		MaxRequest:     utils.IntToPgtypeInt4(projectService.MaxRequest),

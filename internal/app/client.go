@@ -3,11 +3,9 @@ package app
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/app/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -40,23 +38,13 @@ func (u *ClientUseCase) GetClients(
 func (u *ClientUseCase) Create(
 	ctx context.Context, req *dto.ClientCreate,
 ) (*dto.ClientResponse, error) {
-	if req.Name == "" {
-		return nil, domainErr.ErrNameCannotBeEmpty
+	client := entities.Client{
+		Type:  req.Type,
+		Name:  req.Name,
+		Email: req.Email,
 	}
 
-	if !utils.ValidateEmail(req.Email) {
-		return nil, domainErr.ErrInvalidEmailFormat
-	}
-
-	client, err := u.clientRepo.Save(
-		ctx,
-		&entities.Client{
-			Type:  req.Type,
-			Name:  req.Name,
-			Email: req.Email,
-		},
-	)
-	if err != nil {
+	if err := u.clientRepo.Save(ctx, &client); err != nil {
 		return nil, err
 	}
 

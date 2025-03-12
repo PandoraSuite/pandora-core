@@ -51,14 +51,16 @@ func (r *ProjectRepository) FindByClient(
 }
 
 func (r *ProjectRepository) Save(
-	ctx context.Context, prioject *entities.Project,
-) (*entities.Project, error) {
-	model := models.ProjectFromEntity(prioject)
-	if err := r.save(ctx, model); err != nil {
-		return nil, err
+	ctx context.Context, project *entities.Project,
+) error {
+	model := models.ProjectFromEntity(project)
+	if err := r.save(ctx, &model); err != nil {
+		return err
 	}
 
-	return model.ToEntity()
+	project.ID = model.EntityID()
+	project.CreatedAt = model.EntityCreatedAt()
+	return nil
 }
 
 func (r *ProjectRepository) save(

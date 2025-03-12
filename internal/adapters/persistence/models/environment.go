@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -21,6 +22,14 @@ type Environment struct {
 	ProjectID pgtype.Int4
 
 	CreatedAt pgtype.Timestamptz
+}
+
+func (e *Environment) EntityID() int {
+	return utils.PgtypeInt4ToInt(e.ID)
+}
+
+func (e *Environment) EntityCreatedAt() time.Time {
+	return utils.PgtypeTimestamptzToTime(e.CreatedAt)
 }
 
 func (e *Environment) ValidateModel() error {
@@ -68,8 +77,8 @@ func EnvironmentToEntity(array []*Environment) ([]*entities.Environment, error) 
 	return result, nil
 }
 
-func EnvironmentFromEntity(environment *entities.Environment) *Environment {
-	return &Environment{
+func EnvironmentFromEntity(environment *entities.Environment) Environment {
+	return Environment{
 		ID:        utils.IntToPgtypeInt4(environment.ID),
 		Name:      utils.StringToPgtypeText(environment.Name),
 		Status:    utils.StringToPgtypeText(environment.Status.String()),

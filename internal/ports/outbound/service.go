@@ -7,7 +7,7 @@ import (
 )
 
 type ServicePort interface {
-	Save(ctx context.Context, service *entities.Service) (*entities.Service, error)
+	Save(ctx context.Context, service *entities.Service) error
 	FindAll(ctx context.Context) ([]*entities.Service, error)
 	FindActiveServices(ctx context.Context) ([]*entities.Service, error)
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -21,6 +22,14 @@ type Service struct {
 	Version pgtype.Text
 
 	CreatedAt pgtype.Timestamptz
+}
+
+func (s *Service) EntityID() int {
+	return utils.PgtypeInt4ToInt(s.ID)
+}
+
+func (s *Service) EntityCreatedAt() time.Time {
+	return utils.PgtypeTimestamptzToTime(s.CreatedAt)
 }
 
 func (s *Service) ValidateModel() error {
@@ -66,8 +75,8 @@ func ServicesToEntity(array []*Service) ([]*entities.Service, error) {
 	return result, nil
 }
 
-func ServiceFromEntity(service *entities.Service) *Service {
-	return &Service{
+func ServiceFromEntity(service *entities.Service) Service {
+	return Service{
 		ID:        utils.IntToPgtypeInt4(service.ID),
 		Name:      utils.StringToPgtypeText(service.Name),
 		Status:    utils.StringToPgtypeText(service.Status.String()),

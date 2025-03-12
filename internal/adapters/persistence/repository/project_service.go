@@ -41,13 +41,14 @@ func (r *ProjectServiceRepository) FindByProjectAndService(
 
 func (r *ProjectServiceRepository) Save(
 	ctx context.Context, projectService *entities.ProjectService,
-) (*entities.ProjectService, error) {
+) error {
 	model := models.ProjectServiceFromEntity(projectService)
-	if err := r.save(ctx, model); err != nil {
-		return nil, err
+	if err := r.save(ctx, &model); err != nil {
+		return err
 	}
 
-	return model.ToEntity()
+	projectService.CreatedAt = model.EntityCreatedAt()
+	return nil
 }
 
 func (r *ProjectServiceRepository) save(

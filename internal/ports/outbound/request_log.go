@@ -7,5 +7,5 @@ import (
 )
 
 type RequestLogPort interface {
-	Save(ctx context.Context, requestLog *entities.RequestLog) (*entities.RequestLog, error)
+	Save(ctx context.Context, requestLog *entities.RequestLog) error
 }

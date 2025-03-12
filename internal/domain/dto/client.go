@@ -7,9 +7,9 @@ import (
 )
 
 type ClientCreate struct {
-	Type  enums.ClientType `json:"type" enums:"developer,organization" swaggertype:"string"`
-	Name  string           `json:"name"`
-	Email string           `json:"email"`
+	Type  enums.ClientType `json:"type" binding:"required" enums:"developer,organization" swaggertype:"string"`
+	Name  string           `json:"name" binding:"required"`
+	Email string           `json:"email" binding:"required,email"`
 }
 
 type ClientResponse struct {

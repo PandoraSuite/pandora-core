@@ -81,13 +81,15 @@ func (r *ServiceRepository) find(
 
 func (r *ServiceRepository) Save(
 	ctx context.Context, service *entities.Service,
-) (*entities.Service, error) {
+) error {
 	model := models.ServiceFromEntity(service)
-	if err := r.save(ctx, model); err != nil {
-		return nil, err
+	if err := r.save(ctx, &model); err != nil {
+		return err
 	}
 
-	return model.ToEntity()
+	service.ID = model.EntityID()
+	service.CreatedAt = model.EntityCreatedAt()
+	return nil
 }
 
 func (r *ServiceRepository) save(

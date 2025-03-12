@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -14,6 +16,10 @@ type EnvironmentService struct {
 	AvailableRequest pgtype.Int4
 
 	CreatedAt pgtype.Timestamptz
+}
+
+func (es *EnvironmentService) EntityCreatedAt() time.Time {
+	return utils.PgtypeTimestamptzToTime(es.CreatedAt)
 }
 
 func (es *EnvironmentService) ToEntity() *entities.EnvironmentService {
@@ -38,8 +44,8 @@ func EnvironmentServicesToEntity(
 
 func EnvironmentServiceFromEntity(
 	environmentService *entities.EnvironmentService,
-) *EnvironmentService {
-	return &EnvironmentService{
+) EnvironmentService {
+	return EnvironmentService{
 		ServiceID:        utils.IntToPgtypeInt4(environmentService.ServiceID),
 		EnvironmentID:    utils.IntToPgtypeInt4(environmentService.EnvironmentID),
 		MaxRequest:       utils.IntToPgtypeInt4(environmentService.MaxRequest),

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -21,6 +22,14 @@ type Project struct {
 	ClientID pgtype.Int4
 
 	CreatedAt pgtype.Timestamptz
+}
+
+func (p *Project) EntityID() int {
+	return utils.PgtypeInt4ToInt(p.ID)
+}
+
+func (p *Project) EntityCreatedAt() time.Time {
+	return utils.PgtypeTimestamptzToTime(p.CreatedAt)
 }
 
 func (p *Project) ValidateModel() error {
@@ -66,8 +75,8 @@ func ProjectsToEntity(array []*Project) ([]*entities.Project, error) {
 	return result, nil
 }
 
-func ProjectFromEntity(project *entities.Project) *Project {
-	return &Project{
+func ProjectFromEntity(project *entities.Project) Project {
+	return Project{
 		ID:        utils.IntToPgtypeInt4(project.ID),
 		Name:      utils.StringToPgtypeText(project.Name),
 		Status:    utils.StringToPgtypeText(project.Status.String()),

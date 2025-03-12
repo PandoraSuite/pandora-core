@@ -93,13 +93,14 @@ func (r *EnvironmentServiceRepository) DecrementAvailableRequest(
 
 func (r *EnvironmentServiceRepository) Save(
 	ctx context.Context, environmentService *entities.EnvironmentService,
-) (*entities.EnvironmentService, error) {
+) error {
 	model := models.EnvironmentServiceFromEntity(environmentService)
-	if err := r.save(ctx, model); err != nil {
-		return nil, err
+	if err := r.save(ctx, &model); err != nil {
+		return err
 	}
 
-	return model.ToEntity(), nil
+	environmentService.CreatedAt = model.EntityCreatedAt()
+	return nil
 }
 
 func (r *EnvironmentServiceRepository) save(

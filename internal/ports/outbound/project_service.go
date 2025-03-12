@@ -7,7 +7,7 @@ import (
 )
 
 type ProjectServicePort interface {
-	Save(ctx context.Context, projectService *entities.ProjectService) (*entities.ProjectService, error)
+	Save(ctx context.Context, projectService *entities.ProjectService) error
 }
 
 type ProjectServiceFindPort interface {

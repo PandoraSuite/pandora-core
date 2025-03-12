@@ -7,7 +7,7 @@ import (
 )
 
 type EnvironmentServicePort interface {
-	Save(ctx context.Context, environmentService *entities.EnvironmentService) (*entities.EnvironmentService, error)
+	Save(ctx context.Context, environmentService *entities.EnvironmentService) error
 	FindByProjectAndService(ctx context.Context, projectID, serviceID int) ([]*entities.EnvironmentService, error)
 }
 

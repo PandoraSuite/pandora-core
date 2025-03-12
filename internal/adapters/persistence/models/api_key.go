@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -23,6 +24,14 @@ type APIKey struct {
 	EnvironmentID pgtype.Int4
 
 	CreatedAt pgtype.Timestamptz
+}
+
+func (k *APIKey) EntityID() int {
+	return utils.PgtypeInt4ToInt(k.ID)
+}
+
+func (k *APIKey) EntityCreatedAt() time.Time {
+	return utils.PgtypeTimestamptzToTime(k.CreatedAt)
 }
 
 func (k *APIKey) ValidateModel() error {
@@ -70,8 +79,8 @@ func APIKeysToEntity(array []*APIKey) ([]*entities.APIKey, error) {
 	return result, nil
 }
 
-func APIKeyFromEntity(apiKey *entities.APIKey) *APIKey {
-	return &APIKey{
+func APIKeyFromEntity(apiKey *entities.APIKey) APIKey {
+	return APIKey{
 		ID:            utils.IntToPgtypeInt4(apiKey.ID),
 		Key:           utils.StringToPgtypeText(apiKey.Key),
 		Status:        utils.StringToPgtypeText(apiKey.Status.String()),
