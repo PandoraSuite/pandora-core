@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
+	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -16,14 +17,14 @@ type ClientRepository struct {
 }
 
 func (r *ClientRepository) FindAll(
-	ctx context.Context, clientType enums.ClientType,
+	ctx context.Context, filter *dto.ClientFilter,
 ) ([]*entities.Client, error) {
 	query := "SELECT * FROM client"
 
 	var args []any
-	if clientType != enums.ClientTypeNull {
+	if filter.Type != enums.ClientTypeNull {
 		query += " WHERE type = $1;"
-		args = append(args, clientType)
+		args = append(args, filter.Type)
 	} else {
 		query += ";"
 	}

@@ -5,7 +5,6 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
-	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -13,10 +12,10 @@ type ClientUseCase struct {
 	clientRepo outbound.ClientPort
 }
 
-func (u *ClientUseCase) GetClients(
-	ctx context.Context, clientType enums.ClientType,
+func (u *ClientUseCase) GetAll(
+	ctx context.Context, req *dto.ClientFilter,
 ) ([]*dto.ClientResponse, error) {
-	clients, err := u.clientRepo.FindAll(ctx, clientType)
+	clients, err := u.clientRepo.FindAll(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -42,6 +41,10 @@ func (u *ClientUseCase) Create(
 		Type:  req.Type,
 		Name:  req.Name,
 		Email: req.Email,
+	}
+
+	if err := client.Validate(); err != nil {
+		return nil, err
 	}
 
 	if err := u.clientRepo.Save(ctx, &client); err != nil {

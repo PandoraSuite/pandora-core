@@ -6,6 +6,10 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
+type ClientFilter struct {
+	Type enums.ClientType `json:"type,omitempty" enums:"developer,organization" swaggertype:"string"`
+}
+
 type ClientCreate struct {
 	Type  enums.ClientType `json:"type" binding:"required" enums:"developer,organization" swaggertype:"string"`
 	Name  string           `json:"name" binding:"required"`
