@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type ProjectService struct {
@@ -15,6 +16,22 @@ type ProjectService struct {
 	ResetFrequency enums.ProjectServiceResetFrequency
 
 	CreatedAt time.Time
+}
+
+func (p *ProjectService) Validate() error {
+	if p.ProjectID <= 0 {
+		return errors.ErrInvalidProjectID
+	}
+
+	if p.ServiceID <= 0 {
+		return errors.ErrInvalidServiceID
+	}
+
+	if p.MaxRequest < 0 {
+		return errors.ErrInvalidMaxRequest
+	}
+
+	return nil
 }
 
 func (p *ProjectService) CalculateNextReset() {

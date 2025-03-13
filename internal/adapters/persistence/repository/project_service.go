@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -37,6 +39,51 @@ func (r *ProjectServiceRepository) FindByProjectAndService(
 	}
 
 	return projectService.ToEntity()
+}
+
+func (r *ProjectServiceRepository) BulkSave(
+	ctx context.Context, projectServices []*entities.ProjectService,
+) error {
+	if len(projectServices) == 0 {
+		return nil
+	}
+
+	values := []string{}
+	args := []any{}
+	argIndex := 1
+
+	for _, projectService := range projectServices {
+		values = append(
+			values,
+			fmt.Sprintf(
+				"($%d, $%d, $%d, $%d, $%d)",
+				argIndex,
+				argIndex+1,
+				argIndex+2,
+				argIndex+3,
+				argIndex+4,
+			),
+		)
+		args = append(
+			args,
+			projectService.ProjectID,
+			projectService.ServiceID,
+			projectService.MaxRequest,
+			projectService.ResetFrequency,
+			projectService.NextReset,
+		)
+		argIndex += 5
+	}
+
+	query := fmt.Sprintf(`
+			INSERT INTO project_service (project_id, service_id, max_request, reset_frequency, next_reset)
+			VALUES %s
+		`,
+		strings.Join(values, ", "),
+	)
+
+	_, err := r.pool.Exec(ctx, query, args...)
+	return err
 }
 
 func (r *ProjectServiceRepository) Save(

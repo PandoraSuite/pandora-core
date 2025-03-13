@@ -2,10 +2,10 @@ package app
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -25,15 +25,14 @@ func (u *ProjectUseCase) AssignService(
 	}
 
 	projectService.CalculateNextReset()
-	_, err := u.projectServiceRepo.Save(ctx, projectService)
-	if err != nil {
+	if err := u.projectServiceRepo.Save(ctx, projectService); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (u *ProjectUseCase) GetProjectsByClient(
+func (u *ProjectUseCase) GetByClient(
 	ctx context.Context, clientID int,
 ) ([]*dto.ProjectResponse, error) {
 	projects, err := u.projectRepo.FindByClient(ctx, clientID)
@@ -58,29 +57,77 @@ func (u *ProjectUseCase) GetProjectsByClient(
 func (u *ProjectUseCase) Create(
 	ctx context.Context, req *dto.ProjectCreate,
 ) (*dto.ProjectResponse, error) {
-	if req.Name == "" {
-		return nil, domainErr.ErrNameCannotBeEmpty
+	project := entities.Project{
+		Name:     req.Name,
+		Status:   req.Status,
+		ClientID: req.ClientID,
 	}
 
-	client, err := u.projectRepo.Save(
-		ctx,
-		&entities.Project{
-			Name:     req.Name,
-			Status:   req.Status,
-			ClientID: req.ClientID,
-		},
-	)
-	if err != nil {
+	if err := project.Validate(); err != nil {
 		return nil, err
 	}
 
-	return &dto.ProjectResponse{
-		ID:        client.ID,
-		Name:      client.Name,
-		Status:    client.Status,
-		ClientID:  client.ClientID,
-		CreatedAt: client.CreatedAt,
-	}, nil
+	if err := u.projectRepo.Save(ctx, &project); err != nil {
+		return nil, err
+	}
+
+	resp := &dto.ProjectResponse{
+		ID:        project.ID,
+		Name:      project.Name,
+		Status:    project.Status,
+		ClientID:  project.ClientID,
+		CreatedAt: project.CreatedAt,
+	}
+
+	var servicesErrors []error
+	var projectServices []*entities.ProjectService
+	for _, s := range req.Services {
+		projectService := &entities.ProjectService{
+			ProjectID:      project.ID,
+			ServiceID:      s.ID,
+			MaxRequest:     s.MaxRequest,
+			ResetFrequency: s.ResetFrequency,
+		}
+
+		if err := projectService.Validate(); err != nil {
+			servicesErrors = append(servicesErrors, err)
+			continue
+		}
+
+		projectService.CalculateNextReset()
+		projectServices = append(projectServices, projectService)
+	}
+
+	var errResp error
+	if len(servicesErrors) > 0 {
+		errResp = fmt.Errorf("invalid service assignments: %v", servicesErrors)
+	}
+
+	if len(projectServices) > 0 {
+		err := u.projectServiceRepo.BulkSave(ctx, projectServices)
+		if err != nil {
+			if errResp != nil {
+				err = fmt.Errorf("%w and %w", errResp, err)
+			}
+			return resp, err
+		}
+
+		projectServiceResp := make(
+			[]*dto.ProjectServiceAssignmentResponse,
+			len(projectServices),
+		)
+		for i, projectService := range projectServices {
+			projectServiceResp[i] = &dto.ProjectServiceAssignmentResponse{
+				ID:             projectService.ServiceID,
+				NextReset:      projectService.NextReset,
+				MaxRequest:     projectService.MaxRequest,
+				ResetFrequency: projectService.ResetFrequency,
+			}
+		}
+		resp.Services = projectServiceResp
+	}
+
+	return resp, errResp
 }
 
 func NewProjectUseCase(

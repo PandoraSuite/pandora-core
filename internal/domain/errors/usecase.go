@@ -17,10 +17,16 @@ var (
 
 	ErrProjectServiceNotFound = errors.New("project service not found")
 
+	ErrProjectStatusCannotBeNull = errors.New("project status cannot be null")
+
 	ErrEnvironmentServiceNotFound = errors.New("environment service not found")
 
 	ErrNameCannotBeEmpty                     = errors.New("name cannot be empty")
 	ErrInvalidEmailFormat                    = errors.New("invalid email format")
 	ErrNoAvailableRequests                   = errors.New("no available requests")
 	ErrMaxRequestExceededForServiceInProyect = errors.New("max request exceeded for service in proyect")
+
+	ErrInvalidProjectID  = errors.New("project ID must be greater than 0")
+	ErrInvalidServiceID  = errors.New("service ID must be greater than 0")
+	ErrInvalidMaxRequest = errors.New("max request must be greater than or equal to 0")
 )

@@ -8,13 +8,16 @@ import (
 type ProjectStatus int
 
 const (
-	ProjectInProduction ProjectStatus = iota
+	ProjectStatusNull ProjectStatus = iota
+	ProjectInProduction
 	ProjectInDevelopment
 	ProjectDeactivated
 )
 
 func (s ProjectStatus) String() string {
 	switch s {
+	case ProjectStatusNull:
+		return ""
 	case ProjectInProduction:
 		return "in_production"
 	case ProjectInDevelopment:
@@ -45,6 +48,8 @@ func (s *ProjectStatus) MarshalJSON() ([]byte, error) {
 
 func ParseProjectStatus(s string) (ProjectStatus, error) {
 	switch s {
+	case "":
+		return ProjectStatusNull, nil
 	case "in_production":
 		return ProjectInProduction, nil
 	case "in_development":

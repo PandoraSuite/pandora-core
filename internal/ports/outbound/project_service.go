@@ -8,6 +8,7 @@ import (
 
 type ProjectServicePort interface {
 	Save(ctx context.Context, projectService *entities.ProjectService) error
+	BulkSave(ctx context.Context, projectServices []*entities.ProjectService) error
 }
 
 type ProjectServiceFindPort interface {

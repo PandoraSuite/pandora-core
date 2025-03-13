@@ -29,7 +29,7 @@ func GetProjectsByClient(projectService inbound.ProjectHTTPPort) gin.HandlerFunc
 			return
 		}
 
-		projects, err := projectService.GetProjectsByClient(c.Request.Context(), clientID)
+		projects, err := projectService.GetByClient(c.Request.Context(), clientID)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
