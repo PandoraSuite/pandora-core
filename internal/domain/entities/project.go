@@ -17,7 +17,7 @@ type Project struct {
 	CreatedAt time.Time
 }
 
-func (p *Project) Validate() error {
+func (p *Project) Validate() *errors.Error {
 	if p.Status == enums.ProjectStatusNull {
 		return errors.ErrProjectStatusCannotBeNull
 	}

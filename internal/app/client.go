@@ -5,6 +5,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -14,7 +15,7 @@ type ClientUseCase struct {
 
 func (u *ClientUseCase) GetAll(
 	ctx context.Context, req *dto.ClientFilter,
-) ([]*dto.ClientResponse, error) {
+) ([]*dto.ClientResponse, *errors.Error) {
 	clients, err := u.clientRepo.FindAll(ctx, req)
 	if err != nil {
 		return nil, err
@@ -36,7 +37,7 @@ func (u *ClientUseCase) GetAll(
 
 func (u *ClientUseCase) Create(
 	ctx context.Context, req *dto.ClientCreate,
-) (*dto.ClientResponse, error) {
+) (*dto.ClientResponse, *errors.Error) {
 	client := entities.Client{
 		Type:  req.Type,
 		Name:  req.Name,

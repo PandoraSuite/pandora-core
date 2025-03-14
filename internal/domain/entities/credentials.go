@@ -3,7 +3,7 @@ package entities
 import (
 	"golang.org/x/crypto/bcrypt"
 
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type Credentials struct {
@@ -12,23 +12,23 @@ type Credentials struct {
 	ForcePasswordReset bool
 }
 
-func (c *Credentials) CalculatePasswordHash(password string) error {
+func (c *Credentials) CalculatePasswordHash(password string) *errors.Error {
 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
-		return domainErr.ErrPasswordProcessingFailed
+		return errors.ErrPasswordProcessingFailed
 	}
 
 	c.HashedPassword = string(hashed)
 	return nil
 }
 
-func (c *Credentials) VerifyPassword(password string) error {
+func (c *Credentials) VerifyPassword(password string) *errors.Error {
 	err := bcrypt.CompareHashAndPassword(
 		[]byte(c.HashedPassword), []byte(password),
 	)
 
 	if err != nil {
-		return domainErr.ErrInvalidCredentials
+		return errors.ErrInvalidCredentials
 	}
 	return nil
 }

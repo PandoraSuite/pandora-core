@@ -4,9 +4,10 @@ import (
 	"context"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type TokenPort interface {
-	GenerateToken(ctx context.Context, subject string) (*dto.AuthenticateResponse, error)
-	ValidateToken(ctx context.Context, token *dto.TokenRequest) (string, error)
+	GenerateToken(ctx context.Context, subject string) (*dto.AuthenticateResponse, *errors.Error)
+	ValidateToken(ctx context.Context, token *dto.TokenRequest) (string, *errors.Error)
 }

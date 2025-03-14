@@ -2,12 +2,11 @@ package app
 
 import (
 	"context"
-	"errors"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -22,8 +21,8 @@ func (u *EnvironmentUseCase) AssignService(
 ) error {
 	environment, err := u.environmentRepo.FindByID(ctx, req.EnvironmentID)
 	if err != nil {
-		if errors.Is(err, domainErr.ErrNotFound) {
-			err = domainErr.ErrEnvironmentNotFound
+		if err == errors.ErrNotFound {
+			err = errors.ErrEnvironmentNotFound
 		}
 		return err
 	}
@@ -32,8 +31,8 @@ func (u *EnvironmentUseCase) AssignService(
 		ctx, environment.ProjectID, req.ServiceID,
 	)
 	if err != nil {
-		if errors.Is(err, domainErr.ErrNotFound) {
-			err = domainErr.ErrProjectServiceNotFound
+		if err == errors.ErrNotFound {
+			err = errors.ErrProjectServiceNotFound
 		}
 		return err
 	}
@@ -43,8 +42,8 @@ func (u *EnvironmentUseCase) AssignService(
 			ctx, environment.ProjectID, req.ServiceID,
 		)
 		if err != nil {
-			if errors.Is(err, domainErr.ErrNotFound) {
-				err = domainErr.ErrEnvironmentServiceNotFound
+			if err == errors.ErrNotFound {
+				err = errors.ErrEnvironmentServiceNotFound
 			}
 			return err
 		}
@@ -55,7 +54,7 @@ func (u *EnvironmentUseCase) AssignService(
 		}
 
 		if req.MaxRequest+totalMaxRequest > projectService.MaxRequest {
-			return domainErr.ErrMaxRequestExceededForServiceInProyect
+			return errors.ErrMaxRequestExceededForServiceInProyect
 		}
 	}
 
@@ -100,7 +99,7 @@ func (u *EnvironmentUseCase) Create(
 	ctx context.Context, req *dto.EnvironmentCreate,
 ) (*dto.EnvironmentResponse, error) {
 	if req.Name == "" {
-		return nil, errors.New("name of the environment cannot be empty")
+		return nil, errors.ErrNameCannotBeEmpty
 	}
 
 	client, err := u.environmentRepo.Save(

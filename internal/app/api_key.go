@@ -2,13 +2,12 @@ package app
 
 import (
 	"context"
-	"errors"
 	"strconv"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -26,38 +25,38 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 
 	apiKey, err := u.apiKeyRepo.FindByKey(ctx, req.Key)
 	if err != nil {
-		if errors.Is(err, domainErr.ErrNotFound) {
-			err = domainErr.ErrAPIKeyNotFound
+		if err == errors.ErrNotFound {
+			err = errors.ErrAPIKeyNotFound
 		}
 		return resp, err
 	}
 
 	if apiKey.IsExpired() {
-		return resp, domainErr.ErrAPIKeyExpired
+		return resp, errors.ErrAPIKeyExpired
 	}
 
 	service, err := u.serviceRepo.FindByNameAndVersion(
 		ctx, req.ServiceName, req.ServiceVersion,
 	)
 	if err != nil {
-		if errors.Is(err, domainErr.ErrNotFound) {
-			err = domainErr.ErrServiceNotFound
+		if err == errors.ErrNotFound {
+			err = errors.ErrServiceNotFound
 		}
 		return resp, err
 	}
 
 	if service.Status == enums.ServiceDeprecated {
-		return resp, domainErr.ErrServiceDeprecated
+		return resp, errors.ErrServiceDeprecated
 	}
 	if service.Status == enums.ServiceDeactivated {
-		return resp, domainErr.ErrServiceDeactivated
+		return resp, errors.ErrServiceDeactivated
 	}
 
 	environmentService, err := u.environmentService.DecrementAvailableRequest(
 		ctx, apiKey.EnvironmentID, service.ID,
 	)
 	if err != nil {
-		return resp, domainErr.ErrNoAvailableRequests
+		return resp, errors.ErrNoAvailableRequests
 	}
 
 	requestLog, err := u.requestLog.Save(
@@ -124,7 +123,7 @@ func (u *APIKeyUseCase) Create(
 	for {
 		err := apiKey.GenerateKey()
 		if err != nil {
-			return nil, domainErr.ErrAPIKeyGenerationFailed
+			return nil, err
 		}
 
 		exists, err := u.apiKeyRepo.Exists(ctx, apiKey.Key)

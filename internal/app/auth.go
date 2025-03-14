@@ -5,7 +5,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -16,11 +16,11 @@ type AuthUseCase struct {
 
 func (u *AuthUseCase) Authenticate(
 	ctx context.Context, req *dto.Authenticate,
-) (*dto.AuthenticateResponse, error) {
+) (*dto.AuthenticateResponse, *errors.Error) {
 	credentials, err := u.credentialsRepo.FindCredentials(ctx, req.Username)
 	if err != nil {
-		if err == domainErr.ErrCredentialsNotFound {
-			return nil, domainErr.ErrInvalidCredentials
+		if err == errors.ErrCredentialsNotFound {
+			return nil, errors.ErrInvalidCredentials
 		}
 		return nil, err
 	}
@@ -39,13 +39,13 @@ func (u *AuthUseCase) Authenticate(
 
 func (u *AuthUseCase) ChangePassword(
 	ctx context.Context, req *dto.ChangePassword,
-) error {
+) *errors.Error {
 	if len(req.NewPassword) < 12 {
-		return domainErr.ErrPasswordTooShort
+		return errors.ErrPasswordTooShort
 	}
 
 	if req.NewPassword != req.ConfirmPassword {
-		return domainErr.ErrPasswordMismatch
+		return errors.ErrPasswordMismatch
 	}
 
 	credentials := &entities.Credentials{Username: req.Username}
@@ -58,13 +58,13 @@ func (u *AuthUseCase) ChangePassword(
 
 func (u *AuthUseCase) ValidateToken(
 	ctx context.Context, req *dto.TokenRequest,
-) (string, error) {
+) (string, *errors.Error) {
 	return u.tokenProvider.ValidateToken(ctx, req)
 }
 
 func (u *AuthUseCase) IsPasswordResetRequired(
 	ctx context.Context, username string,
-) (bool, error) {
+) (bool, *errors.Error) {
 	credentials, err := u.credentialsRepo.FindCredentials(ctx, username)
 	if err != nil {
 		return false, err

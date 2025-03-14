@@ -1,32 +1,30 @@
 package errors
 
-import "errors"
-
 var (
-	ErrAPIKeyExpired          = errors.New("api key expired")
-	ErrAPIKeyNotFound         = errors.New("api key not found")
-	ErrAPIKeyGenerationFailed = errors.New("api key generation failed")
+	ErrAPIKeyExpired          = NewError(CodeValidationError, "api key expired")
+	ErrAPIKeyNotFound         = NewError(CodeNotFound, "api key not found")
+	ErrAPIKeyGenerationFailed = NewError(CodeInternalError, "api key generation failed")
 
-	ErrClientTypeCannotBeNull = errors.New("client type cannot be null")
+	ErrClientTypeCannotBeNull = NewError(CodeValidationError, "client type cannot be null")
 
-	ErrServiceNotFound    = errors.New("service not found")
-	ErrServiceDeprecated  = errors.New("service is deprecated")
-	ErrServiceDeactivated = errors.New("service is deactivated")
+	ErrServiceNotFound    = NewError(CodeNotFound, "service not found")
+	ErrServiceDeprecated  = NewError(CodeValidationError, "service is deprecated")
+	ErrServiceDeactivated = NewError(CodeValidationError, "service is deactivated")
 
-	ErrEnvironmentNotFound = errors.New("environment not found")
+	ErrEnvironmentNotFound = NewError(CodeNotFound, "environment not found")
 
-	ErrProjectServiceNotFound = errors.New("project service not found")
+	ErrProjectServiceNotFound = NewError(CodeNotFound, "project service not found")
 
-	ErrProjectStatusCannotBeNull = errors.New("project status cannot be null")
+	ErrProjectStatusCannotBeNull = NewError(CodeValidationError, "project status cannot be null")
 
-	ErrEnvironmentServiceNotFound = errors.New("environment service not found")
+	ErrEnvironmentServiceNotFound = NewError(CodeNotFound, "environment service not found")
 
-	ErrNameCannotBeEmpty                     = errors.New("name cannot be empty")
-	ErrInvalidEmailFormat                    = errors.New("invalid email format")
-	ErrNoAvailableRequests                   = errors.New("no available requests")
-	ErrMaxRequestExceededForServiceInProyect = errors.New("max request exceeded for service in proyect")
+	ErrNameCannotBeEmpty                     = NewError(CodeValidationError, "name cannot be empty")
+	ErrInvalidEmailFormat                    = NewError(CodeValidationError, "invalid email format")
+	ErrNoAvailableRequests                   = NewError(CodeValidationError, "no available requests")
+	ErrMaxRequestExceededForServiceInProyect = NewError(CodeValidationError, "max request exceeded for service in proyect")
 
-	ErrInvalidProjectID  = errors.New("project ID must be greater than 0")
-	ErrInvalidServiceID  = errors.New("service ID must be greater than 0")
-	ErrInvalidMaxRequest = errors.New("max request must be greater than or equal to 0")
+	ErrInvalidProjectID  = NewError(CodeValidationError, "project ID must be greater than 0")
+	ErrInvalidServiceID  = NewError(CodeValidationError, "service ID must be greater than 0")
+	ErrInvalidMaxRequest = NewError(CodeValidationError, "max request must be greater than or equal to 0")
 )

@@ -18,7 +18,7 @@ type ProjectService struct {
 	CreatedAt time.Time
 }
 
-func (p *ProjectService) Validate() error {
+func (p *ProjectService) Validate() *errors.Error {
 	if p.ProjectID <= 0 {
 		return errors.ErrInvalidProjectID
 	}

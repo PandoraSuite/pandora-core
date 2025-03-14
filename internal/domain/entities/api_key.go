@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type APIKey struct {
@@ -20,11 +21,11 @@ type APIKey struct {
 	CreatedAt time.Time
 }
 
-func (a *APIKey) GenerateKey() error {
+func (a *APIKey) GenerateKey() *errors.Error {
 	bytes := make([]byte, 32)
 	_, err := rand.Read(bytes)
 	if err != nil {
-		return err
+		return errors.ErrAPIKeyGenerationFailed
 	}
 
 	a.Key = base64.RawURLEncoding.EncodeToString(bytes)

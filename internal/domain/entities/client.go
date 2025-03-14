@@ -18,7 +18,7 @@ type Client struct {
 	CreatedAt time.Time
 }
 
-func (c *Client) Validate() error {
+func (c *Client) Validate() *errors.Error {
 	if c.Type == enums.ClientTypeNull {
 		return errors.ErrClientTypeCannotBeNull
 	}

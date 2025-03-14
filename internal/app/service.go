@@ -6,7 +6,7 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -14,7 +14,7 @@ type ServiceUseCase struct {
 	serviceRepo outbound.ServicePort
 }
 
-func (u *ServiceUseCase) GetServices(ctx context.Context) ([]*dto.ServiceResponse, error) {
+func (u *ServiceUseCase) GetServices(ctx context.Context) ([]*dto.ServiceResponse, *errors.Error) {
 	services, err := u.serviceRepo.FindAll(ctx)
 	if err != nil {
 		return nil, err
@@ -34,7 +34,7 @@ func (u *ServiceUseCase) GetServices(ctx context.Context) ([]*dto.ServiceRespons
 	return serviceResponses, nil
 }
 
-func (u *ServiceUseCase) GetActiveServices(ctx context.Context) ([]*dto.ServiceResponse, error) {
+func (u *ServiceUseCase) GetActiveServices(ctx context.Context) ([]*dto.ServiceResponse, *errors.Error) {
 	services, err := u.serviceRepo.FindActiveServices(ctx)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (u *ServiceUseCase) GetActiveServices(ctx context.Context) ([]*dto.ServiceR
 
 func (u *ServiceUseCase) Create(
 	ctx context.Context, req *dto.ServiceCreate,
-) (*dto.ServiceResponse, error) {
+) (*dto.ServiceResponse, *errors.Error) {
 	if req.Name == "" {
 		return nil, domainErr.ErrNameCannotBeEmpty
 	}

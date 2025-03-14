@@ -1,18 +1,16 @@
 package errors
 
-import "errors"
-
 var (
-	ErrInvalidToken       = errors.New("invalid authentication token")
-	ErrInvalidTokenData   = errors.New("failed to validate authentication data")
-	ErrInvalidTokenType   = errors.New("invalid token type, expected 'Bearer'")
-	ErrTokenSigningFailed = errors.New("failed to sign authentication token")
+	ErrInvalidToken       = NewError(CodeUnauthorized, "invalid authentication token")
+	ErrInvalidTokenData   = NewError(CodeUnauthorized, "failed to validate authentication data")
+	ErrInvalidTokenType   = NewError(CodeUnauthorized, "invalid token type, expected 'Bearer'")
+	ErrTokenSigningFailed = NewError(CodeInternalError, "failed to sign authentication token")
 
-	ErrInvalidCredentials  = errors.New("invalid username or password")
-	ErrCredentialsNotFound = errors.New("credentials not found")
+	ErrInvalidCredentials  = NewError(CodeUnauthorized, "invalid username or password")
+	ErrCredentialsNotFound = NewError(CodeUnauthorized, "credentials not found")
 
-	ErrPasswordMismatch         = errors.New("password and confirmation do not match")
-	ErrPasswordTooShort         = errors.New("password must be at least 12 characters long")
-	ErrPasswordChangeFailed     = errors.New("failed to change password")
-	ErrPasswordProcessingFailed = errors.New("unable to process the password")
+	ErrPasswordMismatch         = NewError(CodeValidationError, "password and confirmation do not match")
+	ErrPasswordTooShort         = NewError(CodeValidationError, "password must be at least 12 characters long")
+	ErrPasswordChangeFailed     = NewError(CodeInternalError, "failed to change password")
+	ErrPasswordProcessingFailed = NewError(CodeInternalError, "unable to process the password")
 )

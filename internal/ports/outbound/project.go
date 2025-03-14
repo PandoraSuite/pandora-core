@@ -4,9 +4,10 @@ import (
 	"context"
 
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type ProjectPort interface {
-	Save(ctx context.Context, project *entities.Project) error
-	FindByClient(ctx context.Context, clientID int) ([]*entities.Project, error)
+	Save(ctx context.Context, project *entities.Project) *errors.Error
+	FindByClient(ctx context.Context, clientID int) ([]*entities.Project, *errors.Error)
 }

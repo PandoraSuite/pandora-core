@@ -2,10 +2,10 @@ package app
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
 
@@ -16,7 +16,7 @@ type ProjectUseCase struct {
 
 func (u *ProjectUseCase) AssignService(
 	ctx context.Context, req *dto.AssignServiceToProject,
-) error {
+) *errors.Error {
 	projectService := &entities.ProjectService{
 		ProjectID:      req.ProjectID,
 		ServiceID:      req.ServiceID,
@@ -34,7 +34,7 @@ func (u *ProjectUseCase) AssignService(
 
 func (u *ProjectUseCase) GetByClient(
 	ctx context.Context, clientID int,
-) ([]*dto.ProjectResponse, error) {
+) ([]*dto.ProjectResponse, *errors.Error) {
 	projects, err := u.projectRepo.FindByClient(ctx, clientID)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (u *ProjectUseCase) GetByClient(
 
 func (u *ProjectUseCase) Create(
 	ctx context.Context, req *dto.ProjectCreate,
-) (*dto.ProjectResponse, error) {
+) (*dto.ProjectResponse, *errors.Error) {
 	project := entities.Project{
 		Name:     req.Name,
 		Status:   req.Status,
@@ -79,7 +79,7 @@ func (u *ProjectUseCase) Create(
 		CreatedAt: project.CreatedAt,
 	}
 
-	var servicesErrors []error
+	var servicesErrors []string
 	var projectServices []*entities.ProjectService
 	for _, s := range req.Services {
 		projectService := &entities.ProjectService{
@@ -90,7 +90,7 @@ func (u *ProjectUseCase) Create(
 		}
 
 		if err := projectService.Validate(); err != nil {
-			servicesErrors = append(servicesErrors, err)
+			servicesErrors = append(servicesErrors, err.Error())
 			continue
 		}
 
@@ -98,16 +98,24 @@ func (u *ProjectUseCase) Create(
 		projectServices = append(projectServices, projectService)
 	}
 
-	var errResp error
+	var errResp *errors.Error
 	if len(servicesErrors) > 0 {
-		errResp = fmt.Errorf("invalid service assignments: %v", servicesErrors)
+		errResp = errors.NewError(
+			errors.CodeValidationError,
+			"Invalid service assignments",
+			servicesErrors...,
+		)
 	}
 
 	if len(projectServices) > 0 {
 		err := u.projectServiceRepo.BulkSave(ctx, projectServices)
 		if err != nil {
 			if errResp != nil {
-				err = fmt.Errorf("%w and %w", errResp, err)
+				err = errors.NewError(
+					err.Code,
+					"Failed to save project services",
+					append(servicesErrors, err.Message)...,
+				)
 			}
 			return resp, err
 		}
