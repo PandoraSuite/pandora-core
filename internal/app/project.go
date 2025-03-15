@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -22,6 +23,10 @@ func (u *ProjectUseCase) AssignService(
 		ServiceID:      req.ServiceID,
 		MaxRequest:     req.MaxRequest,
 		ResetFrequency: req.ResetFrequency,
+	}
+
+	if err := projectService.Validate(); err != nil {
+		return err
 	}
 
 	projectService.CalculateNextReset()
@@ -81,7 +86,7 @@ func (u *ProjectUseCase) Create(
 
 	var servicesErrors []string
 	var projectServices []*entities.ProjectService
-	for _, s := range req.Services {
+	for i, s := range req.Services {
 		projectService := &entities.ProjectService{
 			ProjectID:      project.ID,
 			ServiceID:      s.ID,
@@ -90,7 +95,10 @@ func (u *ProjectUseCase) Create(
 		}
 
 		if err := projectService.Validate(); err != nil {
-			servicesErrors = append(servicesErrors, err.Error())
+			servicesErrors = append(
+				servicesErrors,
+				fmt.Sprintf("Error validating service %v: %s", i, err.Message),
+			)
 			continue
 		}
 

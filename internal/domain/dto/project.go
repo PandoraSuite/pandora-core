@@ -10,13 +10,13 @@ type AssignServiceToProject struct {
 	ProjectID      int                                `json:"-" swaggerignore:"true"`
 	ServiceID      int                                `json:"-" swaggerignore:"true"`
 	MaxRequest     int                                `json:"max_request"`
-	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency" enums:"null,daily,weekly,biweekly,monthly" swaggertype:"string"`
+	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency" enums:",daily,weekly,biweekly,monthly" swaggertype:"string"`
 }
 
 type ProjectServiceAssignment struct {
 	ID             int                                `json:"id" binding:"required"`
 	MaxRequest     int                                `json:"max_request" binding:"required"`
-	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency" binding:"required" enums:"null,daily,weekly,biweekly,monthly" swaggertype:"string"`
+	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency" binding:"required" enums:",daily,weekly,biweekly,monthly" swaggertype:"string"`
 }
 
 type ProjectCreate struct {
