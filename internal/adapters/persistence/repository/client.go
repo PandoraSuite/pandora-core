@@ -3,22 +3,22 @@ package repository
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ClientRepository struct {
 	pool *pgxpool.Pool
 
-	handlerErr func(error) error
+	handlerErr func(error) *errors.Error
 }
 
 func (r *ClientRepository) FindAll(
 	ctx context.Context, filter *dto.ClientFilter,
-) ([]*entities.Client, error) {
+) ([]*entities.Client, *errors.Error) {
 	query := "SELECT * FROM client"
 
 	var args []any
@@ -36,9 +36,9 @@ func (r *ClientRepository) FindAll(
 
 	defer rows.Close()
 
-	var clients []*models.Client
+	var clients []*entities.Client
 	for rows.Next() {
-		client := new(models.Client)
+		client := new(entities.Client)
 
 		err = rows.Scan(
 			&client.ID,
@@ -58,25 +58,12 @@ func (r *ClientRepository) FindAll(
 		return nil, r.handlerErr(err)
 	}
 
-	return models.ClientsToEntity(clients)
+	return clients, nil
 }
 
-func (r *ClientRepository) Save(ctx context.Context, client *entities.Client) error {
-	model := models.ClientFromEntity(client)
-	if err := r.save(ctx, &model); err != nil {
-		return err
-	}
-
-	client.ID = model.EntityID()
-	client.CreatedAt = model.EntityCreatedAt()
-	return nil
-}
-
-func (r *ClientRepository) save(ctx context.Context, client *models.Client) error {
-	if err := client.ValidateModel(); err != nil {
-		return err
-	}
-
+func (r *ClientRepository) Save(
+	ctx context.Context, client *entities.Client,
+) *errors.Error {
 	query := `
 		INSERT INTO client (type, name, email)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
@@ -90,15 +77,11 @@ func (r *ClientRepository) save(ctx context.Context, client *models.Client) erro
 		client.Email,
 	).Scan(&client.ID, &client.CreatedAt)
 
-	if err != nil {
-		return r.handlerErr(err)
-	}
-
-	return nil
+	return r.handlerErr(err)
 }
 
 func NewClientRepository(
-	pool *pgxpool.Pool, handlerErr func(error) error,
+	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,
 ) *ClientRepository {
 	return &ClientRepository{
 		pool:       pool,

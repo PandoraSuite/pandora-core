@@ -3,20 +3,20 @@ package repository
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type APIKeyRepository struct {
 	pool *pgxpool.Pool
 
-	handlerErr func(error) error
+	handlerErr func(error) *errors.Error
 }
 
 func (r *APIKeyRepository) FindByEnvironment(
 	ctx context.Context, environmentID int,
-) ([]*entities.APIKey, error) {
+) ([]*entities.APIKey, *errors.Error) {
 	query := "SELECT * FROM api_key WHERE environment_id = $1;"
 	rows, err := r.pool.Query(ctx, query, environmentID)
 	if err != nil {
@@ -25,9 +25,9 @@ func (r *APIKeyRepository) FindByEnvironment(
 
 	defer rows.Close()
 
-	var apiKeys []*models.APIKey
+	var apiKeys []*entities.APIKey
 	for rows.Next() {
-		apiKey := new(models.APIKey)
+		apiKey := new(entities.APIKey)
 
 		err = rows.Scan(
 			&apiKey.ID,
@@ -49,15 +49,15 @@ func (r *APIKeyRepository) FindByEnvironment(
 		return nil, r.handlerErr(err)
 	}
 
-	return models.APIKeysToEntity(apiKeys)
+	return apiKeys, nil
 }
 
 func (r *APIKeyRepository) FindByKey(
 	ctx context.Context, key string,
-) (*entities.APIKey, error) {
+) (*entities.APIKey, *errors.Error) {
 	query := "SELECT * FROM api_key WHERE key = $1;"
 
-	var apiKey models.APIKey
+	apiKey := new(entities.APIKey)
 	err := r.pool.QueryRow(ctx, query, key).Scan(
 		&apiKey.ID,
 		&apiKey.EnvironmentID,
@@ -71,10 +71,10 @@ func (r *APIKeyRepository) FindByKey(
 		return nil, r.handlerErr(err)
 	}
 
-	return apiKey.ToEntity()
+	return apiKey, nil
 }
 
-func (r *APIKeyRepository) Exists(ctx context.Context, key string) (bool, error) {
+func (r *APIKeyRepository) Exists(ctx context.Context, key string) (bool, *errors.Error) {
 	query := "SELECT EXISTS (SELECT 1 FROM api_key WHERE key = $1;);"
 
 	var exists bool
@@ -88,22 +88,7 @@ func (r *APIKeyRepository) Exists(ctx context.Context, key string) (bool, error)
 
 func (r *APIKeyRepository) Save(
 	ctx context.Context, apiKey *entities.APIKey,
-) error {
-	model := models.APIKeyFromEntity(apiKey)
-	if err := r.save(ctx, &model); err != nil {
-		return err
-	}
-
-	apiKey.ID = model.EntityID()
-	apiKey.CreatedAt = model.EntityCreatedAt()
-	return nil
-}
-
-func (r *APIKeyRepository) save(ctx context.Context, apiKey *models.APIKey) error {
-	if err := apiKey.ValidateModel(); err != nil {
-		return err
-	}
-
+) *errors.Error {
 	query := `
 		INSERT INTO api_key (environment_id, key, expires_at, last_used, status)
 		VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at;
@@ -119,15 +104,11 @@ func (r *APIKeyRepository) save(ctx context.Context, apiKey *models.APIKey) erro
 		apiKey.Status,
 	).Scan(&apiKey.ID, &apiKey.CreatedAt)
 
-	if err != nil {
-		return r.handlerErr(err)
-	}
-
-	return nil
+	return r.handlerErr(err)
 }
 
 func NewAPIKeyRepository(
-	pool *pgxpool.Pool, handlerErr func(error) error,
+	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,
 ) *APIKeyRepository {
 	return &APIKeyRepository{
 		pool:       pool,

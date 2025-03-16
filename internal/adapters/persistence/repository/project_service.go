@@ -5,27 +5,27 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ProjectServiceRepository struct {
 	pool *pgxpool.Pool
 
-	handlerErr func(error) error
+	handlerErr func(error) *errors.Error
 }
 
 func (r *ProjectServiceRepository) FindByProjectAndService(
 	ctx context.Context, projectID, serviceID int,
-) (*entities.ProjectService, error) {
+) (*entities.ProjectService, *errors.Error) {
 	query := `
 		SELECT *
 		FROM project_service
 		WHERE project_id = $1 AND service_id = $2;
 	`
 
-	var projectService models.ProjectService
+	projectService := new(entities.ProjectService)
 	err := r.pool.QueryRow(ctx, query, projectID, serviceID).Scan(
 		&projectService.ProjectID,
 		&projectService.ServiceID,
@@ -38,12 +38,12 @@ func (r *ProjectServiceRepository) FindByProjectAndService(
 		return nil, r.handlerErr(err)
 	}
 
-	return projectService.ToEntity()
+	return projectService, nil
 }
 
 func (r *ProjectServiceRepository) BulkSave(
 	ctx context.Context, projectServices []*entities.ProjectService,
-) error {
+) *errors.Error {
 	if len(projectServices) == 0 {
 		return nil
 	}
@@ -83,28 +83,12 @@ func (r *ProjectServiceRepository) BulkSave(
 	)
 
 	_, err := r.pool.Exec(ctx, query, args...)
-	return err
+	return r.handlerErr(err)
 }
 
 func (r *ProjectServiceRepository) Save(
 	ctx context.Context, projectService *entities.ProjectService,
-) error {
-	model := models.ProjectServiceFromEntity(projectService)
-	if err := r.save(ctx, &model); err != nil {
-		return err
-	}
-
-	projectService.CreatedAt = model.EntityCreatedAt()
-	return nil
-}
-
-func (r *ProjectServiceRepository) save(
-	ctx context.Context, projectService *models.ProjectService,
-) error {
-	if err := projectService.ValidateModel(); err != nil {
-		return err
-	}
-
+) *errors.Error {
 	query := `
 		INSERT INTO project_service (project_id, service_id, max_request, reset_frequency, next_reset)
 		VALUES ($1, $2, $3, $4, $5) RETURNING created_at;
@@ -120,15 +104,11 @@ func (r *ProjectServiceRepository) save(
 		projectService.NextReset,
 	).Scan(&projectService.CreatedAt)
 
-	if err != nil {
-		return r.handlerErr(err)
-	}
-
-	return nil
+	return r.handlerErr(err)
 }
 
 func NewProjectServiceRepository(
-	pool *pgxpool.Pool, handlerErr func(error) error,
+	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,
 ) *ProjectServiceRepository {
 	return &ProjectServiceRepository{
 		pool:       pool,

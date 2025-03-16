@@ -3,27 +3,27 @@ package repository
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type EnvironmentServiceRepository struct {
 	pool *pgxpool.Pool
 
-	handlerErr func(error) error
+	handlerErr func(error) *errors.Error
 }
 
 func (r *EnvironmentServiceRepository) FindByProjectAndService(
 	ctx context.Context, projectID, serviceID int,
-) ([]*entities.EnvironmentService, error) {
+) ([]*entities.EnvironmentService, *errors.Error) {
 	query := `
 		SELECT *
 		FROM environment_service
 		WHERE environment_id in (
 			SELECT id
 			FROM environment
-			WHERE project_id = $1 AND status <> 'active' ;
+			WHERE project_id = $1 AND status = 'active' ;
 		) AND service_id = $2;
 	`
 
@@ -34,9 +34,9 @@ func (r *EnvironmentServiceRepository) FindByProjectAndService(
 
 	defer rows.Close()
 
-	var environmentServices []*models.EnvironmentService
+	var environmentServices []*entities.EnvironmentService
 	for rows.Next() {
-		environmentService := new(models.EnvironmentService)
+		environmentService := new(entities.EnvironmentService)
 
 		err = rows.Scan(
 			&environmentService.EnvironmentID,
@@ -56,12 +56,12 @@ func (r *EnvironmentServiceRepository) FindByProjectAndService(
 		return nil, r.handlerErr(err)
 	}
 
-	return models.EnvironmentServicesToEntity(environmentServices)
+	return environmentServices, nil
 }
 
 func (r *EnvironmentServiceRepository) DecrementAvailableRequest(
 	ctx context.Context, environmentID, serviceID int,
-) (*entities.EnvironmentService, error) {
+) (*entities.EnvironmentService, *errors.Error) {
 	query := `
 		UPDATE environment_service
 		SET available_request =
@@ -75,7 +75,7 @@ func (r *EnvironmentServiceRepository) DecrementAvailableRequest(
 		RETURNING *;
 	`
 
-	environmentService := new(models.EnvironmentService)
+	environmentService := new(entities.EnvironmentService)
 	err := r.pool.QueryRow(ctx, query, environmentID, serviceID).
 		Scan(
 			&environmentService.EnvironmentID,
@@ -88,24 +88,12 @@ func (r *EnvironmentServiceRepository) DecrementAvailableRequest(
 		return nil, r.handlerErr(err)
 	}
 
-	return environmentService.ToEntity(), nil
+	return environmentService, nil
 }
 
 func (r *EnvironmentServiceRepository) Save(
 	ctx context.Context, environmentService *entities.EnvironmentService,
-) error {
-	model := models.EnvironmentServiceFromEntity(environmentService)
-	if err := r.save(ctx, &model); err != nil {
-		return err
-	}
-
-	environmentService.CreatedAt = model.EntityCreatedAt()
-	return nil
-}
-
-func (r *EnvironmentServiceRepository) save(
-	ctx context.Context, environmentService *models.EnvironmentService,
-) error {
+) *errors.Error {
 	query := `
 		INSERT INTO environment_service (environment_id, service_id, max_request, available_request)
 		VALUES ($1, $2, $3, $4) RETURNING created_at;
@@ -120,15 +108,11 @@ func (r *EnvironmentServiceRepository) save(
 		environmentService.AvailableRequest,
 	).Scan(&environmentService.CreatedAt)
 
-	if err != nil {
-		return r.handlerErr(err)
-	}
-
-	return nil
+	return r.handlerErr(err)
 }
 
 func NewEnvironmentServiceRepository(
-	pool *pgxpool.Pool, handlerErr func(error) error,
+	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,
 ) *EnvironmentServiceRepository {
 	return &EnvironmentServiceRepository{
 		pool:       pool,

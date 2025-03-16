@@ -3,20 +3,20 @@ package repository
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ProjectRepository struct {
 	pool *pgxpool.Pool
 
-	handlerErr func(error) error
+	handlerErr func(error) *errors.Error
 }
 
 func (r *ProjectRepository) FindByClient(
 	ctx context.Context, clientID int,
-) ([]*entities.Project, error) {
+) ([]*entities.Project, *errors.Error) {
 	query := "SELECT * FROM project WHERE client_id = $1;"
 	rows, err := r.pool.Query(ctx, query, clientID)
 	if err != nil {
@@ -25,9 +25,9 @@ func (r *ProjectRepository) FindByClient(
 
 	defer rows.Close()
 
-	var projects []*models.Project
+	var projects []*entities.Project
 	for rows.Next() {
-		project := new(models.Project)
+		project := new(entities.Project)
 
 		err = rows.Scan(
 			&project.ID,
@@ -47,29 +47,12 @@ func (r *ProjectRepository) FindByClient(
 		return nil, r.handlerErr(err)
 	}
 
-	return models.ProjectsToEntity(projects)
+	return projects, nil
 }
 
 func (r *ProjectRepository) Save(
 	ctx context.Context, project *entities.Project,
-) error {
-	model := models.ProjectFromEntity(project)
-	if err := r.save(ctx, &model); err != nil {
-		return err
-	}
-
-	project.ID = model.EntityID()
-	project.CreatedAt = model.EntityCreatedAt()
-	return nil
-}
-
-func (r *ProjectRepository) save(
-	ctx context.Context, project *models.Project,
-) error {
-	if err := project.ValidateModel(); err != nil {
-		return err
-	}
-
+) *errors.Error {
 	query := `
 		INSERT INTO project (client_id, name, status)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
@@ -83,15 +66,11 @@ func (r *ProjectRepository) save(
 		project.Status,
 	).Scan(&project.ID, &project.CreatedAt)
 
-	if err != nil {
-		return r.handlerErr(err)
-	}
-
-	return nil
+	return r.handlerErr(err)
 }
 
 func NewProjectRepository(
-	pool *pgxpool.Pool, handlerErr func(error) error,
+	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,
 ) *ProjectRepository {
 	return &ProjectRepository{
 		pool:       pool,

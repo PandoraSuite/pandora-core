@@ -20,8 +20,12 @@ func (db *Persistence) Close() { db.pool.Close() }
 
 func (db *Persistence) Pool() *pgxpool.Pool { return db.pool }
 
-func (db *Persistence) HandlerErr() func(error) error {
-	return func(err error) error {
+func (db *Persistence) HandlerErr() func(error) *domainErr.Error {
+	return func(err error) *domainErr.Error {
+		if err == nil {
+			return nil
+		}
+
 		if errors.Is(err, pgx.ErrNoRows) {
 			return domainErr.ErrNotFound
 		}
@@ -43,7 +47,9 @@ func (db *Persistence) HandlerErr() func(error) error {
 				return domainErr.ErrPersistence
 			}
 		}
-		return err
+		return domainErr.NewError(
+			domainErr.CodeInternalError, "Unknown error", err.Error(),
+		)
 	}
 }
 

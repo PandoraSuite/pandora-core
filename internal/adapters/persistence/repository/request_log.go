@@ -3,37 +3,20 @@ package repository
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence/models"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type RequestLogRepository struct {
 	pool *pgxpool.Pool
 
-	handlerErr func(error) error
+	handlerErr func(error) *errors.Error
 }
 
 func (r *RequestLogRepository) Save(
 	ctx context.Context, requestLog *entities.RequestLog,
-) error {
-	model := models.RequestLogFromEntity(requestLog)
-	if err := r.save(ctx, &model); err != nil {
-		return err
-	}
-
-	requestLog.ID = model.EntityID()
-	requestLog.CreatedAt = model.EntityCreatedAt()
-	return nil
-}
-
-func (r *RequestLogRepository) save(
-	ctx context.Context, requestLog *models.RequestLog,
-) error {
-	if err := requestLog.ValidateModel(); err != nil {
-		return err
-	}
-
+) *errors.Error {
 	query := `
 		INSERT INTO request_log (environment_id, service_id, api_key, request_time, execution_status)
 		VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at;
@@ -49,15 +32,11 @@ func (r *RequestLogRepository) save(
 		requestLog.ExecutionStatus,
 	).Scan(&requestLog.ID, &requestLog.CreatedAt)
 
-	if err != nil {
-		return r.handlerErr(err)
-	}
-
-	return nil
+	return r.handlerErr(err)
 }
 
 func NewRequestLogRepository(
-	pool *pgxpool.Pool, handlerErr func(error) error,
+	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,
 ) *RequestLogRepository {
 	return &RequestLogRepository{
 		pool:       pool,
