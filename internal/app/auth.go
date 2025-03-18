@@ -69,6 +69,7 @@ func (u *AuthUseCase) IsPasswordResetRequired(
 	if err != nil {
 		return false, err
 	}
+
 	return credentials.ForcePasswordReset, nil
 }
 

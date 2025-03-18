@@ -57,19 +57,17 @@ func (u *ServiceUseCase) GetActiveServices(ctx context.Context) ([]*dto.ServiceR
 func (u *ServiceUseCase) Create(
 	ctx context.Context, req *dto.ServiceCreate,
 ) (*dto.ServiceResponse, *errors.Error) {
-	if req.Name == "" {
-		return nil, domainErr.ErrNameCannotBeEmpty
+	service := entities.Service{
+		Name:    req.Name,
+		Status:  enums.ServiceActive,
+		Version: req.Version,
 	}
 
-	service, err := u.serviceRepo.Save(
-		ctx,
-		&entities.Service{
-			Name:    req.Name,
-			Status:  enums.ServiceActive,
-			Version: req.Version,
-		},
-	)
-	if err != nil {
+	if err := service.Validate(); err != nil {
+		return nil, err
+	}
+
+	if err := u.serviceRepo.Save(ctx, &service); err != nil {
 		return nil, err
 	}
 

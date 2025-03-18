@@ -59,17 +59,14 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 		return resp, errors.ErrNoAvailableRequests
 	}
 
-	requestLog, err := u.requestLog.Save(
-		ctx,
-		&entities.RequestLog{
-			APIKey:          apiKey.Key,
-			ServiceID:       service.ID,
-			RequestTime:     req.RequestTime,
-			EnvironmentID:   apiKey.EnvironmentID,
-			ExecutionStatus: enums.RequestLogPending,
-		},
-	)
-	if err != nil {
+	requestLog := entities.RequestLog{
+		APIKey:          apiKey.Key,
+		ServiceID:       service.ID,
+		RequestTime:     req.RequestTime,
+		EnvironmentID:   apiKey.EnvironmentID,
+		ExecutionStatus: enums.RequestLogPending,
+	}
+	if err := u.requestLog.Save(ctx, &requestLog); err != nil {
 		return resp, err
 	}
 
@@ -114,7 +111,7 @@ func (u *APIKeyUseCase) GetAPIKeysByEnvironment(
 func (u *APIKeyUseCase) Create(
 	ctx context.Context, req *dto.APIKeyCreate,
 ) (*dto.APIKeyResponse, error) {
-	apiKey := &entities.APIKey{
+	apiKey := entities.APIKey{
 		Status:        enums.APIKeyActive,
 		ExpiresAt:     req.ExpiresAt,
 		EnvironmentID: req.EnvironmentID,
@@ -136,8 +133,7 @@ func (u *APIKeyUseCase) Create(
 		}
 	}
 
-	apiKey, err := u.apiKeyRepo.Save(ctx, apiKey)
-	if err != nil {
+	if err := u.apiKeyRepo.Save(ctx, &apiKey); err != nil {
 		return nil, err
 	}
 

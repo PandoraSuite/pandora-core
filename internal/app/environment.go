@@ -58,7 +58,7 @@ func (u *EnvironmentUseCase) AssignService(
 		}
 	}
 
-	_, err = u.environmentServiceRepo.Save(
+	err = u.environmentServiceRepo.Save(
 		ctx,
 		&entities.EnvironmentService{
 			ServiceID:     req.ServiceID,
@@ -73,7 +73,7 @@ func (u *EnvironmentUseCase) AssignService(
 	return nil
 }
 
-func (u *EnvironmentUseCase) GetEnvironmentsByProject(
+func (u *EnvironmentUseCase) GetByProject(
 	ctx context.Context, projectID int,
 ) ([]*dto.EnvironmentResponse, error) {
 	environments, err := u.environmentRepo.FindByProject(ctx, projectID)
@@ -98,28 +98,26 @@ func (u *EnvironmentUseCase) GetEnvironmentsByProject(
 func (u *EnvironmentUseCase) Create(
 	ctx context.Context, req *dto.EnvironmentCreate,
 ) (*dto.EnvironmentResponse, error) {
-	if req.Name == "" {
-		return nil, errors.ErrNameCannotBeEmpty
+	environment := entities.Environment{
+		Name:      req.Name,
+		Status:    enums.EnvironmentActive,
+		ProjectID: req.ProjectID,
 	}
 
-	client, err := u.environmentRepo.Save(
-		ctx,
-		&entities.Environment{
-			Name:      req.Name,
-			Status:    enums.EnvironmentActive,
-			ProjectID: req.ProjectID,
-		},
-	)
-	if err != nil {
+	if err := environment.Validate(); err != nil {
+		return nil, err
+	}
+
+	if err := u.environmentRepo.Save(ctx, &environment); err != nil {
 		return nil, err
 	}
 
 	return &dto.EnvironmentResponse{
-		ID:        client.ID,
-		Name:      client.Name,
-		Status:    client.Status,
-		ProjectID: client.ProjectID,
-		CreatedAt: client.CreatedAt,
+		ID:        environment.ID,
+		Name:      environment.Name,
+		Status:    environment.Status,
+		ProjectID: environment.ProjectID,
+		CreatedAt: environment.CreatedAt,
 	}, nil
 }
 

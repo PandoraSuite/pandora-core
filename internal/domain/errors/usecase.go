@@ -22,6 +22,7 @@ var (
 	ErrNameCannotBeEmpty                     = NewError(CodeValidationError, "name cannot be empty")
 	ErrInvalidEmailFormat                    = NewError(CodeValidationError, "invalid email format")
 	ErrNoAvailableRequests                   = NewError(CodeValidationError, "no available requests")
+	ErrVersionCannotBeEmpty                  = NewError(CodeValidationError, "version cannot be empty")
 	ErrMaxRequestExceededForServiceInProyect = NewError(CodeValidationError, "max request exceeded for service in proyect")
 
 	ErrInvalidProjectID  = NewError(CodeValidationError, "project ID must be greater than 0")
