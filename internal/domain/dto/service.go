@@ -6,6 +6,10 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
+type ServiceFilter struct {
+	Status enums.ServiceStatus `json:"type,omitempty" enums:"active,deactivated" swaggertype:"string"`
+}
+
 type ServiceCreate struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`

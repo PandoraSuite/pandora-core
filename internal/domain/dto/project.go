@@ -29,9 +29,11 @@ type ProjectCreate struct {
 
 type ProjectServiceAssignmentResponse struct {
 	ID             int                                `json:"id"`
+	Name           string                             `json:"name"`
 	NextReset      time.Time                          `json:"next_reset"`
 	MaxRequest     int                                `json:"max_request"`
 	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency"`
+	AssignedAt     time.Time                          `json:"assigned_at"`
 }
 
 type ProjectResponse struct {
@@ -42,4 +44,9 @@ type ProjectResponse struct {
 	CreatedAt time.Time           `json:"created_at"`
 
 	Services []*ProjectServiceAssignmentResponse `json:"services"`
+}
+
+type ProjectUpdate struct {
+	Name   string              `json:"name,omitempty"`
+	Status enums.ProjectStatus `json:"type,omitempty" enums:"in_production,in_development,deactivated" swaggertype:"string"`
 }

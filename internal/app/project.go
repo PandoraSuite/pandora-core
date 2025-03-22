@@ -40,7 +40,7 @@ func (u *ProjectUseCase) AssignService(
 func (u *ProjectUseCase) GetByClient(
 	ctx context.Context, clientID int,
 ) ([]*dto.ProjectResponse, *errors.Error) {
-	projects, err := u.projectRepo.FindByClient(ctx, clientID)
+	projects, err := u.projectRepo.FindByClientWithServices(ctx, clientID)
 	if err != nil {
 		return nil, err
 	}
@@ -138,6 +138,7 @@ func (u *ProjectUseCase) Create(
 				NextReset:      projectService.NextReset,
 				MaxRequest:     projectService.MaxRequest,
 				ResetFrequency: projectService.ResetFrequency,
+				AssignedAt:     projectService.CreatedAt,
 			}
 		}
 		resp.Services = projectServiceResp

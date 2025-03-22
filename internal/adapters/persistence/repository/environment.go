@@ -2,8 +2,12 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
+	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -14,18 +18,76 @@ type EnvironmentRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *EnvironmentRepository) Update(
+	ctx context.Context, id int, update *dto.EnvironmentUpdate,
+) *errors.Error {
+	var updates []string
+	args := []any{id}
+	argIndex := 2
+
+	if update.Status != enums.APIKeyStatusNull {
+		updates = append(updates, fmt.Sprintf("status = $%d", argIndex))
+		args = append(args, update.Status)
+		argIndex++
+	}
+
+	if update.Name != "" {
+		updates = append(updates, fmt.Sprintf("name = $%d", argIndex))
+		args = append(args, update.Name)
+		argIndex++
+	}
+
+	if len(updates) == 0 {
+		return nil
+	}
+
+	query := fmt.Sprintf(
+		"UPDATE environment SET %s WHERE id = $1;",
+		strings.Join(updates, ", "),
+	)
+
+	result, err := r.pool.Exec(ctx, query, args...)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.ErrAPIKeyNotFound
+	}
+
+	return nil
+}
+
 func (r *EnvironmentRepository) FindByID(
 	ctx context.Context, id int,
-) (*entities.Environment, *errors.Error) {
-	query := "SELECT * FROM environment WHERE id = $1;"
+) (*dto.EnvironmentResponse, *errors.Error) {
+	query := `
+		SELECT e.id, e.name, e.status, e.project_id, e.createdAt,
+			COALESCE(
+				JSON_AGG(
+					JSON_BUILD_OBJECT(
+						'id', s.id,
+						'name', s.name,
+						'max_request', es.max_request,
+						'assigned_at', es.created_at
+					)
+				), '[]'
+			) AS services
+		FROM environment e
+		LEFT JOIN environment_service es ON es.environment_id = e.id
+		LEFT JOIN service s ON s.id = es.service_id
+		WHERE e.id = $1
+		GROUP BY e.id;
+	`
 
-	environment := new(entities.Environment)
+	environment := new(dto.EnvironmentResponse)
 	err := r.pool.QueryRow(ctx, query, id).Scan(
 		&environment.ID,
-		&environment.ProjectID,
 		&environment.Name,
 		&environment.Status,
+		&environment.ProjectID,
 		&environment.CreatedAt,
+		&environment.Services,
 	)
 	if err != nil {
 		return nil, r.handlerErr(err)
@@ -36,8 +98,26 @@ func (r *EnvironmentRepository) FindByID(
 
 func (r *EnvironmentRepository) FindByProject(
 	ctx context.Context, projectID int,
-) ([]*entities.Environment, *errors.Error) {
-	query := "SELECT * FROM environment WHERE project_id = $1;"
+) ([]*dto.EnvironmentResponse, *errors.Error) {
+	query := `
+		SELECT e.id, e.name, e.status, e.project_id, e.createdAt,
+			COALESCE(
+				JSON_AGG(
+					JSON_BUILD_OBJECT(
+						'id', s.id,
+						'name', s.name,
+						'max_request', es.max_request,
+						'assigned_at', es.created_at
+					)
+				), '[]'
+			) AS services
+		FROM environment e
+		JOIN project p ON p.id = e.project_id
+		LEFT JOIN environment_service es ON es.environment_id = e.id
+		LEFT JOIN service s ON s.id = es.service_id
+		WHERE p.id = $1
+		GROUP BY e.id;
+	`
 
 	rows, err := r.pool.Query(ctx, query, projectID)
 	if err != nil {
@@ -46,16 +126,17 @@ func (r *EnvironmentRepository) FindByProject(
 
 	defer rows.Close()
 
-	var environments []*entities.Environment
+	var environments []*dto.EnvironmentResponse
 	for rows.Next() {
-		environment := new(entities.Environment)
+		environment := new(dto.EnvironmentResponse)
 
 		err = rows.Scan(
 			&environment.ID,
-			&environment.ProjectID,
 			&environment.Name,
 			&environment.Status,
+			&environment.ProjectID,
 			&environment.CreatedAt,
+			&environment.Services,
 		)
 		if err != nil {
 			return nil, r.handlerErr(err)

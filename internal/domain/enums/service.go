@@ -8,13 +8,16 @@ import (
 type ServiceStatus int
 
 const (
-	ServiceActive ServiceStatus = iota
+	ServiceStatusNull ServiceStatus = iota
+	ServiceActive
 	ServiceDeactivated
 	ServiceDeprecated
 )
 
 func (s ServiceStatus) String() string {
 	switch s {
+	case ServiceStatusNull:
+		return ""
 	case ServiceActive:
 		return "active"
 	case ServiceDeactivated:
@@ -24,6 +27,21 @@ func (s ServiceStatus) String() string {
 	default:
 		panic("unknown ServiceStatus")
 	}
+}
+
+func (s *ServiceStatus) Scan(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("invalid status: %v", v)
+	}
+
+	status, err := ParseServiceStatus(str)
+	if err != nil {
+		return err
+	}
+
+	*s = status
+	return nil
 }
 
 func (s *ServiceStatus) UnmarshalJSON(b []byte) error {
@@ -45,6 +63,8 @@ func (s *ServiceStatus) MarshalJSON() ([]byte, error) {
 
 func ParseServiceStatus(s string) (ServiceStatus, error) {
 	switch s {
+	case "":
+		return ServiceStatusNull, nil
 	case "active":
 		return ServiceActive, nil
 	case "deactivated":

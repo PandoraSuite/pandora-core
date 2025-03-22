@@ -33,3 +33,8 @@ type APIKeyResponse struct {
 	EnvironmentID int                `json:"environment_id"`
 	CreatedAt     time.Time          `json:"created_at"`
 }
+
+type APIKeyUpdate struct {
+	Status    enums.APIKeyStatus `json:"status,omitempty" enums:"active,deactivated" swaggertype:"string"`
+	ExpiresAt time.Time          `json:"expires_at,omitempty"`
+}

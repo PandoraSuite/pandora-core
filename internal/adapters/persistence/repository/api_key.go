@@ -2,8 +2,12 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
+	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -12,6 +16,63 @@ type APIKeyRepository struct {
 	pool *pgxpool.Pool
 
 	handlerErr func(error) *errors.Error
+}
+
+func (r *APIKeyRepository) Update(
+	ctx context.Context, id int, update *dto.APIKeyUpdate,
+) *errors.Error {
+	var updates []string
+	args := []any{id}
+	argIndex := 2
+
+	if update.Status != enums.APIKeyStatusNull {
+		updates = append(updates, fmt.Sprintf("status = $%d", argIndex))
+		args = append(args, update.Status)
+		argIndex++
+	}
+
+	if update.ExpiresAt.IsZero() {
+		updates = append(updates, fmt.Sprintf("expires_at = $%d", argIndex))
+		args = append(args, update.ExpiresAt)
+		argIndex++
+	}
+
+	if len(updates) == 0 {
+		return nil
+	}
+
+	query := fmt.Sprintf(
+		"UPDATE api_key SET %s WHERE id = $1;",
+		strings.Join(updates, ", "),
+	)
+
+	result, err := r.pool.Exec(ctx, query, args...)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.ErrAPIKeyNotFound
+	}
+
+	return nil
+}
+
+func (r *APIKeyRepository) UpdateLastUsed(
+	ctx context.Context, key string,
+) *errors.Error {
+	query := "UPDATE api_key SET last_used = NOW() WHERE key = $1;"
+
+	result, err := r.pool.Exec(ctx, query, key)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.ErrAPIKeyNotFound
+	}
+
+	return nil
 }
 
 func (r *APIKeyRepository) FindByEnvironment(
@@ -74,8 +135,32 @@ func (r *APIKeyRepository) FindByKey(
 	return apiKey, nil
 }
 
-func (r *APIKeyRepository) Exists(ctx context.Context, key string) (bool, *errors.Error) {
-	query := "SELECT EXISTS (SELECT 1 FROM api_key WHERE key = $1;);"
+func (r *APIKeyRepository) FindByID(
+	ctx context.Context, id int,
+) (*entities.APIKey, *errors.Error) {
+	query := "SELECT * FROM api_key WHERE id = $1;"
+
+	apiKey := new(entities.APIKey)
+	err := r.pool.QueryRow(ctx, query, id).Scan(
+		&apiKey.ID,
+		&apiKey.EnvironmentID,
+		&apiKey.Key,
+		&apiKey.ExpiresAt,
+		&apiKey.LastUsed,
+		&apiKey.Status,
+		&apiKey.CreatedAt,
+	)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return apiKey, nil
+}
+
+func (r *APIKeyRepository) Exists(
+	ctx context.Context, key string,
+) (bool, *errors.Error) {
+	query := "SELECT EXISTS (SELECT 1 FROM api_key WHERE key = $1);"
 
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, key).Scan(&exists)

@@ -8,12 +8,15 @@ import (
 type EnvironmentStatus int
 
 const (
-	EnvironmentActive EnvironmentStatus = iota
+	EnvironmentStatusNull EnvironmentStatus = iota
+	EnvironmentActive
 	EnvironmentDeactivated
 )
 
 func (s EnvironmentStatus) String() string {
 	switch s {
+	case EnvironmentStatusNull:
+		return ""
 	case EnvironmentActive:
 		return "active"
 	case EnvironmentDeactivated:
@@ -21,6 +24,21 @@ func (s EnvironmentStatus) String() string {
 	default:
 		panic("unknown EnvironmentStatus")
 	}
+}
+
+func (s *EnvironmentStatus) Scan(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("invalid status: %v", v)
+	}
+
+	status, err := ParseEnvironmentStatus(str)
+	if err != nil {
+		return err
+	}
+
+	*s = status
+	return nil
 }
 
 func (s *EnvironmentStatus) UnmarshalJSON(b []byte) error {
@@ -42,6 +60,8 @@ func (s *EnvironmentStatus) MarshalJSON() ([]byte, error) {
 
 func ParseEnvironmentStatus(s string) (EnvironmentStatus, error) {
 	switch s {
+	case "":
+		return EnvironmentStatusNull, nil
 	case "active":
 		return EnvironmentActive, nil
 	case "deactivated":

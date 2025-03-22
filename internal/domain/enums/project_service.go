@@ -32,6 +32,21 @@ func (rf ProjectServiceResetFrequency) String() string {
 	}
 }
 
+func (rf *ProjectServiceResetFrequency) Scan(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("invalid reset frequency: %v", v)
+	}
+
+	restFrequency, err := ParseProjectServiceResetFrequency(str)
+	if err != nil {
+		return err
+	}
+
+	*rf = restFrequency
+	return nil
+}
+
 func (rf *ProjectServiceResetFrequency) UnmarshalJSON(b []byte) error {
 	var s string
 	if err := json.Unmarshal(b, &s); err != nil {

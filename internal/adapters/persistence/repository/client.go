@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -16,18 +18,96 @@ type ClientRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *ClientRepository) Update(
+	ctx context.Context, id int, update *dto.ClientUpdate,
+) *errors.Error {
+	var updates []string
+	args := []any{id}
+	argIndex := 2
+
+	if update.Name != "" {
+		updates = append(updates, fmt.Sprintf("name = $%d", argIndex))
+		args = append(args, update.Name)
+		argIndex++
+	}
+
+	if update.Email != "" {
+		updates = append(updates, fmt.Sprintf("email = $%d", argIndex))
+		args = append(args, update.Email)
+		argIndex++
+	}
+
+	if update.Type != enums.ClientTypeNull {
+		updates = append(updates, fmt.Sprintf("type = $%d", argIndex))
+		args = append(args, update.Type)
+		argIndex++
+	}
+
+	if len(updates) == 0 {
+		return nil
+	}
+
+	query := fmt.Sprintf(
+		"UPDATE client SET %s WHERE id = $1;",
+		strings.Join(updates, ", "),
+	)
+
+	result, err := r.pool.Exec(ctx, query, args...)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.ErrClientNotFound
+	}
+
+	return nil
+}
+
+func (r *ClientRepository) FindByID(
+	ctx context.Context, id int,
+) (*entities.Client, *errors.Error) {
+	query := "SELECT * FROM client WHERE id = $1;"
+
+	client := new(entities.Client)
+	err := r.pool.QueryRow(ctx, query, id).Scan(
+		&client.ID,
+		&client.Type,
+		&client.Name,
+		&client.Email,
+		&client.CreatedAt,
+	)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return client, nil
+}
+
 func (r *ClientRepository) FindAll(
 	ctx context.Context, filter *dto.ClientFilter,
 ) ([]*entities.Client, *errors.Error) {
 	query := "SELECT * FROM client"
 
 	var args []any
-	if filter.Type != enums.ClientTypeNull {
-		query += " WHERE type = $1;"
-		args = append(args, filter.Type)
-	} else {
-		query += ";"
+	if filter != nil {
+		var where []string
+		argIndex := 1
+
+		if filter.Type != enums.ClientTypeNull {
+			where = append(where, fmt.Sprintf("type = $%d", argIndex))
+			args = append(args, filter.Type)
+			argIndex++
+		}
+
+		if len(where) > 0 {
+			query = fmt.Sprintf(
+				"%s WHERE %s", query, strings.Join(where, " AND "),
+			)
+		}
 	}
+
+	query += ";"
 
 	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {

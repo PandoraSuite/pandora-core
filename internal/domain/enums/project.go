@@ -29,6 +29,21 @@ func (s ProjectStatus) String() string {
 	}
 }
 
+func (s *ProjectStatus) Scan(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("invalid status: %v", v)
+	}
+
+	status, err := ParseProjectStatus(str)
+	if err != nil {
+		return err
+	}
+
+	*s = status
+	return nil
+}
+
 func (s *ProjectStatus) UnmarshalJSON(b []byte) error {
 	var ss string
 	if err := json.Unmarshal(b, &ss); err != nil {

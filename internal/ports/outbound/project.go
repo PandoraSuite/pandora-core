@@ -9,5 +9,5 @@ import (
 
 type ProjectPort interface {
 	Save(ctx context.Context, project *entities.Project) *errors.Error
-	FindByClient(ctx context.Context, clientID int) ([]*entities.Project, *errors.Error)
+	FindByClientWithServices(ctx context.Context, clientID int) ([]*entities.Project, *errors.Error)
 }

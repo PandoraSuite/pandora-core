@@ -2,8 +2,12 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
+	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -34,20 +38,32 @@ func (r *ServiceRepository) FindByNameAndVersion(
 	return service, nil
 }
 
-func (r *ServiceRepository) FindActiveServices(ctx context.Context) ([]*entities.Service, *errors.Error) {
-	query := "SELECT * FROM service WHERE status = 'active';"
-	return r.find(ctx, query)
-}
-
-func (r *ServiceRepository) FindAll(ctx context.Context) ([]*entities.Service, *errors.Error) {
-	query := "SELECT * FROM service;"
-	return r.find(ctx, query)
-}
-
-func (r *ServiceRepository) find(
-	ctx context.Context, query string,
+func (r *ServiceRepository) FindAll(
+	ctx context.Context, filter *dto.ServiceFilter,
 ) ([]*entities.Service, *errors.Error) {
-	rows, err := r.pool.Query(ctx, query)
+	query := "SELECT * FROM service"
+
+	var args []any
+	if filter != nil {
+		var where []string
+		argIndex := 1
+
+		if filter.Status != enums.ServiceStatusNull {
+			where = append(where, fmt.Sprintf("status = $%d", argIndex))
+			args = append(args, filter.Status)
+			argIndex++
+		}
+
+		if len(where) > 0 {
+			query = fmt.Sprintf(
+				"%s WHERE %s", query, strings.Join(where, " AND "),
+			)
+		}
+	}
+
+	query += ";"
+
+	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, r.handlerErr(err)
 	}
@@ -61,8 +77,8 @@ func (r *ServiceRepository) find(
 		err = rows.Scan(
 			&service.ID,
 			&service.Name,
-			&service.Version,
 			&service.Status,
+			&service.Version,
 			&service.CreatedAt,
 		)
 		if err != nil {

@@ -35,7 +35,7 @@ func (u *ServiceUseCase) GetServices(ctx context.Context) ([]*dto.ServiceRespons
 }
 
 func (u *ServiceUseCase) GetActiveServices(ctx context.Context) ([]*dto.ServiceResponse, *errors.Error) {
-	services, err := u.serviceRepo.FindActiveServices(ctx)
+	services, err := u.serviceRepo.FindAll(ctx)
 	if err != nil {
 		return nil, err
 	}

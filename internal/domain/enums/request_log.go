@@ -8,7 +8,8 @@ import (
 type RequestLogExecutionStatus int
 
 const (
-	RequestLogSuccess RequestLogExecutionStatus = iota
+	RequestLogExecutionStatusNull RequestLogExecutionStatus = iota
+	RequestLogSuccess
 	RequestLogFailed
 	RequestLogPending
 	RequestLogUnauthorized
@@ -17,6 +18,8 @@ const (
 
 func (es RequestLogExecutionStatus) String() string {
 	switch es {
+	case RequestLogExecutionStatusNull:
+		return ""
 	case RequestLogSuccess:
 		return "success"
 	case RequestLogFailed:
@@ -30,6 +33,21 @@ func (es RequestLogExecutionStatus) String() string {
 	default:
 		panic("unknown RequestLogExecutionStatus")
 	}
+}
+
+func (s *RequestLogExecutionStatus) Scan(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("invalid execution status: %v", v)
+	}
+
+	status, err := ParseRequestLogExecutionStatus(str)
+	if err != nil {
+		return err
+	}
+
+	*s = status
+	return nil
 }
 
 func (es *RequestLogExecutionStatus) UnmarshalJSON(b []byte) error {
@@ -51,6 +69,8 @@ func (es *RequestLogExecutionStatus) MarshalJSON() ([]byte, error) {
 
 func ParseRequestLogExecutionStatus(es string) (RequestLogExecutionStatus, error) {
 	switch es {
+	case "":
+		return RequestLogExecutionStatusNull, nil
 	case "success":
 		return RequestLogSuccess, nil
 	case "failed":

@@ -12,9 +12,23 @@ type AssignServiceToEnvironment struct {
 	MaxRequest    int `json:"max_request"`
 }
 
+type EnvironmentServiceAssignment struct {
+	ID         int `json:"id" binding:"required"`
+	MaxRequest int `json:"max_request" binding:"required"`
+}
+
 type EnvironmentCreate struct {
 	Name      string `json:"name"`
 	ProjectID int    `json:"project_id"`
+
+	Services []*EnvironmentServiceAssignment `json:"services,omitempty"`
+}
+
+type EnvironmentServiceAssignmentResponse struct {
+	ID         int       `json:"id"`
+	Name       string    `json:"name"`
+	MaxRequest int       `json:"max_request"`
+	AssignedAt time.Time `json:"assigned_at"`
 }
 
 type EnvironmentResponse struct {
@@ -23,4 +37,11 @@ type EnvironmentResponse struct {
 	Status    enums.EnvironmentStatus `json:"status" enums:"active,deactivated" swaggertype:"string"`
 	ProjectID int                     `json:"project_id"`
 	CreatedAt time.Time               `json:"created_at"`
+
+	Services []*EnvironmentServiceAssignmentResponse `json:"services"`
+}
+
+type EnvironmentUpdate struct {
+	Name   string             `json:"name,omitempty"`
+	Status enums.APIKeyStatus `json:"status,omitempty" enums:"active,deactivated" swaggertype:"string"`
 }

@@ -3,19 +3,27 @@ package errors
 var (
 	ErrAPIKeyExpired          = NewError(CodeValidationError, "api key expired")
 	ErrAPIKeyNotFound         = NewError(CodeNotFound, "api key not found")
+	ErrAPIKeyInvalidStatus    = NewError(CodeValidationError, "invalid API key status")
 	ErrAPIKeyGenerationFailed = NewError(CodeInternalError, "api key generation failed")
 
+	ErrClientNotFound         = NewError(CodeNotFound, "client not found")
+	ErrClientInvalidType      = NewError(CodeValidationError, "invalid client type")
 	ErrClientTypeCannotBeNull = NewError(CodeValidationError, "client type cannot be null")
 
-	ErrServiceNotFound    = NewError(CodeNotFound, "service not found")
-	ErrServiceDeprecated  = NewError(CodeValidationError, "service is deprecated")
-	ErrServiceDeactivated = NewError(CodeValidationError, "service is deactivated")
+	ErrEnvironmentNotFound      = NewError(CodeNotFound, "environment not found")
+	ErrEnvironmentInvalidStatus = NewError(CodeValidationError, "invalid environment status")
 
-	ErrEnvironmentNotFound = NewError(CodeNotFound, "environment not found")
+	ErrProjectServiceNotFound      = NewError(CodeNotFound, "project service not found")
+	ErrProjectServiceInvalidStatus = NewError(CodeValidationError, "invalid project service status")
 
-	ErrProjectServiceNotFound = NewError(CodeNotFound, "project service not found")
-
+	ErrProjectNotFound           = NewError(CodeNotFound, "project not found")
+	ErrProjectInvalidStatus      = NewError(CodeValidationError, "invalid project status")
 	ErrProjectStatusCannotBeNull = NewError(CodeValidationError, "project status cannot be null")
+
+	ErrServiceNotFound      = NewError(CodeNotFound, "service not found")
+	ErrServiceDeprecated    = NewError(CodeValidationError, "service is deprecated")
+	ErrServiceDeactivated   = NewError(CodeValidationError, "service is deactivated")
+	ErrServiceInvalidStatus = NewError(CodeValidationError, "invalid service status")
 
 	ErrEnvironmentServiceNotFound = NewError(CodeNotFound, "environment service not found")
 
