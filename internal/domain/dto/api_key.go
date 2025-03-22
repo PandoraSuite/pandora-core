@@ -35,6 +35,5 @@ type APIKeyResponse struct {
 }
 
 type APIKeyUpdate struct {
-	Status    enums.APIKeyStatus `json:"status,omitempty" enums:"active,deactivated" swaggertype:"string"`
-	ExpiresAt time.Time          `json:"expires_at,omitempty"`
+	ExpiresAt time.Time `json:"expires_at,omitempty"`
 }

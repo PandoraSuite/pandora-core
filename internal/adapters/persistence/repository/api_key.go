@@ -18,18 +18,36 @@ type APIKeyRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *APIKeyRepository) UpdateStatus(
+	ctx context.Context, id int, status enums.APIKeyStatus,
+) *errors.Error {
+	if status == enums.APIKeyStatusNull {
+		return errors.ErrAPIKeyInvalidStatus
+	}
+
+	query := "UPDATE api_key SET status = $1 WHERE id = $2;"
+	result, err := r.pool.Exec(ctx, query, status, id)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.ErrAPIKeyNotFound
+	}
+
+	return nil
+}
+
 func (r *APIKeyRepository) Update(
 	ctx context.Context, id int, update *dto.APIKeyUpdate,
 ) *errors.Error {
+	if update == nil {
+		return nil
+	}
+
 	var updates []string
 	args := []any{id}
 	argIndex := 2
-
-	if update.Status != enums.APIKeyStatusNull {
-		updates = append(updates, fmt.Sprintf("status = $%d", argIndex))
-		args = append(args, update.Status)
-		argIndex++
-	}
 
 	if update.ExpiresAt.IsZero() {
 		updates = append(updates, fmt.Sprintf("expires_at = $%d", argIndex))

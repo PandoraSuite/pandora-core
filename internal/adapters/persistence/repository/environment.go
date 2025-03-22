@@ -18,18 +18,36 @@ type EnvironmentRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *EnvironmentRepository) UpdateStatus(
+	ctx context.Context, id int, status enums.EnvironmentStatus,
+) *errors.Error {
+	if status == enums.EnvironmentStatusNull {
+		return errors.ErrEnvironmentInvalidStatus
+	}
+
+	query := "UPDATE environment SET status = $1 WHERE id = $2;"
+	result, err := r.pool.Exec(ctx, query, status, id)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.ErrAPIKeyNotFound
+	}
+
+	return nil
+}
+
 func (r *EnvironmentRepository) Update(
 	ctx context.Context, id int, update *dto.EnvironmentUpdate,
 ) *errors.Error {
+	if update == nil {
+		return nil
+	}
+
 	var updates []string
 	args := []any{id}
 	argIndex := 2
-
-	if update.Status != enums.APIKeyStatusNull {
-		updates = append(updates, fmt.Sprintf("status = $%d", argIndex))
-		args = append(args, update.Status)
-		argIndex++
-	}
 
 	if update.Name != "" {
 		updates = append(updates, fmt.Sprintf("name = $%d", argIndex))

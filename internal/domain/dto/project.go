@@ -47,6 +47,5 @@ type ProjectResponse struct {
 }
 
 type ProjectUpdate struct {
-	Name   string              `json:"name,omitempty"`
-	Status enums.ProjectStatus `json:"type,omitempty" enums:"in_production,in_development,deactivated" swaggertype:"string"`
+	Name string `json:"name,omitempty"`
 }

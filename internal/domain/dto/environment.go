@@ -42,6 +42,5 @@ type EnvironmentResponse struct {
 }
 
 type EnvironmentUpdate struct {
-	Name   string             `json:"name,omitempty"`
-	Status enums.APIKeyStatus `json:"status,omitempty" enums:"active,deactivated" swaggertype:"string"`
+	Name string `json:"name,omitempty"`
 }

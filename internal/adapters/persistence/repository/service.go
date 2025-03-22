@@ -18,6 +18,26 @@ type ServiceRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *ServiceRepository) UpdateStatus(
+	ctx context.Context, id int, status enums.ServiceStatus,
+) *errors.Error {
+	if status == enums.ServiceStatusNull {
+		return errors.ErrServiceInvalidStatus
+	}
+
+	query := "UPDATE service SET status = $1 WHERE id = $2;"
+	result, err := r.pool.Exec(ctx, query, status, id)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.ErrAPIKeyNotFound
+	}
+
+	return nil
+}
+
 func (r *ServiceRepository) FindByNameAndVersion(
 	ctx context.Context, name, version string,
 ) (*entities.Service, *errors.Error) {

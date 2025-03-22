@@ -18,9 +18,33 @@ type ProjectRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *ProjectRepository) UpdateStatus(
+	ctx context.Context, id int, status enums.ProjectStatus,
+) *errors.Error {
+	if status == enums.ProjectStatusNull {
+		return errors.ErrProjectInvalidStatus
+	}
+
+	query := "UPDATE project SET status = $1 WHERE id = $2;"
+	result, err := r.pool.Exec(ctx, query, status, id)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.ErrAPIKeyNotFound
+	}
+
+	return nil
+}
+
 func (r *ProjectRepository) Update(
 	ctx context.Context, id int, update *dto.ProjectUpdate,
 ) *errors.Error {
+	if update == nil {
+		return nil
+	}
+
 	var updates []string
 	args := []any{id}
 	argIndex := 2
@@ -28,12 +52,6 @@ func (r *ProjectRepository) Update(
 	if update.Name != "" {
 		updates = append(updates, fmt.Sprintf("name = $%d", argIndex))
 		args = append(args, update.Name)
-		argIndex++
-	}
-
-	if update.Status != enums.ProjectStatusNull {
-		updates = append(updates, fmt.Sprintf("status = $%d", argIndex))
-		args = append(args, update.Status)
 		argIndex++
 	}
 

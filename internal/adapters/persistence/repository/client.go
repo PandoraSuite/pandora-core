@@ -21,6 +21,10 @@ type ClientRepository struct {
 func (r *ClientRepository) Update(
 	ctx context.Context, id int, update *dto.ClientUpdate,
 ) *errors.Error {
+	if update == nil {
+		return nil
+	}
+
 	var updates []string
 	args := []any{id}
 	argIndex := 2
