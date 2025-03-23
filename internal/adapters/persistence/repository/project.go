@@ -9,6 +9,7 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -78,7 +79,7 @@ func (r *ProjectRepository) Update(
 
 func (r *ProjectRepository) FindByID(
 	ctx context.Context, id int,
-) (*dto.ProjectResponse, *errors.Error) {
+) (*entities.Project, *errors.Error) {
 	query := `
 		SELECT p.id, p.name, p.status, p.client_id, p.created_at,
 			COALESCE(
@@ -86,6 +87,7 @@ func (r *ProjectRepository) FindByID(
 					JSON_BUILD_OBJECT(
 						'id', s.id,
 						'name', s.name,
+						'version', s.version,
 						'next_reset', ps.next_reset,
 						'max_request', ps.max_request,
 						'reset_frequency', ps.reset_frequency,
@@ -100,7 +102,7 @@ func (r *ProjectRepository) FindByID(
 		GROUP BY p.id;
 	`
 
-	project := new(dto.ProjectResponse)
+	project := new(entities.Project)
 	err := r.pool.QueryRow(ctx, query, id).Scan(
 		&project.ID,
 		&project.Name,
@@ -118,7 +120,7 @@ func (r *ProjectRepository) FindByID(
 
 func (r *ProjectRepository) FindByClient(
 	ctx context.Context, clientID int,
-) ([]*dto.ProjectResponse, *errors.Error) {
+) ([]*entities.Project, *errors.Error) {
 	query := `
 		SELECT p.id, p.name, p.status, p.client_id, p.created_at,
 			COALESCE(
@@ -126,6 +128,7 @@ func (r *ProjectRepository) FindByClient(
 					JSON_BUILD_OBJECT(
 						'id', s.id,
 						'name', s.name,
+						'version', s.version,
 						'next_reset', ps.next_reset,
 						'max_request', ps.max_request,
 						'reset_frequency', ps.reset_frequency,
@@ -148,9 +151,9 @@ func (r *ProjectRepository) FindByClient(
 
 	defer rows.Close()
 
-	var projects []*dto.ProjectResponse
+	var projects []*entities.Project
 	for rows.Next() {
-		project := new(dto.ProjectResponse)
+		project := new(entities.Project)
 
 		err = rows.Scan(
 			&project.ID,
@@ -177,12 +180,35 @@ func (r *ProjectRepository) FindByClient(
 func (r *ProjectRepository) Save(
 	ctx context.Context, project *entities.Project,
 ) *errors.Error {
+	tx, txErr := r.pool.Begin(ctx)
+	if txErr != nil {
+		return r.handlerErr(txErr)
+	}
+
+	if err := r.saveProject(ctx, tx, project); err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+
+	services, err := r.saveProjectServices(ctx, tx, project.ID, project.Services)
+	if err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+
+	project.Services = services
+	return r.handlerErr(tx.Commit(ctx))
+}
+
+func (r *ProjectRepository) saveProject(
+	ctx context.Context, tx pgx.Tx, project *entities.Project,
+) *errors.Error {
 	query := `
 		INSERT INTO project (client_id, name, status)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
 	`
 
-	err := r.pool.QueryRow(
+	err := tx.QueryRow(
 		ctx,
 		query,
 		project.ClientID,
@@ -191,6 +217,91 @@ func (r *ProjectRepository) Save(
 	).Scan(&project.ID, &project.CreatedAt)
 
 	return r.handlerErr(err)
+}
+
+func (r *ProjectRepository) saveProjectServices(
+	ctx context.Context,
+	tx pgx.Tx,
+	projectID int,
+	newServices []*entities.ProjectService,
+) ([]*entities.ProjectService, *errors.Error) {
+	if len(newServices) == 0 {
+		return nil, nil
+	}
+
+	values := []string{}
+	args := []any{}
+	argIndex := 1
+
+	for _, service := range newServices {
+		values = append(
+			values,
+			fmt.Sprintf(
+				"($%d, $%d, $%d, $%d, $%d)",
+				argIndex,
+				argIndex+1,
+				argIndex+2,
+				argIndex+3,
+				argIndex+4,
+			),
+		)
+		args = append(
+			args,
+			projectID,
+			service.ID,
+			service.MaxRequest,
+			service.ResetFrequency,
+			service.NextReset,
+		)
+		argIndex += 5
+	}
+
+	query := fmt.Sprintf(
+		`
+			WITH inserted AS (
+				INSERT INTO project_service (project_id, service_id, max_request, reset_frequency, next_reset)
+				VALUES %s
+				RETURNING *
+			)
+			SELECT s.id, s.name, s.version, i.max_request, i.reset_frequency, i.next_reset, i.create_at
+			FROM inserted i
+			JOIN service s ON i.service_id = s.id
+		`,
+		strings.Join(values, ", "),
+	)
+
+	rows, err := tx.Query(ctx, query, args...)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	defer rows.Close()
+
+	var services []*entities.ProjectService
+	for rows.Next() {
+		project := new(entities.ProjectService)
+
+		err = rows.Scan(
+			&project.ID,
+			&project.Name,
+			&project.Version,
+			&project.MaxRequest,
+			&project.ResetFrequency,
+			&project.NextReset,
+			&project.AssignedAt,
+		)
+		if err != nil {
+			return nil, r.handlerErr(err)
+		}
+
+		services = append(services, project)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return services, r.handlerErr(err)
 }
 
 func NewProjectRepository(
