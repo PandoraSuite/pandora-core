@@ -3,6 +3,7 @@ package errors
 var (
 	ErrAPIKeyExpired          = NewError(CodeValidationError, "api key expired")
 	ErrAPIKeyNotFound         = NewError(CodeNotFound, "api key not found")
+	ErrAPIKeyNotActive        = NewError(CodeUnauthorized, "api key is not active") //
 	ErrAPIKeyInvalidStatus    = NewError(CodeValidationError, "invalid API key status")
 	ErrAPIKeyGenerationFailed = NewError(CodeInternalError, "api key generation failed")
 

@@ -12,10 +12,10 @@ import (
 )
 
 type APIKeyUseCase struct {
-	apiKeyRepo         outbound.APIKeyPort
-	requestLog         outbound.RequestLogPort
-	serviceRepo        outbound.ServiceFindPort
-	environmentService outbound.EnvironmentServiceQuotaPort
+	apiKeyRepo      outbound.APIKeyPort
+	requestLog      outbound.RequestLogPort
+	serviceRepo     outbound.ServiceFindPort
+	environmentRepo outbound.EnvironmentPort
 }
 
 func (u *APIKeyUseCase) ValidateAndConsume(
@@ -29,6 +29,10 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 			err = errors.ErrAPIKeyNotFound
 		}
 		return resp, err
+	}
+
+	if !apiKey.IsActive() {
+		return resp, errors.ErrAPIKeyNotActive
 	}
 
 	if apiKey.IsExpired() {
@@ -52,7 +56,7 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 		return resp, errors.ErrServiceDeactivated
 	}
 
-	environmentService, err := u.environmentService.DecrementAvailableRequest(
+	availableRequest, err := u.environmentRepo.DecrementAvailableRequest(
 		ctx, apiKey.EnvironmentID, service.ID,
 	)
 	if err != nil {
@@ -70,17 +74,17 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 		return resp, err
 	}
 
-	var availableRequest string
-	if environmentService.MaxRequest == 0 {
-		availableRequest = "unlimited"
+	var availableRequestResp string
+	if availableRequest.MaxRequest == 0 {
+		availableRequestResp = "unlimited"
 	} else {
-		availableRequest = strconv.Itoa(environmentService.AvailableRequest)
+		availableRequestResp = strconv.Itoa(availableRequest.AvailableRequest)
 	}
 
 	return &dto.APIKeyValidateResponse{
 		Valid:            true,
-		AvailableRequest: availableRequest,
 		RequestLogID:     requestLog.ID,
+		AvailableRequest: availableRequestResp,
 	}, nil
 }
 
@@ -151,12 +155,12 @@ func NewAPIKeyUseCase(
 	apiKeyRepo outbound.APIKeyPort,
 	requestLog outbound.RequestLogPort,
 	serviceRepo outbound.ServiceFindPort,
-	environmentService outbound.EnvironmentServiceQuotaPort,
+	environmentRepo outbound.EnvironmentPort,
 ) *APIKeyUseCase {
 	return &APIKeyUseCase{
-		apiKeyRepo:         apiKeyRepo,
-		requestLog:         requestLog,
-		serviceRepo:        serviceRepo,
-		environmentService: environmentService,
+		apiKeyRepo:      apiKeyRepo,
+		requestLog:      requestLog,
+		serviceRepo:     serviceRepo,
+		environmentRepo: environmentRepo,
 	}
 }

@@ -35,3 +35,7 @@ func (a *APIKey) GenerateKey() *errors.Error {
 func (a *APIKey) IsExpired() bool {
 	return a.ExpiresAt.Before(time.Now())
 }
+
+func (a *APIKey) IsActive() bool {
+	return a.Status == enums.APIKeyActive
+}
