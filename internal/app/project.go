@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -11,26 +10,24 @@ import (
 )
 
 type ProjectUseCase struct {
-	projectRepo        outbound.ProjectPort
-	projectServiceRepo outbound.ProjectServicePort
+	projectRepo outbound.ProjectPort
 }
 
 func (u *ProjectUseCase) AssignService(
-	ctx context.Context, req *dto.AssignServiceToProject,
+	ctx context.Context, id int, req *dto.ProjectService,
 ) *errors.Error {
-	projectService := &entities.ProjectService{
-		ProjectID:      req.ProjectID,
-		ServiceID:      req.ServiceID,
+	service := &entities.ProjectService{
+		ID:             req.ID,
 		MaxRequest:     req.MaxRequest,
 		ResetFrequency: req.ResetFrequency,
 	}
 
-	if err := projectService.Validate(); err != nil {
+	if err := service.Validate(); err != nil {
 		return err
 	}
 
-	projectService.CalculateNextReset()
-	if err := u.projectServiceRepo.Save(ctx, projectService); err != nil {
+	service.CalculateNextReset()
+	if err := u.projectRepo.AddService(ctx, id, service); err != nil {
 		return err
 	}
 
@@ -40,103 +37,91 @@ func (u *ProjectUseCase) AssignService(
 func (u *ProjectUseCase) GetByClient(
 	ctx context.Context, clientID int,
 ) ([]*dto.ProjectResponse, *errors.Error) {
-	return u.projectRepo.FindByClient(ctx, clientID)
+	projects, err := u.projectRepo.FindByClient(ctx, clientID)
+	if err != nil {
+		return nil, err
+	}
+
+	projectResponses := make([]*dto.ProjectResponse, len(projects))
+	for i, project := range projects {
+		serviceResp := make(
+			[]*dto.ProjectServiceResponse, len(project.Services),
+		)
+		for i, service := range project.Services {
+			serviceResp[i] = &dto.ProjectServiceResponse{
+				ID:             service.ID,
+				NextReset:      service.NextReset,
+				MaxRequest:     service.MaxRequest,
+				ResetFrequency: service.ResetFrequency,
+				AssignedAt:     service.AssignedAt,
+			}
+		}
+
+		projectResponses[i] = &dto.ProjectResponse{
+			ID:        project.ID,
+			Name:      project.Name,
+			Status:    project.Status,
+			ClientID:  project.ClientID,
+			CreatedAt: project.CreatedAt,
+			Services:  serviceResp,
+		}
+	}
+
+	return projectResponses, nil
 }
 
 func (u *ProjectUseCase) Create(
 	ctx context.Context, req *dto.ProjectCreate,
 ) (*dto.ProjectResponse, *errors.Error) {
+	services := make([]*entities.ProjectService, len(req.Services))
+	for i, service := range req.Services {
+		services[i] = &entities.ProjectService{
+			ID:             service.ID,
+			MaxRequest:     service.MaxRequest,
+			ResetFrequency: service.ResetFrequency,
+		}
+	}
+
 	project := entities.Project{
 		Name:     req.Name,
 		Status:   req.Status,
 		ClientID: req.ClientID,
+		Services: services,
 	}
 
 	if err := project.Validate(); err != nil {
 		return nil, err
 	}
 
+	project.CalculateNextServicesReset()
+
 	if err := u.projectRepo.Save(ctx, &project); err != nil {
 		return nil, err
 	}
 
-	resp := &dto.ProjectResponse{
+	serviceResp := make(
+		[]*dto.ProjectServiceResponse, len(project.Services),
+	)
+	for i, service := range project.Services {
+		serviceResp[i] = &dto.ProjectServiceResponse{
+			ID:             service.ID,
+			NextReset:      service.NextReset,
+			MaxRequest:     service.MaxRequest,
+			ResetFrequency: service.ResetFrequency,
+			AssignedAt:     service.AssignedAt,
+		}
+	}
+
+	return &dto.ProjectResponse{
 		ID:        project.ID,
 		Name:      project.Name,
 		Status:    project.Status,
 		ClientID:  project.ClientID,
 		CreatedAt: project.CreatedAt,
-	}
-
-	var servicesErrors []string
-	var projectServices []*entities.ProjectService
-	for i, s := range req.Services {
-		projectService := &entities.ProjectService{
-			ProjectID:      project.ID,
-			ServiceID:      s.ID,
-			MaxRequest:     s.MaxRequest,
-			ResetFrequency: s.ResetFrequency,
-		}
-
-		if err := projectService.Validate(); err != nil {
-			servicesErrors = append(
-				servicesErrors,
-				fmt.Sprintf("Error validating service %v: %s", i, err.Message),
-			)
-			continue
-		}
-
-		projectService.CalculateNextReset()
-		projectServices = append(projectServices, projectService)
-	}
-
-	var errResp *errors.Error
-	if len(servicesErrors) > 0 {
-		errResp = errors.NewError(
-			errors.CodeValidationError,
-			"Invalid service assignments",
-			servicesErrors...,
-		)
-	}
-
-	if len(projectServices) > 0 {
-		err := u.projectServiceRepo.BulkSave(ctx, projectServices)
-		if err != nil {
-			if errResp != nil {
-				err = errors.NewError(
-					err.Code,
-					"Failed to save project services",
-					append(servicesErrors, err.Message)...,
-				)
-			}
-			return resp, err
-		}
-
-		projectServiceResp := make(
-			[]*dto.ProjectServiceAssignmentResponse,
-			len(projectServices),
-		)
-		for i, projectService := range projectServices {
-			projectServiceResp[i] = &dto.ProjectServiceAssignmentResponse{
-				ID:             projectService.ServiceID,
-				NextReset:      projectService.NextReset,
-				MaxRequest:     projectService.MaxRequest,
-				ResetFrequency: projectService.ResetFrequency,
-				AssignedAt:     projectService.CreatedAt,
-			}
-		}
-		resp.Services = projectServiceResp
-	}
-
-	return resp, errResp
+		Services:  serviceResp,
+	}, nil
 }
 
-func NewProjectUseCase(
-	projectRepo outbound.ProjectPort,
-	projectServiceRepo outbound.ProjectServicePort,
-) *ProjectUseCase {
-	return &ProjectUseCase{
-		projectRepo:        projectRepo,
-		projectServiceRepo: projectServiceRepo,
-	}
+func NewProjectUseCase(projectRepo outbound.ProjectPort) *ProjectUseCase {
+	return &ProjectUseCase{projectRepo: projectRepo}
 }

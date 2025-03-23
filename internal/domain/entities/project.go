@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
@@ -26,6 +27,14 @@ func (p *ProjectService) Validate() *errors.Error {
 
 	if p.MaxRequest < 0 {
 		return errors.ErrInvalidMaxRequest
+	}
+
+	if p.MaxRequest == 0 && p.ResetFrequency != enums.ProjectServiceNull {
+		return errors.ErrProjectServiceResetFrequencyNotPermitted
+	}
+
+	if p.MaxRequest > 0 && p.ResetFrequency == enums.ProjectServiceNull {
+		return errors.ErrProjectServiceResetFrequencyRequired
 	}
 
 	return nil
@@ -74,5 +83,31 @@ func (p *Project) Validate() *errors.Error {
 		return errors.ErrNameCannotBeEmpty
 	}
 
+	var errs []string
+	for i, s := range p.Services {
+		err := s.Validate()
+
+		if err != nil {
+			errs = append(
+				errs,
+				fmt.Sprintf("service %v: %s", i, err.Message),
+			)
+		}
+	}
+
+	if len(errs) > 0 {
+		return errors.NewError(
+			errors.CodeValidationError,
+			"Invalid services assignments",
+			errs...,
+		)
+	}
+
 	return nil
+}
+
+func (p *Project) CalculateNextServicesReset() {
+	for _, s := range p.Services {
+		s.CalculateNextReset()
+	}
 }

@@ -13,8 +13,9 @@ var (
 	ErrEnvironmentNotFound      = NewError(CodeNotFound, "environment not found")
 	ErrEnvironmentInvalidStatus = NewError(CodeValidationError, "invalid environment status")
 
-	ErrProjectServiceNotFound      = NewError(CodeNotFound, "project service not found")
-	ErrProjectServiceInvalidStatus = NewError(CodeValidationError, "invalid project service status")
+	ErrProjectServiceNotFound                   = NewError(CodeNotFound, "project service not found")
+	ErrProjectServiceResetFrequencyRequired     = NewError(CodeValidationError, "reset frequency is required when max request is greater than 0")
+	ErrProjectServiceResetFrequencyNotPermitted = NewError(CodeValidationError, "reset frequency must be null when max request is 0 (unlimited)")
 
 	ErrProjectNotFound           = NewError(CodeNotFound, "project not found")
 	ErrProjectInvalidStatus      = NewError(CodeValidationError, "invalid project status")

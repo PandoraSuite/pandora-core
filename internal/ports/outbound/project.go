@@ -10,5 +10,6 @@ import (
 
 type ProjectPort interface {
 	Save(ctx context.Context, project *entities.Project) *errors.Error
+	AddService(ctx context.Context, id int, service *entities.ProjectService) *errors.Error
 	FindByClient(ctx context.Context, clientID int) ([]*dto.ProjectResponse, *errors.Error)
 }
