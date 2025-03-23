@@ -280,6 +280,32 @@ func (r *EnvironmentRepository) FindByProject(
 	return environments, nil
 }
 
+func (r *EnvironmentRepository) AddService(
+	ctx context.Context, id int, service *entities.EnvironmentService,
+) *errors.Error {
+	query := `
+		WITH inserted AS (
+			INSERT INTO environment_service (environment_id, service_id, max_request, available_request)
+			VALUES ($1, $2, $3, $4)
+			RETURNING service_id
+		)
+		SELECT s.name, s.version
+		FROM inserted i
+		JOIN service s ON i.service_id = s.id
+	`
+
+	err := r.pool.QueryRow(
+		ctx,
+		query,
+		id,
+		service.ID,
+		service.MaxRequest,
+		service.AvailableRequest,
+	).Scan(&service.Name, &service.Version)
+
+	return r.handlerErr(err)
+}
+
 func (r *EnvironmentRepository) Save(
 	ctx context.Context, environment *entities.Environment,
 ) *errors.Error {
@@ -347,7 +373,6 @@ func (r *EnvironmentRepository) saveEnvironmentServices(
 				argIndex+1,
 				argIndex+2,
 				argIndex+3,
-				argIndex+4,
 			),
 		)
 		args = append(
@@ -357,7 +382,7 @@ func (r *EnvironmentRepository) saveEnvironmentServices(
 			service.MaxRequest,
 			service.AvailableRequest,
 		)
-		argIndex += 5
+		argIndex += 4
 	}
 
 	query := fmt.Sprintf(

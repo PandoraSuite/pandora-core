@@ -177,6 +177,33 @@ func (r *ProjectRepository) FindByClient(
 	return projects, nil
 }
 
+func (r *ProjectRepository) AddService(
+	ctx context.Context, id int, service *entities.ProjectService,
+) *errors.Error {
+	query := `
+		WITH inserted AS (
+			INSERT INTO project_service (project_id, service_id, max_request, reset_frequency, next_reset)
+			VALUES ($1, $2, $3, $4, $5)
+			RETURNING service_id
+		)
+		SELECT s.name, s.version
+		FROM inserted i
+		JOIN service s ON i.service_id = s.id
+	`
+
+	err := r.pool.QueryRow(
+		ctx,
+		query,
+		id,
+		service.ID,
+		service.MaxRequest,
+		service.ResetFrequency,
+		service.NextReset,
+	).Scan(&service.Name, &service.Version)
+
+	return r.handlerErr(err)
+}
+
 func (r *ProjectRepository) Save(
 	ctx context.Context, project *entities.Project,
 ) *errors.Error {
