@@ -190,7 +190,9 @@ func (r *ProjectRepository) Save(
 		return err
 	}
 
-	services, err := r.saveProjectServices(ctx, tx, project.ID, project.Services)
+	services, err := r.saveProjectServices(
+		ctx, tx, project.ID, project.Services,
+	)
 	if err != nil {
 		tx.Rollback(ctx)
 		return err
@@ -279,22 +281,22 @@ func (r *ProjectRepository) saveProjectServices(
 
 	var services []*entities.ProjectService
 	for rows.Next() {
-		project := new(entities.ProjectService)
+		service := new(entities.ProjectService)
 
 		err = rows.Scan(
-			&project.ID,
-			&project.Name,
-			&project.Version,
-			&project.MaxRequest,
-			&project.ResetFrequency,
-			&project.NextReset,
-			&project.AssignedAt,
+			&service.ID,
+			&service.Name,
+			&service.Version,
+			&service.MaxRequest,
+			&service.ResetFrequency,
+			&service.NextReset,
+			&service.AssignedAt,
 		)
 		if err != nil {
 			return nil, r.handlerErr(err)
 		}
 
-		services = append(services, project)
+		services = append(services, service)
 	}
 
 	if err := rows.Err(); err != nil {

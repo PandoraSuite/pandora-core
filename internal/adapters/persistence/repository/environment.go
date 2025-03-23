@@ -9,6 +9,7 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -76,9 +77,39 @@ func (r *EnvironmentRepository) Update(
 	return nil
 }
 
+func (r *EnvironmentRepository) DecrementAvailableRequest(
+	ctx context.Context, id, serviceID int,
+) (*dto.DecrementAvailableRequest, *errors.Error) {
+	query := `
+		UPDATE environment_service
+		SET available_request =
+			CASE
+				WHEN available_request IS NOT NULL AND available_request > 0
+				THEN available_request - 1
+				ELSE available_request
+			END
+		WHERE environment_id = $1 AND service_id = $2
+		AND (available_request IS NULL OR available_request > 0)
+		RETURNING max_request, available_request;
+	`
+
+	result := new(dto.DecrementAvailableRequest)
+	err := r.pool.QueryRow(ctx, query, id, serviceID).
+		Scan(
+			&result.MaxRequest,
+			&result.AvailableRequest,
+		)
+
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return result, nil
+}
+
 func (r *EnvironmentRepository) FindByID(
 	ctx context.Context, id int,
-) (*dto.EnvironmentResponse, *errors.Error) {
+) (*entities.Environment, *errors.Error) {
 	query := `
 		SELECT e.id, e.name, e.status, e.project_id, e.createdAt,
 			COALESCE(
@@ -86,6 +117,7 @@ func (r *EnvironmentRepository) FindByID(
 					JSON_BUILD_OBJECT(
 						'id', s.id,
 						'name', s.name,
+						'version', s.version,
 						'max_request', es.max_request,
 						'assigned_at', es.created_at
 					)
@@ -98,7 +130,7 @@ func (r *EnvironmentRepository) FindByID(
 		GROUP BY e.id;
 	`
 
-	environment := new(dto.EnvironmentResponse)
+	environment := new(entities.Environment)
 	err := r.pool.QueryRow(ctx, query, id).Scan(
 		&environment.ID,
 		&environment.Name,
@@ -116,7 +148,7 @@ func (r *EnvironmentRepository) FindByID(
 
 func (r *EnvironmentRepository) FindByProject(
 	ctx context.Context, projectID int,
-) ([]*dto.EnvironmentResponse, *errors.Error) {
+) ([]*entities.Environment, *errors.Error) {
 	query := `
 		SELECT e.id, e.name, e.status, e.project_id, e.createdAt,
 			COALESCE(
@@ -124,6 +156,7 @@ func (r *EnvironmentRepository) FindByProject(
 					JSON_BUILD_OBJECT(
 						'id', s.id,
 						'name', s.name,
+						'version', s.version,
 						'max_request', es.max_request,
 						'assigned_at', es.created_at
 					)
@@ -144,9 +177,9 @@ func (r *EnvironmentRepository) FindByProject(
 
 	defer rows.Close()
 
-	var environments []*dto.EnvironmentResponse
+	var environments []*entities.Environment
 	for rows.Next() {
-		environment := new(dto.EnvironmentResponse)
+		environment := new(entities.Environment)
 
 		err = rows.Scan(
 			&environment.ID,
@@ -173,6 +206,31 @@ func (r *EnvironmentRepository) FindByProject(
 func (r *EnvironmentRepository) Save(
 	ctx context.Context, environment *entities.Environment,
 ) *errors.Error {
+	tx, txErr := r.pool.Begin(ctx)
+	if txErr != nil {
+		return r.handlerErr(txErr)
+	}
+
+	if err := r.saveEnvironment(ctx, tx, environment); err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+
+	services, err := r.saveEnvironmentServices(
+		ctx, tx, environment.ID, environment.Services,
+	)
+	if err != nil {
+		tx.Rollback(ctx)
+		return err
+	}
+
+	environment.Services = services
+	return r.handlerErr(tx.Commit(ctx))
+}
+
+func (r *EnvironmentRepository) saveEnvironment(
+	ctx context.Context, tx pgx.Tx, environment *entities.Environment,
+) *errors.Error {
 	query := `
 		INSERT INTO environment (project_id, name, status)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
@@ -187,6 +245,89 @@ func (r *EnvironmentRepository) Save(
 	).Scan(&environment.ID, &environment.CreatedAt)
 
 	return r.handlerErr(err)
+}
+
+func (r *EnvironmentRepository) saveEnvironmentServices(
+	ctx context.Context,
+	tx pgx.Tx,
+	environmentID int,
+	newServices []*entities.EnvironmentService,
+) ([]*entities.EnvironmentService, *errors.Error) {
+	if len(newServices) == 0 {
+		return nil, nil
+	}
+
+	values := []string{}
+	args := []any{}
+	argIndex := 1
+
+	for _, service := range newServices {
+		values = append(
+			values,
+			fmt.Sprintf(
+				"($%d, $%d, $%d, $%d)",
+				argIndex,
+				argIndex+1,
+				argIndex+2,
+				argIndex+3,
+				argIndex+4,
+			),
+		)
+		args = append(
+			args,
+			environmentID,
+			service.ID,
+			service.MaxRequest,
+			service.AvailableRequest,
+		)
+		argIndex += 5
+	}
+
+	query := fmt.Sprintf(
+		`
+			WITH inserted AS (
+				INSERT INTO environment_service (environment_id, service_id, max_request, available_request)
+				VALUES %s
+				RETURNING *
+			)
+			SELECT s.id, s.name, s.version, i.max_request, i.available_request, i.create_at
+			FROM inserted i
+			JOIN service s ON i.service_id = s.id
+		`,
+		strings.Join(values, ", "),
+	)
+
+	rows, err := tx.Query(ctx, query, args...)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	defer rows.Close()
+
+	var services []*entities.EnvironmentService
+	for rows.Next() {
+		service := new(entities.EnvironmentService)
+
+		err = rows.Scan(
+			&service.ID,
+			&service.Name,
+			&service.Version,
+			&service.MaxRequest,
+			&service.AvailableRequest,
+			&service.AssignedAt,
+		)
+		if err != nil {
+			return nil, r.handlerErr(err)
+		}
+
+		services = append(services, service)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return services, r.handlerErr(err)
 }
 
 func NewEnvironmentRepository(

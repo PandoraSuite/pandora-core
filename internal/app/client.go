@@ -13,6 +13,33 @@ type ClientUseCase struct {
 	clientRepo outbound.ClientPort
 }
 
+func (c *ClientUseCase) Update(
+	ctx context.Context, id int, req *dto.ClientUpdate,
+) *errors.Error {
+	return c.clientRepo.Update(ctx, id, req)
+}
+
+func (c *ClientUseCase) GetByID(
+	ctx context.Context, id int,
+) (*dto.ClientResponse, *errors.Error) {
+	if id <= 0 {
+		return nil, errors.ErrInvalidClientID
+	}
+
+	client, err := c.clientRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.ClientResponse{
+		ID:        client.ID,
+		Type:      client.Type,
+		Name:      client.Name,
+		Email:     client.Email,
+		CreatedAt: client.CreatedAt,
+	}, nil
+}
+
 func (u *ClientUseCase) GetAll(
 	ctx context.Context, req *dto.ClientFilter,
 ) ([]*dto.ClientResponse, *errors.Error) {

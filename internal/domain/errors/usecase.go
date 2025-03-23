@@ -33,6 +33,7 @@ var (
 	ErrVersionCannotBeEmpty                  = NewError(CodeValidationError, "version cannot be empty")
 	ErrMaxRequestExceededForServiceInProyect = NewError(CodeValidationError, "max request exceeded for service in proyect")
 
+	ErrInvalidClientID   = NewError(CodeValidationError, "client ID must be greater than 0")
 	ErrInvalidProjectID  = NewError(CodeValidationError, "project ID must be greater than 0")
 	ErrInvalidServiceID  = NewError(CodeValidationError, "service ID must be greater than 0")
 	ErrInvalidMaxRequest = NewError(CodeValidationError, "max request must be greater than or equal to 0")

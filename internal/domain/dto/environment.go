@@ -6,6 +6,11 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
+type DecrementAvailableRequest struct {
+	MaxRequest       int `json:"max_request"`
+	AvailableRequest int `json:"available_request"`
+}
+
 type AssignServiceToEnvironment struct {
 	ServiceID     int `json:"service_id"`
 	EnvironmentID int `json:"environment_id"`
