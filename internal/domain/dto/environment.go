@@ -11,13 +11,7 @@ type DecrementAvailableRequest struct {
 	AvailableRequest int `json:"available_request"`
 }
 
-type AssignServiceToEnvironment struct {
-	ServiceID     int `json:"service_id"`
-	EnvironmentID int `json:"environment_id"`
-	MaxRequest    int `json:"max_request"`
-}
-
-type EnvironmentServiceAssignment struct {
+type EnvironmentService struct {
 	ID         int `json:"id" binding:"required"`
 	MaxRequest int `json:"max_request" binding:"required"`
 }
@@ -26,12 +20,13 @@ type EnvironmentCreate struct {
 	Name      string `json:"name"`
 	ProjectID int    `json:"project_id"`
 
-	Services []*EnvironmentServiceAssignment `json:"services,omitempty"`
+	Services []*EnvironmentService `json:"services,omitempty"`
 }
 
-type EnvironmentServiceAssignmentResponse struct {
+type EnvironmentServiceResponse struct {
 	ID         int       `json:"id"`
 	Name       string    `json:"name"`
+	Version    string    `json:"version"`
 	MaxRequest int       `json:"max_request"`
 	AssignedAt time.Time `json:"assigned_at"`
 }
@@ -43,7 +38,7 @@ type EnvironmentResponse struct {
 	ProjectID int                     `json:"project_id"`
 	CreatedAt time.Time               `json:"created_at"`
 
-	Services []*EnvironmentServiceAssignmentResponse `json:"services"`
+	Services []*EnvironmentServiceResponse `json:"services"`
 }
 
 type EnvironmentUpdate struct {

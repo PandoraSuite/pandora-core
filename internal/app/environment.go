@@ -11,71 +11,64 @@ import (
 )
 
 type EnvironmentUseCase struct {
-	environmentRepo        outbound.EnvironmentPort
-	projectServiceRepo     outbound.ProjectServiceFindPort
-	environmentServiceRepo outbound.EnvironmentServicePort
+	environmentRepo outbound.EnvironmentPort
 }
 
 func (u *EnvironmentUseCase) AssignService(
-	ctx context.Context, req *dto.AssignServiceToEnvironment,
-) error {
-	environment, err := u.environmentRepo.FindByID(ctx, req.EnvironmentID)
-	if err != nil {
-		if err == errors.ErrNotFound {
-			err = errors.ErrEnvironmentNotFound
-		}
+	ctx context.Context, id int, req *dto.EnvironmentService,
+) *errors.Error {
+	service := entities.EnvironmentService{
+		ID:               req.ID,
+		MaxRequest:       req.MaxRequest,
+		AvailableRequest: req.MaxRequest,
+	}
+
+	if id <= 0 {
+		return errors.ErrInvalidEnvironmentID
+	}
+
+	if err := service.Validate(); err != nil {
 		return err
 	}
 
-	projectService, err := u.projectServiceRepo.FindByProjectAndService(
-		ctx, environment.ProjectID, req.ServiceID,
-	)
+	exists, err := u.environmentRepo.ExistsEnvironmentService(ctx, id, service.ID)
 	if err != nil {
-		if err == errors.ErrNotFound {
-			err = errors.ErrProjectServiceNotFound
-		}
 		return err
 	}
 
-	if projectService.MaxRequest > 0 {
-		environmentServices, err := u.environmentServiceRepo.FindByProjectAndService(
-			ctx, environment.ProjectID, req.ServiceID,
-		)
+	if exists {
+		return errors.ErrEnvironmentServiceAlreadyExists
+	}
+
+	maxRequest, err := u.environmentRepo.
+		GetMaxRequestForServiceInProject(ctx, id, service.ID)
+	if err != nil {
+		return err
+	}
+
+	if maxRequest > 0 {
+		maxRequests, err := u.environmentRepo.
+			GetAllMaxRequestForServiceInEnvironments(ctx, id, req.ID)
 		if err != nil {
-			if err == errors.ErrNotFound {
-				err = errors.ErrEnvironmentServiceNotFound
-			}
 			return err
 		}
 
 		var totalMaxRequest int
-		for _, s := range environmentServices {
-			totalMaxRequest += s.MaxRequest
+		for _, v := range maxRequests {
+			totalMaxRequest += v
 		}
 
-		if req.MaxRequest+totalMaxRequest > projectService.MaxRequest {
+		if req.MaxRequest+totalMaxRequest > maxRequest {
 			return errors.ErrMaxRequestExceededForServiceInProyect
 		}
 	}
 
-	err = u.environmentServiceRepo.Save(
-		ctx,
-		&entities.EnvironmentService{
-			ServiceID:     req.ServiceID,
-			EnvironmentID: req.EnvironmentID,
-			MaxRequest:    req.MaxRequest,
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return u.environmentRepo.AddService(ctx, id, &service)
 }
 
 func (u *EnvironmentUseCase) GetByProject(
 	ctx context.Context, projectID int,
-) ([]*dto.EnvironmentResponse, error) {
+) ([]*dto.EnvironmentResponse, *errors.Error) {
 	environments, err := u.environmentRepo.FindByProject(ctx, projectID)
 	if err != nil {
 		return nil, err
@@ -83,6 +76,19 @@ func (u *EnvironmentUseCase) GetByProject(
 
 	environmentResponses := make([]*dto.EnvironmentResponse, len(environments))
 	for i, environment := range environments {
+		serviceResp := make(
+			[]*dto.EnvironmentServiceResponse, len(environment.Services),
+		)
+		for i, service := range environment.Services {
+			serviceResp[i] = &dto.EnvironmentServiceResponse{
+				ID:         service.ID,
+				Name:       service.Name,
+				Version:    service.Version,
+				MaxRequest: service.MaxRequest,
+				AssignedAt: service.AssignedAt,
+			}
+		}
+
 		environmentResponses[i] = &dto.EnvironmentResponse{
 			ID:        environment.ID,
 			Name:      environment.Name,
@@ -97,11 +103,21 @@ func (u *EnvironmentUseCase) GetByProject(
 
 func (u *EnvironmentUseCase) Create(
 	ctx context.Context, req *dto.EnvironmentCreate,
-) (*dto.EnvironmentResponse, error) {
+) (*dto.EnvironmentResponse, *errors.Error) {
+	services := make([]*entities.EnvironmentService, len(req.Services))
+	for i, service := range req.Services {
+		services[i] = &entities.EnvironmentService{
+			ID:               service.ID,
+			MaxRequest:       service.MaxRequest,
+			AvailableRequest: service.MaxRequest,
+		}
+	}
+
 	environment := entities.Environment{
 		Name:      req.Name,
 		Status:    enums.EnvironmentActive,
 		ProjectID: req.ProjectID,
+		Services:  services,
 	}
 
 	if err := environment.Validate(); err != nil {
@@ -112,23 +128,29 @@ func (u *EnvironmentUseCase) Create(
 		return nil, err
 	}
 
+	serviceResp := make(
+		[]*dto.EnvironmentServiceResponse, len(environment.Services),
+	)
+	for i, service := range environment.Services {
+		serviceResp[i] = &dto.EnvironmentServiceResponse{
+			ID:         service.ID,
+			Name:       service.Name,
+			Version:    service.Version,
+			MaxRequest: service.MaxRequest,
+			AssignedAt: service.AssignedAt,
+		}
+	}
+
 	return &dto.EnvironmentResponse{
 		ID:        environment.ID,
 		Name:      environment.Name,
 		Status:    environment.Status,
 		ProjectID: environment.ProjectID,
 		CreatedAt: environment.CreatedAt,
+		Services:  serviceResp,
 	}, nil
 }
 
-func NewEnvironmentUseCase(
-	environmentRepo outbound.EnvironmentPort,
-	projectServiceRepo outbound.ProjectServiceFindPort,
-	environmentServiceRepo outbound.EnvironmentServicePort,
-) *EnvironmentUseCase {
-	return &EnvironmentUseCase{
-		environmentRepo:        environmentRepo,
-		projectServiceRepo:     projectServiceRepo,
-		environmentServiceRepo: environmentServiceRepo,
-	}
+func NewEnvironmentUseCase(environmentRepo outbound.EnvironmentPort) *EnvironmentUseCase {
+	return &EnvironmentUseCase{environmentRepo: environmentRepo}
 }

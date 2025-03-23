@@ -107,6 +107,83 @@ func (r *EnvironmentRepository) DecrementAvailableRequest(
 	return result, nil
 }
 
+func (r *EnvironmentRepository) ExistsEnvironmentService(
+	ctx context.Context, id, serviceID int,
+) (bool, *errors.Error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM environment_service
+			WHERE environment_id = $1 AND service_id = $2;
+		);
+	`
+
+	var exists bool
+	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(&exists)
+	if err != nil {
+		return false, r.handlerErr(err)
+	}
+
+	return exists, nil
+}
+
+func (r *EnvironmentRepository) GetAllMaxRequestForServiceInEnvironments(
+	ctx context.Context, id, serviceID int,
+) ([]int, *errors.Error) {
+	query := `
+		SELECT es.max_request
+		FROM environment_service es
+		JOIN environment e ON e.id = es.environment_id
+		WHERE e.project_id = (
+			SELECT project_id FROM environment WHERE id = $1;
+		)
+		AND es.service_id = $2;
+	`
+
+	rows, err := r.pool.Query(ctx, query, id, serviceID)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	defer rows.Close()
+
+	var maxRequests []int
+	for rows.Next() {
+		var maxResuest int
+		if err := rows.Scan(&maxResuest); err != nil {
+			return nil, r.handlerErr(err)
+		}
+
+		maxRequests = append(maxRequests, maxResuest)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return maxRequests, nil
+}
+
+func (r *EnvironmentRepository) GetMaxRequestForServiceInProject(
+	ctx context.Context, id, serviceID int,
+) (int, *errors.Error) {
+	query := `
+		SELECT ps.max_request
+		FROM environment e
+		JOIN project_service ps ON ps.project_id = e.project_id
+		WHERE e.id = $1 AND ps.service_id = $2;
+	`
+
+	var maxRequest int
+	err := r.pool.QueryRow(ctx, query, id, serviceID).
+		Scan(&maxRequest)
+	if err != nil {
+		return 0, r.handlerErr(err)
+	}
+
+	return maxRequest, nil
+}
+
 func (r *EnvironmentRepository) FindByID(
 	ctx context.Context, id int,
 ) (*entities.Environment, *errors.Error) {

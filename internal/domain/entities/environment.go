@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
@@ -27,6 +28,14 @@ func (e *EnvironmentService) Validate() *errors.Error {
 		return errors.ErrInvalidMaxRequest
 	}
 
+	if e.MaxRequest == 0 && e.AvailableRequest > 0 {
+		return errors.ErrEnvironmentServiceAvailableRequestNotAllowed
+	}
+
+	if e.AvailableRequest > e.MaxRequest {
+		return errors.ErrEnvironmentServiceAvailableRequestExceedsMax
+	}
+
 	return nil
 }
 
@@ -49,6 +58,26 @@ func (e *Environment) Validate() *errors.Error {
 
 	if e.ProjectID <= 0 {
 		return errors.ErrInvalidProjectID
+	}
+
+	var errs []string
+	for i, s := range e.Services {
+		err := s.Validate()
+
+		if err != nil {
+			errs = append(
+				errs,
+				fmt.Sprintf("service %v: %s", i, err.Message),
+			)
+		}
+	}
+
+	if len(errs) > 0 {
+		return errors.NewError(
+			errors.CodeValidationError,
+			"invalid services assignments",
+			errs...,
+		)
 	}
 
 	return nil

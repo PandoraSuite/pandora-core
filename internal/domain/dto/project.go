@@ -23,6 +23,7 @@ type ProjectCreate struct {
 type ProjectServiceResponse struct {
 	ID             int                                `json:"id"`
 	Name           string                             `json:"name"`
+	Version        string                             `json:"version"`
 	NextReset      time.Time                          `json:"next_reset"`
 	MaxRequest     int                                `json:"max_request"`
 	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency"`

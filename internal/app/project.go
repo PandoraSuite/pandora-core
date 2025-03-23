@@ -27,11 +27,7 @@ func (u *ProjectUseCase) AssignService(
 	}
 
 	service.CalculateNextReset()
-	if err := u.projectRepo.AddService(ctx, id, service); err != nil {
-		return err
-	}
-
-	return nil
+	return u.projectRepo.AddService(ctx, id, service)
 }
 
 func (u *ProjectUseCase) GetByClient(
@@ -50,6 +46,8 @@ func (u *ProjectUseCase) GetByClient(
 		for i, service := range project.Services {
 			serviceResp[i] = &dto.ProjectServiceResponse{
 				ID:             service.ID,
+				Name:           service.Name,
+				Version:        service.Version,
 				NextReset:      service.NextReset,
 				MaxRequest:     service.MaxRequest,
 				ResetFrequency: service.ResetFrequency,
@@ -105,6 +103,8 @@ func (u *ProjectUseCase) Create(
 	for i, service := range project.Services {
 		serviceResp[i] = &dto.ProjectServiceResponse{
 			ID:             service.ID,
+			Name:           service.Name,
+			Version:        service.Version,
 			NextReset:      service.NextReset,
 			MaxRequest:     service.MaxRequest,
 			ResetFrequency: service.ResetFrequency,

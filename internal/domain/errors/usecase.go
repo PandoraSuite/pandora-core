@@ -26,7 +26,10 @@ var (
 	ErrServiceDeactivated   = NewError(CodeValidationError, "service is deactivated")
 	ErrServiceInvalidStatus = NewError(CodeValidationError, "invalid service status")
 
-	ErrEnvironmentServiceNotFound = NewError(CodeNotFound, "environment service not found")
+	ErrEnvironmentServiceNotFound                   = NewError(CodeNotFound, "environment service not found")
+	ErrEnvironmentServiceAlreadyExists              = NewError(CodeValidationError, "service is already configured for this environment")
+	ErrEnvironmentServiceAvailableRequestExceedsMax = NewError(CodeValidationError, "available request cannot be greater than max request")
+	ErrEnvironmentServiceAvailableRequestNotAllowed = NewError(CodeValidationError, "available request cannot be set when max request is 0 (unlimited)")
 
 	ErrNameCannotBeEmpty                     = NewError(CodeValidationError, "name cannot be empty")
 	ErrInvalidEmailFormat                    = NewError(CodeValidationError, "invalid email format")
@@ -34,8 +37,9 @@ var (
 	ErrVersionCannotBeEmpty                  = NewError(CodeValidationError, "version cannot be empty")
 	ErrMaxRequestExceededForServiceInProyect = NewError(CodeValidationError, "max request exceeded for service in proyect")
 
-	ErrInvalidClientID   = NewError(CodeValidationError, "client ID must be greater than 0")
-	ErrInvalidProjectID  = NewError(CodeValidationError, "project ID must be greater than 0")
-	ErrInvalidServiceID  = NewError(CodeValidationError, "service ID must be greater than 0")
-	ErrInvalidMaxRequest = NewError(CodeValidationError, "max request must be greater than or equal to 0")
+	ErrInvalidClientID      = NewError(CodeValidationError, "client ID must be greater than 0")
+	ErrInvalidProjectID     = NewError(CodeValidationError, "project ID must be greater than 0")
+	ErrInvalidServiceID     = NewError(CodeValidationError, "service ID must be greater than 0")
+	ErrInvalidMaxRequest    = NewError(CodeValidationError, "max request must be greater than or equal to 0")
+	ErrInvalidEnvironmentID = NewError(CodeValidationError, "environment ID must be greater than 0")
 )

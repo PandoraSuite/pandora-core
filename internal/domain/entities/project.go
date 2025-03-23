@@ -98,7 +98,7 @@ func (p *Project) Validate() *errors.Error {
 	if len(errs) > 0 {
 		return errors.NewError(
 			errors.CodeValidationError,
-			"Invalid services assignments",
+			"invalid services assignments",
 			errs...,
 		)
 	}
