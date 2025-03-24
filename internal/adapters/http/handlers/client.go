@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
-	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 	"github.com/gin-gonic/gin"
 )
@@ -18,20 +18,29 @@ import (
 // @Produce json
 // @Param id path int true "Client ID"
 // @Success 200 {array} dto.ProjectResponse
-// @Failure 400 {object} map[string]string "Invalid client ID"
-// @Failure 500 {object} map[string]string "Internal server error"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 422 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/clients/{id}/projects [get]
 func GetProjectsByClient(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		clientID, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
+		clientID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid client ID"})
 			return
 		}
 
-		projects, err := projectService.GetByClient(c.Request.Context(), clientID)
+		projects, err := projectService.GetByClient(
+			c.Request.Context(), clientID,
+		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(
+				utils.GetDomainErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
@@ -48,30 +57,35 @@ func GetProjectsByClient(projectService inbound.ProjectHTTPPort) gin.HandlerFunc
 // @Produce json
 // @Param request body dto.ClientCreate true "Client creation data"
 // @Success 201 {object} dto.ClientResponse
-// @Failure 400 {object} map[string]string "Invalid input data"
-// @Failure 500 {object} map[string]string "Internal server error"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 422 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/clients [post]
 func CreateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ClientCreate
 
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
 		client, err := clientService.Create(c.Request.Context(), &req)
-		switch err {
-		case nil:
-			c.JSON(http.StatusCreated, client)
-		case errors.ErrNameCannotBeEmpty,
-			errors.ErrInvalidEmailFormat,
-			errors.ErrClientTypeCannotBeNull:
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		default:
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-
+		if err != nil {
+			c.JSON(
+				utils.GetDomainErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
+			return
 		}
+
+		c.JSON(http.StatusCreated, client)
 	}
 }
 
@@ -83,21 +97,31 @@ func CreateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 // @Produce json
 // @Param query query dto.ClientQueryParams false "Query parameters"
 // @Success 200 {array} dto.ClientResponse
-// @Failure 400 {object} map[string]string "Invalid query parameter"
-// @Failure 500 {object} map[string]string "Internal server error"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 422 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/clients [get]
 func GetAllClients(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ClientFilter
 
 		if err := c.ShouldBindQuery(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
 		clients, err := clientService.GetClients(c.Request.Context(), &req)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(
+				utils.GetDomainErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 

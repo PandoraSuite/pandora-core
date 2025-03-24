@@ -14,7 +14,7 @@ type AuthenticateResponse struct {
 }
 
 type ChangePassword struct {
-	Username        string `json:"-"`
+	Username        string `json:"-" swaggerignore:"true"`
 	NewPassword     string `json:"new_password"`
 	ConfirmPassword string `json:"confirm_password"`
 }

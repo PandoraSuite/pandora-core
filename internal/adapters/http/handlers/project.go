@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 	"github.com/gin-gonic/gin"
 )
@@ -19,25 +19,31 @@ import (
 // @Produce json
 // @Param request body dto.ProjectCreate true "Project creation data"
 // @Success 201 {object} dto.ProjectResponse
-// @Failure 400 {object} map[string]string "Invalid input data"
-// @Failure 500 {object} map[string]string "Internal server error"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 422 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/projects [post]
 func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ProjectCreate
 
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
 		project, err := projectService.Create(c.Request.Context(), &req)
 		if err != nil {
-			if err == domainErr.ErrNameCannotBeEmpty {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			} else {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			}
+			c.JSON(
+				utils.GetDomainErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
@@ -52,39 +58,38 @@ func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 // @Security OAuth2Password
 // @Accept json
 // @Produce json
-// @Param project_id path int true "Project ID"
-// @Param service_id path int true "Service ID"
+// @Param id path int true "Project ID"
 // @Param request body dto.AssignServiceToProject true "Service assignment data"
 // @Success 204 "No Content"
-// @Failure 400 {object} map[string]string "Invalid input data"
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/v1/projects/{project_id}/services/{service_id}/assign [post]
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 422 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /api/v1/projects/{id}/services [post]
 func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		projectID, err := strconv.Atoi(c.Param("project_id"))
-		if err != nil {
+		projectID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
 			return
 		}
 
-		serviceID, err := strconv.Atoi(c.Param("service_id"))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid service ID"})
-			return
-		}
-
-		var req dto.AssignServiceToProject
+		var req dto.ProjectService
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		req.ProjectID = projectID
-		req.ServiceID = serviceID
-
-		err = projectService.AssignService(c.Request.Context(), &req)
+		err := projectService.AssignService(
+			c.Request.Context(), projectID, &req,
+		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(
+				utils.GetDomainErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
@@ -100,20 +105,27 @@ func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerF
 // @Produce json
 // @Param id path int true "Project ID"
 // @Success 200 {array} dto.EnvironmentResponse
-// @Failure 400 {object} map[string]string "Invalid project ID"
-// @Failure 500 {object} map[string]string "Internal server error"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 422 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/projects/{id}/environments [get]
 func GetEnvironmentsByProject(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		projectID, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
+		projectID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
 			return
 		}
 
 		environments, err := environmentUseCase.GetEnvironmentsByProject(c.Request.Context(), projectID)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(
+				utils.GetDomainErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 

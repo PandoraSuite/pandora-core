@@ -3,8 +3,8 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 	"github.com/gin-gonic/gin"
 )
@@ -18,26 +18,30 @@ import (
 // @Param username formData string true "Login username"
 // @Param password formData string true "Login password"
 // @Success 200 {object} dto.AuthenticateResponse
-// @Failure 400 {object} map[string]string "Invalid request format"
-// @Failure 401 {object} map[string]string "Invalid username or password"
-// @Failure 500 {object} map[string]string "Internal server error"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 422 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/auth/login [post]
 func Authenticate(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.Authenticate
 
 		if err := c.ShouldBind(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
 		res, err := authService.Authenticate(c.Request.Context(), &req)
 		if err != nil {
-			if err == domainErr.ErrInvalidCredentials {
-				c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-			} else {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			}
+			c.JSON(
+				utils.GetDomainErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
@@ -54,9 +58,12 @@ func Authenticate(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 // @Produce json
 // @Param request body dto.ChangePassword true "New password and confirmation"
 // @Success 204
-// @Failure 400 {object} map[string]string "Validation error"
-// @Failure 401 {object} map[string]string "Unauthorized"
-// @Failure 500 {object} map[string]string "Internal server error"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 422 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/auth/change-password [post]
 func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -71,19 +78,20 @@ func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 
 		var req dto.ChangePassword
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
 		req.Username = username
 		err := authService.ChangePassword(c.Request.Context(), &req)
 		if err != nil {
-			switch err {
-			case domainErr.ErrPasswordTooShort, domainErr.ErrPasswordMismatch:
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			default:
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			}
+			c.JSON(
+				utils.GetDomainErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 

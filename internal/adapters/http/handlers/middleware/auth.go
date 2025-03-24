@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 	"github.com/gin-gonic/gin"
@@ -33,7 +34,10 @@ func ValidateToken(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 
 		username, err := authService.ValidateToken(c.Request.Context(), req)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			c.JSON(
+				utils.GetDomainErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			c.Abort()
 			return
 		}

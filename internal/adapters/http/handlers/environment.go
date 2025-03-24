@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 	"github.com/gin-gonic/gin"
 )
@@ -18,13 +18,17 @@ import (
 // @Produce json
 // @Param id path int true "Environment ID"
 // @Success 200 {array} dto.APIKeyResponse
-// @Failure 400 {object} map[string]string "Invalid environment ID"
-// @Failure 500 {object} map[string]string "Internal server error"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 422 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/environments/{id}/api-keys [get]
 func GetAPIKeysByEnvironment(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		environmentID, err := strconv.Atoi(c.Param("id"))
-		if err != nil {
+		environmentID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid environment ID"})
 			return
 		}
@@ -33,7 +37,10 @@ func GetAPIKeysByEnvironment(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFu
 			c.Request.Context(), environmentID,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			c.JSON(
+				utils.GetDomainErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
@@ -50,25 +57,31 @@ func GetAPIKeysByEnvironment(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFu
 // @Produce json
 // @Param request body dto.EnvironmentCreate true "Environment creation data"
 // @Success 201 {object} dto.EnvironmentResponse
-// @Failure 400 {object} map[string]string "Invalid input data"
-// @Failure 500 {object} map[string]string "Internal server error"
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 422 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/environments [post]
 func CreateEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.EnvironmentCreate
 
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
 		environment, err := environmentUseCase.Create(c.Request.Context(), &req)
 		if err != nil {
-			if err == domainErr.ErrNameCannotBeEmpty {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			} else {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			}
+			c.JSON(
+				utils.GetDomainErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
@@ -83,43 +96,41 @@ func CreateEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.Handl
 // @Security OAuth2Password
 // @Accept json
 // @Produce json
-// @Param environment_id path int true "Environment ID"
-// @Param service_id path int true "Environment ID"
-// @Param request body dto.AssignServiceToEnvironment true "Service assignment data"
-// @Success 204 "No Content"
-// @Failure 400 {object} map[string]string "Invalid input data"
-// @Failure 500 {object} map[string]string "Internal server error"
-// @Router /api/v1/environments/{environment_id}/services/{service_id}/assign [post]
+// @Param id path int true "Environment ID"
+// @Param request body dto.EnvironmentService true "Service data"
+// @Success 204
+// @Failure 400 {object} utils.ErrorResponse
+// @Failure 401 {object} utils.ErrorResponse
+// @Failure 403 {object} utils.ErrorResponse
+// @Failure 404 {object} utils.ErrorResponse
+// @Failure 422 {object} utils.ErrorResponse
+// @Failure 500 {object} utils.ErrorResponse
+// @Router /api/v1/environments/{id}/services [post]
 func AssignServiceToEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		environmentID, err := strconv.Atoi(c.Param("environment_id"))
-		if err != nil {
+		environmentID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid environment ID"})
 			return
 		}
 
-		serviceID, err := strconv.Atoi(c.Param("service_id"))
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid service ID"})
-			return
-		}
-
-		var req dto.AssignServiceToEnvironment
+		var req dto.EnvironmentService
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
-		req.ServiceID = serviceID
-		req.EnvironmentID = environmentID
-
-		err = environmentUseCase.AssignService(c.Request.Context(), &req)
+		err := environmentUseCase.AssignService(
+			c.Request.Context(), environmentID, &req,
+		)
 		if err != nil {
-			if err == domainErr.ErrMaxRequestExceededForServiceInProyect {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			} else {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			}
+			c.JSON(
+				utils.GetDomainErrorStatusCode(err),
+				utils.ErrorResponse{Error: err},
+			)
 			return
 		}
 
