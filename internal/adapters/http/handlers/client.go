@@ -116,7 +116,7 @@ func GetAllClients(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		clients, err := clientService.GetClients(c.Request.Context(), &req)
+		clients, err := clientService.GetAll(c.Request.Context(), &req)
 		if err != nil {
 			c.JSON(
 				utils.GetDomainErrorStatusCode(err),

@@ -15,7 +15,7 @@ type ServiceUseCase struct {
 }
 
 func (u *ServiceUseCase) GetServices(ctx context.Context) ([]*dto.ServiceResponse, *errors.Error) {
-	services, err := u.serviceRepo.FindAll(ctx)
+	services, err := u.serviceRepo.FindAll(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +35,9 @@ func (u *ServiceUseCase) GetServices(ctx context.Context) ([]*dto.ServiceRespons
 }
 
 func (u *ServiceUseCase) GetActiveServices(ctx context.Context) ([]*dto.ServiceResponse, *errors.Error) {
-	services, err := u.serviceRepo.FindAll(ctx)
+	services, err := u.serviceRepo.FindAll(
+		ctx, &dto.ServiceFilter{Status: enums.ServiceActive},
+	)
 	if err != nil {
 		return nil, err
 	}

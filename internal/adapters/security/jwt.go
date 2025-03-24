@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -14,7 +14,9 @@ type JWTProvider struct {
 	secret []byte
 }
 
-func (p *JWTProvider) GenerateToken(ctx context.Context, subject string) (*dto.AuthenticateResponse, error) {
+func (p *JWTProvider) GenerateToken(
+	ctx context.Context, subject string,
+) (*dto.AuthenticateResponse, *errors.Error) {
 	now := time.Now()
 	expTime := now.Add(time.Hour)
 
@@ -29,7 +31,7 @@ func (p *JWTProvider) GenerateToken(ctx context.Context, subject string) (*dto.A
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenStr, err := token.SignedString(p.secret)
 	if err != nil {
-		return nil, domainErr.ErrTokenSigningFailed
+		return nil, errors.ErrTokenSigningFailed
 	}
 
 	return &dto.AuthenticateResponse{
@@ -39,9 +41,11 @@ func (p *JWTProvider) GenerateToken(ctx context.Context, subject string) (*dto.A
 	}, nil
 }
 
-func (p *JWTProvider) ValidateToken(ctx context.Context, token *dto.TokenRequest) (string, error) {
+func (p *JWTProvider) ValidateToken(
+	ctx context.Context, token *dto.TokenRequest,
+) (string, *errors.Error) {
 	if token.Type != "Bearer" {
-		return "", domainErr.ErrInvalidTokenType
+		return "", errors.ErrInvalidTokenType
 	}
 
 	t, err := jwt.Parse(token.Key, func(token *jwt.Token) (any, error) {
@@ -49,13 +53,13 @@ func (p *JWTProvider) ValidateToken(ctx context.Context, token *dto.TokenRequest
 	})
 
 	if err != nil || !t.Valid {
-		return "", domainErr.ErrInvalidToken
+		return "", errors.ErrInvalidToken
 	}
 
 	if claims, ok := t.Claims.(jwt.MapClaims); ok {
 		return claims["sub"].(string), nil
 	}
-	return "", domainErr.ErrInvalidTokenData
+	return "", errors.ErrInvalidTokenData
 }
 
 func NewJWTProvider(secret []byte) *JWTProvider {

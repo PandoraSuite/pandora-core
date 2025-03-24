@@ -20,7 +20,7 @@ type APIKeyUseCase struct {
 
 func (u *APIKeyUseCase) ValidateAndConsume(
 	ctx context.Context, req *dto.APIKeyValidateAndConsume,
-) (*dto.APIKeyValidateResponse, error) {
+) (*dto.APIKeyValidateResponse, *errors.Error) {
 	resp := &dto.APIKeyValidateResponse{Valid: false}
 
 	apiKey, err := u.apiKeyRepo.FindByKey(ctx, req.Key)
@@ -90,7 +90,7 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 
 func (u *APIKeyUseCase) GetAPIKeysByEnvironment(
 	ctx context.Context, environmentID int,
-) ([]*dto.APIKeyResponse, error) {
+) ([]*dto.APIKeyResponse, *errors.Error) {
 	apiKeys, err := u.apiKeyRepo.FindByEnvironment(ctx, environmentID)
 	if err != nil {
 		return nil, err
@@ -114,7 +114,7 @@ func (u *APIKeyUseCase) GetAPIKeysByEnvironment(
 
 func (u *APIKeyUseCase) Create(
 	ctx context.Context, req *dto.APIKeyCreate,
-) (*dto.APIKeyResponse, error) {
+) (*dto.APIKeyResponse, *errors.Error) {
 	apiKey := entities.APIKey{
 		Status:        enums.APIKeyActive,
 		ExpiresAt:     req.ExpiresAt,

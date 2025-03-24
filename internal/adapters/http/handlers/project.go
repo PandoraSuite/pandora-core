@@ -120,7 +120,9 @@ func GetEnvironmentsByProject(environmentUseCase inbound.EnvironmentHTTPPort) gi
 			return
 		}
 
-		environments, err := environmentUseCase.GetEnvironmentsByProject(c.Request.Context(), projectID)
+		environments, err := environmentUseCase.GetByProject(
+			c.Request.Context(), projectID,
+		)
 		if err != nil {
 			c.JSON(
 				utils.GetDomainErrorStatusCode(err),

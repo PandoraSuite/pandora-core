@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type credentials struct {
@@ -24,9 +24,9 @@ type CredentialsRepository struct {
 
 func (r *CredentialsRepository) FindCredentials(
 	ctx context.Context, username string,
-) (*entities.Credentials, error) {
+) (*entities.Credentials, *errors.Error) {
 	if username != r.credentials.Username {
-		return nil, domainErr.ErrCredentialsNotFound
+		return nil, errors.ErrCredentialsNotFound
 	}
 
 	return &entities.Credentials{
@@ -38,9 +38,9 @@ func (r *CredentialsRepository) FindCredentials(
 
 func (r *CredentialsRepository) ChangePassword(
 	ctx context.Context, credentials *entities.Credentials,
-) error {
+) *errors.Error {
 	if credentials.Username != r.credentials.Username {
-		return domainErr.ErrCredentialsNotFound
+		return errors.ErrCredentialsNotFound
 	}
 
 	oldPassword := r.credentials.Password
@@ -52,7 +52,7 @@ func (r *CredentialsRepository) ChangePassword(
 
 	if err := r.saveCredentials(); err != nil {
 		r.credentials.Password = oldPassword
-		return err
+		return errors.ErrPersistence
 	}
 	return nil
 }
