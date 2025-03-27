@@ -95,7 +95,7 @@ func CreateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 // @Tags Clients
 // @Security OAuth2Password
 // @Produce json
-// @Param query query dto.ClientQueryParams false "Query parameters"
+// @Param query query dto.ClientFilter false "Query parameters"
 // @Success 200 {array} dto.ClientResponse
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 401 {object} utils.ErrorResponse

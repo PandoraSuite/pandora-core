@@ -31,22 +31,16 @@ func (t *ClientType) Scan(v any) error {
 	if !ok {
 		return fmt.Errorf("invalid type: %v", v)
 	}
-
-	ct, err := ParseClientType(str)
+	parsed, err := ParseClientType(str)
 	if err != nil {
 		return err
 	}
-
-	*t = ct
+	*t = parsed
 	return nil
 }
 
 func (t *ClientType) UnmarshalJSON(b []byte) error {
-	var s string
-	if err := json.Unmarshal(b, &s); err != nil {
-		return err
-	}
-	parsed, err := ParseClientType(s)
+	parsed, err := ParseClientType(string(b))
 	if err != nil {
 		return err
 	}

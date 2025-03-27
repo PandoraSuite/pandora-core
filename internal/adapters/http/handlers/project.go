@@ -59,7 +59,7 @@ func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 // @Accept json
 // @Produce json
 // @Param id path int true "Project ID"
-// @Param request body dto.AssignServiceToProject true "Service assignment data"
+// @Param request body dto.ProjectService true "Service assignment data"
 // @Success 204 "No Content"
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 401 {object} utils.ErrorResponse

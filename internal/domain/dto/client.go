@@ -7,7 +7,7 @@ import (
 )
 
 type ClientFilter struct {
-	Type enums.ClientType `json:"type,omitempty" enums:"developer,organization" swaggertype:"string"`
+	Type enums.ClientType `form:"type,omitempty" enums:"developer,organization" swaggertype:"string"`
 }
 
 type ClientCreate struct {
