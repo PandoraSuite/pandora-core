@@ -58,7 +58,7 @@ func (s *ServiceStatus) UnmarshalJSON(b []byte) error {
 }
 
 func (s *ServiceStatus) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.String())
+	return []byte(s.String()), nil
 }
 
 func ParseServiceStatus(s string) (ServiceStatus, error) {

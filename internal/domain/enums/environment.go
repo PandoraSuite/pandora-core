@@ -55,7 +55,7 @@ func (s *EnvironmentStatus) UnmarshalJSON(b []byte) error {
 }
 
 func (s *EnvironmentStatus) MarshalJSON() ([]byte, error) {
-	return json.Marshal(s.String())
+	return []byte(s.String()), nil
 }
 
 func ParseEnvironmentStatus(s string) (EnvironmentStatus, error) {

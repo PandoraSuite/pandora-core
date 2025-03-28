@@ -61,7 +61,7 @@ func (rf *ProjectServiceResetFrequency) UnmarshalJSON(b []byte) error {
 }
 
 func (rf *ProjectServiceResetFrequency) MarshalJSON() ([]byte, error) {
-	return json.Marshal(rf.String())
+	return []byte(rf.String()), nil
 }
 
 func ParseProjectServiceResetFrequency(rf string) (ProjectServiceResetFrequency, error) {
