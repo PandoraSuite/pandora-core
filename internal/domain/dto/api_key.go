@@ -6,22 +6,29 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
-type APIKeyValidateAndConsume struct {
+type APIKeyValidate struct {
 	Key            string    `json:"key"`
 	RequestTime    time.Time `json:"request_time"`
 	ServiceName    string    `json:"service_name"`
 	ServiceVersion string    `json:"service_version"`
 }
 
+type APIKeyValidateResponse struct {
+	Valid     bool `json:"valid"`
+	RequestID int  `json:"request_id"`
+
+	Message string `json:"message,omitempty"`
+}
+
+type APIKeyValidateQuotaResponse struct {
+	APIKeyValidateResponse `json:",inline"`
+
+	AvailableRequest string `json:"available_request"`
+}
+
 type APIKeyCreate struct {
 	ExpiresAt     time.Time `json:"expires_at"`
 	EnvironmentID int       `json:"environment_id"`
-}
-
-type APIKeyValidateResponse struct {
-	Valid            bool   `json:"valid"`
-	AvailableRequest string `json:"available_request"`
-	RequestLogID     int    `json:"request_log_id"`
 }
 
 type APIKeyResponse struct {

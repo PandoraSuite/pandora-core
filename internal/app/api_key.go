@@ -19,7 +19,7 @@ type APIKeyUseCase struct {
 }
 
 func (u *APIKeyUseCase) ValidateAndConsume(
-	ctx context.Context, req *dto.APIKeyValidateAndConsume,
+	ctx context.Context, req *dto.APIKeyValidate,
 ) (*dto.APIKeyValidateResponse, *errors.Error) {
 	resp := &dto.APIKeyValidateResponse{Valid: false}
 
@@ -81,10 +81,12 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 		availableRequestResp = strconv.Itoa(availableRequest.AvailableRequest)
 	}
 
+	println(availableRequestResp)
+
 	return &dto.APIKeyValidateResponse{
-		Valid:            true,
-		RequestLogID:     requestLog.ID,
-		AvailableRequest: availableRequestResp,
+		Valid:     true,
+		RequestID: requestLog.ID,
+		// AvailableRequest: availableRequestResp,
 	}, nil
 }
 
