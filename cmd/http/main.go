@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	log.Println("[INFO] Starting Pandora Core...")
+	log.Println("[INFO] Starting Pandora Core (API RESTful)...")
 
 	cfg, err := config.LoadConfig()
 	if err != nil {
