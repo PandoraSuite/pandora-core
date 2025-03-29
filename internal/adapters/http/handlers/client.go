@@ -6,6 +6,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 	"github.com/gin-gonic/gin"
 )
@@ -106,16 +107,16 @@ func CreateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 // @Router /api/v1/clients [get]
 func GetAllClients(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var req dto.ClientFilter
-
-		if err := c.ShouldBindQuery(&req); err != nil {
+		t, paramErr := enums.ParseClientType(c.Query("type"))
+		if paramErr != nil {
 			c.JSON(
-				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				http.StatusUnprocessableEntity,
+				utils.ErrorResponse{Error: paramErr},
 			)
 			return
 		}
 
+		req := dto.ClientFilter{Type: t}
 		clients, err := clientService.GetAll(c.Request.Context(), &req)
 		if err != nil {
 			c.JSON(
