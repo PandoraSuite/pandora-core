@@ -48,7 +48,7 @@ func (t *ClientType) UnmarshalJSON(b []byte) error {
 }
 
 func (t *ClientType) MarshalJSON() ([]byte, error) {
-	return []byte(t.String()), nil
+	return []byte(fmt.Sprintf("\"%s\"", t.String())), nil
 }
 
 func ParseClientType(t string) (ClientType, error) {

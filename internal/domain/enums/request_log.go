@@ -64,7 +64,7 @@ func (es *RequestLogExecutionStatus) UnmarshalJSON(b []byte) error {
 }
 
 func (es *RequestLogExecutionStatus) MarshalJSON() ([]byte, error) {
-	return []byte(es.String()), nil
+	return []byte(fmt.Sprintf("\"%s\"", es.String())), nil
 }
 
 func ParseRequestLogExecutionStatus(es string) (RequestLogExecutionStatus, error) {

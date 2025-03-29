@@ -55,7 +55,7 @@ func (s *APIKeyStatus) UnmarshalJSON(b []byte) error {
 }
 
 func (s *APIKeyStatus) MarshalJSON() ([]byte, error) {
-	return []byte(s.String()), nil
+	return []byte(fmt.Sprintf("\"%s\"", s.String())), nil
 }
 
 func ParseAPIKeyStatus(s string) (APIKeyStatus, error) {
