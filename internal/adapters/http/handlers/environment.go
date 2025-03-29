@@ -24,7 +24,10 @@ func GetAPIKeysByEnvironment(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFu
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid environment ID"})
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "invalid environment ID"},
+			)
 			return
 		}
 
@@ -32,9 +35,9 @@ func GetAPIKeysByEnvironment(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFu
 			c.Request.Context(), environmentID,
 		)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -59,18 +62,18 @@ func CreateEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.Handl
 		var req dto.EnvironmentCreate
 
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
 
 		environment, err := environmentUseCase.Create(c.Request.Context(), &req)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -95,15 +98,18 @@ func AssignServiceToEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) 
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid environment ID"})
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid environment ID"},
+			)
 			return
 		}
 
 		var req dto.EnvironmentService
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -112,9 +118,9 @@ func AssignServiceToEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) 
 			c.Request.Context(), environmentID, &req,
 		)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}

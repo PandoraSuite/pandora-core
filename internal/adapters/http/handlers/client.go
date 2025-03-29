@@ -25,7 +25,10 @@ func GetProjectsByClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid client ID"})
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid client ID"},
+			)
 			return
 		}
 
@@ -33,9 +36,9 @@ func GetProjectsByClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 			c.Request.Context(), clientID,
 		)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -60,18 +63,18 @@ func CreateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 		var req dto.ClientCreate
 
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
 
 		client, err := clientService.Create(c.Request.Context(), &req)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -94,7 +97,7 @@ func GetAllClients(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		t, paramErr := enums.ParseClientType(c.Query("type"))
 		if paramErr != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				http.StatusUnprocessableEntity,
 				utils.ErrorResponse{Error: paramErr},
 			)
@@ -104,9 +107,9 @@ func GetAllClients(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 		req := dto.ClientFilter{Type: t}
 		clients, err := clientService.GetAll(c.Request.Context(), &req)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}

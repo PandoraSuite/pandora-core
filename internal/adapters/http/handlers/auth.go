@@ -25,18 +25,18 @@ func Authenticate(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 		var req dto.Authenticate
 
 		if err := c.ShouldBind(&req); err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
 
 		res, err := authService.Authenticate(c.Request.Context(), &req)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -60,7 +60,7 @@ func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		username := c.GetString("username")
 		if username == "" {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				http.StatusInternalServerError,
 				gin.H{"error": "username not found in context"},
 			)
@@ -69,9 +69,9 @@ func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 
 		var req dto.ChangePassword
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -79,9 +79,9 @@ func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 		req.Username = username
 		err := authService.ChangePassword(c.Request.Context(), &req)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}

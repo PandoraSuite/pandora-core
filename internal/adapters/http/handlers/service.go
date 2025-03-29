@@ -26,18 +26,18 @@ func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 		var req dto.ServiceCreate
 
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
 
 		service, err := srvService.Create(c.Request.Context(), &req)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -60,7 +60,7 @@ func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		s, paramErr := enums.ParseServiceStatus(c.Query("status"))
 		if paramErr != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				http.StatusUnprocessableEntity,
 				utils.ErrorResponse{Error: paramErr},
 			)
@@ -70,9 +70,9 @@ func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 		req := dto.ServiceFilter{Status: s}
 		services, err := srvService.GetServices(c.Request.Context(), &req)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}

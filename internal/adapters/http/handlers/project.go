@@ -26,18 +26,18 @@ func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 		var req dto.ProjectCreate
 
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
 
 		project, err := projectService.Create(c.Request.Context(), &req)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -62,13 +62,16 @@ func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerF
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
 			return
 		}
 
 		var req dto.ProjectService
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": err.Error()},
+			)
 			return
 		}
 
@@ -76,9 +79,9 @@ func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerF
 			c.Request.Context(), projectID, &req,
 		)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -101,7 +104,10 @@ func GetEnvironmentsByProject(environmentUseCase inbound.EnvironmentHTTPPort) gi
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid project ID"},
+			)
 			return
 		}
 
@@ -109,9 +115,9 @@ func GetEnvironmentsByProject(environmentUseCase inbound.EnvironmentHTTPPort) gi
 			c.Request.Context(), projectID,
 		)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
