@@ -107,7 +107,7 @@ func (r *EnvironmentRepository) DecrementAvailableRequest(
 	return result, nil
 }
 
-func (r *EnvironmentRepository) ExistsEnvironmentService(
+func (r *EnvironmentRepository) ExistsServiceIn(
 	ctx context.Context, id, serviceID int,
 ) (bool, *errors.Error) {
 	query := `

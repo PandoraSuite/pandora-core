@@ -54,7 +54,9 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 	{
 		auth := protected.Group("/auth")
 		{
-			auth.POST("/change-password", handlers.ChangePassword(srv.authService))
+			auth.POST(
+				"/change-password", handlers.ChangePassword(srv.authService),
+			)
 		}
 
 		protected.Use(middleware.ForcePasswordReset(srv.authService))
@@ -65,9 +67,16 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 
 		environments := protected.Group("/environments")
 		{
+			environments.POST(
+				"", handlers.CreateEnvironment(srv.environmentService),
+			)
 			environments.GET(
 				"/:id/api-keys",
 				handlers.GetAPIKeysByEnvironment(srv.apiKeyService),
+			)
+			environments.POST(
+				"/:id/services",
+				handlers.AssignServiceToEnvironment(srv.environmentService),
 			)
 		}
 

@@ -23,15 +23,11 @@ func (u *EnvironmentUseCase) AssignService(
 		AvailableRequest: req.MaxRequest,
 	}
 
-	if id <= 0 {
-		return errors.ErrInvalidEnvironmentID
-	}
-
 	if err := service.Validate(); err != nil {
 		return err
 	}
 
-	exists, err := u.environmentRepo.ExistsEnvironmentService(ctx, id, service.ID)
+	exists, err := u.environmentRepo.ExistsServiceIn(ctx, id, service.ID)
 	if err != nil {
 		return err
 	}
