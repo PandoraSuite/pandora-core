@@ -58,12 +58,7 @@ func Authenticate(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 // @Produce json
 // @Param request body dto.ChangePassword true "New password and confirmation"
 // @Success 204
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/auth/change-password [post]
 func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {

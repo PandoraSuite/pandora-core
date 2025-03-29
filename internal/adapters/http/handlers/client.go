@@ -19,12 +19,7 @@ import (
 // @Produce json
 // @Param id path int true "Client ID"
 // @Success 200 {array} dto.ProjectResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/clients/{id}/projects [get]
 func GetProjectsByClient(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -58,12 +53,7 @@ func GetProjectsByClient(projectService inbound.ProjectHTTPPort) gin.HandlerFunc
 // @Produce json
 // @Param request body dto.ClientCreate true "Client creation data"
 // @Success 201 {object} dto.ClientResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/clients [post]
 func CreateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -98,12 +88,7 @@ func CreateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 // @Produce json
 // @Param query query dto.ClientFilter false "Query parameters"
 // @Success 200 {array} dto.ClientResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/clients [get]
 func GetAllClients(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
