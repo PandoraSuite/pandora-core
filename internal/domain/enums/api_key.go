@@ -46,16 +46,18 @@ func (s *APIKeyStatus) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &ss); err != nil {
 		return err
 	}
+
 	parsed, err := ParseAPIKeyStatus(ss)
 	if err != nil {
 		return err
 	}
+
 	*s = parsed
 	return nil
 }
 
 func (s *APIKeyStatus) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("\"%s\"", s.String())), nil
+	return json.Marshal(s.String())
 }
 
 func ParseAPIKeyStatus(s string) (APIKeyStatus, error) {

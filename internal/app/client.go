@@ -10,7 +10,8 @@ import (
 )
 
 type ClientUseCase struct {
-	clientRepo outbound.ClientPort
+	clientRepo  outbound.ClientPort
+	projectRepo outbound.ProjectPort
 }
 
 func (c *ClientUseCase) Update(
@@ -38,6 +39,53 @@ func (c *ClientUseCase) GetByID(
 		Email:     client.Email,
 		CreatedAt: client.CreatedAt,
 	}, nil
+}
+
+func (u *ClientUseCase) GetProjects(
+	ctx context.Context, id int,
+) ([]*dto.ProjectResponse, *errors.Error) {
+	exists, err := u.clientRepo.Exists(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return nil, errors.ErrClientNotFound
+	}
+
+	projects, err := u.projectRepo.FindByClient(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	projectResponses := make([]*dto.ProjectResponse, len(projects))
+	for i, project := range projects {
+		serviceResp := make(
+			[]*dto.ProjectServiceResponse, len(project.Services),
+		)
+		for i, service := range project.Services {
+			serviceResp[i] = &dto.ProjectServiceResponse{
+				ID:             service.ID,
+				Name:           service.Name,
+				Version:        service.Version,
+				NextReset:      service.NextReset,
+				MaxRequest:     service.MaxRequest,
+				ResetFrequency: service.ResetFrequency,
+				AssignedAt:     service.AssignedAt,
+			}
+		}
+
+		projectResponses[i] = &dto.ProjectResponse{
+			ID:        project.ID,
+			Name:      project.Name,
+			Status:    project.Status,
+			ClientID:  project.ClientID,
+			CreatedAt: project.CreatedAt,
+			Services:  serviceResp,
+		}
+	}
+
+	return projectResponses, nil
 }
 
 func (u *ClientUseCase) GetAll(
@@ -88,6 +136,12 @@ func (u *ClientUseCase) Create(
 	}, nil
 }
 
-func NewClientUseCase(clientRepo outbound.ClientPort) *ClientUseCase {
-	return &ClientUseCase{clientRepo: clientRepo}
+func NewClientUseCase(
+	clientRepo outbound.ClientPort,
+	projectRepo outbound.ProjectPort,
+) *ClientUseCase {
+	return &ClientUseCase{
+		clientRepo:  clientRepo,
+		projectRepo: projectRepo,
+	}
 }

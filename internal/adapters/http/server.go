@@ -92,7 +92,7 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 			clients.GET("", handlers.GetAllClients(srv.clientService))
 			clients.GET(
 				":id/projects",
-				handlers.GetProjectsByClient(srv.projectService),
+				handlers.GetProjectsByClient(srv.clientService),
 			)
 		}
 	}

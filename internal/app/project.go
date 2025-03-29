@@ -30,44 +30,6 @@ func (u *ProjectUseCase) AssignService(
 	return u.projectRepo.AddService(ctx, id, service)
 }
 
-func (u *ProjectUseCase) GetByClient(
-	ctx context.Context, clientID int,
-) ([]*dto.ProjectResponse, *errors.Error) {
-	projects, err := u.projectRepo.FindByClient(ctx, clientID)
-	if err != nil {
-		return nil, err
-	}
-
-	projectResponses := make([]*dto.ProjectResponse, len(projects))
-	for i, project := range projects {
-		serviceResp := make(
-			[]*dto.ProjectServiceResponse, len(project.Services),
-		)
-		for i, service := range project.Services {
-			serviceResp[i] = &dto.ProjectServiceResponse{
-				ID:             service.ID,
-				Name:           service.Name,
-				Version:        service.Version,
-				NextReset:      service.NextReset,
-				MaxRequest:     service.MaxRequest,
-				ResetFrequency: service.ResetFrequency,
-				AssignedAt:     service.AssignedAt,
-			}
-		}
-
-		projectResponses[i] = &dto.ProjectResponse{
-			ID:        project.ID,
-			Name:      project.Name,
-			Status:    project.Status,
-			ClientID:  project.ClientID,
-			CreatedAt: project.CreatedAt,
-			Services:  serviceResp,
-		}
-	}
-
-	return projectResponses, nil
-}
-
 func (u *ProjectUseCase) Create(
 	ctx context.Context, req *dto.ProjectCreate,
 ) (*dto.ProjectResponse, *errors.Error) {

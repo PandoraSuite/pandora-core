@@ -49,16 +49,18 @@ func (s *ProjectStatus) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &ss); err != nil {
 		return err
 	}
+
 	parsed, err := ParseProjectStatus(ss)
 	if err != nil {
 		return err
 	}
+
 	*s = parsed
 	return nil
 }
 
 func (s *ProjectStatus) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("\"%s\"", s.String())), nil
+	return json.Marshal(s.String())
 }
 
 func ParseProjectStatus(s string) (ProjectStatus, error) {

@@ -21,7 +21,7 @@ import (
 // @Success 200 {array} dto.ProjectResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/clients/{id}/projects [get]
-func GetProjectsByClient(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+func GetProjectsByClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
@@ -29,7 +29,7 @@ func GetProjectsByClient(projectService inbound.ProjectHTTPPort) gin.HandlerFunc
 			return
 		}
 
-		projects, err := projectService.GetByClient(
+		projects, err := clientService.GetProjects(
 			c.Request.Context(), clientID,
 		)
 		if err != nil {

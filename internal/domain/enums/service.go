@@ -49,16 +49,18 @@ func (s *ServiceStatus) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &ss); err != nil {
 		return err
 	}
+
 	parsed, err := ParseServiceStatus(ss)
 	if err != nil {
 		return err
 	}
+
 	*s = parsed
 	return nil
 }
 
 func (s *ServiceStatus) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("\"%s\"", s.String())), nil
+	return json.Marshal(s.String())
 }
 
 func ParseServiceStatus(s string) (ServiceStatus, error) {

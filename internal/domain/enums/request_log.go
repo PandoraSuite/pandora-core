@@ -55,16 +55,18 @@ func (es *RequestLogExecutionStatus) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &ss); err != nil {
 		return err
 	}
+
 	parsed, err := ParseRequestLogExecutionStatus(ss)
 	if err != nil {
 		return err
 	}
+
 	*es = parsed
 	return nil
 }
 
 func (es *RequestLogExecutionStatus) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("\"%s\"", es.String())), nil
+	return json.Marshal(es.String())
 }
 
 func ParseRequestLogExecutionStatus(es string) (RequestLogExecutionStatus, error) {

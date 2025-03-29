@@ -48,7 +48,7 @@ func main() {
 	}
 
 	authUseCase := app.NewAuthUseCase(jwtProvider, credentialsRepo)
-	clientUseCase := app.NewClientUseCase(clientRepo)
+	clientUseCase := app.NewClientUseCase(clientRepo, projectRepo)
 	serviceUseCase := app.NewServiceUseCase(serviceRepo)
 	projectUseCase := app.NewProjectUseCase(projectRepo)
 	environmentUseCase := app.NewEnvironmentUseCase(environmentRepo)

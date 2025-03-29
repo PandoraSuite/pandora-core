@@ -48,20 +48,22 @@ func (rf *ProjectServiceResetFrequency) Scan(v any) error {
 }
 
 func (rf *ProjectServiceResetFrequency) UnmarshalJSON(b []byte) error {
-	var s string
-	if err := json.Unmarshal(b, &s); err != nil {
+	var ss string
+	if err := json.Unmarshal(b, &ss); err != nil {
 		return err
 	}
-	parsed, err := ParseProjectServiceResetFrequency(s)
+
+	parsed, err := ParseProjectServiceResetFrequency(ss)
 	if err != nil {
 		return err
 	}
+
 	*rf = parsed
 	return nil
 }
 
 func (rf *ProjectServiceResetFrequency) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("\"%s\"", rf.String())), nil
+	return json.Marshal(rf.String())
 }
 
 func ParseProjectServiceResetFrequency(rf string) (ProjectServiceResetFrequency, error) {
