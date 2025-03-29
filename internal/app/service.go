@@ -14,30 +14,10 @@ type ServiceUseCase struct {
 	serviceRepo outbound.ServicePort
 }
 
-func (u *ServiceUseCase) GetServices(ctx context.Context) ([]*dto.ServiceResponse, *errors.Error) {
-	services, err := u.serviceRepo.FindAll(ctx, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	serviceResponses := make([]*dto.ServiceResponse, len(services))
-	for i, service := range services {
-		serviceResponses[i] = &dto.ServiceResponse{
-			ID:        service.ID,
-			Name:      service.Name,
-			Status:    service.Status,
-			Version:   service.Version,
-			CreatedAt: service.CreatedAt,
-		}
-	}
-
-	return serviceResponses, nil
-}
-
-func (u *ServiceUseCase) GetActiveServices(ctx context.Context) ([]*dto.ServiceResponse, *errors.Error) {
-	services, err := u.serviceRepo.FindAll(
-		ctx, &dto.ServiceFilter{Status: enums.ServiceActive},
-	)
+func (u *ServiceUseCase) GetServices(
+	ctx context.Context, req *dto.ServiceFilter,
+) ([]*dto.ServiceResponse, *errors.Error) {
+	services, err := u.serviceRepo.FindAll(ctx, req)
 	if err != nil {
 		return nil, err
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 type ServiceFilter struct {
-	Status enums.ServiceStatus `json:"type,omitempty" enums:"active,deactivated" swaggertype:"string"`
+	Status enums.ServiceStatus `form:"status,omitempty" enums:"active,deactivated" swaggertype:"string"`
 }
 
 type ServiceCreate struct {

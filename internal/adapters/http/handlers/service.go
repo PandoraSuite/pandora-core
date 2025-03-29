@@ -5,6 +5,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 	"github.com/gin-gonic/gin"
 )
@@ -51,36 +52,23 @@ func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 // @Tags Services
 // @Security OAuth2Password
 // @Produce json
+// @Param query query dto.ServiceFilter false "Query parameters"
 // @Success 200 {array} []dto.ServiceResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/services [get]
 func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		services, err := srvService.GetServices(c.Request.Context())
-		if err != nil {
+		s, paramErr := enums.ParseServiceStatus(c.Query("status"))
+		if paramErr != nil {
 			c.JSON(
-				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				http.StatusUnprocessableEntity,
+				utils.ErrorResponse{Error: paramErr},
 			)
 			return
 		}
 
-		c.JSON(http.StatusOK, services)
-	}
-}
-
-// GetActiveServices godoc
-// @Summary Retrieves active services
-// @Description Fetches a list of all active services
-// @Tags Services
-// @Security OAuth2Password
-// @Produce json
-// @Success 200 {array} []dto.ServiceResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
-// @Router /api/v1/services/active [get]
-func GetActiveServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		services, err := srvService.GetActiveServices(c.Request.Context())
+		req := dto.ServiceFilter{Status: s}
+		services, err := srvService.GetServices(c.Request.Context(), &req)
 		if err != nil {
 			c.JSON(
 				utils.GetBindJSONErrorStatusCode(err),

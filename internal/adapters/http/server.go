@@ -75,7 +75,6 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 		{
 			services.POST("", handlers.CreateService(srv.srvService))
 			services.GET("", handlers.GetAllServices(srv.srvService))
-			services.GET("/active", handlers.GetActiveServices(srv.srvService))
 		}
 
 		projects := protected.Group("/projects")

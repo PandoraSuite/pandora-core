@@ -97,8 +97,8 @@ func (r *ServiceRepository) FindAll(
 		err = rows.Scan(
 			&service.ID,
 			&service.Name,
-			&service.Status,
 			&service.Version,
+			&service.Status,
 			&service.CreatedAt,
 		)
 		if err != nil {
