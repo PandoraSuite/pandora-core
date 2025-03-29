@@ -1,7 +1,6 @@
 package enums
 
 import (
-	"encoding/json"
 	"fmt"
 )
 
@@ -49,7 +48,7 @@ func (t *ClientType) UnmarshalJSON(b []byte) error {
 }
 
 func (t *ClientType) MarshalJSON() ([]byte, error) {
-	return json.Marshal(t.String())
+	return []byte(fmt.Sprintf("\"%s\"", t.String())), nil
 }
 
 func ParseClientType(t string) (ClientType, error) {

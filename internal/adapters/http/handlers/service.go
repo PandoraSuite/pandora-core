@@ -18,12 +18,7 @@ import (
 // @Produce json
 // @Param request body dto.ServiceCreate true "Service creation data"
 // @Success 201 {object} dto.ServiceResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/services [post]
 func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -57,12 +52,7 @@ func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 // @Security OAuth2Password
 // @Produce json
 // @Success 200 {array} []dto.ServiceResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/services [get]
 func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -86,12 +76,7 @@ func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 // @Security OAuth2Password
 // @Produce json
 // @Success 200 {array} []dto.ServiceResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/services/active [get]
 func GetActiveServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
