@@ -88,10 +88,10 @@ func (r *ProjectRepository) FindByID(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'next_reset', ps.next_reset,
-						'max_request', ps.max_request,
-						'reset_frequency', ps.reset_frequency,
-						'assigned_at', ps.created_at
+						'nextReset', ps.next_reset,
+						'maxRequest', ps.max_request,
+						'resetFrequency', ps.reset_frequency,
+						'assignedAt', ps.created_at
 					)
 				), '[]'
 			) AS services
@@ -129,10 +129,10 @@ func (r *ProjectRepository) FindByClient(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'next_reset', ps.next_reset,
-						'max_request', ps.max_request,
-						'reset_frequency', ps.reset_frequency,
-						'assigned_at', ps.created_at
+						'nextReset', ps.next_reset,
+						'maxRequest', ps.max_request,
+						'resetFrequency', ps.reset_frequency,
+						'assignedAt', ps.created_at
 					)
 				), '[]'
 			) AS services
@@ -292,7 +292,7 @@ func (r *ProjectRepository) saveProjectServices(
 				VALUES %s
 				RETURNING *
 			)
-			SELECT s.id, s.name, s.version, i.max_request, i.reset_frequency, i.next_reset, i.create_at
+			SELECT s.id, s.name, s.version, i.max_request, i.reset_frequency, i.next_reset, i.created_at
 			FROM inserted i
 			JOIN service s ON i.service_id = s.id
 		`,

@@ -195,8 +195,8 @@ func (r *EnvironmentRepository) FindByID(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'max_request', es.max_request,
-						'assigned_at', es.created_at
+						'maxRequest', es.max_request,
+						'assignedAt', es.created_at
 					)
 				), '[]'
 			) AS services
@@ -234,8 +234,8 @@ func (r *EnvironmentRepository) FindByProject(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'max_request', es.max_request,
-						'assigned_at', es.created_at
+						'maxRequest', es.max_request,
+						'assignedAt', es.created_at
 					)
 				), '[]'
 			) AS services
@@ -339,7 +339,7 @@ func (r *EnvironmentRepository) saveEnvironment(
 		VALUES ($1, $2, $3) RETURNING id, created_at;
 	`
 
-	err := r.pool.QueryRow(
+	err := tx.QueryRow(
 		ctx,
 		query,
 		environment.ProjectID,
@@ -392,7 +392,7 @@ func (r *EnvironmentRepository) saveEnvironmentServices(
 				VALUES %s
 				RETURNING *
 			)
-			SELECT s.id, s.name, s.version, i.max_request, i.available_request, i.create_at
+			SELECT s.id, s.name, s.version, i.max_request, i.available_request, i.created_at
 			FROM inserted i
 			JOIN service s ON i.service_id = s.id
 		`,

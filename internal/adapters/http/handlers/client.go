@@ -14,7 +14,7 @@ import (
 // GetProjectsByClient godoc
 // @Summary Retrieves all projects for a specific client
 // @Description Fetches a list of projects associated with a given client
-// @Tags Projects
+// @Tags Clients
 // @Security OAuth2Password
 // @Produce json
 // @Param id path int true "Client ID"

@@ -177,7 +177,6 @@ definitions:
         type: integer
       reset_frequency:
         enum:
-        - ""
         - daily
         - weekly
         - biweekly
@@ -336,24 +335,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.AuthenticateResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Authenticate user
@@ -440,7 +423,7 @@ paths:
       - OAuth2Password: []
       summary: Retrieves all projects for a specific client
       tags:
-      - Projects
+      - Clients
   /api/v1/environments:
     post:
       consumes:
@@ -581,7 +564,7 @@ paths:
       - OAuth2Password: []
       summary: Retrieves all environments for a specific project
       tags:
-      - Environments
+      - Projects
   /api/v1/projects/{id}/services:
     post:
       consumes:

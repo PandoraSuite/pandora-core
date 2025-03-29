@@ -81,7 +81,7 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 		{
 			projects.POST("", handlers.CreateProject(srv.projectService))
 			projects.POST(
-				"/:project_id/services",
+				"/:id/services",
 				handlers.AssignServiceToProject(srv.projectService),
 			)
 		}

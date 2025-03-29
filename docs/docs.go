@@ -147,32 +147,8 @@ const docTemplate = `{
                             "$ref": "#/definitions/dto.AuthenticateResponse"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
+                    "default": {
+                        "description": "Default error response for all failures",
                         "schema": {
                             "$ref": "#/definitions/utils.ErrorResponse"
                         }
@@ -280,7 +256,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Projects"
+                    "Clients"
                 ],
                 "summary": "Retrieves all projects for a specific client",
                 "parameters": [
@@ -505,7 +481,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Environments"
+                    "Projects"
                 ],
                 "summary": "Retrieves all environments for a specific project",
                 "parameters": [
@@ -950,7 +926,6 @@ const docTemplate = `{
                 "reset_frequency": {
                     "type": "string",
                     "enum": [
-                        "",
                         "daily",
                         "weekly",
                         "biweekly",

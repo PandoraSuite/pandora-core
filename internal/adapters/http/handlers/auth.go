@@ -18,11 +18,7 @@ import (
 // @Param username formData string true "Login username"
 // @Param password formData string true "Login password"
 // @Success 200 {object} dto.AuthenticateResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/auth/login [post]
 func Authenticate(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {

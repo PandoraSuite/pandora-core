@@ -90,7 +90,7 @@ func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerF
 // GetEnvironmentsByProject godoc
 // @Summary Retrieves all environments for a specific project
 // @Description Fetches a list of environments associated with a given project
-// @Tags Environments
+// @Tags Projects
 // @Security OAuth2Password
 // @Produce json
 // @Param id path int true "Project ID"
