@@ -5,6 +5,8 @@ definitions:
         type: integer
       expires_at:
         type: string
+    required:
+    - environment_id
     type: object
   dto.APIKeyResponse:
     properties:
@@ -181,11 +183,10 @@ definitions:
         - weekly
         - biweekly
         - monthly
+        - ""
         type: string
     required:
     - id
-    - max_request
-    - reset_frequency
     type: object
   dto.ProjectServiceResponse:
     properties:

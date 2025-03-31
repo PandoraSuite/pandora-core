@@ -100,7 +100,7 @@ func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerF
 // @Success 200 {array} dto.EnvironmentResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/projects/{id}/environments [get]
-func GetEnvironmentsByProject(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
+func GetEnvironmentsByProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
@@ -111,7 +111,7 @@ func GetEnvironmentsByProject(environmentUseCase inbound.EnvironmentHTTPPort) gi
 			return
 		}
 
-		environments, err := environmentUseCase.GetByProject(
+		environments, err := projectService.GetEnvironments(
 			c.Request.Context(), projectID,
 		)
 		if err != nil {

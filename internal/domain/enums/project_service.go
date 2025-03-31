@@ -18,7 +18,7 @@ const (
 func (rf ProjectServiceResetFrequency) String() string {
 	switch rf {
 	case ProjectServiceNull:
-		return "null"
+		return ""
 	case ProjectServiceDaily:
 		return "daily"
 	case ProjectServiceWeekly:

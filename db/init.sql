@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS environment (
     status TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
-    FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
+    CONSTRAINT environment_project_id_fk FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
 
     CONSTRAINT environment_status_check CHECK (status IN ('active', 'deactivated')),
     CONSTRAINT environment_name_project_id_unique UNIQUE (name, project_id)

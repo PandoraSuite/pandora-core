@@ -77,6 +77,34 @@ func (r *ProjectRepository) Update(
 	return nil
 }
 
+func (r *ProjectRepository) Exists(
+	ctx context.Context, id int,
+) (bool, *errors.Error) {
+	query := "SELECT EXISTS (SELECT 1 FROM project WHERE id = $1);"
+
+	var exists bool
+	err := r.pool.QueryRow(ctx, query, id).Scan(&exists)
+	if err != nil {
+		return false, r.handlerErr(err)
+	}
+
+	return exists, nil
+}
+
+func (r *ProjectRepository) GetMaxRequest(
+	ctx context.Context, id, serviceID int,
+) (int, *errors.Error) {
+	query := `
+		SELECT max_request
+		FROM project_service
+		WHERE project_id = $1 AND service_id = $2;
+	`
+
+	var maxRequest int
+	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(&maxRequest)
+	return maxRequest, r.handlerErr(err)
+}
+
 func (r *ProjectRepository) FindByID(
 	ctx context.Context, id int,
 ) (*entities.Project, *errors.Error) {
@@ -191,13 +219,20 @@ func (r *ProjectRepository) AddService(
 		JOIN service s ON i.service_id = s.id
 	`
 
+	resetFrequencyS := service.ResetFrequency.String()
+
+	var resetFrequency any
+	if resetFrequencyS != "" {
+		resetFrequency = resetFrequencyS
+	}
+
 	err := r.pool.QueryRow(
 		ctx,
 		query,
 		id,
 		service.ID,
 		service.MaxRequest,
-		service.ResetFrequency,
+		resetFrequency,
 		service.NextReset,
 	).Scan(&service.Name, &service.Version)
 

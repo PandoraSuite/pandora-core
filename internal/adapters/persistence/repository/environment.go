@@ -114,7 +114,7 @@ func (r *EnvironmentRepository) ExistsServiceIn(
 		SELECT EXISTS (
 			SELECT 1
 			FROM environment_service
-			WHERE environment_id = $1 AND service_id = $2;
+			WHERE environment_id = $1 AND service_id = $2
 		);
 	`
 
@@ -127,7 +127,20 @@ func (r *EnvironmentRepository) ExistsServiceIn(
 	return exists, nil
 }
 
-func (r *EnvironmentRepository) GetAllMaxRequestForServiceInEnvironments(
+func (r *EnvironmentRepository) ListMaxRequestsByProjectAndService(
+	ctx context.Context, projectID, serviceID int,
+) ([]int, *errors.Error) {
+	query := `
+		SELECT es.max_request
+		FROM environment_service es
+		JOIN environment e ON e.id = es.environment_id
+		WHERE e.project_id = $1 AND es.service_id = $2;
+	`
+
+	return r.listMaxRequests(ctx, query, projectID, serviceID)
+}
+
+func (r *EnvironmentRepository) ListMaxRequestsByEnvironmentAndService(
 	ctx context.Context, id, serviceID int,
 ) ([]int, *errors.Error) {
 	query := `
@@ -135,12 +148,18 @@ func (r *EnvironmentRepository) GetAllMaxRequestForServiceInEnvironments(
 		FROM environment_service es
 		JOIN environment e ON e.id = es.environment_id
 		WHERE e.project_id = (
-			SELECT project_id FROM environment WHERE id = $1;
+			SELECT project_id FROM environment WHERE id = $1
 		)
 		AND es.service_id = $2;
 	`
 
-	rows, err := r.pool.Query(ctx, query, id, serviceID)
+	return r.listMaxRequests(ctx, query, id, serviceID)
+}
+
+func (r *EnvironmentRepository) listMaxRequests(
+	ctx context.Context, query string, mainID, serviceID int,
+) ([]int, *errors.Error) {
+	rows, err := r.pool.Query(ctx, query, mainID, serviceID)
 	if err != nil {
 		return nil, r.handlerErr(err)
 	}
@@ -164,7 +183,7 @@ func (r *EnvironmentRepository) GetAllMaxRequestForServiceInEnvironments(
 	return maxRequests, nil
 }
 
-func (r *EnvironmentRepository) GetMaxRequestForServiceInProject(
+func (r *EnvironmentRepository) GetMaxRequestByEnvironmentAndServiceInProject(
 	ctx context.Context, id, serviceID int,
 ) (int, *errors.Error) {
 	query := `
@@ -175,20 +194,15 @@ func (r *EnvironmentRepository) GetMaxRequestForServiceInProject(
 	`
 
 	var maxRequest int
-	err := r.pool.QueryRow(ctx, query, id, serviceID).
-		Scan(&maxRequest)
-	if err != nil {
-		return 0, r.handlerErr(err)
-	}
-
-	return maxRequest, nil
+	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(&maxRequest)
+	return maxRequest, r.handlerErr(err)
 }
 
 func (r *EnvironmentRepository) FindByID(
 	ctx context.Context, id int,
 ) (*entities.Environment, *errors.Error) {
 	query := `
-		SELECT e.id, e.name, e.status, e.project_id, e.createdAt,
+		SELECT e.id, e.name, e.status, e.project_id, e.created_at,
 			COALESCE(
 				JSON_AGG(
 					JSON_BUILD_OBJECT(
@@ -196,6 +210,7 @@ func (r *EnvironmentRepository) FindByID(
 						'name', s.name,
 						'version', s.version,
 						'maxRequest', es.max_request,
+						'availableRequest', es.available_request,
 						'assignedAt', es.created_at
 					)
 				), '[]'
@@ -227,7 +242,7 @@ func (r *EnvironmentRepository) FindByProject(
 	ctx context.Context, projectID int,
 ) ([]*entities.Environment, *errors.Error) {
 	query := `
-		SELECT e.id, e.name, e.status, e.project_id, e.createdAt,
+		SELECT e.id, e.name, e.status, e.project_id, e.created_at,
 			COALESCE(
 				JSON_AGG(
 					JSON_BUILD_OBJECT(
@@ -235,6 +250,7 @@ func (r *EnvironmentRepository) FindByProject(
 						'name', s.name,
 						'version', s.version,
 						'maxRequest', es.max_request,
+						'availableRequest', es.available_request,
 						'assignedAt', es.created_at
 					)
 				), '[]'

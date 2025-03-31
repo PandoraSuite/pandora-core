@@ -656,6 +656,9 @@ const docTemplate = `{
     "definitions": {
         "dto.APIKeyCreate": {
             "type": "object",
+            "required": [
+                "environment_id"
+            ],
             "properties": {
                 "environment_id": {
                     "type": "integer"
@@ -912,9 +915,7 @@ const docTemplate = `{
         "dto.ProjectService": {
             "type": "object",
             "required": [
-                "id",
-                "max_request",
-                "reset_frequency"
+                "id"
             ],
             "properties": {
                 "id": {
@@ -929,7 +930,8 @@ const docTemplate = `{
                         "daily",
                         "weekly",
                         "biweekly",
-                        "monthly"
+                        "monthly",
+                        ""
                     ]
                 }
             }

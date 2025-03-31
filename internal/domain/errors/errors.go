@@ -18,11 +18,23 @@ type Error struct {
 	Details []string  `json:"details,omitempty"`
 }
 
+func (e *Error) AddDetail(detail string) *Error {
+	copyErr := *e
+
+	copyErr.Details = make([]string, len(e.Details))
+	copy(copyErr.Details, e.Details)
+
+	copyErr.Details = append(copyErr.Details, detail)
+
+	return &copyErr
+
+}
+
 func (e *Error) Error() string {
 	if len(e.Details) > 0 {
-		return fmt.Sprintf("[%s] %s: %v", e.Code, e.Message, e.Details)
+		return fmt.Sprintf("(%s) %s: %v", e.Code, e.Message, e.Details)
 	}
-	return fmt.Sprintf("[%s] %s", e.Code, e.Message)
+	return fmt.Sprintf("(%s) %s", e.Code, e.Message)
 }
 
 func NewError(code ErrorCode, message string, details ...string) *Error {

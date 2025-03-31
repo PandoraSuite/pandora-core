@@ -23,10 +23,6 @@ func (c *ClientUseCase) Update(
 func (c *ClientUseCase) GetByID(
 	ctx context.Context, id int,
 ) (*dto.ClientResponse, *errors.Error) {
-	if id <= 0 {
-		return nil, errors.ErrInvalidClientID
-	}
-
 	client, err := c.clientRepo.FindByID(ctx, id)
 	if err != nil {
 		return nil, err

@@ -648,6 +648,9 @@
     "definitions": {
         "dto.APIKeyCreate": {
             "type": "object",
+            "required": [
+                "environment_id"
+            ],
             "properties": {
                 "environment_id": {
                     "type": "integer"
@@ -904,9 +907,7 @@
         "dto.ProjectService": {
             "type": "object",
             "required": [
-                "id",
-                "max_request",
-                "reset_frequency"
+                "id"
             ],
             "properties": {
                 "id": {
@@ -921,7 +922,8 @@
                         "daily",
                         "weekly",
                         "biweekly",
-                        "monthly"
+                        "monthly",
+                        ""
                     ]
                 }
             }

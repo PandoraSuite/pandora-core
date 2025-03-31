@@ -10,7 +10,8 @@ import (
 )
 
 type ProjectUseCase struct {
-	projectRepo outbound.ProjectPort
+	projectRepo     outbound.ProjectPort
+	environmentRepo outbound.EnvironmentPort
 }
 
 func (u *ProjectUseCase) AssignService(
@@ -28,6 +29,51 @@ func (u *ProjectUseCase) AssignService(
 
 	service.CalculateNextReset()
 	return u.projectRepo.AddService(ctx, id, service)
+}
+
+func (u *ProjectUseCase) GetEnvironments(
+	ctx context.Context, id int,
+) ([]*dto.EnvironmentResponse, *errors.Error) {
+	exists, err := u.projectRepo.Exists(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return nil, errors.ErrProjectNotFound
+	}
+
+	environments, err := u.environmentRepo.FindByProject(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	environmentResponses := make([]*dto.EnvironmentResponse, len(environments))
+	for i, environment := range environments {
+		serviceResp := make(
+			[]*dto.EnvironmentServiceResponse, len(environment.Services),
+		)
+		for i, service := range environment.Services {
+			serviceResp[i] = &dto.EnvironmentServiceResponse{
+				ID:         service.ID,
+				Name:       service.Name,
+				Version:    service.Version,
+				MaxRequest: service.MaxRequest,
+				AssignedAt: service.AssignedAt,
+			}
+		}
+
+		environmentResponses[i] = &dto.EnvironmentResponse{
+			ID:        environment.ID,
+			Name:      environment.Name,
+			Status:    environment.Status,
+			ProjectID: environment.ProjectID,
+			CreatedAt: environment.CreatedAt,
+			Services:  serviceResp,
+		}
+	}
+
+	return environmentResponses, nil
 }
 
 func (u *ProjectUseCase) Create(
@@ -84,6 +130,12 @@ func (u *ProjectUseCase) Create(
 	}, nil
 }
 
-func NewProjectUseCase(projectRepo outbound.ProjectPort) *ProjectUseCase {
-	return &ProjectUseCase{projectRepo: projectRepo}
+func NewProjectUseCase(
+	projectRepo outbound.ProjectPort,
+	environmentRepo outbound.EnvironmentPort,
+) *ProjectUseCase {
+	return &ProjectUseCase{
+		projectRepo:     projectRepo,
+		environmentRepo: environmentRepo,
+	}
 }

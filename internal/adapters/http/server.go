@@ -89,6 +89,10 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 		projects := protected.Group("/projects")
 		{
 			projects.POST("", handlers.CreateProject(srv.projectService))
+			projects.GET(
+				"/:id/environments",
+				handlers.GetEnvironmentsByProject(srv.projectService),
+			)
 			projects.POST(
 				"/:id/services",
 				handlers.AssignServiceToProject(srv.projectService),
