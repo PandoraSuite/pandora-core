@@ -54,7 +54,9 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 	{
 		auth := protected.Group("/auth")
 		{
-			auth.POST("/change-password", handlers.ChangePassword(srv.authService))
+			auth.POST(
+				"/change-password", handlers.ChangePassword(srv.authService),
+			)
 		}
 
 		protected.Use(middleware.ForcePasswordReset(srv.authService))
@@ -65,9 +67,16 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 
 		environments := protected.Group("/environments")
 		{
+			environments.POST(
+				"", handlers.CreateEnvironment(srv.environmentService),
+			)
 			environments.GET(
 				"/:id/api-keys",
 				handlers.GetAPIKeysByEnvironment(srv.apiKeyService),
+			)
+			environments.POST(
+				"/:id/services",
+				handlers.AssignServiceToEnvironment(srv.environmentService),
 			)
 		}
 
@@ -75,14 +84,17 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 		{
 			services.POST("", handlers.CreateService(srv.srvService))
 			services.GET("", handlers.GetAllServices(srv.srvService))
-			services.GET("/active", handlers.GetActiveServices(srv.srvService))
 		}
 
 		projects := protected.Group("/projects")
 		{
 			projects.POST("", handlers.CreateProject(srv.projectService))
+			projects.GET(
+				"/:id/environments",
+				handlers.GetEnvironmentsByProject(srv.projectService),
+			)
 			projects.POST(
-				"/:project_id/services",
+				"/:id/services",
 				handlers.AssignServiceToProject(srv.projectService),
 			)
 		}
@@ -93,7 +105,7 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 			clients.GET("", handlers.GetAllClients(srv.clientService))
 			clients.GET(
 				":id/projects",
-				handlers.GetProjectsByClient(srv.projectService),
+				handlers.GetProjectsByClient(srv.clientService),
 			)
 		}
 	}

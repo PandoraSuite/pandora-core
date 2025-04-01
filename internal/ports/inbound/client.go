@@ -10,4 +10,5 @@ import (
 type ClientHTTPPort interface {
 	Create(ctx context.Context, req *dto.ClientCreate) (*dto.ClientResponse, *errors.Error)
 	GetAll(ctx context.Context, req *dto.ClientFilter) ([]*dto.ClientResponse, *errors.Error)
+	GetProjects(ctx context.Context, id int) ([]*dto.ProjectResponse, *errors.Error)
 }

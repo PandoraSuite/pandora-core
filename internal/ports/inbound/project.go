@@ -9,6 +9,6 @@ import (
 
 type ProjectHTTPPort interface {
 	Create(ctx context.Context, req *dto.ProjectCreate) (*dto.ProjectResponse, *errors.Error)
-	GetByClient(ctx context.Context, clientID int) ([]*dto.ProjectResponse, *errors.Error)
 	AssignService(ctx context.Context, id int, req *dto.ProjectService) *errors.Error
+	GetEnvironments(ctx context.Context, id int) ([]*dto.EnvironmentResponse, *errors.Error)
 }

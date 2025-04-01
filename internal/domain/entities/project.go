@@ -21,10 +21,6 @@ type ProjectService struct {
 }
 
 func (p *ProjectService) Validate() *errors.Error {
-	if p.ID <= 0 {
-		return errors.ErrInvalidServiceID
-	}
-
 	if p.MaxRequest < 0 {
 		return errors.ErrInvalidMaxRequest
 	}
@@ -110,4 +106,13 @@ func (p *Project) CalculateNextServicesReset() {
 	for _, s := range p.Services {
 		s.CalculateNextReset()
 	}
+}
+
+func (p *Project) GetService(serviceID int) (*ProjectService, *errors.Error) {
+	for _, service := range p.Services {
+		if service.ID == serviceID {
+			return service, nil
+		}
+	}
+	return nil, errors.ErrServiceNotFound
 }

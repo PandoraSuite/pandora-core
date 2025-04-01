@@ -5,6 +5,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 	"github.com/gin-gonic/gin"
 )
@@ -18,30 +19,25 @@ import (
 // @Produce json
 // @Param request body dto.ServiceCreate true "Service creation data"
 // @Success 201 {object} dto.ServiceResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/services [post]
 func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ServiceCreate
 
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
 
 		service, err := srvService.Create(c.Request.Context(), &req)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -56,50 +52,27 @@ func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 // @Tags Services
 // @Security OAuth2Password
 // @Produce json
+// @Param query query dto.ServiceFilter false "Query parameters"
 // @Success 200 {array} []dto.ServiceResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/services [get]
 func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		services, err := srvService.GetServices(c.Request.Context())
-		if err != nil {
-			c.JSON(
-				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+		s, paramErr := enums.ParseServiceStatus(c.Query("status"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusUnprocessableEntity,
+				utils.ErrorResponse{Error: paramErr},
 			)
 			return
 		}
 
-		c.JSON(http.StatusOK, services)
-	}
-}
-
-// GetActiveServices godoc
-// @Summary Retrieves active services
-// @Description Fetches a list of all active services
-// @Tags Services
-// @Security OAuth2Password
-// @Produce json
-// @Success 200 {array} []dto.ServiceResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
-// @Router /api/v1/services/active [get]
-func GetActiveServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		services, err := srvService.GetActiveServices(c.Request.Context())
+		req := dto.ServiceFilter{Status: s}
+		services, err := srvService.GetServices(c.Request.Context(), &req)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}

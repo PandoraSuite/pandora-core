@@ -68,6 +68,20 @@ func (r *ClientRepository) Update(
 	return nil
 }
 
+func (r *ClientRepository) Exists(
+	ctx context.Context, id int,
+) (bool, *errors.Error) {
+	query := "SELECT EXISTS (SELECT 1 FROM client WHERE id = $1);"
+
+	var exists bool
+	err := r.pool.QueryRow(ctx, query, id).Scan(&exists)
+	if err != nil {
+		return false, r.handlerErr(err)
+	}
+
+	return exists, nil
+}
+
 func (r *ClientRepository) FindByID(
 	ctx context.Context, id int,
 ) (*entities.Client, *errors.Error) {
