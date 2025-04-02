@@ -125,9 +125,6 @@ CREATE TABLE IF NOT EXISTS reservation (
     environment_id INTEGER NOT NULL,
     service_id INTEGER NOT NULL,
     api_key TEXT NOT NULL,
-    environment TEXT NOT NULL,
-    service TEXT NOT NULL,
-    version varchar(11) NOT NULL,
     request_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMP WITH TIME ZONE,
 
