@@ -16,7 +16,7 @@ type JWTProvider struct {
 
 func (p *JWTProvider) GenerateToken(
 	ctx context.Context, subject string,
-) (*dto.AuthenticateResponse, *errors.Error) {
+) (*dto.TokenResponse, *errors.Error) {
 	now := time.Now()
 	expTime := now.Add(time.Hour)
 
@@ -34,7 +34,7 @@ func (p *JWTProvider) GenerateToken(
 		return nil, errors.ErrTokenSigningFailed
 	}
 
-	return &dto.AuthenticateResponse{
+	return &dto.TokenResponse{
 		Token:     tokenStr,
 		TokenType: "Bearer",
 		ExpiresIn: expTime,

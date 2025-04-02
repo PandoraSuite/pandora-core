@@ -34,7 +34,10 @@ func (u *AuthUseCase) Authenticate(
 		return nil, err
 	}
 
-	return token, nil
+	return &dto.AuthenticateResponse{
+		TokenResponse:      token,
+		ForcePasswordReset: credentials.ForcePasswordReset,
+	}, nil
 }
 
 func (u *AuthUseCase) ChangePassword(
