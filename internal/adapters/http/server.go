@@ -42,80 +42,80 @@ type Server struct {
 	environmentService inbound.EnvironmentHTTPPort
 }
 
-func (srv *Server) setupRoutes(router *gin.RouterGroup) {
+func (s *Server) setupRoutes(router *gin.RouterGroup) {
 
 	auth := router.Group("/auth")
 	{
-		auth.POST("/login", handlers.Authenticate(srv.authService))
+		auth.POST("/login", handlers.Authenticate(s.authService))
 	}
 
 	protected := router.Group("")
-	protected.Use(middleware.ValidateToken(srv.authService))
+	protected.Use(middleware.ValidateToken(s.authService))
 	{
 		auth := protected.Group("/auth")
 		{
-			auth.POST("/change-password", handlers.ChangePassword(srv.authService))
+			auth.POST("/change-password", handlers.ChangePassword(s.authService))
 		}
 
-		protected.Use(middleware.ForcePasswordReset(srv.authService))
+		protected.Use(middleware.ForcePasswordReset(s.authService))
 		apiKeys := protected.Group("/api-keys")
 		{
-			apiKeys.POST("", handlers.CreateAPIKey(srv.apiKeyService))
+			apiKeys.POST("", handlers.CreateAPIKey(s.apiKeyService))
 		}
 
 		environments := protected.Group("/environments")
 		{
 			environments.GET(
 				"/:id/api-keys",
-				handlers.GetAPIKeysByEnvironment(srv.apiKeyService),
+				handlers.GetAPIKeysByEnvironment(s.apiKeyService),
 			)
 		}
 
 		services := protected.Group("/services")
 		{
-			services.POST("", handlers.CreateService(srv.srvService))
-			services.GET("", handlers.GetAllServices(srv.srvService))
-			services.GET("/active", handlers.GetActiveServices(srv.srvService))
+			services.POST("", handlers.CreateService(s.srvService))
+			services.GET("", handlers.GetAllServices(s.srvService))
+			services.GET("/active", handlers.GetActiveServices(s.srvService))
 		}
 
 		projects := protected.Group("/projects")
 		{
-			projects.POST("", handlers.CreateProject(srv.projectService))
+			projects.POST("", handlers.CreateProject(s.projectService))
 			projects.POST(
 				"/:project_id/services",
-				handlers.AssignServiceToProject(srv.projectService),
+				handlers.AssignServiceToProject(s.projectService),
 			)
 		}
 
 		clients := protected.Group("/clients")
 		{
-			clients.POST("", handlers.CreateClient(srv.clientService))
-			clients.GET("", handlers.GetAllClients(srv.clientService))
+			clients.POST("", handlers.CreateClient(s.clientService))
+			clients.GET("", handlers.GetAllClients(s.clientService))
 			clients.GET(
 				":id/projects",
-				handlers.GetProjectsByClient(srv.projectService),
+				handlers.GetProjectsByClient(s.projectService),
 			)
 		}
 	}
 }
 
-func (srv *Server) Run() {
+func (s *Server) Run() {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	srv.setupRoutes(router.Group("/api/v1"))
+	s.setupRoutes(router.Group("/api/v1"))
 
-	srv.server = &http.Server{
-		Addr:    srv.addr,
+	s.server = &http.Server{
+		Addr:    s.addr,
 		Handler: router,
 	}
 
-	log.Printf("[INFO] API is running on port: %s\n", srv.addr)
+	log.Printf("[INFO] API is running on port: %s\n", s.addr)
 	log.Printf("[INFO] Pandora Core is fully initialized and ready to accept requests.\n\n")
-	if err := srv.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("[ERROR] Failed to start server: %v", err)
 	}
 }

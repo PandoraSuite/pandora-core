@@ -8,22 +8,31 @@ import (
 
 type APIKeyValidate struct {
 	Key            string    `json:"key"`
+	Service        string    `json:"service"`
+	Environment    string    `json:"environment"`
 	RequestTime    time.Time `json:"request_time"`
-	ServiceName    string    `json:"service_name"`
 	ServiceVersion string    `json:"service_version"`
 }
 
-type APIKeyValidateResponse struct {
-	Valid     bool `json:"valid"`
-	RequestID int  `json:"request_id"`
-
-	Message string `json:"message,omitempty"`
+type APIKeyValidateBooking struct {
+	Key       string `json:"key"`
+	BookingID string `json:"booking_id"`
 }
 
-type APIKeyValidateQuotaResponse struct {
+type APIKeyValidateResponse struct {
+	RequestID string `json:"request_id"`
+}
+
+type APIKeyValidateConsumeResponse struct {
 	APIKeyValidateResponse `json:",inline"`
 
 	AvailableRequest string `json:"available_request"`
+}
+
+type APIKeyValidateBookingResponse struct {
+	APIKeyValidateConsumeResponse `json:",inline"`
+
+	BookingID string `json:"booking_id"`
 }
 
 type APIKeyCreate struct {
