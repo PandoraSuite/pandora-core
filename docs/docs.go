@@ -707,6 +707,9 @@ const docTemplate = `{
                 "expires_in": {
                     "type": "string"
                 },
+                "force_password_reset": {
+                    "type": "boolean"
+                },
                 "token_type": {
                     "type": "string"
                 }
