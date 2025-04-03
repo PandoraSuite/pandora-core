@@ -13,8 +13,9 @@ type EnvironmentPort interface {
 	FindByID(ctx context.Context, id int) (*entities.Environment, *errors.Error)
 	AddService(ctx context.Context, id int, service *entities.EnvironmentService) *errors.Error
 	FindByProject(ctx context.Context, projectID int) ([]*entities.Environment, *errors.Error)
+	ExistsServiceIn(ctx context.Context, id, serviceID int) (bool, *errors.Error)
 	DecrementAvailableRequest(ctx context.Context, id, serviceID int) (*dto.DecrementAvailableRequest, *errors.Error)
-	ExistsEnvironmentService(ctx context.Context, id, serviceID int) (bool, *errors.Error)
-	GetMaxRequestForServiceInProject(ctx context.Context, id, serviceID int) (int, *errors.Error)
-	GetAllMaxRequestForServiceInEnvironments(ctx context.Context, id, serviceID int) ([]int, *errors.Error)
+	ListMaxRequestsByProjectAndService(ctx context.Context, projectID, serviceID int) ([]int, *errors.Error)
+	ListMaxRequestsByEnvironmentAndService(ctx context.Context, id, serviceID int) ([]int, *errors.Error)
+	GetMaxRequestByEnvironmentAndServiceInProject(ctx context.Context, id, serviceID int) (int, *errors.Error)
 }

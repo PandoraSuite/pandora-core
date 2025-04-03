@@ -26,6 +26,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("[ERROR] Failed to initialize persistence: %v", err)
 	}
+
 	pool := db.Pool()
 	errHandler := db.HandlerErr()
 
@@ -48,10 +49,12 @@ func main() {
 	}
 
 	authUseCase := app.NewAuthUseCase(jwtProvider, credentialsRepo)
-	clientUseCase := app.NewClientUseCase(clientRepo)
+	clientUseCase := app.NewClientUseCase(clientRepo, projectRepo)
 	serviceUseCase := app.NewServiceUseCase(serviceRepo)
-	projectUseCase := app.NewProjectUseCase(projectRepo)
-	environmentUseCase := app.NewEnvironmentUseCase(environmentRepo)
+	projectUseCase := app.NewProjectUseCase(projectRepo, environmentRepo)
+	environmentUseCase := app.NewEnvironmentUseCase(
+		environmentRepo, projectRepo,
+	)
 	apiKeyUseCase := app.NewAPIKeyUseCase(
 		apiKeyRepo, requestLogRepo, serviceRepo, environmentRepo,
 	)

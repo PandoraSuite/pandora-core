@@ -55,10 +55,12 @@ func (es *RequestLogExecutionStatus) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &ss); err != nil {
 		return err
 	}
+
 	parsed, err := ParseRequestLogExecutionStatus(ss)
 	if err != nil {
 		return err
 	}
+
 	*es = parsed
 	return nil
 }

@@ -10,7 +10,8 @@ import (
 )
 
 type ProjectUseCase struct {
-	projectRepo outbound.ProjectPort
+	projectRepo     outbound.ProjectPort
+	environmentRepo outbound.EnvironmentPort
 }
 
 func (u *ProjectUseCase) AssignService(
@@ -30,42 +31,49 @@ func (u *ProjectUseCase) AssignService(
 	return u.projectRepo.AddService(ctx, id, service)
 }
 
-func (u *ProjectUseCase) GetByClient(
-	ctx context.Context, clientID int,
-) ([]*dto.ProjectResponse, *errors.Error) {
-	projects, err := u.projectRepo.FindByClient(ctx, clientID)
+func (u *ProjectUseCase) GetEnvironments(
+	ctx context.Context, id int,
+) ([]*dto.EnvironmentResponse, *errors.Error) {
+	exists, err := u.projectRepo.Exists(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	projectResponses := make([]*dto.ProjectResponse, len(projects))
-	for i, project := range projects {
+	if !exists {
+		return nil, errors.ErrProjectNotFound
+	}
+
+	environments, err := u.environmentRepo.FindByProject(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	environmentResponses := make([]*dto.EnvironmentResponse, len(environments))
+	for i, environment := range environments {
 		serviceResp := make(
-			[]*dto.ProjectServiceResponse, len(project.Services),
+			[]*dto.EnvironmentServiceResponse, len(environment.Services),
 		)
-		for i, service := range project.Services {
-			serviceResp[i] = &dto.ProjectServiceResponse{
-				ID:             service.ID,
-				Name:           service.Name,
-				Version:        service.Version,
-				NextReset:      service.NextReset,
-				MaxRequest:     service.MaxRequest,
-				ResetFrequency: service.ResetFrequency,
-				AssignedAt:     service.AssignedAt,
+		for i, service := range environment.Services {
+			serviceResp[i] = &dto.EnvironmentServiceResponse{
+				ID:         service.ID,
+				Name:       service.Name,
+				Version:    service.Version,
+				MaxRequest: service.MaxRequest,
+				AssignedAt: service.AssignedAt,
 			}
 		}
 
-		projectResponses[i] = &dto.ProjectResponse{
-			ID:        project.ID,
-			Name:      project.Name,
-			Status:    project.Status,
-			ClientID:  project.ClientID,
-			CreatedAt: project.CreatedAt,
+		environmentResponses[i] = &dto.EnvironmentResponse{
+			ID:        environment.ID,
+			Name:      environment.Name,
+			Status:    environment.Status,
+			ProjectID: environment.ProjectID,
+			CreatedAt: environment.CreatedAt,
 			Services:  serviceResp,
 		}
 	}
 
-	return projectResponses, nil
+	return environmentResponses, nil
 }
 
 func (u *ProjectUseCase) Create(
@@ -122,6 +130,12 @@ func (u *ProjectUseCase) Create(
 	}, nil
 }
 
-func NewProjectUseCase(projectRepo outbound.ProjectPort) *ProjectUseCase {
-	return &ProjectUseCase{projectRepo: projectRepo}
+func NewProjectUseCase(
+	projectRepo outbound.ProjectPort,
+	environmentRepo outbound.EnvironmentPort,
+) *ProjectUseCase {
+	return &ProjectUseCase{
+		projectRepo:     projectRepo,
+		environmentRepo: environmentRepo,
+	}
 }

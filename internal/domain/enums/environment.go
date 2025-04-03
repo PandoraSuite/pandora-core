@@ -46,10 +46,12 @@ func (s *EnvironmentStatus) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &ss); err != nil {
 		return err
 	}
+
 	parsed, err := ParseEnvironmentStatus(ss)
 	if err != nil {
 		return err
 	}
+
 	*s = parsed
 	return nil
 }

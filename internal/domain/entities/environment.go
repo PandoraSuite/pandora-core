@@ -20,10 +20,6 @@ type EnvironmentService struct {
 }
 
 func (e *EnvironmentService) Validate() *errors.Error {
-	if e.ID <= 0 {
-		return errors.ErrInvalidServiceID
-	}
-
 	if e.MaxRequest < 0 {
 		return errors.ErrInvalidMaxRequest
 	}
@@ -54,10 +50,6 @@ type Environment struct {
 func (e *Environment) Validate() *errors.Error {
 	if e.Name == "" {
 		return errors.ErrNameCannotBeEmpty
-	}
-
-	if e.ProjectID <= 0 {
-		return errors.ErrInvalidProjectID
 	}
 
 	var errs []string

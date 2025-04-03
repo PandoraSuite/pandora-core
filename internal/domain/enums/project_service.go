@@ -18,7 +18,7 @@ const (
 func (rf ProjectServiceResetFrequency) String() string {
 	switch rf {
 	case ProjectServiceNull:
-		return "null"
+		return ""
 	case ProjectServiceDaily:
 		return "daily"
 	case ProjectServiceWeekly:
@@ -48,14 +48,16 @@ func (rf *ProjectServiceResetFrequency) Scan(v any) error {
 }
 
 func (rf *ProjectServiceResetFrequency) UnmarshalJSON(b []byte) error {
-	var s string
-	if err := json.Unmarshal(b, &s); err != nil {
+	var ss string
+	if err := json.Unmarshal(b, &ss); err != nil {
 		return err
 	}
-	parsed, err := ParseProjectServiceResetFrequency(s)
+
+	parsed, err := ParseProjectServiceResetFrequency(ss)
 	if err != nil {
 		return err
 	}
+
 	*rf = parsed
 	return nil
 }

@@ -37,7 +37,7 @@ type APIKeyValidateBookingResponse struct {
 
 type APIKeyCreate struct {
 	ExpiresAt     time.Time `json:"expires_at"`
-	EnvironmentID int       `json:"environment_id"`
+	EnvironmentID int       `json:"environment_id" binding:"required"`
 }
 
 type APIKeyResponse struct {

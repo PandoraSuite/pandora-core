@@ -18,18 +18,16 @@ import (
 // @Produce json
 // @Param id path int true "Environment ID"
 // @Success 200 {array} dto.APIKeyResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/environments/{id}/api-keys [get]
 func GetAPIKeysByEnvironment(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid environment ID"})
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "invalid environment ID"},
+			)
 			return
 		}
 
@@ -37,9 +35,9 @@ func GetAPIKeysByEnvironment(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFu
 			c.Request.Context(), environmentID,
 		)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -57,30 +55,25 @@ func GetAPIKeysByEnvironment(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFu
 // @Produce json
 // @Param request body dto.EnvironmentCreate true "Environment creation data"
 // @Success 201 {object} dto.EnvironmentResponse
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/environments [post]
 func CreateEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.EnvironmentCreate
 
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
 
 		environment, err := environmentUseCase.Create(c.Request.Context(), &req)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -99,26 +92,24 @@ func CreateEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.Handl
 // @Param id path int true "Environment ID"
 // @Param request body dto.EnvironmentService true "Service data"
 // @Success 204
-// @Failure 400 {object} utils.ErrorResponse
-// @Failure 401 {object} utils.ErrorResponse
-// @Failure 403 {object} utils.ErrorResponse
-// @Failure 404 {object} utils.ErrorResponse
-// @Failure 422 {object} utils.ErrorResponse
-// @Failure 500 {object} utils.ErrorResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/environments/{id}/services [post]
 func AssignServiceToEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid environment ID"})
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid environment ID"},
+			)
 			return
 		}
 
 		var req dto.EnvironmentService
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}
@@ -127,9 +118,9 @@ func AssignServiceToEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) 
 			c.Request.Context(), environmentID, &req,
 		)
 		if err != nil {
-			c.JSON(
+			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
-				utils.ErrorResponse{Error: err},
+				gin.H{"error": err.Error()},
 			)
 			return
 		}

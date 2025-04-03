@@ -25,4 +25,9 @@ go.work.sum
 .env
 
 # configurations
-storage/adminPanel/*
+tmp/
+storage/
+
+.vscode/
+
+.air.toml

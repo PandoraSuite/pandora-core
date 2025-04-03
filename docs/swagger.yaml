@@ -5,6 +5,8 @@ definitions:
         type: integer
       expires_at:
         type: string
+    required:
+    - environment_id
     type: object
   dto.APIKeyResponse:
     properties:
@@ -32,6 +34,8 @@ definitions:
         type: string
       expires_in:
         type: string
+      force_password_reset:
+        type: boolean
       token_type:
         type: string
     type: object
@@ -177,16 +181,14 @@ definitions:
         type: integer
       reset_frequency:
         enum:
-        - ""
         - daily
         - weekly
         - biweekly
         - monthly
+        - ""
         type: string
     required:
     - id
-    - max_request
-    - reset_frequency
     type: object
   dto.ProjectServiceResponse:
     properties:
@@ -278,28 +280,8 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/dto.APIKeyResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
@@ -324,28 +306,8 @@ paths:
       responses:
         "204":
           description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
@@ -376,24 +338,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dto.AuthenticateResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       summary: Authenticate user
@@ -418,28 +364,8 @@ paths:
             items:
               $ref: '#/definitions/dto.ClientResponse'
             type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
@@ -465,28 +391,8 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/dto.ClientResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
@@ -512,35 +418,15 @@ paths:
             items:
               $ref: '#/definitions/dto.ProjectResponse'
             type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
       - OAuth2Password: []
       summary: Retrieves all projects for a specific client
       tags:
-      - Projects
+      - Clients
   /api/v1/environments:
     post:
       consumes:
@@ -560,28 +446,8 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/dto.EnvironmentResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
@@ -607,28 +473,8 @@ paths:
             items:
               $ref: '#/definitions/dto.APIKeyResponse'
             type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
@@ -658,28 +504,8 @@ paths:
       responses:
         "204":
           description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
@@ -706,28 +532,8 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/dto.ProjectResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
@@ -753,35 +559,15 @@ paths:
             items:
               $ref: '#/definitions/dto.EnvironmentResponse'
             type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
       - OAuth2Password: []
       summary: Retrieves all environments for a specific project
       tags:
-      - Environments
+      - Projects
   /api/v1/projects/{id}/services:
     post:
       consumes:
@@ -804,28 +590,8 @@ paths:
       responses:
         "204":
           description: No Content
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
@@ -836,6 +602,13 @@ paths:
   /api/v1/services:
     get:
       description: Fetches a list of all registered services
+      parameters:
+      - enum:
+        - active
+        - deactivated
+        in: query
+        name: status
+        type: string
       produces:
       - application/json
       responses:
@@ -847,28 +620,8 @@ paths:
                 $ref: '#/definitions/dto.ServiceResponse'
               type: array
             type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
@@ -894,76 +647,13 @@ paths:
           description: Created
           schema:
             $ref: '#/definitions/dto.ServiceResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
+        default:
+          description: Default error response for all failures
           schema:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
       - OAuth2Password: []
       summary: Creates a new service
-      tags:
-      - Services
-  /api/v1/services/active:
-    get:
-      description: Fetches a list of all active services
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              items:
-                $ref: '#/definitions/dto.ServiceResponse'
-              type: array
-            type: array
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/utils.ErrorResponse'
-      security:
-      - OAuth2Password: []
-      summary: Retrieves active services
       tags:
       - Services
 securityDefinitions:

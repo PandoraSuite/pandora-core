@@ -40,10 +40,16 @@ func (t *ClientType) Scan(v any) error {
 }
 
 func (t *ClientType) UnmarshalJSON(b []byte) error {
-	parsed, err := ParseClientType(string(b))
+	var ss string
+	if err := json.Unmarshal(b, &ss); err != nil {
+		return err
+	}
+
+	parsed, err := ParseClientType(ss)
 	if err != nil {
 		return err
 	}
+
 	*t = parsed
 	return nil
 }
