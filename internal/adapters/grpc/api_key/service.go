@@ -15,22 +15,22 @@ type service struct {
 	apiKeyService inbound.APIKeyGRPCPort
 }
 
-func (s *service) Validate(ctx context.Context, req *pb.APIKeyValidateBooking) (*pb.APIKeyValidateResponse, error) {
-	return &pb.APIKeyValidateResponse{
+func (s *service) Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.ValidateResponse, error) {
+	return &pb.ValidateResponse{
 		Valid: true,
-		Result: &pb.APIKeyValidateResponse_Successful_{
-			Successful: &pb.APIKeyValidateResponse_Successful{
+		Result: &pb.ValidateResponse_Successful_{
+			Successful: &pb.ValidateResponse_Successful{
 				RequestId: "req-123456",
 			},
 		},
 	}, nil
 }
 
-func (s *service) ValidateAndConsume(ctx context.Context, req *pb.APIKeyValidate) (*pb.APIKeyValidateConsumeResponse, error) {
-	return &pb.APIKeyValidateConsumeResponse{
+func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndConsumeRequest) (*pb.ValidateAndConsumeResponse, error) {
+	return &pb.ValidateAndConsumeResponse{
 		Valid: true,
-		Result: &pb.APIKeyValidateConsumeResponse_Successful_{
-			Successful: &pb.APIKeyValidateConsumeResponse_Successful{
+		Result: &pb.ValidateAndConsumeResponse_Successful_{
+			Successful: &pb.ValidateAndConsumeResponse_Successful{
 				RequestId:        "req-123456",
 				AvailableRequest: 1000,
 			},
@@ -38,13 +38,13 @@ func (s *service) ValidateAndConsume(ctx context.Context, req *pb.APIKeyValidate
 	}, nil
 }
 
-func (s *service) ValidateAndBooking(ctx context.Context, req *pb.APIKeyValidate) (*pb.APIKeyValidateBookingResponse, error) {
-	return &pb.APIKeyValidateBookingResponse{
+func (s *service) ValidateAndBooking(ctx context.Context, req *pb.ValidateAndReservationRequest) (*pb.ValidateAndReservationResponse, error) {
+	return &pb.ValidateAndReservationResponse{
 		Valid: true,
-		Result: &pb.APIKeyValidateBookingResponse_Successful_{
-			Successful: &pb.APIKeyValidateBookingResponse_Successful{
+		Result: &pb.ValidateAndReservationResponse_Successful_{
+			Successful: &pb.ValidateAndReservationResponse_Successful{
 				RequestId:        "req-123456",
-				BookingId:        "booking-123456",
+				ReservationId:    "booking-123456",
 				AvailableRequest: 1000,
 			},
 		},
