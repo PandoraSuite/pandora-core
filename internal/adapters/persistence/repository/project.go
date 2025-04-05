@@ -111,20 +111,6 @@ func (r *ProjectRepository) GetProjectServiceQuotaUsage(
 	return quota, r.handlerErr(err)
 }
 
-func (r *ProjectRepository) GetMaxRequest(
-	ctx context.Context, id, serviceID int,
-) (int, *errors.Error) {
-	query := `
-		SELECT max_request
-		FROM project_service
-		WHERE project_id = $1 AND service_id = $2;
-	`
-
-	var maxRequest int
-	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(&maxRequest)
-	return maxRequest, r.handlerErr(err)
-}
-
 func (r *ProjectRepository) FindByID(
 	ctx context.Context, id int,
 ) (*entities.Project, *errors.Error) {

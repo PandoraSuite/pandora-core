@@ -16,7 +16,4 @@ type EnvironmentPort interface {
 	ExistsServiceIn(ctx context.Context, id, serviceID int) (bool, *errors.Error)
 	DecrementAvailableRequest(ctx context.Context, id, serviceID int) (*dto.DecrementAvailableRequest, *errors.Error)
 	GetProjectServiceQuotaUsage(ctx context.Context, id, serviceID int) (*dto.QuotaUsage, *errors.Error)
-	ListMaxRequestsByProjectAndService(ctx context.Context, projectID, serviceID int) ([]int, *errors.Error)
-	ListMaxRequestsByEnvironmentAndService(ctx context.Context, id, serviceID int) ([]int, *errors.Error)
-	GetMaxRequestByEnvironmentAndServiceInProject(ctx context.Context, id, serviceID int) (int, *errors.Error)
 }
