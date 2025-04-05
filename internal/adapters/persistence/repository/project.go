@@ -95,7 +95,7 @@ func (r *ProjectRepository) GetProjectServiceQuotaUsage(
 	ctx context.Context, id, serviceID int,
 ) (*dto.QuotaUsage, *errors.Error) {
 	query := `
-		SELECT COALESCE(ps.max_request, 0), COALESCE(SUM(es.max_request), 0)
+		SELECT COALESCE(ps.max_request, -1), COALESCE(SUM(es.max_request), 0)
 		FROM project_service ps
 		LEFT JOIN environment e ON e.project_id = ps.project_id
 		LEFT JOIN environment_service es ON es.environment_id = e.id AND es.service_id = ps.service_id
@@ -123,7 +123,7 @@ func (r *ProjectRepository) FindByID(
 						'name', s.name,
 						'version', s.version,
 						'nextReset', ps.next_reset,
-						'maxRequest', ps.max_request,
+						'maxRequest', COALESCE(ps.max_request, -1),
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
 					)
@@ -164,7 +164,7 @@ func (r *ProjectRepository) FindByClient(
 						'name', s.name,
 						'version', s.version,
 						'nextReset', ps.next_reset,
-						'maxRequest', ps.max_request,
+						'maxRequest', COALESCE(ps.max_request, -1),
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
 					)
@@ -231,7 +231,7 @@ func (r *ProjectRepository) AddService(
 	}
 
 	var maxRequest any
-	if service.MaxRequest != 0 {
+	if service.MaxRequest != -1 {
 		maxRequest = service.MaxRequest
 	}
 
@@ -325,7 +325,7 @@ func (r *ProjectRepository) saveProjectServices(
 		}
 
 		var maxRequest any
-		if service.MaxRequest != 0 {
+		if service.MaxRequest != -1 {
 			maxRequest = service.MaxRequest
 		}
 
@@ -347,7 +347,7 @@ func (r *ProjectRepository) saveProjectServices(
 				VALUES %s
 				RETURNING *
 			)
-			SELECT s.id, s.name, s.version, i.max_request, i.reset_frequency, i.next_reset, i.created_at
+			SELECT s.id, s.name, s.version, COALESCE(i.max_request, -1), i.reset_frequency, i.next_reset, i.created_at
 			FROM inserted i
 			JOIN service s ON i.service_id = s.id
 		`,

@@ -48,8 +48,8 @@ func (u *EnvironmentUseCase) AssignService(
 		return err
 	}
 
-	if quota.MaxAllowed > 0 {
-		if service.MaxRequest == 0 {
+	if quota.MaxAllowed > -1 {
+		if service.MaxRequest == -1 {
 			return errors.ErrInfiniteRequestsNotAllowed
 		}
 
@@ -88,8 +88,8 @@ func (u *EnvironmentUseCase) Create(
 			continue
 		}
 
-		if quota.MaxAllowed > 0 {
-			if service.MaxRequest == 0 {
+		if quota.MaxAllowed > -1 {
+			if service.MaxRequest == -1 {
 				err := errors.ErrInfiniteRequestsNotAllowed.
 					AddDetail(fmt.Sprintf("Service %d", service.ID))
 				errs = append(errs, err.Error())

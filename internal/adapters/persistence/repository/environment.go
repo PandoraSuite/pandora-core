@@ -81,7 +81,7 @@ func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
 	ctx context.Context, id, serviceID int,
 ) (*dto.QuotaUsage, *errors.Error) {
 	query := `
-		SELECT COALESCE(ps.max_request, 0), COALESCE(SUM(es.max_request), 0)
+		SELECT COALESCE(ps.max_request, -1), COALESCE(SUM(es.max_request), 0)
 		FROM environment e_target
 		JOIN project_service ps ON ps.project_id = e_target.project_id AND ps.service_id = $2
 		LEFT JOIN environment e ON e.project_id = ps.project_id
@@ -159,8 +159,8 @@ func (r *EnvironmentRepository) FindByID(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'maxRequest', es.max_request,
-						'availableRequest', es.available_request,
+						'maxRequest', COALESCE(es.max_request, -1),
+						'availableRequest', COALESCE(es.available_request, -1),
 						'assignedAt', es.created_at
 					)
 				), '[]'
@@ -199,8 +199,8 @@ func (r *EnvironmentRepository) FindByProject(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'maxRequest', es.max_request,
-						'availableRequest', es.available_request,
+						'maxRequest', COALESCE(es.max_request, -1),
+						'availableRequest', COALESCE(es.available_request, -1),
 						'assignedAt', es.created_at
 					)
 				), '[]'
@@ -261,12 +261,12 @@ func (r *EnvironmentRepository) AddService(
 	`
 
 	var maxRequest any
-	if service.MaxRequest != 0 {
+	if service.MaxRequest != -1 {
 		maxRequest = service.MaxRequest
 	}
 
 	var availableRequest any
-	if service.AvailableRequest != 0 {
+	if service.AvailableRequest != -1 {
 		availableRequest = service.AvailableRequest
 	}
 
@@ -353,12 +353,12 @@ func (r *EnvironmentRepository) saveEnvironmentServices(
 		)
 
 		var maxRequest any
-		if service.MaxRequest != 0 {
+		if service.MaxRequest != -1 {
 			maxRequest = service.MaxRequest
 		}
 
 		var availableRequest any
-		if service.AvailableRequest != 0 {
+		if service.AvailableRequest != -1 {
 			availableRequest = service.AvailableRequest
 		}
 
@@ -379,7 +379,7 @@ func (r *EnvironmentRepository) saveEnvironmentServices(
 				VALUES %s
 				RETURNING *
 			)
-			SELECT s.id, s.name, s.version, i.max_request, i.available_request, i.created_at
+			SELECT s.id, s.name, s.version, COALESCE(i.max_request, -1), COALESCE(i.available_request, -1), i.created_at
 			FROM inserted i
 			JOIN service s ON i.service_id = s.id
 		`,
@@ -395,28 +395,18 @@ func (r *EnvironmentRepository) saveEnvironmentServices(
 
 	var services []*entities.EnvironmentService
 	for rows.Next() {
-		var maxRequest any
-		var availableRequest any
 		service := new(entities.EnvironmentService)
 
 		err = rows.Scan(
 			&service.ID,
 			&service.Name,
 			&service.Version,
-			&maxRequest,
-			&availableRequest,
+			&service.MaxRequest,
+			&service.AvailableRequest,
 			&service.AssignedAt,
 		)
 		if err != nil {
 			return nil, r.handlerErr(err)
-		}
-
-		if v, ok := maxRequest.(int); ok {
-			service.MaxRequest = v
-		}
-
-		if v, ok := availableRequest.(int); ok {
-			service.AvailableRequest = v
 		}
 
 		services = append(services, service)

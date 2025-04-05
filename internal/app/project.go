@@ -55,11 +55,12 @@ func (u *ProjectUseCase) GetEnvironments(
 		)
 		for i, service := range environment.Services {
 			serviceResp[i] = &dto.EnvironmentServiceResponse{
-				ID:         service.ID,
-				Name:       service.Name,
-				Version:    service.Version,
-				MaxRequest: service.MaxRequest,
-				AssignedAt: service.AssignedAt,
+				ID:               service.ID,
+				Name:             service.Name,
+				Version:          service.Version,
+				MaxRequest:       service.MaxRequest,
+				AvailableRequest: service.AvailableRequest,
+				AssignedAt:       service.AssignedAt,
 			}
 		}
 
