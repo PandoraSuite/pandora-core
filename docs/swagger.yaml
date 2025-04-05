@@ -117,12 +117,13 @@ definitions:
         type: integer
     required:
     - id
-    - max_request
     type: object
   dto.EnvironmentServiceResponse:
     properties:
       assigned_at:
         type: string
+      available_request:
+        type: integer
       id:
         type: integer
       max_request:

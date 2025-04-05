@@ -91,6 +91,26 @@ func (r *ProjectRepository) Exists(
 	return exists, nil
 }
 
+func (r *ProjectRepository) GetProjectServiceQuotaUsage(
+	ctx context.Context, id, serviceID int,
+) (*dto.QuotaUsage, *errors.Error) {
+	query := `
+		SELECT COALESCE(ps.max_request, 0), COALESCE(SUM(es.max_request), 0)
+		FROM project_service ps
+		LEFT JOIN environment e ON e.project_id = ps.project_id
+		LEFT JOIN environment_service es ON es.environment_id = e.id AND es.service_id = ps.service_id
+		WHERE ps.project_id = $1 AND ps.service_id = $2
+		GROUP BY ps.max_request;
+	`
+
+	quota := new(dto.QuotaUsage)
+	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(
+		&quota.MaxAllowed,
+		&quota.CurrentAllocated,
+	)
+	return quota, r.handlerErr(err)
+}
+
 func (r *ProjectRepository) GetMaxRequest(
 	ctx context.Context, id, serviceID int,
 ) (int, *errors.Error) {
@@ -122,7 +142,7 @@ func (r *ProjectRepository) FindByID(
 						'assignedAt', ps.created_at
 					)
 				), '[]'
-			) AS services
+			)
 		FROM project p
 		LEFT JOIN project_service ps ON ps.project_id = p.id
 		LEFT JOIN service s ON s.id = ps.service_id
@@ -163,7 +183,7 @@ func (r *ProjectRepository) FindByClient(
 						'assignedAt', ps.created_at
 					)
 				), '[]'
-			) AS services
+			)
 		FROM project p
 		JOIN client c ON c.id = p.client_id
 		LEFT JOIN project_service ps ON ps.project_id = p.id
@@ -219,11 +239,14 @@ func (r *ProjectRepository) AddService(
 		JOIN service s ON i.service_id = s.id
 	`
 
-	resetFrequencyS := service.ResetFrequency.String()
-
 	var resetFrequency any
-	if resetFrequencyS != "" {
-		resetFrequency = resetFrequencyS
+	if s := service.ResetFrequency.String(); s != "" {
+		resetFrequency = s
+	}
+
+	var maxRequest any
+	if service.MaxRequest != 0 {
+		maxRequest = service.MaxRequest
 	}
 
 	err := r.pool.QueryRow(
@@ -231,7 +254,7 @@ func (r *ProjectRepository) AddService(
 		query,
 		id,
 		service.ID,
-		service.MaxRequest,
+		maxRequest,
 		resetFrequency,
 		service.NextReset,
 	).Scan(&service.Name, &service.Version)
@@ -309,12 +332,23 @@ func (r *ProjectRepository) saveProjectServices(
 				argIndex+4,
 			),
 		)
+
+		var resetFrequency any
+		if s := service.ResetFrequency.String(); s != "" {
+			resetFrequency = s
+		}
+
+		var maxRequest any
+		if service.MaxRequest != 0 {
+			maxRequest = service.MaxRequest
+		}
+
 		args = append(
 			args,
 			projectID,
 			service.ID,
-			service.MaxRequest,
-			service.ResetFrequency,
+			maxRequest,
+			resetFrequency,
 			service.NextReset,
 		)
 		argIndex += 5

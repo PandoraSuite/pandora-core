@@ -77,6 +77,27 @@ func (r *EnvironmentRepository) Update(
 	return nil
 }
 
+func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
+	ctx context.Context, id, serviceID int,
+) (*dto.QuotaUsage, *errors.Error) {
+	query := `
+		SELECT COALESCE(ps.max_request, 0), COALESCE(SUM(es.max_request), 0)
+		FROM environment e_target
+		JOIN project_service ps ON ps.project_id = e_target.project_id AND ps.service_id = $2
+		LEFT JOIN environment e ON e.project_id = ps.project_id
+		LEFT JOIN environment_service es ON es.environment_id = e.id AND es.service_id = ps.service_id
+		WHERE e_target.id = $1
+		GROUP BY ps.max_request;
+	`
+
+	quota := new(dto.QuotaUsage)
+	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(
+		&quota.MaxAllowed,
+		&quota.CurrentAllocated,
+	)
+	return quota, r.handlerErr(err)
+}
+
 func (r *EnvironmentRepository) DecrementAvailableRequest(
 	ctx context.Context, id, serviceID int,
 ) (*dto.DecrementAvailableRequest, *errors.Error) {
@@ -310,13 +331,23 @@ func (r *EnvironmentRepository) AddService(
 		JOIN service s ON i.service_id = s.id
 	`
 
+	var maxRequest any
+	if service.MaxRequest != 0 {
+		maxRequest = service.MaxRequest
+	}
+
+	var availableRequest any
+	if service.AvailableRequest != 0 {
+		availableRequest = service.AvailableRequest
+	}
+
 	err := r.pool.QueryRow(
 		ctx,
 		query,
 		id,
 		service.ID,
-		service.MaxRequest,
-		service.AvailableRequest,
+		maxRequest,
+		availableRequest,
 	).Scan(&service.Name, &service.Version)
 
 	return r.handlerErr(err)
@@ -391,12 +422,23 @@ func (r *EnvironmentRepository) saveEnvironmentServices(
 				argIndex+3,
 			),
 		)
+
+		var maxRequest any
+		if service.MaxRequest != 0 {
+			maxRequest = service.MaxRequest
+		}
+
+		var availableRequest any
+		if service.AvailableRequest != 0 {
+			availableRequest = service.AvailableRequest
+		}
+
 		args = append(
 			args,
 			environmentID,
 			service.ID,
-			service.MaxRequest,
-			service.AvailableRequest,
+			maxRequest,
+			availableRequest,
 		)
 		argIndex += 4
 	}
@@ -424,18 +466,28 @@ func (r *EnvironmentRepository) saveEnvironmentServices(
 
 	var services []*entities.EnvironmentService
 	for rows.Next() {
+		var maxRequest any
+		var availableRequest any
 		service := new(entities.EnvironmentService)
 
 		err = rows.Scan(
 			&service.ID,
 			&service.Name,
 			&service.Version,
-			&service.MaxRequest,
-			&service.AvailableRequest,
+			&maxRequest,
+			&availableRequest,
 			&service.AssignedAt,
 		)
 		if err != nil {
 			return nil, r.handlerErr(err)
+		}
+
+		if v, ok := maxRequest.(int); ok {
+			service.MaxRequest = v
+		}
+
+		if v, ok := availableRequest.(int); ok {
+			service.AvailableRequest = v
 		}
 
 		services = append(services, service)
