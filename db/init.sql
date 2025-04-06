@@ -35,7 +35,8 @@ CREATE TABLE IF NOT EXISTS project (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
-    CONSTRAINT project_client_id_fk FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE,
+    CONSTRAINT project_client_id_fk FOREIGN KEY (client_id)
+        REFERENCES client(id) ON DELETE CASCADE,
 
     CONSTRAINT project_status_check CHECK (status IN ('in_production', 'in_development', 'deactivated')),
     CONSTRAINT project_name_client_id_unique UNIQUE (name, client_id)
@@ -49,7 +50,8 @@ CREATE TABLE IF NOT EXISTS environment (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
-    CONSTRAINT environment_project_id_fk FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
+    CONSTRAINT environment_project_id_fk FOREIGN KEY (project_id)
+        REFERENCES project(id) ON DELETE CASCADE,
 
     CONSTRAINT environment_status_check CHECK (status IN ('active', 'deactivated')),
     CONSTRAINT environment_name_project_id_unique UNIQUE (name, project_id)
@@ -65,7 +67,8 @@ CREATE TABLE IF NOT EXISTS api_key (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), 
 
-    CONSTRAINT api_key_environment_id_fk FOREIGN KEY (environment_id) REFERENCES environment(id) ON DELETE CASCADE,
+    CONSTRAINT api_key_environment_id_fk FOREIGN KEY (environment_id)
+        REFERENCES environment(id) ON DELETE CASCADE,
 
     CONSTRAINT api_key_status_check CHECK (status IN ('active', 'deactivated')),
     CONSTRAINT api_key_key_unique UNIQUE (key)
@@ -82,8 +85,10 @@ CREATE TABLE IF NOT EXISTS project_service (
 
     PRIMARY KEY (project_id, service_id),
     
-    CONSTRAINT project_service_project_id_fk FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
-    CONSTRAINT project_service_service_id_fk FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE,
+    CONSTRAINT project_service_project_id_fk FOREIGN KEY (project_id)
+        REFERENCES project(id) ON DELETE CASCADE,
+    CONSTRAINT project_service_service_id_fk FOREIGN KEY (service_id)
+        REFERENCES service(id) ON DELETE CASCADE,
 
     CONSTRAINT project_service_reset_frequency_check CHECK (reset_frequency IN ('daily', 'weekly', 'biweekly', 'monthly'))
 );
@@ -98,8 +103,10 @@ CREATE TABLE IF NOT EXISTS environment_service (
 
     PRIMARY KEY (environment_id, service_id),
 
-    CONSTRAINT environment_service_environment_id_fk FOREIGN KEY (environment_id) REFERENCES environment(id) ON DELETE CASCADE,
-    CONSTRAINT environment_service_service_id_fk FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE
+    CONSTRAINT environment_service_environment_id_fk FOREIGN KEY (environment_id)
+        REFERENCES environment(id) ON DELETE CASCADE,
+    CONSTRAINT environment_service_service_id_fk FOREIGN KEY (service_id)
+        REFERENCES service(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS request_log (
@@ -113,9 +120,9 @@ CREATE TABLE IF NOT EXISTS request_log (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
     CONSTRAINT request_log_environment_service_fk FOREIGN KEY (environment_id, service_id) 
-	REFERENCES environment_service(environment_id, service_id) ON DELETE CASCADE,
-
-    CONSTRAINT request_log_start_point_fk FOREIGN KEY (start_point) REFERENCES request_log(id) ON DELETE CASCADE,
+	    REFERENCES environment_service(environment_id, service_id) ON DELETE CASCADE,
+    CONSTRAINT request_log_start_point_fk FOREIGN KEY (start_point)
+        REFERENCES request_log(id) ON DELETE CASCADE,
 
     CONSTRAINT request_log_execution_status_check CHECK (execution_status IN ('success', 'failed', 'unauthorized', 'server error'))
 );
@@ -129,7 +136,7 @@ CREATE TABLE IF NOT EXISTS reservation (
     expires_at TIMESTAMP WITH TIME ZONE,
 
     CONSTRAINT request_log_environment_service_fk FOREIGN KEY (environment_id, service_id) 
-	REFERENCES environment_service(environment_id, service_id) ON DELETE CASCADE
+	    REFERENCES environment_service(environment_id, service_id) ON DELETE CASCADE
 );
 
 
