@@ -106,6 +106,9 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 				"", handlers.CreateEnvironment(srv.environmentService),
 			)
 			environments.GET(
+				":id", handlers.GetEnvironment(srv.environmentService),
+			)
+			environments.GET(
 				"/:id/api-keys",
 				handlers.GetAPIKeysByEnvironment(srv.apiKeyService),
 			)

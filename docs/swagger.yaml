@@ -527,6 +527,33 @@ paths:
       summary: Creates a new environment
       tags:
       - Environments
+  /api/v1/environments/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Fetches the details of a specific environment using its ID
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EnvironmentResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Retrieves an environment by ID
+      tags:
+      - Environments
   /api/v1/environments/{id}/api-keys:
     get:
       consumes:

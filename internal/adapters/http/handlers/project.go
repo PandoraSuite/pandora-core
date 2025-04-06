@@ -69,7 +69,7 @@ func GetProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		environments, err := projectService.GetByID(
+		project, err := projectService.GetByID(
 			c.Request.Context(), projectID,
 		)
 		if err != nil {
@@ -80,7 +80,7 @@ func GetProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, environments)
+		c.JSON(http.StatusOK, project)
 	}
 }
 

@@ -47,6 +47,43 @@ func CreateEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.Handl
 	}
 }
 
+// GetEnvironment godoc
+// @Summary Retrieves an environment by ID
+// @Description Fetches the details of a specific environment using its ID
+// @Tags Environments
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "Environment ID"
+// @Success 200 {object} dto.EnvironmentResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/environments/{id} [get]
+func GetEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		environmentID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "invalid environment ID"},
+			)
+			return
+		}
+
+		environment, err := environmentUseCase.GetByID(
+			c.Request.Context(), environmentID,
+		)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.JSON(http.StatusOK, environment)
+	}
+}
+
 // GetAPIKeysByEnvironment godoc
 // @Summary Retrieves all API Keys for an environment
 // @Description Returns a list of API Keys associated with a specific environment

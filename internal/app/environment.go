@@ -16,6 +16,41 @@ type EnvironmentUseCase struct {
 	projectRepo     outbound.ProjectPort
 }
 
+func (u *EnvironmentUseCase) GetByID(
+	ctx context.Context, id int,
+) (*dto.EnvironmentResponse, *errors.Error) {
+	environment, err := u.environmentRepo.FindByID(ctx, id)
+	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrEnvironmentNotFound
+		}
+		return nil, err
+	}
+
+	serviceResp := make(
+		[]*dto.EnvironmentServiceResponse, len(environment.Services),
+	)
+	for i, service := range environment.Services {
+		serviceResp[i] = &dto.EnvironmentServiceResponse{
+			ID:               service.ID,
+			Name:             service.Name,
+			Version:          service.Version,
+			MaxRequest:       service.MaxRequest,
+			AvailableRequest: service.AvailableRequest,
+			AssignedAt:       service.AssignedAt,
+		}
+	}
+
+	return &dto.EnvironmentResponse{
+		ID:        environment.ID,
+		Name:      environment.Name,
+		Status:    environment.Status,
+		ProjectID: environment.ProjectID,
+		CreatedAt: environment.CreatedAt,
+		Services:  serviceResp,
+	}, nil
+}
+
 func (u *EnvironmentUseCase) AssignService(
 	ctx context.Context, id int, req *dto.EnvironmentService,
 ) *errors.Error {
