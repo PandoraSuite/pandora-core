@@ -138,11 +138,10 @@ var File_request_v1_request_proto protoreflect.FileDescriptor
 const file_request_v1_request_proto_rawDesc = "" +
 	"\n" +
 	"\x18request/v1/request.proto\x12\n" +
-	"request.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bgoogle/protobuf/empty.proto\"q\n" +
+	"request.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bgoogle/protobuf/empty.proto\"s\n" +
 	"\x17SetRequestStatusRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12F\n" +
-	"\x06status\x18\x02 \x01(\x0e2\".request.v1.RequestExecutionStatusB\n" +
-	"\xbaH\a\x82\x01\x04 \x00 \x04R\x06status*\x82\x02\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12H\n" +
+	"\x06status\x18\x02 \x01(\x0e2\".request.v1.RequestExecutionStatusB\f\xbaH\t\x82\x01\x06\x10\x01 \x00 \x04R\x06status*\x82\x02\n" +
 	"\x16RequestExecutionStatus\x12!\n" +
 	"\x1dREQUEST_EXECUTION_STATUS_NULL\x10\x00\x12$\n" +
 	" REQUEST_EXECUTION_STATUS_SUCCESS\x10\x01\x12#\n" +
