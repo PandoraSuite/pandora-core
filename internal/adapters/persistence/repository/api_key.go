@@ -25,7 +25,12 @@ func (r *APIKeyRepository) UpdateStatus(
 		return errors.ErrAPIKeyInvalidStatus
 	}
 
-	query := "UPDATE api_key SET status = $1 WHERE id = $2;"
+	query := `
+		UPDATE api_key
+		SET status = $1
+		WHERE id = $2;
+	`
+
 	result, err := r.pool.Exec(ctx, query, status, id)
 	if err != nil {
 		return r.handlerErr(err)
@@ -60,7 +65,11 @@ func (r *APIKeyRepository) Update(
 	}
 
 	query := fmt.Sprintf(
-		"UPDATE api_key SET %s WHERE id = $1;",
+		`
+			UPDATE api_key
+			SET %s
+			WHERE id = $1;
+		`,
 		strings.Join(updates, ", "),
 	)
 
@@ -79,7 +88,11 @@ func (r *APIKeyRepository) Update(
 func (r *APIKeyRepository) UpdateLastUsed(
 	ctx context.Context, key string,
 ) *errors.Error {
-	query := "UPDATE api_key SET last_used = NOW() WHERE key = $1;"
+	query := `
+		UPDATE api_key
+		SET last_used = NOW()
+		WHERE key = $1;
+	`
 
 	result, err := r.pool.Exec(ctx, query, key)
 	if err != nil {
@@ -197,7 +210,13 @@ func (r *APIKeyRepository) FindByID(
 func (r *APIKeyRepository) Exists(
 	ctx context.Context, key string,
 ) (bool, *errors.Error) {
-	query := "SELECT EXISTS (SELECT 1 FROM api_key WHERE key = $1);"
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM api_key
+			WHERE key = $1
+		);
+	`
 
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, key).Scan(&exists)

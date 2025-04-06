@@ -26,7 +26,12 @@ func (r *ProjectRepository) UpdateStatus(
 		return errors.ErrProjectInvalidStatus
 	}
 
-	query := "UPDATE project SET status = $1 WHERE id = $2;"
+	query := `
+		UPDATE project
+		SET status = $1
+		WHERE id = $2;
+	`
+
 	result, err := r.pool.Exec(ctx, query, status, id)
 	if err != nil {
 		return r.handlerErr(err)
@@ -61,7 +66,11 @@ func (r *ProjectRepository) Update(
 	}
 
 	query := fmt.Sprintf(
-		"UPDATE project SET %s WHERE id = $1;",
+		`
+			UPDATE project
+			SET %s
+			WHERE id = $1;
+		`,
 		strings.Join(updates, ", "),
 	)
 
@@ -80,7 +89,13 @@ func (r *ProjectRepository) Update(
 func (r *ProjectRepository) Exists(
 	ctx context.Context, id int,
 ) (bool, *errors.Error) {
-	query := "SELECT EXISTS (SELECT 1 FROM project WHERE id = $1);"
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM project
+			WHERE id = $1
+		);
+	`
 
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, id).Scan(&exists)
@@ -97,8 +112,11 @@ func (r *ProjectRepository) GetProjectServiceQuotaUsage(
 	query := `
 		SELECT COALESCE(ps.max_request, -1), COALESCE(SUM(es.max_request), 0)
 		FROM project_service ps
-		LEFT JOIN environment e ON e.project_id = ps.project_id
-		LEFT JOIN environment_service es ON es.environment_id = e.id AND es.service_id = ps.service_id
+			LEFT JOIN environment e
+				ON e.project_id = ps.project_id
+			LEFT JOIN environment_service es
+				ON es.environment_id = e.id
+				AND es.service_id = ps.service_id
 		WHERE ps.project_id = $1 AND ps.service_id = $2
 		GROUP BY ps.max_request;
 	`
@@ -130,8 +148,10 @@ func (r *ProjectRepository) FindByID(
 				), '[]'
 			)
 		FROM project p
-		LEFT JOIN project_service ps ON ps.project_id = p.id
-		LEFT JOIN service s ON s.id = ps.service_id
+			LEFT JOIN project_service ps
+				ON ps.project_id = p.id
+			LEFT JOIN service s
+				ON s.id = ps.service_id
 		WHERE p.id = $1
 		GROUP BY p.id;
 	`
@@ -171,9 +191,12 @@ func (r *ProjectRepository) FindByClient(
 				), '[]'
 			)
 		FROM project p
-		JOIN client c ON c.id = p.client_id
-		LEFT JOIN project_service ps ON ps.project_id = p.id
-		LEFT JOIN service s ON s.id = ps.service_id
+			JOIN client c
+				ON c.id = p.client_id
+			LEFT JOIN project_service ps
+				ON ps.project_id = p.id
+			LEFT JOIN service s
+				ON s.id = ps.service_id
 		WHERE c.id = $1
 		GROUP BY p.id;
 	`
@@ -222,7 +245,8 @@ func (r *ProjectRepository) AddService(
 		)
 		SELECT s.name, s.version
 		FROM inserted i
-		JOIN service s ON i.service_id = s.id
+			JOIN service s
+				ON i.service_id = s.id;
 	`
 
 	var resetFrequency any
@@ -349,7 +373,8 @@ func (r *ProjectRepository) saveProjectServices(
 			)
 			SELECT s.id, s.name, s.version, COALESCE(i.max_request, -1), i.reset_frequency, i.next_reset, i.created_at
 			FROM inserted i
-			JOIN service s ON i.service_id = s.id
+				JOIN service s
+					ON i.service_id = s.id;
 		`,
 		strings.Join(values, ", "),
 	)

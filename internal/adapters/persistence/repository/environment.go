@@ -26,7 +26,12 @@ func (r *EnvironmentRepository) UpdateStatus(
 		return errors.ErrEnvironmentInvalidStatus
 	}
 
-	query := "UPDATE environment SET status = $1 WHERE id = $2;"
+	query := `
+		UPDATE environment
+		SET status = $1
+		WHERE id = $2;
+	`
+
 	result, err := r.pool.Exec(ctx, query, status, id)
 	if err != nil {
 		return r.handlerErr(err)
@@ -61,7 +66,11 @@ func (r *EnvironmentRepository) Update(
 	}
 
 	query := fmt.Sprintf(
-		"UPDATE environment SET %s WHERE id = $1;",
+		`
+			UPDATE environment
+			SET %s
+			WHERE id = $1;
+		`,
 		strings.Join(updates, ", "),
 	)
 
@@ -83,9 +92,14 @@ func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
 	query := `
 		SELECT COALESCE(ps.max_request, -1), COALESCE(SUM(es.max_request), 0)
 		FROM environment e_target
-		JOIN project_service ps ON ps.project_id = e_target.project_id AND ps.service_id = $2
-		LEFT JOIN environment e ON e.project_id = ps.project_id
-		LEFT JOIN environment_service es ON es.environment_id = e.id AND es.service_id = ps.service_id
+			JOIN project_service ps
+				ON ps.project_id = e_target.project_id
+				AND ps.service_id = $2
+			LEFT JOIN environment e
+				ON e.project_id = ps.project_id
+			LEFT JOIN environment_service es
+				ON es.environment_id = e.id
+				AND es.service_id = ps.service_id
 		WHERE e_target.id = $1
 		GROUP BY ps.max_request;
 	`
@@ -110,7 +124,7 @@ func (r *EnvironmentRepository) DecrementAvailableRequest(
 				ELSE available_request
 			END
 		WHERE environment_id = $1 AND service_id = $2
-		AND (available_request IS NULL OR available_request > 0)
+			AND (available_request IS NULL OR available_request > 0)
 		RETURNING max_request, available_request;
 	`
 
@@ -164,10 +178,12 @@ func (r *EnvironmentRepository) FindByID(
 						'assignedAt', es.created_at
 					)
 				), '[]'
-			) AS services
+			)
 		FROM environment e
-		LEFT JOIN environment_service es ON es.environment_id = e.id
-		LEFT JOIN service s ON s.id = es.service_id
+			LEFT JOIN environment_service es
+				ON es.environment_id = e.id
+			LEFT JOIN service s
+			ON s.id = es.service_id
 		WHERE e.id = $1
 		GROUP BY e.id;
 	`
@@ -204,11 +220,14 @@ func (r *EnvironmentRepository) FindByProject(
 						'assignedAt', es.created_at
 					)
 				), '[]'
-			) AS services
+			)
 		FROM environment e
-		JOIN project p ON p.id = e.project_id
-		LEFT JOIN environment_service es ON es.environment_id = e.id
-		LEFT JOIN service s ON s.id = es.service_id
+			JOIN project p
+				ON p.id = e.project_id
+			LEFT JOIN environment_service es
+				ON es.environment_id = e.id
+			LEFT JOIN service s
+				ON s.id = es.service_id
 		WHERE p.id = $1
 		GROUP BY e.id;
 	`
@@ -257,7 +276,8 @@ func (r *EnvironmentRepository) AddService(
 		)
 		SELECT s.name, s.version
 		FROM inserted i
-		JOIN service s ON i.service_id = s.id
+			JOIN service s
+				ON i.service_id = s.id;
 	`
 
 	var maxRequest any
@@ -381,7 +401,8 @@ func (r *EnvironmentRepository) saveEnvironmentServices(
 			)
 			SELECT s.id, s.name, s.version, COALESCE(i.max_request, -1), COALESCE(i.available_request, -1), i.created_at
 			FROM inserted i
-			JOIN service s ON i.service_id = s.id
+				JOIN service s
+					ON i.service_id = s.id;
 		`,
 		strings.Join(values, ", "),
 	)
