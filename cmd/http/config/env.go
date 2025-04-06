@@ -43,3 +43,10 @@ func getHTTPPort() string {
 	}
 	return "80"
 }
+
+func getExposeVersion() bool {
+	if value, exists := os.LookupEnv("PANDORA_EXPOSE_VERSION"); exists {
+		return value == "true"
+	}
+	return true
+}

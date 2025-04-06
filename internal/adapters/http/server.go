@@ -111,10 +111,14 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 	}
 }
 
-func (srv *Server) Run() {
+func (srv *Server) Run(exposeVersion bool) {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
+
+	if exposeVersion {
+		router.Use(middleware.VersionHeader())
+	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
