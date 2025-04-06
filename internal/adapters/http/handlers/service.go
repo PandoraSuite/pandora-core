@@ -3,11 +3,12 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
-	"github.com/gin-gonic/gin"
 )
 
 // CreateService godoc
