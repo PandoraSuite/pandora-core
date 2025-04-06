@@ -1,0 +1,15 @@
+version: v2
+
+deps:
+  - buf.build/bufbuild/protovalidate
+
+lint:
+  enum_zero_value_suffix: _NULL
+  rpc_allow_google_protobuf_empty_responses: true
+
+  use:
+    - STANDARD
+
+breaking:
+  use:
+    - FILE

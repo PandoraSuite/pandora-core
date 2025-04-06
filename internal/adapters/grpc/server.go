@@ -4,9 +4,13 @@ import (
 	"log"
 	"net"
 
+	"github.com/bufbuild/protovalidate-go"
+	interceptors "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
 	"google.golang.org/grpc"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc/api_key"
+	"github.com/MAD-py/pandora-core/internal/adapters/grpc/request"
+	"github.com/MAD-py/pandora-core/internal/adapters/grpc/reservation"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 )
 
@@ -20,10 +24,21 @@ type Server struct {
 
 func (s *Server) setupServices() {
 	api_key.RegisterService(s.server, s.apiKeyService)
+	request.RegisterService(s.server)
+	reservation.RegisterService(s.server)
 }
 
 func (s *Server) Run() {
-	s.server = grpc.NewServer()
+	validator, err := protovalidate.New()
+	if err != nil {
+		panic("failed to create protovalidate validator")
+	}
+
+	s.server = grpc.NewServer(
+		grpc.UnaryInterceptor(
+			interceptors.UnaryServerInterceptor(validator),
+		),
+	)
 	s.setupServices()
 
 	listener, err := net.Listen("tcp", s.addr)

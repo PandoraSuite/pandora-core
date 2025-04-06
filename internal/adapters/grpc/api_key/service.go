@@ -5,7 +5,7 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/grpc/api_key/pb"
+	pb "github.com/MAD-py/pandora-core/internal/adapters/grpc/api_key/v1"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 )
 
@@ -38,7 +38,7 @@ func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndCon
 	}, nil
 }
 
-func (s *service) ValidateAndBooking(ctx context.Context, req *pb.ValidateAndReservationRequest) (*pb.ValidateAndReservationResponse, error) {
+func (s *service) ValidateAndReservation(ctx context.Context, req *pb.ValidateAndReservationRequest) (*pb.ValidateAndReservationResponse, error) {
 	return &pb.ValidateAndReservationResponse{
 		Valid: true,
 		Result: &pb.ValidateAndReservationResponse_Successful_{
