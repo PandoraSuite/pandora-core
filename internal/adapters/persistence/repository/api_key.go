@@ -49,7 +49,7 @@ func (r *APIKeyRepository) Update(
 	args := []any{id}
 	argIndex := 2
 
-	if update.ExpiresAt.IsZero() {
+	if !update.ExpiresAt.IsZero() {
 		updates = append(updates, fmt.Sprintf("expires_at = $%d", argIndex))
 		args = append(args, update.ExpiresAt)
 		argIndex++
@@ -96,7 +96,14 @@ func (r *APIKeyRepository) UpdateLastUsed(
 func (r *APIKeyRepository) FindByEnvironment(
 	ctx context.Context, environmentID int,
 ) ([]*entities.APIKey, *errors.Error) {
-	query := "SELECT * FROM api_key WHERE environment_id = $1;"
+	query := `
+		SELECT id, environment_id, key, status, created_at,
+			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
+			COALESCE(last_used, '0001-01-01 00:00:00.0+00')
+		FROM api_key
+		WHERE environment_id = $1;
+	`
+
 	rows, err := r.pool.Query(ctx, query, environmentID)
 	if err != nil {
 		return nil, r.handlerErr(err)
@@ -112,10 +119,10 @@ func (r *APIKeyRepository) FindByEnvironment(
 			&apiKey.ID,
 			&apiKey.EnvironmentID,
 			&apiKey.Key,
-			&apiKey.ExpiresAt,
-			&apiKey.LastUsed,
 			&apiKey.Status,
 			&apiKey.CreatedAt,
+			&apiKey.ExpiresAt,
+			&apiKey.LastUsed,
 		)
 		if err != nil {
 			return nil, r.handlerErr(err)
@@ -134,17 +141,23 @@ func (r *APIKeyRepository) FindByEnvironment(
 func (r *APIKeyRepository) FindByKey(
 	ctx context.Context, key string,
 ) (*entities.APIKey, *errors.Error) {
-	query := "SELECT * FROM api_key WHERE key = $1;"
+	query := `
+		SELECT id, environment_id, key, status, created_at,
+			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
+			COALESCE(last_used, '0001-01-01 00:00:00.0+00')
+		FROM api_key
+		WHERE key = $1;
+	`
 
 	apiKey := new(entities.APIKey)
 	err := r.pool.QueryRow(ctx, query, key).Scan(
 		&apiKey.ID,
 		&apiKey.EnvironmentID,
 		&apiKey.Key,
-		&apiKey.ExpiresAt,
-		&apiKey.LastUsed,
 		&apiKey.Status,
 		&apiKey.CreatedAt,
+		&apiKey.ExpiresAt,
+		&apiKey.LastUsed,
 	)
 	if err != nil {
 		return nil, r.handlerErr(err)
@@ -156,17 +169,23 @@ func (r *APIKeyRepository) FindByKey(
 func (r *APIKeyRepository) FindByID(
 	ctx context.Context, id int,
 ) (*entities.APIKey, *errors.Error) {
-	query := "SELECT * FROM api_key WHERE id = $1;"
+	query := `
+		SELECT id, environment_id, key, status, created_at,
+			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
+			COALESCE(last_used, '0001-01-01 00:00:00.0+00')
+		FROM api_key
+		WHERE id = $1;
+	`
 
 	apiKey := new(entities.APIKey)
 	err := r.pool.QueryRow(ctx, query, id).Scan(
 		&apiKey.ID,
 		&apiKey.EnvironmentID,
 		&apiKey.Key,
-		&apiKey.ExpiresAt,
-		&apiKey.LastUsed,
 		&apiKey.Status,
 		&apiKey.CreatedAt,
+		&apiKey.ExpiresAt,
+		&apiKey.LastUsed,
 	)
 	if err != nil {
 		return nil, r.handlerErr(err)
@@ -197,13 +216,23 @@ func (r *APIKeyRepository) Save(
 		VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at;
 	`
 
+	var expiresAt any
+	if !apiKey.ExpiresAt.IsZero() {
+		expiresAt = apiKey.ExpiresAt
+	}
+
+	var lastUsed any
+	if !apiKey.LastUsed.IsZero() {
+		lastUsed = apiKey.LastUsed
+	}
+
 	err := r.pool.QueryRow(
 		ctx,
 		query,
 		apiKey.EnvironmentID,
 		apiKey.Key,
-		apiKey.ExpiresAt,
-		apiKey.LastUsed,
+		expiresAt,
+		lastUsed,
 		apiKey.Status,
 	).Scan(&apiKey.ID, &apiKey.CreatedAt)
 

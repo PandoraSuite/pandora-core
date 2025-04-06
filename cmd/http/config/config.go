@@ -11,12 +11,15 @@ type Config struct {
 
 	dbDNS string
 
-	httpPort string
+	httpPort      string
+	exposeVersion bool
 
 	jwtSecret string
 }
 
 func (c *Config) HTTPPort() string { return c.httpPort }
+
+func (c *Config) ExposeVersion() bool { return c.exposeVersion }
 
 func (c *Config) DBDNS() string { return c.dbDNS }
 
@@ -97,11 +100,13 @@ func LoadConfig() (*Config, error) {
 	}
 
 	httpPort := getHTTPPort()
+	exposeVersion := getExposeVersion()
 
 	return &Config{
-		dir:       dir,
-		dbDNS:     dbDNS,
-		httpPort:  httpPort,
-		jwtSecret: jwtSecret,
+		dir:           dir,
+		dbDNS:         dbDNS,
+		httpPort:      httpPort,
+		jwtSecret:     jwtSecret,
+		exposeVersion: exposeVersion,
 	}, nil
 }

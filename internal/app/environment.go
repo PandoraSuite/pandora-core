@@ -38,25 +38,22 @@ func (u *EnvironmentUseCase) AssignService(
 		return errors.ErrEnvironmentServiceAlreadyExists
 	}
 
-	maxRequest, err := u.environmentRepo.
-		GetMaxRequestByEnvironmentAndServiceInProject(ctx, id, service.ID)
+	quota, err := u.environmentRepo.GetProjectServiceQuotaUsage(
+		ctx, id, service.ID,
+	)
 	if err != nil {
+		if err == errors.ErrNotFound {
+			return errors.ErrEnvironmentNotFound
+		}
 		return err
 	}
 
-	if maxRequest > 0 {
-		maxRequests, err := u.environmentRepo.
-			ListMaxRequestsByEnvironmentAndService(ctx, id, service.ID)
-		if err != nil {
-			return err
+	if quota.MaxAllowed > -1 {
+		if service.MaxRequest == -1 {
+			return errors.ErrInfiniteRequestsNotAllowed
 		}
 
-		var totalMaxRequest int
-		for _, v := range maxRequests {
-			totalMaxRequest += v
-		}
-
-		if service.MaxRequest+totalMaxRequest > maxRequest {
+		if quota.CurrentAllocated+service.MaxRequest > quota.MaxAllowed {
 			return errors.ErrMaxRequestExceededForServiceInProyect
 		}
 	}
@@ -67,55 +64,42 @@ func (u *EnvironmentUseCase) AssignService(
 func (u *EnvironmentUseCase) Create(
 	ctx context.Context, req *dto.EnvironmentCreate,
 ) (*dto.EnvironmentResponse, *errors.Error) {
-	project, err := u.projectRepo.FindByID(ctx, req.ProjectID)
+	exists, err := u.projectRepo.Exists(ctx, req.ProjectID)
 	if err != nil {
-		if err == errors.ErrNotFound {
-			return nil, errors.ErrProjectNotFound
-		}
 		return nil, err
+	}
+
+	if !exists {
+		return nil, errors.ErrProjectNotFound
 	}
 
 	var errs []string
 	services := make([]*entities.EnvironmentService, len(req.Services))
 	for i, service := range req.Services {
-		projectService, err := project.GetService(service.ID)
+		quota, err := u.projectRepo.GetProjectServiceQuotaUsage(
+			ctx, req.ProjectID, service.ID,
+		)
 		if err != nil {
+			if err == errors.ErrNotFound {
+				err = errors.ErrServiceNotFound
+			}
 			err := err.AddDetail(fmt.Sprintf("Service %d", service.ID))
 			errs = append(errs, err.Error())
-			services[i] = nil
 			continue
 		}
 
-		if projectService.MaxRequest > 0 {
-			if service.MaxRequest == 0 {
+		if quota.MaxAllowed > -1 {
+			if service.MaxRequest == -1 {
 				err := errors.ErrInfiniteRequestsNotAllowed.
 					AddDetail(fmt.Sprintf("Service %d", service.ID))
 				errs = append(errs, err.Error())
-				services[i] = nil
 				continue
 			}
 
-			maxRequests, err := u.environmentRepo.
-				ListMaxRequestsByProjectAndService(
-					ctx, req.ProjectID, service.ID,
-				)
-			if err != nil {
-				err := err.AddDetail(fmt.Sprintf("Service %d", service.ID))
-				errs = append(errs, err.Error())
-				services[i] = nil
-				continue
-			}
-
-			var totalMaxRequest int
-			for _, v := range maxRequests {
-				totalMaxRequest += v
-			}
-
-			if service.MaxRequest+totalMaxRequest > projectService.MaxRequest {
+			if quota.CurrentAllocated+service.MaxRequest > quota.MaxAllowed {
 				err := errors.ErrMaxRequestExceededForServiceInProyect.
 					AddDetail(fmt.Sprintf("Service %d", service.ID))
 				errs = append(errs, err.Error())
-				services[i] = nil
 				continue
 			}
 		}
@@ -156,11 +140,12 @@ func (u *EnvironmentUseCase) Create(
 	)
 	for i, service := range environment.Services {
 		serviceResp[i] = &dto.EnvironmentServiceResponse{
-			ID:         service.ID,
-			Name:       service.Name,
-			Version:    service.Version,
-			MaxRequest: service.MaxRequest,
-			AssignedAt: service.AssignedAt,
+			ID:               service.ID,
+			Name:             service.Name,
+			Version:          service.Version,
+			MaxRequest:       service.MaxRequest,
+			AvailableRequest: service.AvailableRequest,
+			AssignedAt:       service.AssignedAt,
 		}
 	}
 

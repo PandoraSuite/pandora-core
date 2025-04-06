@@ -823,8 +823,7 @@ const docTemplate = `{
         "dto.EnvironmentService": {
             "type": "object",
             "required": [
-                "id",
-                "max_request"
+                "id"
             ],
             "properties": {
                 "id": {
@@ -840,6 +839,9 @@ const docTemplate = `{
             "properties": {
                 "assigned_at": {
                     "type": "string"
+                },
+                "available_request": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
