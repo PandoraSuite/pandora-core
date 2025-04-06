@@ -19,6 +19,13 @@ import (
 // @description API for centralized API key management and service access control.
 // @termsOfService http://example.com/terms/
 
+// @tag.name Authentication
+// @tag.name Services
+// @tag.name Clients
+// @tag.name Projects
+// @tag.name Environments
+// @tag.name API Keys
+
 // @contact.name Pandora Core Support
 // @contact.url http://example.com/support
 // @contact.email support@example.com

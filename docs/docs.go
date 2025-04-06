@@ -1134,7 +1134,27 @@ const docTemplate = `{
             "flow": "password",
             "tokenUrl": "/api/v1/auth/login"
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "Authentication"
+        },
+        {
+            "name": "Services"
+        },
+        {
+            "name": "Clients"
+        },
+        {
+            "name": "Projects"
+        },
+        {
+            "name": "Environments"
+        },
+        {
+            "name": "API Keys"
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

@@ -728,3 +728,10 @@ securityDefinitions:
     tokenUrl: /api/v1/auth/login
     type: oauth2
 swagger: "2.0"
+tags:
+- name: Authentication
+- name: Services
+- name: Clients
+- name: Projects
+- name: Environments
+- name: API Keys
