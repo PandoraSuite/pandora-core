@@ -117,3 +117,48 @@ func GetAllClients(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 		c.JSON(http.StatusOK, clients)
 	}
 }
+
+// UpdateClient godoc
+// @Summary Updates an existing client
+// @Description Modifies client data based on the provided ID
+// @Tags Clients
+// @Security OAuth2Password
+// @Produce json
+// @Param id path int true "Client ID"
+// @Param request body dto.ClientUpdate true "Updated client data"
+// @Success 204
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/clients/{id} [patch]
+func UpdateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		clientID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid client ID"},
+			)
+			return
+		}
+
+		var req dto.ClientUpdate
+
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		err := clientService.Update(c.Request.Context(), clientID, &req)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.Status(http.StatusNoContent)
+	}
+}

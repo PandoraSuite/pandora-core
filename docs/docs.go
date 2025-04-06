@@ -244,6 +244,52 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/clients/{id}": {
+            "patch": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Modifies client data based on the provided ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Clients"
+                ],
+                "summary": "Updates an existing client",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Client ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated client data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ClientUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/clients/{id}/projects": {
             "get": {
                 "security": [
@@ -760,6 +806,24 @@ const docTemplate = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "developer",
+                        "organization"
+                    ]
+                }
+            }
+        },
+        "dto.ClientUpdate": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"

@@ -78,6 +78,18 @@ definitions:
         - organization
         type: string
     type: object
+  dto.ClientUpdate:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      type:
+        enum:
+        - developer
+        - organization
+        type: string
+    type: object
   dto.EnvironmentCreate:
     properties:
       name:
@@ -399,6 +411,35 @@ paths:
       security:
       - OAuth2Password: []
       summary: Creates a new client
+      tags:
+      - Clients
+  /api/v1/clients/{id}:
+    patch:
+      description: Modifies client data based on the provided ID
+      parameters:
+      - description: Client ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated client data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ClientUpdate'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates an existing client
       tags:
       - Clients
   /api/v1/clients/{id}/projects:
