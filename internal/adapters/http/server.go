@@ -103,6 +103,7 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 		{
 			clients.POST("", handlers.CreateClient(srv.clientService))
 			clients.GET("", handlers.GetAllClients(srv.clientService))
+			clients.GET(":id", handlers.GetClient(srv.clientService))
 			clients.PATCH(":id", handlers.UpdateClient(srv.clientService))
 			clients.GET(
 				":id/projects",

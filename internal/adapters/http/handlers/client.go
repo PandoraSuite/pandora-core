@@ -162,3 +162,37 @@ func UpdateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 		c.Status(http.StatusNoContent)
 	}
 }
+
+// GetClient godoc
+// @Summary Retrieves a client by ID
+// @Description Fetches the details of a specific client using its ID
+// @Tags Clients
+// @Security OAuth2Password
+// @Produce json
+// @Param id path int true "Client ID"
+// @Success 200 {object} dto.ClientResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/clients/{id} [get]
+func GetClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		clientID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid client ID"},
+			)
+			return
+		}
+
+		clients, err := clientService.GetByID(c.Request.Context(), clientID)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.JSON(http.StatusOK, clients)
+	}
+}

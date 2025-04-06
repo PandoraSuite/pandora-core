@@ -85,7 +85,11 @@ func (r *ClientRepository) Exists(
 func (r *ClientRepository) FindByID(
 	ctx context.Context, id int,
 ) (*entities.Client, *errors.Error) {
-	query := "SELECT * FROM client WHERE id = $1;"
+	query := `
+		SELECT id, type, name, email, created_at
+		FROM client
+		WHERE id = $1;
+	`
 
 	client := new(entities.Client)
 	err := r.pool.QueryRow(ctx, query, id).Scan(
@@ -105,7 +109,10 @@ func (r *ClientRepository) FindByID(
 func (r *ClientRepository) FindAll(
 	ctx context.Context, filter *dto.ClientFilter,
 ) ([]*entities.Client, *errors.Error) {
-	query := "SELECT * FROM client"
+	query := `
+		SELECT id, type, name, email, created_at
+		FROM client
+	`
 
 	var args []any
 	if filter != nil {

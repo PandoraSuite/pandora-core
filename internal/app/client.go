@@ -25,6 +25,9 @@ func (c *ClientUseCase) GetByID(
 ) (*dto.ClientResponse, *errors.Error) {
 	client, err := c.clientRepo.FindByID(ctx, id)
 	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrClientNotFound
+		}
 		return nil, err
 	}
 
