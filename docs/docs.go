@@ -164,6 +164,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Fetches a list of clients, optionally filtered by client type",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -252,6 +255,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Fetches the details of a specific client using its ID",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -336,6 +342,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Fetches a list of projects associated with a given client",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -424,6 +433,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Returns a list of API Keys associated with a specific environment",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -553,6 +565,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/projects/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Fetches the details of a specific project using its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Retrieves a project by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProjectResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/projects/{id}/environments": {
             "get": {
                 "security": [
@@ -561,6 +616,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Fetches a list of environments associated with a given project",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -653,6 +711,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Fetches a list of all registered services",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],

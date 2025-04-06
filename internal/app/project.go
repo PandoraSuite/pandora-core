@@ -31,6 +31,42 @@ func (u *ProjectUseCase) AssignService(
 	return u.projectRepo.AddService(ctx, id, service)
 }
 
+func (u *ProjectUseCase) GetByID(
+	ctx context.Context, id int,
+) (*dto.ProjectResponse, *errors.Error) {
+	project, err := u.projectRepo.FindByID(ctx, id)
+	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrProjectNotFound
+		}
+		return nil, err
+	}
+
+	serviceResp := make(
+		[]*dto.ProjectServiceResponse, len(project.Services),
+	)
+	for i, service := range project.Services {
+		serviceResp[i] = &dto.ProjectServiceResponse{
+			ID:             service.ID,
+			Name:           service.Name,
+			Version:        service.Version,
+			NextReset:      service.NextReset,
+			MaxRequest:     service.MaxRequest,
+			ResetFrequency: service.ResetFrequency,
+			AssignedAt:     service.AssignedAt,
+		}
+	}
+
+	return &dto.ProjectResponse{
+		ID:        project.ID,
+		Name:      project.Name,
+		Status:    project.Status,
+		ClientID:  project.ClientID,
+		CreatedAt: project.CreatedAt,
+		Services:  serviceResp,
+	}, nil
+}
+
 func (u *ProjectUseCase) GetEnvironments(
 	ctx context.Context, id int,
 ) ([]*dto.EnvironmentResponse, *errors.Error) {

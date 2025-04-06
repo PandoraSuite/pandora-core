@@ -16,6 +16,7 @@ import (
 // @Description Fetches a list of all registered services
 // @Tags Services
 // @Security OAuth2Password
+// @Accept json
 // @Produce json
 // @Param query query dto.ServiceFilter false "Query parameters"
 // @Success 200 {array} []dto.ServiceResponse

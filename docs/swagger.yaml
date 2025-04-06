@@ -360,6 +360,8 @@ paths:
       - Authentication
   /api/v1/clients:
     get:
+      consumes:
+      - application/json
       description: Fetches a list of clients, optionally filtered by client type
       parameters:
       - enum:
@@ -415,6 +417,8 @@ paths:
       - Clients
   /api/v1/clients/{id}:
     get:
+      consumes:
+      - application/json
       description: Fetches the details of a specific client using its ID
       parameters:
       - description: Client ID
@@ -468,6 +472,8 @@ paths:
       - Clients
   /api/v1/clients/{id}/projects:
     get:
+      consumes:
+      - application/json
       description: Fetches a list of projects associated with a given client
       parameters:
       - description: Client ID
@@ -523,6 +529,8 @@ paths:
       - Environments
   /api/v1/environments/{id}/api-keys:
     get:
+      consumes:
+      - application/json
       description: Returns a list of API Keys associated with a specific environment
       parameters:
       - description: Environment ID
@@ -607,8 +615,37 @@ paths:
       summary: Creates a new project
       tags:
       - Projects
+  /api/v1/projects/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Fetches the details of a specific project using its ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProjectResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Retrieves a project by ID
+      tags:
+      - Projects
   /api/v1/projects/{id}/environments:
     get:
+      consumes:
+      - application/json
       description: Fetches a list of environments associated with a given project
       parameters:
       - description: Project ID
@@ -667,6 +704,8 @@ paths:
       - Projects
   /api/v1/services:
     get:
+      consumes:
+      - application/json
       description: Fetches a list of all registered services
       parameters:
       - enum:

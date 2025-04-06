@@ -52,6 +52,7 @@ func CreateEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.Handl
 // @Description Returns a list of API Keys associated with a specific environment
 // @Tags Environments
 // @Security OAuth2Password
+// @Accept json
 // @Produce json
 // @Param id path int true "Environment ID"
 // @Success 200 {array} dto.APIKeyResponse

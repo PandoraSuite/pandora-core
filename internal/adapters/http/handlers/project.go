@@ -47,11 +47,49 @@ func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 	}
 }
 
+// GetProject godoc
+// @Summary Retrieves a project by ID
+// @Description Fetches the details of a specific project using its ID
+// @Tags Projects
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "Project ID"
+// @Success 200 {object} dto.ProjectResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/projects/{id} [get]
+func GetProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		projectID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid project ID"},
+			)
+			return
+		}
+
+		environments, err := projectService.GetByID(
+			c.Request.Context(), projectID,
+		)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.JSON(http.StatusOK, environments)
+	}
+}
+
 // GetEnvironmentsByProject godoc
 // @Summary Retrieves all environments for a specific project
 // @Description Fetches a list of environments associated with a given project
 // @Tags Projects
 // @Security OAuth2Password
+// @Accept json
 // @Produce json
 // @Param id path int true "Project ID"
 // @Success 200 {array} dto.EnvironmentResponse

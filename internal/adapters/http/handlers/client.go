@@ -17,6 +17,7 @@ import (
 // @Description Fetches a list of clients, optionally filtered by client type
 // @Tags Clients
 // @Security OAuth2Password
+// @Accept json
 // @Produce json
 // @Param query query dto.ClientFilter false "Query parameters"
 // @Success 200 {array} dto.ClientResponse
@@ -88,6 +89,7 @@ func CreateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 // @Description Fetches the details of a specific client using its ID
 // @Tags Clients
 // @Security OAuth2Password
+// @Accept json
 // @Produce json
 // @Param id path int true "Client ID"
 // @Success 200 {object} dto.ClientResponse
@@ -167,6 +169,7 @@ func UpdateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 // @Description Fetches a list of projects associated with a given client
 // @Tags Clients
 // @Security OAuth2Password
+// @Accept json
 // @Produce json
 // @Param id path int true "Client ID"
 // @Success 200 {array} dto.ProjectResponse
