@@ -10,42 +10,6 @@ import (
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 )
 
-// Authenticate godoc
-// @Summary Authenticate user
-// @Description Authenticates the administrator and returns a token.
-// @Tags Authentication
-// @Accept x-www-form-urlencoded
-// @Produce json
-// @Param username formData string true "Login username"
-// @Param password formData string true "Login password"
-// @Success 200 {object} dto.AuthenticateResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
-// @Router /api/v1/auth/login [post]
-func Authenticate(authService inbound.AuthHTTPPort) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		var req dto.Authenticate
-
-		if err := c.ShouldBind(&req); err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
-			return
-		}
-
-		res, err := authService.Authenticate(c.Request.Context(), &req)
-		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
-			return
-		}
-
-		c.JSON(http.StatusOK, res)
-	}
-}
-
 // ChangePassword godoc
 // @Summary Change password
 // @Description Allows an authenticated user to change their password.
@@ -88,5 +52,41 @@ func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 		}
 
 		c.Status(http.StatusNoContent)
+	}
+}
+
+// Authenticate godoc
+// @Summary Authenticate user
+// @Description Authenticates the administrator and returns a token.
+// @Tags Authentication
+// @Accept x-www-form-urlencoded
+// @Produce json
+// @Param username formData string true "Login username"
+// @Param password formData string true "Login password"
+// @Success 200 {object} dto.AuthenticateResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/auth/login [post]
+func Authenticate(authService inbound.AuthHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var req dto.Authenticate
+
+		if err := c.ShouldBind(&req); err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		res, err := authService.Authenticate(c.Request.Context(), &req)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.JSON(http.StatusOK, res)
 	}
 }

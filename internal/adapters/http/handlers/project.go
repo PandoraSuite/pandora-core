@@ -47,6 +47,42 @@ func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 	}
 }
 
+// GetEnvironmentsByProject godoc
+// @Summary Retrieves all environments for a specific project
+// @Description Fetches a list of environments associated with a given project
+// @Tags Projects
+// @Security OAuth2Password
+// @Produce json
+// @Param id path int true "Project ID"
+// @Success 200 {array} dto.EnvironmentResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/projects/{id}/environments [get]
+func GetEnvironmentsByProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		projectID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid project ID"},
+			)
+			return
+		}
+
+		environments, err := projectService.GetEnvironments(
+			c.Request.Context(), projectID,
+		)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.JSON(http.StatusOK, environments)
+	}
+}
+
 // AssignServiceToProject godoc
 // @Summary Assigns a service to a project
 // @Description Associates a service with a given project
@@ -88,41 +124,5 @@ func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerF
 		}
 
 		c.Status(http.StatusNoContent)
-	}
-}
-
-// GetEnvironmentsByProject godoc
-// @Summary Retrieves all environments for a specific project
-// @Description Fetches a list of environments associated with a given project
-// @Tags Projects
-// @Security OAuth2Password
-// @Produce json
-// @Param id path int true "Project ID"
-// @Success 200 {array} dto.EnvironmentResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
-// @Router /api/v1/projects/{id}/environments [get]
-func GetEnvironmentsByProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		projectID, paramErr := strconv.Atoi(c.Param("id"))
-		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid project ID"},
-			)
-			return
-		}
-
-		environments, err := projectService.GetEnvironments(
-			c.Request.Context(), projectID,
-		)
-		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
-			return
-		}
-
-		c.JSON(http.StatusOK, environments)
 	}
 }

@@ -67,9 +67,36 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 		}
 
 		protected.Use(middleware.ForcePasswordReset(srv.authService))
-		apiKeys := protected.Group("/api-keys")
+
+		services := protected.Group("/services")
 		{
-			apiKeys.POST("", handlers.CreateAPIKey(srv.apiKeyService))
+			services.GET("", handlers.GetAllServices(srv.srvService))
+			services.POST("", handlers.CreateService(srv.srvService))
+		}
+
+		clients := protected.Group("/clients")
+		{
+			clients.GET("", handlers.GetAllClients(srv.clientService))
+			clients.POST("", handlers.CreateClient(srv.clientService))
+			clients.GET(":id", handlers.GetClient(srv.clientService))
+			clients.PATCH(":id", handlers.UpdateClient(srv.clientService))
+			clients.GET(
+				":id/projects",
+				handlers.GetProjectsByClient(srv.clientService),
+			)
+		}
+
+		projects := protected.Group("/projects")
+		{
+			projects.POST("", handlers.CreateProject(srv.projectService))
+			projects.GET(
+				"/:id/environments",
+				handlers.GetEnvironmentsByProject(srv.projectService),
+			)
+			projects.POST(
+				"/:id/services",
+				handlers.AssignServiceToProject(srv.projectService),
+			)
 		}
 
 		environments := protected.Group("/environments")
@@ -87,36 +114,11 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 			)
 		}
 
-		services := protected.Group("/services")
+		apiKeys := protected.Group("/api-keys")
 		{
-			services.POST("", handlers.CreateService(srv.srvService))
-			services.GET("", handlers.GetAllServices(srv.srvService))
+			apiKeys.POST("", handlers.CreateAPIKey(srv.apiKeyService))
 		}
 
-		projects := protected.Group("/projects")
-		{
-			projects.POST("", handlers.CreateProject(srv.projectService))
-			projects.GET(
-				"/:id/environments",
-				handlers.GetEnvironmentsByProject(srv.projectService),
-			)
-			projects.POST(
-				"/:id/services",
-				handlers.AssignServiceToProject(srv.projectService),
-			)
-		}
-
-		clients := protected.Group("/clients")
-		{
-			clients.POST("", handlers.CreateClient(srv.clientService))
-			clients.GET("", handlers.GetAllClients(srv.clientService))
-			clients.GET(":id", handlers.GetClient(srv.clientService))
-			clients.PATCH(":id", handlers.UpdateClient(srv.clientService))
-			clients.GET(
-				":id/projects",
-				handlers.GetProjectsByClient(srv.clientService),
-			)
-		}
 	}
 }
 
