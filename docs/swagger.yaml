@@ -78,6 +78,18 @@ definitions:
         - organization
         type: string
     type: object
+  dto.ClientUpdate:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      type:
+        enum:
+        - developer
+        - organization
+        type: string
+    type: object
   dto.EnvironmentCreate:
     properties:
       name:
@@ -123,6 +135,8 @@ definitions:
     properties:
       assigned_at:
         type: string
+      available_request:
+        type: integer
       id:
         type: integer
       max_request:
@@ -189,6 +203,7 @@ definitions:
         type: string
     required:
     - id
+    - max_request
     type: object
   dto.ProjectServiceResponse:
     properties:
@@ -347,6 +362,8 @@ paths:
       - Authentication
   /api/v1/clients:
     get:
+      consumes:
+      - application/json
       description: Fetches a list of clients, optionally filtered by client type
       parameters:
       - enum:
@@ -400,8 +417,65 @@ paths:
       summary: Creates a new client
       tags:
       - Clients
+  /api/v1/clients/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Fetches the details of a specific client using its ID
+      parameters:
+      - description: Client ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ClientResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Retrieves a client by ID
+      tags:
+      - Clients
+    patch:
+      description: Modifies client data based on the provided ID
+      parameters:
+      - description: Client ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated client data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ClientUpdate'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates an existing client
+      tags:
+      - Clients
   /api/v1/clients/{id}/projects:
     get:
+      consumes:
+      - application/json
       description: Fetches a list of projects associated with a given client
       parameters:
       - description: Client ID
@@ -455,8 +529,37 @@ paths:
       summary: Creates a new environment
       tags:
       - Environments
+  /api/v1/environments/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Fetches the details of a specific environment using its ID
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EnvironmentResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Retrieves an environment by ID
+      tags:
+      - Environments
   /api/v1/environments/{id}/api-keys:
     get:
+      consumes:
+      - application/json
       description: Returns a list of API Keys associated with a specific environment
       parameters:
       - description: Environment ID
@@ -541,8 +644,37 @@ paths:
       summary: Creates a new project
       tags:
       - Projects
+  /api/v1/projects/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Fetches the details of a specific project using its ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProjectResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Retrieves a project by ID
+      tags:
+      - Projects
   /api/v1/projects/{id}/environments:
     get:
+      consumes:
+      - application/json
       description: Fetches a list of environments associated with a given project
       parameters:
       - description: Project ID
@@ -585,8 +717,6 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/dto.ProjectService'
-      produces:
-      - application/json
       responses:
         "204":
           description: No Content
@@ -599,8 +729,38 @@ paths:
       summary: Assigns a service to a project
       tags:
       - Projects
+  /api/v1/projects/{id}/services/{service_id}:
+    delete:
+      description: Disassociates a service from a specific project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Removes a service from a project
+      tags:
+      - Projects
   /api/v1/services:
     get:
+      consumes:
+      - application/json
       description: Fetches a list of all registered services
       parameters:
       - enum:
@@ -662,3 +822,10 @@ securityDefinitions:
     tokenUrl: /api/v1/auth/login
     type: oauth2
 swagger: "2.0"
+tags:
+- name: Authentication
+- name: Services
+- name: Clients
+- name: Projects
+- name: Environments
+- name: API Keys

@@ -31,6 +31,75 @@ func (u *ProjectUseCase) AssignService(
 	return u.projectRepo.AddService(ctx, id, service)
 }
 
+func (u *ProjectUseCase) RemoveService(
+	ctx context.Context, id, serviceID int,
+) *errors.Error {
+	exists, err := u.projectRepo.Exists(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return errors.ErrProjectNotFound
+	}
+
+	_, err = u.environmentRepo.RemoveServiceFromProjectEnvironments(
+		ctx, id, serviceID,
+	)
+	if err != nil {
+		return err
+	}
+
+	n, err := u.projectRepo.RemoveServiceFromProject(
+		ctx, id, serviceID,
+	)
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+		return errors.ErrServiceNotFound
+	}
+
+	return nil
+}
+
+func (u *ProjectUseCase) GetByID(
+	ctx context.Context, id int,
+) (*dto.ProjectResponse, *errors.Error) {
+	project, err := u.projectRepo.FindByID(ctx, id)
+	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrProjectNotFound
+		}
+		return nil, err
+	}
+
+	serviceResp := make(
+		[]*dto.ProjectServiceResponse, len(project.Services),
+	)
+	for i, service := range project.Services {
+		serviceResp[i] = &dto.ProjectServiceResponse{
+			ID:             service.ID,
+			Name:           service.Name,
+			Version:        service.Version,
+			NextReset:      service.NextReset,
+			MaxRequest:     service.MaxRequest,
+			ResetFrequency: service.ResetFrequency,
+			AssignedAt:     service.AssignedAt,
+		}
+	}
+
+	return &dto.ProjectResponse{
+		ID:        project.ID,
+		Name:      project.Name,
+		Status:    project.Status,
+		ClientID:  project.ClientID,
+		CreatedAt: project.CreatedAt,
+		Services:  serviceResp,
+	}, nil
+}
+
 func (u *ProjectUseCase) GetEnvironments(
 	ctx context.Context, id int,
 ) ([]*dto.EnvironmentResponse, *errors.Error) {
@@ -55,11 +124,12 @@ func (u *ProjectUseCase) GetEnvironments(
 		)
 		for i, service := range environment.Services {
 			serviceResp[i] = &dto.EnvironmentServiceResponse{
-				ID:         service.ID,
-				Name:       service.Name,
-				Version:    service.Version,
-				MaxRequest: service.MaxRequest,
-				AssignedAt: service.AssignedAt,
+				ID:               service.ID,
+				Name:             service.Name,
+				Version:          service.Version,
+				MaxRequest:       service.MaxRequest,
+				AvailableRequest: service.AvailableRequest,
+				AssignedAt:       service.AssignedAt,
 			}
 		}
 

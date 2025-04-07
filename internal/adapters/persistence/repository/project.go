@@ -5,18 +5,35 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ProjectRepository struct {
 	pool *pgxpool.Pool
 
 	handlerErr func(error) *errors.Error
+}
+
+func (r *ProjectRepository) RemoveServiceFromProject(
+	ctx context.Context, id, serviceID int,
+) (int64, *errors.Error) {
+	query := `
+		DELETE FROM project_service
+		WHERE project_id = $1 AND service_id = $2;
+	`
+
+	result, err := r.pool.Exec(ctx, query, id, serviceID)
+	if err != nil {
+		return 0, r.handlerErr(err)
+	}
+
+	return result.RowsAffected(), nil
 }
 
 func (r *ProjectRepository) UpdateStatus(
@@ -26,14 +43,19 @@ func (r *ProjectRepository) UpdateStatus(
 		return errors.ErrProjectInvalidStatus
 	}
 
-	query := "UPDATE project SET status = $1 WHERE id = $2;"
+	query := `
+		UPDATE project
+		SET status = $1
+		WHERE id = $2;
+	`
+
 	result, err := r.pool.Exec(ctx, query, status, id)
 	if err != nil {
 		return r.handlerErr(err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrAPIKeyNotFound
+		return errors.ErrProjectNotFound
 	}
 
 	return nil
@@ -61,7 +83,11 @@ func (r *ProjectRepository) Update(
 	}
 
 	query := fmt.Sprintf(
-		"UPDATE project SET %s WHERE id = $1;",
+		`
+			UPDATE project
+			SET %s
+			WHERE id = $1;
+		`,
 		strings.Join(updates, ", "),
 	)
 
@@ -80,7 +106,13 @@ func (r *ProjectRepository) Update(
 func (r *ProjectRepository) Exists(
 	ctx context.Context, id int,
 ) (bool, *errors.Error) {
-	query := "SELECT EXISTS (SELECT 1 FROM project WHERE id = $1);"
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM project
+			WHERE id = $1
+		);
+	`
 
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, id).Scan(&exists)
@@ -91,18 +123,27 @@ func (r *ProjectRepository) Exists(
 	return exists, nil
 }
 
-func (r *ProjectRepository) GetMaxRequest(
+func (r *ProjectRepository) GetProjectServiceQuotaUsage(
 	ctx context.Context, id, serviceID int,
-) (int, *errors.Error) {
+) (*dto.QuotaUsage, *errors.Error) {
 	query := `
-		SELECT max_request
-		FROM project_service
-		WHERE project_id = $1 AND service_id = $2;
+		SELECT COALESCE(ps.max_request, -1), COALESCE(SUM(es.max_request), 0)
+		FROM project_service ps
+			LEFT JOIN environment e
+				ON e.project_id = ps.project_id
+			LEFT JOIN environment_service es
+				ON es.environment_id = e.id
+				AND es.service_id = ps.service_id
+		WHERE ps.project_id = $1 AND ps.service_id = $2
+		GROUP BY ps.max_request;
 	`
 
-	var maxRequest int
-	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(&maxRequest)
-	return maxRequest, r.handlerErr(err)
+	quota := new(dto.QuotaUsage)
+	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(
+		&quota.MaxAllowed,
+		&quota.CurrentAllocated,
+	)
+	return quota, r.handlerErr(err)
 }
 
 func (r *ProjectRepository) FindByID(
@@ -117,15 +158,17 @@ func (r *ProjectRepository) FindByID(
 						'name', s.name,
 						'version', s.version,
 						'nextReset', ps.next_reset,
-						'maxRequest', ps.max_request,
+						'maxRequest', COALESCE(ps.max_request, -1),
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
 					)
 				), '[]'
-			) AS services
+			)
 		FROM project p
-		LEFT JOIN project_service ps ON ps.project_id = p.id
-		LEFT JOIN service s ON s.id = ps.service_id
+			LEFT JOIN project_service ps
+				ON ps.project_id = p.id
+			LEFT JOIN service s
+				ON s.id = ps.service_id
 		WHERE p.id = $1
 		GROUP BY p.id;
 	`
@@ -158,16 +201,19 @@ func (r *ProjectRepository) FindByClient(
 						'name', s.name,
 						'version', s.version,
 						'nextReset', ps.next_reset,
-						'maxRequest', ps.max_request,
+						'maxRequest', COALESCE(ps.max_request, -1),
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
 					)
 				), '[]'
-			) AS services
+			)
 		FROM project p
-		JOIN client c ON c.id = p.client_id
-		LEFT JOIN project_service ps ON ps.project_id = p.id
-		LEFT JOIN service s ON s.id = ps.service_id
+			JOIN client c
+				ON c.id = p.client_id
+			LEFT JOIN project_service ps
+				ON ps.project_id = p.id
+			LEFT JOIN service s
+				ON s.id = ps.service_id
 		WHERE c.id = $1
 		GROUP BY p.id;
 	`
@@ -216,14 +262,18 @@ func (r *ProjectRepository) AddService(
 		)
 		SELECT s.name, s.version
 		FROM inserted i
-		JOIN service s ON i.service_id = s.id
+			JOIN service s
+				ON i.service_id = s.id;
 	`
 
-	resetFrequencyS := service.ResetFrequency.String()
-
 	var resetFrequency any
-	if resetFrequencyS != "" {
-		resetFrequency = resetFrequencyS
+	if s := service.ResetFrequency.String(); s != "" {
+		resetFrequency = s
+	}
+
+	var maxRequest any
+	if service.MaxRequest != -1 {
+		maxRequest = service.MaxRequest
 	}
 
 	err := r.pool.QueryRow(
@@ -231,7 +281,7 @@ func (r *ProjectRepository) AddService(
 		query,
 		id,
 		service.ID,
-		service.MaxRequest,
+		maxRequest,
 		resetFrequency,
 		service.NextReset,
 	).Scan(&service.Name, &service.Version)
@@ -309,12 +359,23 @@ func (r *ProjectRepository) saveProjectServices(
 				argIndex+4,
 			),
 		)
+
+		var resetFrequency any
+		if s := service.ResetFrequency.String(); s != "" {
+			resetFrequency = s
+		}
+
+		var maxRequest any
+		if service.MaxRequest != -1 {
+			maxRequest = service.MaxRequest
+		}
+
 		args = append(
 			args,
 			projectID,
 			service.ID,
-			service.MaxRequest,
-			service.ResetFrequency,
+			maxRequest,
+			resetFrequency,
 			service.NextReset,
 		)
 		argIndex += 5
@@ -327,9 +388,10 @@ func (r *ProjectRepository) saveProjectServices(
 				VALUES %s
 				RETURNING *
 			)
-			SELECT s.id, s.name, s.version, i.max_request, i.reset_frequency, i.next_reset, i.created_at
+			SELECT s.id, s.name, s.version, COALESCE(i.max_request, -1), i.reset_frequency, i.next_reset, i.created_at
 			FROM inserted i
-			JOIN service s ON i.service_id = s.id
+				JOIN service s
+					ON i.service_id = s.id;
 		`,
 		strings.Join(values, ", "),
 	)

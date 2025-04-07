@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
+
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type JWTProvider struct {

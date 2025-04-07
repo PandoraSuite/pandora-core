@@ -75,7 +75,7 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 	}
 
 	var availableRequestResp string
-	if availableRequest.MaxRequest == 0 {
+	if availableRequest.MaxRequest == -1 {
 		availableRequestResp = "unlimited"
 	} else {
 		availableRequestResp = strconv.Itoa(availableRequest.AvailableRequest)

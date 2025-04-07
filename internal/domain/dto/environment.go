@@ -11,6 +11,11 @@ type DecrementAvailableRequest struct {
 	AvailableRequest int `json:"available_request"`
 }
 
+type QuotaUsage struct {
+	MaxAllowed       int `json:"max_allowed"`
+	CurrentAllocated int `json:"current_allocated"`
+}
+
 type EnvironmentService struct {
 	ID         int `json:"id" binding:"required"`
 	MaxRequest int `json:"max_request" binding:"required"`
@@ -24,11 +29,12 @@ type EnvironmentCreate struct {
 }
 
 type EnvironmentServiceResponse struct {
-	ID         int       `json:"id"`
-	Name       string    `json:"name"`
-	Version    string    `json:"version"`
-	MaxRequest int       `json:"max_request"`
-	AssignedAt time.Time `json:"assigned_at"`
+	ID               int       `json:"id"`
+	Name             string    `json:"name"`
+	Version          string    `json:"version"`
+	MaxRequest       int       `json:"max_request"`
+	AvailableRequest int       `json:"available_request"`
+	AssignedAt       time.Time `json:"assigned_at"`
 }
 
 type EnvironmentResponse struct {

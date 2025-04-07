@@ -25,7 +25,7 @@ type ClientResponse struct {
 }
 
 type ClientUpdate struct {
-	Type  enums.ClientType `json:"type,omitempty" enums:"developer,organization" swaggertype:"string"`
-	Name  string           `json:"name,omitempty"`
+	Type  enums.ClientType `json:"type,omitempty" binding:"omitempty" enums:"developer,organization" swaggertype:"string"`
+	Name  string           `json:"name,omitempty" binding:"omitempty"`
 	Email string           `json:"email,omitempty" binding:"omitempty,email"`
 }

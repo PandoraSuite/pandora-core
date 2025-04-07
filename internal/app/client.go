@@ -14,17 +14,20 @@ type ClientUseCase struct {
 	projectRepo outbound.ProjectPort
 }
 
-func (c *ClientUseCase) Update(
+func (u *ClientUseCase) Update(
 	ctx context.Context, id int, req *dto.ClientUpdate,
 ) *errors.Error {
-	return c.clientRepo.Update(ctx, id, req)
+	return u.clientRepo.Update(ctx, id, req)
 }
 
-func (c *ClientUseCase) GetByID(
+func (u *ClientUseCase) GetByID(
 	ctx context.Context, id int,
 ) (*dto.ClientResponse, *errors.Error) {
-	client, err := c.clientRepo.FindByID(ctx, id)
+	client, err := u.clientRepo.FindByID(ctx, id)
 	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrClientNotFound
+		}
 		return nil, err
 	}
 

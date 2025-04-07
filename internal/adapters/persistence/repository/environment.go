@@ -5,18 +5,40 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type EnvironmentRepository struct {
 	pool *pgxpool.Pool
 
 	handlerErr func(error) *errors.Error
+}
+
+func (r *EnvironmentRepository) RemoveServiceFromProjectEnvironments(
+	ctx context.Context, projectID, serviceID int,
+) (int64, *errors.Error) {
+	query := `
+		DELETE FROM environment_service
+		WHERE service_id = $2
+			AND environment_id IN (
+				SELECT id
+				FROM environment
+				WHERE project_id = $1
+			);
+	`
+
+	result, err := r.pool.Exec(ctx, query, projectID, serviceID)
+	if err != nil {
+		return 0, r.handlerErr(err)
+	}
+
+	return result.RowsAffected(), nil
 }
 
 func (r *EnvironmentRepository) UpdateStatus(
@@ -26,14 +48,19 @@ func (r *EnvironmentRepository) UpdateStatus(
 		return errors.ErrEnvironmentInvalidStatus
 	}
 
-	query := "UPDATE environment SET status = $1 WHERE id = $2;"
+	query := `
+		UPDATE environment
+		SET status = $1
+		WHERE id = $2;
+	`
+
 	result, err := r.pool.Exec(ctx, query, status, id)
 	if err != nil {
 		return r.handlerErr(err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrAPIKeyNotFound
+		return errors.ErrEnvironmentNotFound
 	}
 
 	return nil
@@ -61,7 +88,11 @@ func (r *EnvironmentRepository) Update(
 	}
 
 	query := fmt.Sprintf(
-		"UPDATE environment SET %s WHERE id = $1;",
+		`
+			UPDATE environment
+			SET %s
+			WHERE id = $1;
+		`,
 		strings.Join(updates, ", "),
 	)
 
@@ -71,10 +102,36 @@ func (r *EnvironmentRepository) Update(
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrAPIKeyNotFound
+		return errors.ErrEnvironmentNotFound
 	}
 
 	return nil
+}
+
+func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
+	ctx context.Context, id, serviceID int,
+) (*dto.QuotaUsage, *errors.Error) {
+	query := `
+		SELECT COALESCE(ps.max_request, -1), COALESCE(SUM(es.max_request), 0)
+		FROM environment e_target
+			JOIN project_service ps
+				ON ps.project_id = e_target.project_id
+				AND ps.service_id = $2
+			LEFT JOIN environment e
+				ON e.project_id = ps.project_id
+			LEFT JOIN environment_service es
+				ON es.environment_id = e.id
+				AND es.service_id = ps.service_id
+		WHERE e_target.id = $1
+		GROUP BY ps.max_request;
+	`
+
+	quota := new(dto.QuotaUsage)
+	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(
+		&quota.MaxAllowed,
+		&quota.CurrentAllocated,
+	)
+	return quota, r.handlerErr(err)
 }
 
 func (r *EnvironmentRepository) DecrementAvailableRequest(
@@ -89,7 +146,7 @@ func (r *EnvironmentRepository) DecrementAvailableRequest(
 				ELSE available_request
 			END
 		WHERE environment_id = $1 AND service_id = $2
-		AND (available_request IS NULL OR available_request > 0)
+			AND (available_request IS NULL OR available_request > 0)
 		RETURNING max_request, available_request;
 	`
 
@@ -127,77 +184,6 @@ func (r *EnvironmentRepository) ExistsServiceIn(
 	return exists, nil
 }
 
-func (r *EnvironmentRepository) ListMaxRequestsByProjectAndService(
-	ctx context.Context, projectID, serviceID int,
-) ([]int, *errors.Error) {
-	query := `
-		SELECT es.max_request
-		FROM environment_service es
-		JOIN environment e ON e.id = es.environment_id
-		WHERE e.project_id = $1 AND es.service_id = $2;
-	`
-
-	return r.listMaxRequests(ctx, query, projectID, serviceID)
-}
-
-func (r *EnvironmentRepository) ListMaxRequestsByEnvironmentAndService(
-	ctx context.Context, id, serviceID int,
-) ([]int, *errors.Error) {
-	query := `
-		SELECT es.max_request
-		FROM environment_service es
-		JOIN environment e ON e.id = es.environment_id
-		WHERE e.project_id = (
-			SELECT project_id FROM environment WHERE id = $1
-		)
-		AND es.service_id = $2;
-	`
-
-	return r.listMaxRequests(ctx, query, id, serviceID)
-}
-
-func (r *EnvironmentRepository) listMaxRequests(
-	ctx context.Context, query string, mainID, serviceID int,
-) ([]int, *errors.Error) {
-	rows, err := r.pool.Query(ctx, query, mainID, serviceID)
-	if err != nil {
-		return nil, r.handlerErr(err)
-	}
-
-	defer rows.Close()
-
-	var maxRequests []int
-	for rows.Next() {
-		var maxResuest int
-		if err := rows.Scan(&maxResuest); err != nil {
-			return nil, r.handlerErr(err)
-		}
-
-		maxRequests = append(maxRequests, maxResuest)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, r.handlerErr(err)
-	}
-
-	return maxRequests, nil
-}
-
-func (r *EnvironmentRepository) GetMaxRequestByEnvironmentAndServiceInProject(
-	ctx context.Context, id, serviceID int,
-) (int, *errors.Error) {
-	query := `
-		SELECT ps.max_request
-		FROM environment e
-		JOIN project_service ps ON ps.project_id = e.project_id
-		WHERE e.id = $1 AND ps.service_id = $2;
-	`
-
-	var maxRequest int
-	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(&maxRequest)
-	return maxRequest, r.handlerErr(err)
-}
-
 func (r *EnvironmentRepository) FindByID(
 	ctx context.Context, id int,
 ) (*entities.Environment, *errors.Error) {
@@ -209,15 +195,17 @@ func (r *EnvironmentRepository) FindByID(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'maxRequest', es.max_request,
-						'availableRequest', es.available_request,
+						'maxRequest', COALESCE(es.max_request, -1),
+						'availableRequest', COALESCE(es.available_request, -1),
 						'assignedAt', es.created_at
 					)
 				), '[]'
-			) AS services
+			)
 		FROM environment e
-		LEFT JOIN environment_service es ON es.environment_id = e.id
-		LEFT JOIN service s ON s.id = es.service_id
+			LEFT JOIN environment_service es
+				ON es.environment_id = e.id
+			LEFT JOIN service s
+			ON s.id = es.service_id
 		WHERE e.id = $1
 		GROUP BY e.id;
 	`
@@ -249,16 +237,19 @@ func (r *EnvironmentRepository) FindByProject(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'maxRequest', es.max_request,
-						'availableRequest', es.available_request,
+						'maxRequest', COALESCE(es.max_request, -1),
+						'availableRequest', COALESCE(es.available_request, -1),
 						'assignedAt', es.created_at
 					)
 				), '[]'
-			) AS services
+			)
 		FROM environment e
-		JOIN project p ON p.id = e.project_id
-		LEFT JOIN environment_service es ON es.environment_id = e.id
-		LEFT JOIN service s ON s.id = es.service_id
+			JOIN project p
+				ON p.id = e.project_id
+			LEFT JOIN environment_service es
+				ON es.environment_id = e.id
+			LEFT JOIN service s
+				ON s.id = es.service_id
 		WHERE p.id = $1
 		GROUP BY e.id;
 	`
@@ -307,16 +298,27 @@ func (r *EnvironmentRepository) AddService(
 		)
 		SELECT s.name, s.version
 		FROM inserted i
-		JOIN service s ON i.service_id = s.id
+			JOIN service s
+				ON i.service_id = s.id;
 	`
+
+	var maxRequest any
+	if service.MaxRequest != -1 {
+		maxRequest = service.MaxRequest
+	}
+
+	var availableRequest any
+	if service.AvailableRequest != -1 {
+		availableRequest = service.AvailableRequest
+	}
 
 	err := r.pool.QueryRow(
 		ctx,
 		query,
 		id,
 		service.ID,
-		service.MaxRequest,
-		service.AvailableRequest,
+		maxRequest,
+		availableRequest,
 	).Scan(&service.Name, &service.Version)
 
 	return r.handlerErr(err)
@@ -391,12 +393,23 @@ func (r *EnvironmentRepository) saveEnvironmentServices(
 				argIndex+3,
 			),
 		)
+
+		var maxRequest any
+		if service.MaxRequest != -1 {
+			maxRequest = service.MaxRequest
+		}
+
+		var availableRequest any
+		if service.AvailableRequest != -1 {
+			availableRequest = service.AvailableRequest
+		}
+
 		args = append(
 			args,
 			environmentID,
 			service.ID,
-			service.MaxRequest,
-			service.AvailableRequest,
+			maxRequest,
+			availableRequest,
 		)
 		argIndex += 4
 	}
@@ -408,9 +421,10 @@ func (r *EnvironmentRepository) saveEnvironmentServices(
 				VALUES %s
 				RETURNING *
 			)
-			SELECT s.id, s.name, s.version, i.max_request, i.available_request, i.created_at
+			SELECT s.id, s.name, s.version, COALESCE(i.max_request, -1), COALESCE(i.available_request, -1), i.created_at
 			FROM inserted i
-			JOIN service s ON i.service_id = s.id
+				JOIN service s
+					ON i.service_id = s.id;
 		`,
 		strings.Join(values, ", "),
 	)

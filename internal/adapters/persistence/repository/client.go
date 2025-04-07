@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ClientRepository struct {
@@ -52,7 +53,11 @@ func (r *ClientRepository) Update(
 	}
 
 	query := fmt.Sprintf(
-		"UPDATE client SET %s WHERE id = $1;",
+		`
+			UPDATE client
+			SET %s
+			WHERE id = $1;
+		`,
 		strings.Join(updates, ", "),
 	)
 
@@ -71,7 +76,13 @@ func (r *ClientRepository) Update(
 func (r *ClientRepository) Exists(
 	ctx context.Context, id int,
 ) (bool, *errors.Error) {
-	query := "SELECT EXISTS (SELECT 1 FROM client WHERE id = $1);"
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM client
+			WHERE id = $1
+		);
+	`
 
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, id).Scan(&exists)
@@ -85,7 +96,11 @@ func (r *ClientRepository) Exists(
 func (r *ClientRepository) FindByID(
 	ctx context.Context, id int,
 ) (*entities.Client, *errors.Error) {
-	query := "SELECT * FROM client WHERE id = $1;"
+	query := `
+		SELECT id, type, name, email, created_at
+		FROM client
+		WHERE id = $1;
+	`
 
 	client := new(entities.Client)
 	err := r.pool.QueryRow(ctx, query, id).Scan(
@@ -105,7 +120,10 @@ func (r *ClientRepository) FindByID(
 func (r *ClientRepository) FindAll(
 	ctx context.Context, filter *dto.ClientFilter,
 ) ([]*entities.Client, *errors.Error) {
-	query := "SELECT * FROM client"
+	query := `
+		SELECT id, type, name, email, created_at
+		FROM client
+	`
 
 	var args []any
 	if filter != nil {

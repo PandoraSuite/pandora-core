@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type ServiceRepository struct {
@@ -25,14 +26,19 @@ func (r *ServiceRepository) UpdateStatus(
 		return errors.ErrServiceInvalidStatus
 	}
 
-	query := "UPDATE service SET status = $1 WHERE id = $2;"
+	query := `
+		UPDATE service
+		SET status = $1
+		WHERE id = $2;
+	`
+
 	result, err := r.pool.Exec(ctx, query, status, id)
 	if err != nil {
 		return r.handlerErr(err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrAPIKeyNotFound
+		return errors.ErrServiceNotFound
 	}
 
 	return nil
@@ -41,7 +47,11 @@ func (r *ServiceRepository) UpdateStatus(
 func (r *ServiceRepository) FindByNameAndVersion(
 	ctx context.Context, name, version string,
 ) (*entities.Service, *errors.Error) {
-	query := `SELECT * FROM service WHERE name = $1 AND version = $2;`
+	query := `
+		SELECT id, name, version, status, created_at
+		FROM service
+		WHERE name = $1 AND version = $2;
+	`
 
 	service := new(entities.Service)
 	err := r.pool.QueryRow(ctx, query, name, version).Scan(
@@ -61,7 +71,10 @@ func (r *ServiceRepository) FindByNameAndVersion(
 func (r *ServiceRepository) FindAll(
 	ctx context.Context, filter *dto.ServiceFilter,
 ) ([]*entities.Service, *errors.Error) {
-	query := "SELECT * FROM service"
+	query := `
+		SELECT id, name, version, status, created_at
+		FROM service
+	`
 
 	var args []any
 	if filter != nil {

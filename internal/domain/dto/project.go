@@ -8,7 +8,7 @@ import (
 
 type ProjectService struct {
 	ID             int                                `json:"id" binding:"required"`
-	MaxRequest     int                                `json:"max_request"`
+	MaxRequest     int                                `json:"max_request" binding:"required"`
 	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency" enums:"daily,weekly,biweekly,monthly," swaggertype:"string"`
 }
 

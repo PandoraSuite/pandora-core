@@ -20,11 +20,11 @@ type EnvironmentService struct {
 }
 
 func (e *EnvironmentService) Validate() *errors.Error {
-	if e.MaxRequest < 0 {
+	if e.MaxRequest < -1 {
 		return errors.ErrInvalidMaxRequest
 	}
 
-	if e.MaxRequest == 0 && e.AvailableRequest > 0 {
+	if e.MaxRequest == -1 && e.AvailableRequest > -1 {
 		return errors.ErrEnvironmentServiceAvailableRequestNotAllowed
 	}
 
@@ -53,13 +53,13 @@ func (e *Environment) Validate() *errors.Error {
 	}
 
 	var errs []string
-	for i, s := range e.Services {
+	for _, s := range e.Services {
 		err := s.Validate()
 
 		if err != nil {
 			errs = append(
 				errs,
-				fmt.Sprintf("service %v: %s", i, err.Message),
+				fmt.Sprintf("service %v: %s", s.ID, err.Message),
 			)
 		}
 	}

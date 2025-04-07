@@ -69,5 +69,5 @@ func main() {
 		environmentUseCase,
 	)
 
-	srv.Run()
+	srv.Run(cfg.ExposeVersion())
 }

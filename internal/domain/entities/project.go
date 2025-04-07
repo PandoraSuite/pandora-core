@@ -21,15 +21,15 @@ type ProjectService struct {
 }
 
 func (p *ProjectService) Validate() *errors.Error {
-	if p.MaxRequest < 0 {
+	if p.MaxRequest < -1 {
 		return errors.ErrInvalidMaxRequest
 	}
 
-	if p.MaxRequest == 0 && p.ResetFrequency != enums.ProjectServiceNull {
+	if p.MaxRequest == -1 && p.ResetFrequency != enums.ProjectServiceNull {
 		return errors.ErrProjectServiceResetFrequencyNotPermitted
 	}
 
-	if p.MaxRequest > 0 && p.ResetFrequency == enums.ProjectServiceNull {
+	if p.MaxRequest > -1 && p.ResetFrequency == enums.ProjectServiceNull {
 		return errors.ErrProjectServiceResetFrequencyRequired
 	}
 
@@ -80,13 +80,13 @@ func (p *Project) Validate() *errors.Error {
 	}
 
 	var errs []string
-	for i, s := range p.Services {
+	for _, s := range p.Services {
 		err := s.Validate()
 
 		if err != nil {
 			errs = append(
 				errs,
-				fmt.Sprintf("service %v: %s", i, err.Message),
+				fmt.Sprintf("service %v: %s", s.ID, err.Message),
 			)
 		}
 	}

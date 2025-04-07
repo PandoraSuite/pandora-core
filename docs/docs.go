@@ -164,6 +164,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Fetches a list of clients, optionally filtered by client type",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -244,6 +247,93 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/clients/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Fetches the details of a specific client using its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Clients"
+                ],
+                "summary": "Retrieves a client by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Client ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ClientResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Modifies client data based on the provided ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Clients"
+                ],
+                "summary": "Updates an existing client",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Client ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated client data",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ClientUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/clients/{id}/projects": {
             "get": {
                 "security": [
@@ -252,6 +342,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Fetches a list of projects associated with a given client",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -332,6 +425,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/environments/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Fetches the details of a specific environment using its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environments"
+                ],
+                "summary": "Retrieves an environment by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Environment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EnvironmentResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/environments/{id}/api-keys": {
             "get": {
                 "security": [
@@ -340,6 +476,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Returns a list of API Keys associated with a specific environment",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -469,6 +608,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/projects/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Fetches the details of a specific project using its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Retrieves a project by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProjectResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/projects/{id}/environments": {
             "get": {
                 "security": [
@@ -477,6 +659,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Fetches a list of environments associated with a given project",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -523,9 +708,6 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "Projects"
                 ],
@@ -561,6 +743,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/projects/{id}/services/{service_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Disassociates a service from a specific project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Removes a service from a project",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Service ID",
+                        "name": "service_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/services": {
             "get": {
                 "security": [
@@ -569,6 +795,9 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Fetches a list of all registered services",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -773,6 +1002,24 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ClientUpdate": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string",
+                    "enum": [
+                        "developer",
+                        "organization"
+                    ]
+                }
+            }
+        },
         "dto.EnvironmentCreate": {
             "type": "object",
             "properties": {
@@ -840,6 +1087,9 @@ const docTemplate = `{
             "properties": {
                 "assigned_at": {
                     "type": "string"
+                },
+                "available_request": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
@@ -918,7 +1168,8 @@ const docTemplate = `{
         "dto.ProjectService": {
             "type": "object",
             "required": [
-                "id"
+                "id",
+                "max_request"
             ],
             "properties": {
                 "id": {
@@ -1030,7 +1281,27 @@ const docTemplate = `{
             "flow": "password",
             "tokenUrl": "/api/v1/auth/login"
         }
-    }
+    },
+    "tags": [
+        {
+            "name": "Authentication"
+        },
+        {
+            "name": "Services"
+        },
+        {
+            "name": "Clients"
+        },
+        {
+            "name": "Projects"
+        },
+        {
+            "name": "Environments"
+        },
+        {
+            "name": "API Keys"
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

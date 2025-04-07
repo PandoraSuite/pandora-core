@@ -19,6 +19,13 @@ import (
 // @description API for centralized API key management and service access control.
 // @termsOfService http://example.com/terms/
 
+// @tag.name Authentication
+// @tag.name Services
+// @tag.name Clients
+// @tag.name Projects
+// @tag.name Environments
+// @tag.name API Keys
+
 // @contact.name Pandora Core Support
 // @contact.url http://example.com/support
 // @contact.email support@example.com
@@ -60,15 +67,50 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 		}
 
 		protected.Use(middleware.ForcePasswordReset(s.authService))
-		apiKeys := protected.Group("/api-keys")
+
+		services := protected.Group("/services")
 		{
-			apiKeys.POST("", handlers.CreateAPIKey(s.apiKeyService))
+			services.GET("", handlers.GetAllServices(s.srvService))
+			services.POST("", handlers.CreateService(s.srvService))
+		}
+
+		clients := protected.Group("/clients")
+		{
+			clients.GET("", handlers.GetAllClients(s.clientService))
+			clients.POST("", handlers.CreateClient(s.clientService))
+			clients.GET("/:id", handlers.GetClient(s.clientService))
+			clients.PATCH("/:id", handlers.UpdateClient(s.clientService))
+			clients.GET(
+				"/:id/projects",
+				handlers.GetProjectsByClient(s.clientService),
+			)
+		}
+
+		projects := protected.Group("/projects")
+		{
+			projects.POST("", handlers.CreateProject(s.projectService))
+			projects.GET("/:id", handlers.GetProject(s.projectService))
+			projects.GET(
+				"/:id/environments",
+				handlers.GetEnvironmentsByProject(s.projectService),
+			)
+			projects.POST(
+				"/:id/services",
+				handlers.AssignServiceToProject(s.projectService),
+			)
+			projects.DELETE(
+				"/:id/services/:service_id",
+				handlers.RemoveServiceFromProject(s.projectService),
+			)
 		}
 
 		environments := protected.Group("/environments")
 		{
 			environments.POST(
 				"", handlers.CreateEnvironment(s.environmentService),
+			)
+			environments.GET(
+				"/:id", handlers.GetEnvironment(s.environmentService),
 			)
 			environments.GET(
 				"/:id/api-keys",
@@ -80,41 +122,22 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 			)
 		}
 
-		services := protected.Group("/services")
+		apiKeys := protected.Group("/api-keys")
 		{
-			services.POST("", handlers.CreateService(s.srvService))
-			services.GET("", handlers.GetAllServices(s.srvService))
+			apiKeys.POST("", handlers.CreateAPIKey(s.apiKeyService))
 		}
 
-		projects := protected.Group("/projects")
-		{
-			projects.POST("", handlers.CreateProject(s.projectService))
-			projects.GET(
-				"/:id/environments",
-				handlers.GetEnvironmentsByProject(s.projectService),
-			)
-			projects.POST(
-				"/:id/services",
-				handlers.AssignServiceToProject(s.projectService),
-			)
-		}
-
-		clients := protected.Group("/clients")
-		{
-			clients.POST("", handlers.CreateClient(s.clientService))
-			clients.GET("", handlers.GetAllClients(s.clientService))
-			clients.GET(
-				":id/projects",
-				handlers.GetProjectsByClient(s.clientService),
-			)
-		}
 	}
 }
 
-func (s *Server) Run() {
+func (s *Server) Run(exposeVersion bool) {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
+
+	if exposeVersion {
+		router.Use(middleware.VersionHeader())
+	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

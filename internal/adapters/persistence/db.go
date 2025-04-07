@@ -5,11 +5,11 @@ import (
 	"errors"
 	"time"
 
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
-
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type Persistence struct {
