@@ -15,17 +15,6 @@ type service struct {
 	apiKeyService inbound.APIKeyGRPCPort
 }
 
-func (s *service) Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.ValidateResponse, error) {
-	return &pb.ValidateResponse{
-		Valid: true,
-		Result: &pb.ValidateResponse_Successful_{
-			Successful: &pb.ValidateResponse_Successful{
-				RequestId: "req-123456",
-			},
-		},
-	}, nil
-}
-
 func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndConsumeRequest) (*pb.ValidateAndConsumeResponse, error) {
 	return &pb.ValidateAndConsumeResponse{
 		Valid: true,
@@ -38,14 +27,25 @@ func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndCon
 	}, nil
 }
 
-func (s *service) ValidateAndReservation(ctx context.Context, req *pb.ValidateAndReservationRequest) (*pb.ValidateAndReservationResponse, error) {
-	return &pb.ValidateAndReservationResponse{
+func (s *service) ValidateAndReserve(ctx context.Context, req *pb.ValidateAndReserveRequest) (*pb.ValidateAndReserveResponse, error) {
+	return &pb.ValidateAndReserveResponse{
 		Valid: true,
-		Result: &pb.ValidateAndReservationResponse_Successful_{
-			Successful: &pb.ValidateAndReservationResponse_Successful{
+		Result: &pb.ValidateAndReserveResponse_Successful_{
+			Successful: &pb.ValidateAndReserveResponse_Successful{
 				RequestId:        "req-123456",
 				ReservationId:    "booking-123456",
 				AvailableRequest: 1000,
+			},
+		},
+	}, nil
+}
+
+func (s *service) ValidateWithReservationRequest(ctx context.Context, req *pb.ValidateWithReservationRequest) (*pb.ValidateWithReservationResponse, error) {
+	return &pb.ValidateWithReservationResponse{
+		Valid: true,
+		Result: &pb.ValidateWithReservationResponse_Successful_{
+			Successful: &pb.ValidateWithReservationResponse_Successful{
+				RequestId: "req-123456",
 			},
 		},
 	}, nil
