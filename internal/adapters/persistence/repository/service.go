@@ -38,7 +38,7 @@ func (r *ServiceRepository) UpdateStatus(
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrAPIKeyNotFound
+		return errors.ErrServiceNotFound
 	}
 
 	return nil

@@ -20,6 +20,27 @@ type EnvironmentRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *EnvironmentRepository) RemoveServiceFromProjectEnvironments(
+	ctx context.Context, projectID, serviceID int,
+) (int64, *errors.Error) {
+	query := `
+		DELETE FROM environment_service
+		WHERE service_id = $2
+			AND environment_id IN (
+				SELECT id
+				FROM environment
+				WHERE project_id = $1
+			);
+	`
+
+	result, err := r.pool.Exec(ctx, query, projectID, serviceID)
+	if err != nil {
+		return 0, r.handlerErr(err)
+	}
+
+	return result.RowsAffected(), nil
+}
+
 func (r *EnvironmentRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.EnvironmentStatus,
 ) *errors.Error {
@@ -39,7 +60,7 @@ func (r *EnvironmentRepository) UpdateStatus(
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrAPIKeyNotFound
+		return errors.ErrEnvironmentNotFound
 	}
 
 	return nil
@@ -81,7 +102,7 @@ func (r *EnvironmentRepository) Update(
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrAPIKeyNotFound
+		return errors.ErrEnvironmentNotFound
 	}
 
 	return nil

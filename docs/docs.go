@@ -708,9 +708,6 @@ const docTemplate = `{
                 "consumes": [
                     "application/json"
                 ],
-                "produces": [
-                    "application/json"
-                ],
                 "tags": [
                     "Projects"
                 ],
@@ -731,6 +728,50 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.ProjectService"
                         }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/projects/{id}/services/{service_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Disassociates a service from a specific project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Removes a service from a project",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Service ID",
+                        "name": "service_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1029,7 +1070,8 @@ const docTemplate = `{
         "dto.EnvironmentService": {
             "type": "object",
             "required": [
-                "id"
+                "id",
+                "max_request"
             ],
             "properties": {
                 "id": {
@@ -1126,7 +1168,8 @@ const docTemplate = `{
         "dto.ProjectService": {
             "type": "object",
             "required": [
-                "id"
+                "id",
+                "max_request"
             ],
             "properties": {
                 "id": {

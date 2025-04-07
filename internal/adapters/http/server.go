@@ -78,10 +78,10 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 		{
 			clients.GET("", handlers.GetAllClients(srv.clientService))
 			clients.POST("", handlers.CreateClient(srv.clientService))
-			clients.GET(":id", handlers.GetClient(srv.clientService))
-			clients.PATCH(":id", handlers.UpdateClient(srv.clientService))
+			clients.GET("/:id", handlers.GetClient(srv.clientService))
+			clients.PATCH("/:id", handlers.UpdateClient(srv.clientService))
 			clients.GET(
-				":id/projects",
+				"/:id/projects",
 				handlers.GetProjectsByClient(srv.clientService),
 			)
 		}
@@ -89,7 +89,7 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 		projects := protected.Group("/projects")
 		{
 			projects.POST("", handlers.CreateProject(srv.projectService))
-			projects.GET(":id", handlers.GetProject(srv.projectService))
+			projects.GET("/:id", handlers.GetProject(srv.projectService))
 			projects.GET(
 				"/:id/environments",
 				handlers.GetEnvironmentsByProject(srv.projectService),
@@ -97,6 +97,10 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 			projects.POST(
 				"/:id/services",
 				handlers.AssignServiceToProject(srv.projectService),
+			)
+			projects.DELETE(
+				"/:id/services/:service_id",
+				handlers.RemoveServiceFromProject(srv.projectService),
 			)
 		}
 
@@ -106,7 +110,7 @@ func (srv *Server) setupRoutes(router *gin.RouterGroup) {
 				"", handlers.CreateEnvironment(srv.environmentService),
 			)
 			environments.GET(
-				":id", handlers.GetEnvironment(srv.environmentService),
+				"/:id", handlers.GetEnvironment(srv.environmentService),
 			)
 			environments.GET(
 				"/:id/api-keys",

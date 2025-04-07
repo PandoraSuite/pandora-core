@@ -20,6 +20,22 @@ type ProjectRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *ProjectRepository) RemoveServiceFromProject(
+	ctx context.Context, id, serviceID int,
+) (int64, *errors.Error) {
+	query := `
+		DELETE FROM project_service
+		WHERE project_id = $1 AND service_id = $2;
+	`
+
+	result, err := r.pool.Exec(ctx, query, id, serviceID)
+	if err != nil {
+		return 0, r.handlerErr(err)
+	}
+
+	return result.RowsAffected(), nil
+}
+
 func (r *ProjectRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.ProjectStatus,
 ) *errors.Error {
@@ -39,7 +55,7 @@ func (r *ProjectRepository) UpdateStatus(
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrAPIKeyNotFound
+		return errors.ErrProjectNotFound
 	}
 
 	return nil

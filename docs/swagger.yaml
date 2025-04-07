@@ -129,6 +129,7 @@ definitions:
         type: integer
     required:
     - id
+    - max_request
     type: object
   dto.EnvironmentServiceResponse:
     properties:
@@ -202,6 +203,7 @@ definitions:
         type: string
     required:
     - id
+    - max_request
     type: object
   dto.ProjectServiceResponse:
     properties:
@@ -715,6 +717,32 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/dto.ProjectService'
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Assigns a service to a project
+      tags:
+      - Projects
+  /api/v1/projects/{id}/services/{service_id}:
+    delete:
+      description: Disassociates a service from a specific project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -726,7 +754,7 @@ paths:
             $ref: '#/definitions/utils.ErrorResponse'
       security:
       - OAuth2Password: []
-      summary: Assigns a service to a project
+      summary: Removes a service from a project
       tags:
       - Projects
   /api/v1/services:

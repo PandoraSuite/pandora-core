@@ -127,17 +127,19 @@ func GetEnvironmentsByProject(projectService inbound.ProjectHTTPPort) gin.Handle
 // @Tags Projects
 // @Security OAuth2Password
 // @Accept json
-// @Produce json
 // @Param id path int true "Project ID"
 // @Param request body dto.ProjectService true "Service assignment data"
-// @Success 204 "No Content"
+// @Success 204
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/projects/{id}/services [post]
 func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Invalid project ID"})
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid project ID"},
+			)
 			return
 		}
 
@@ -152,6 +154,52 @@ func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerF
 
 		err := projectService.AssignService(
 			c.Request.Context(), projectID, &req,
+		)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.Status(http.StatusNoContent)
+	}
+}
+
+// RemoveServiceFromProject godoc
+// @Summary Removes a service from a project
+// @Description Disassociates a service from a specific project
+// @Tags Projects
+// @Security OAuth2Password
+// @Produce json
+// @Param id path int true "Project ID"
+// @Param service_id path int true "Service ID"
+// @Success 204
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/projects/{id}/services/{service_id} [delete]
+func RemoveServiceFromProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		projectID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid project ID"},
+			)
+			return
+		}
+
+		serviceID, paramErr := strconv.Atoi(c.Param("service_id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid service ID"},
+			)
+			return
+		}
+
+		err := projectService.RemoveService(
+			c.Request.Context(), projectID, serviceID,
 		)
 		if err != nil {
 			c.AbortWithStatusJSON(

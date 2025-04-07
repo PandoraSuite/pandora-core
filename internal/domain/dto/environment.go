@@ -18,7 +18,7 @@ type QuotaUsage struct {
 
 type EnvironmentService struct {
 	ID         int `json:"id" binding:"required"`
-	MaxRequest int `json:"max_request"`
+	MaxRequest int `json:"max_request" binding:"required"`
 }
 
 type EnvironmentCreate struct {

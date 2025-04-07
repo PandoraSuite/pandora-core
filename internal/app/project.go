@@ -31,6 +31,39 @@ func (u *ProjectUseCase) AssignService(
 	return u.projectRepo.AddService(ctx, id, service)
 }
 
+func (u *ProjectUseCase) RemoveService(
+	ctx context.Context, id, serviceID int,
+) *errors.Error {
+	exists, err := u.projectRepo.Exists(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return errors.ErrProjectNotFound
+	}
+
+	_, err = u.environmentRepo.RemoveServiceFromProjectEnvironments(
+		ctx, id, serviceID,
+	)
+	if err != nil {
+		return err
+	}
+
+	n, err := u.projectRepo.RemoveServiceFromProject(
+		ctx, id, serviceID,
+	)
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+		return errors.ErrServiceNotFound
+	}
+
+	return nil
+}
+
 func (u *ProjectUseCase) GetByID(
 	ctx context.Context, id int,
 ) (*dto.ProjectResponse, *errors.Error) {
