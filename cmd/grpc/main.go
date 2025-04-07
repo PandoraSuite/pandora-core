@@ -10,6 +10,6 @@ import (
 func main() {
 	log.Println("[INFO] Starting Pandora Core (gRPC)...")
 
-	srv := grpc.NewServer(fmt.Sprintf(":%s", "50051"))
+	srv := grpc.NewServer(fmt.Sprintf(":%s", "50051"), nil)
 	srv.Run()
 }

@@ -49,88 +49,88 @@ type Server struct {
 	environmentService inbound.EnvironmentHTTPPort
 }
 
-func (srv *Server) setupRoutes(router *gin.RouterGroup) {
+func (s *Server) setupRoutes(router *gin.RouterGroup) {
 
 	auth := router.Group("/auth")
 	{
-		auth.POST("/login", handlers.Authenticate(srv.authService))
+		auth.POST("/login", handlers.Authenticate(s.authService))
 	}
 
 	protected := router.Group("")
-	protected.Use(middleware.ValidateToken(srv.authService))
+	protected.Use(middleware.ValidateToken(s.authService))
 	{
 		auth := protected.Group("/auth")
 		{
 			auth.POST(
-				"/change-password", handlers.ChangePassword(srv.authService),
+				"/change-password", handlers.ChangePassword(s.authService),
 			)
 		}
 
-		protected.Use(middleware.ForcePasswordReset(srv.authService))
+		protected.Use(middleware.ForcePasswordReset(s.authService))
 
 		services := protected.Group("/services")
 		{
-			services.GET("", handlers.GetAllServices(srv.srvService))
-			services.POST("", handlers.CreateService(srv.srvService))
+			services.GET("", handlers.GetAllServices(s.srvService))
+			services.POST("", handlers.CreateService(s.srvService))
 		}
 
 		clients := protected.Group("/clients")
 		{
-			clients.GET("", handlers.GetAllClients(srv.clientService))
-			clients.POST("", handlers.CreateClient(srv.clientService))
-			clients.GET("/:id", handlers.GetClient(srv.clientService))
-			clients.PATCH("/:id", handlers.UpdateClient(srv.clientService))
+			clients.GET("", handlers.GetAllClients(s.clientService))
+			clients.POST("", handlers.CreateClient(s.clientService))
+			clients.GET("/:id", handlers.GetClient(s.clientService))
+			clients.PATCH("/:id", handlers.UpdateClient(s.clientService))
 			clients.GET(
 				"/:id/projects",
-				handlers.GetProjectsByClient(srv.clientService),
+				handlers.GetProjectsByClient(s.clientService),
 			)
 		}
 
 		projects := protected.Group("/projects")
 		{
-			projects.POST("", handlers.CreateProject(srv.projectService))
-			projects.GET("/:id", handlers.GetProject(srv.projectService))
+			projects.POST("", handlers.CreateProject(s.projectService))
+			projects.GET("/:id", handlers.GetProject(s.projectService))
 			projects.GET(
 				"/:id/environments",
-				handlers.GetEnvironmentsByProject(srv.projectService),
+				handlers.GetEnvironmentsByProject(s.projectService),
 			)
 			projects.POST(
 				"/:id/services",
-				handlers.AssignServiceToProject(srv.projectService),
+				handlers.AssignServiceToProject(s.projectService),
 			)
 			projects.DELETE(
 				"/:id/services/:service_id",
-				handlers.RemoveServiceFromProject(srv.projectService),
+				handlers.RemoveServiceFromProject(s.projectService),
 			)
 		}
 
 		environments := protected.Group("/environments")
 		{
 			environments.POST(
-				"", handlers.CreateEnvironment(srv.environmentService),
+				"", handlers.CreateEnvironment(s.environmentService),
 			)
 			environments.GET(
-				"/:id", handlers.GetEnvironment(srv.environmentService),
+				"/:id", handlers.GetEnvironment(s.environmentService),
 			)
 			environments.GET(
 				"/:id/api-keys",
-				handlers.GetAPIKeysByEnvironment(srv.apiKeyService),
+				handlers.GetAPIKeysByEnvironment(s.apiKeyService),
 			)
 			environments.POST(
 				"/:id/services",
-				handlers.AssignServiceToEnvironment(srv.environmentService),
+				handlers.AssignServiceToEnvironment(s.environmentService),
 			)
 		}
 
 		apiKeys := protected.Group("/api-keys")
 		{
-			apiKeys.POST("", handlers.CreateAPIKey(srv.apiKeyService))
+			apiKeys.POST("", handlers.CreateAPIKey(s.apiKeyService))
 		}
 
 	}
 }
 
-func (srv *Server) Run(exposeVersion bool) {
+func (s *Server) Run(exposeVersion bool) {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
@@ -141,16 +141,16 @@ func (srv *Server) Run(exposeVersion bool) {
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	srv.setupRoutes(router.Group("/api/v1"))
+	s.setupRoutes(router.Group("/api/v1"))
 
-	srv.server = &http.Server{
-		Addr:    srv.addr,
+	s.server = &http.Server{
+		Addr:    s.addr,
 		Handler: router,
 	}
 
-	log.Printf("[INFO] API is running on port: %s\n", srv.addr)
+	log.Printf("[INFO] API is running on port: %s\n", s.addr)
 	log.Printf("[INFO] Pandora Core is fully initialized and ready to accept requests.\n\n")
-	if err := srv.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+	if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("[ERROR] Failed to start server: %v", err)
 	}
 }
