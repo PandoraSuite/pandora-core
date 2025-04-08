@@ -602,6 +602,53 @@
                 }
             }
         },
+        "/api/v1/environments/{id}/services/{service_id}/reset-requests": {
+            "post": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Resets the available request count for a specific service within an environment",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environments"
+                ],
+                "summary": "Resets request quota for a service in an environment",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Environment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Service ID",
+                        "name": "service_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.EnvironmentServiceResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/projects": {
             "post": {
                 "security": [

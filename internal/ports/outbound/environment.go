@@ -16,6 +16,7 @@ type EnvironmentPort interface {
 	RemoveService(ctx context.Context, id, serviceID int) (int64, *errors.Error)
 	FindByProject(ctx context.Context, projectID int) ([]*entities.Environment, *errors.Error)
 	ExistsServiceIn(ctx context.Context, id, serviceID int) (bool, *errors.Error)
+	ResetAvailableRequests(ctx context.Context, id, serviceID int) (*entities.EnvironmentService, *errors.Error)
 	DecrementAvailableRequest(ctx context.Context, id, serviceID int) (*dto.DecrementAvailableRequest, *errors.Error)
 	GetProjectServiceQuotaUsage(ctx context.Context, id, serviceID int) (*dto.QuotaUsage, *errors.Error)
 	RemoveServiceFromProjectEnvironments(ctx context.Context, projectID, serviceID int) (int64, *errors.Error)

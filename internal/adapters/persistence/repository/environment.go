@@ -20,6 +20,34 @@ type EnvironmentRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *EnvironmentRepository) ResetAvailableRequests(
+	ctx context.Context, id, serviceID int,
+) (*entities.EnvironmentService, *errors.Error) {
+	query := `
+		WITH updated AS (
+			UPDATE environment_service
+			SET available_request = max_request
+			WHERE environment_id = $1 AND service_id = $2
+			RETURNING *
+		)
+		SELECT s.id, s.name, s.version, COALESCE(u.max_request, -1), COALESCE(u.available_request, -1), u.created_at
+		FROM updated u
+			JOIN service s
+				ON u.service_id = s.id;
+	`
+
+	service := new(entities.EnvironmentService)
+	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(
+		&service.ID,
+		&service.Name,
+		&service.Version,
+		&service.MaxRequest,
+		&service.AvailableRequest,
+		&service.AssignedAt,
+	)
+	return service, r.handlerErr(err)
+}
+
 func (r *EnvironmentRepository) RemoveService(
 	ctx context.Context, id, serviceID int,
 ) (int64, *errors.Error) {
