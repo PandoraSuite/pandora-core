@@ -127,6 +127,7 @@ func GetEnvironmentsByProject(projectService inbound.ProjectHTTPPort) gin.Handle
 // @Tags Projects
 // @Security OAuth2Password
 // @Accept json
+// @Produce json
 // @Param id path int true "Project ID"
 // @Param request body dto.ProjectService true "Service assignment data"
 // @Success 204

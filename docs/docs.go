@@ -563,6 +563,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/environments/{id}/services/{service_id}": {
+            "delete": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Disassociates a service from a specific environment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Environments"
+                ],
+                "summary": "Removes a service from an environment",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Environment ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Service ID",
+                        "name": "service_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/projects": {
             "post": {
                 "security": [
@@ -706,6 +753,9 @@ const docTemplate = `{
                 ],
                 "description": "Associates a service with a given project",
                 "consumes": [
+                    "application/json"
+                ],
+                "produces": [
                     "application/json"
                 ],
                 "tags": [

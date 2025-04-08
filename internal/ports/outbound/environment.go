@@ -10,8 +10,10 @@ import (
 
 type EnvironmentPort interface {
 	Save(ctx context.Context, environment *entities.Environment) *errors.Error
+	Exists(ctx context.Context, id int) (bool, *errors.Error)
 	FindByID(ctx context.Context, id int) (*entities.Environment, *errors.Error)
 	AddService(ctx context.Context, id int, service *entities.EnvironmentService) *errors.Error
+	RemoveService(ctx context.Context, id, serviceID int) (int64, *errors.Error)
 	FindByProject(ctx context.Context, projectID int) ([]*entities.Environment, *errors.Error)
 	ExistsServiceIn(ctx context.Context, id, serviceID int) (bool, *errors.Error)
 	DecrementAvailableRequest(ctx context.Context, id, serviceID int) (*dto.DecrementAvailableRequest, *errors.Error)

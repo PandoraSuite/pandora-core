@@ -120,6 +120,10 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 				"/:id/services",
 				handlers.AssignServiceToEnvironment(s.environmentService),
 			)
+			environments.DELETE(
+				"/:id/services/:service_id",
+				handlers.RemoveServiceFromEnvironment(s.environmentService),
+			)
 		}
 
 		apiKeys := protected.Group("/api-keys")

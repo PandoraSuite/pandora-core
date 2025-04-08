@@ -167,3 +167,50 @@ func AssignServiceToEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) 
 		c.Status(http.StatusNoContent)
 	}
 }
+
+// RemoveServiceFromEnvironment godoc
+// @Summary Removes a service from an environment
+// @Description Disassociates a service from a specific environment
+// @Tags Environments
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "Environment ID"
+// @Param service_id path int true "Service ID"
+// @Success 204
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/environments/{id}/services/{service_id} [delete]
+func RemoveServiceFromEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		environmentID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid environment ID"},
+			)
+			return
+		}
+
+		serviceID, paramErr := strconv.Atoi(c.Param("service_id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid service ID"},
+			)
+			return
+		}
+
+		err := environmentUseCase.RemoveService(
+			c.Request.Context(), environmentID, serviceID,
+		)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.Status(http.StatusNoContent)
+	}
+}
