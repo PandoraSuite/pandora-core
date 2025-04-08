@@ -1,7 +1,9 @@
 package errors
 
 var (
-	ErrServiceNotFound = NewError(CodeNotFound, "Service not found")
+	ErrServiceNotFound                 = NewError(CodeNotFound, "Service not found")
+	ErrServiceNotAssignedToProject     = NewError(CodeNotFound, "Service not assigned to Project")
+	ErrServiceNotAssignedToEnvironment = NewError(CodeNotFound, "Service not assigned to Environment")
 
 	ErrServiceDeprecated                   = NewError(CodeValidationError, "Service is deprecated")
 	ErrServiceDeactivated                  = NewError(CodeValidationError, "Service is deactivated")

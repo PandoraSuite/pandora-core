@@ -16,6 +16,36 @@ type EnvironmentUseCase struct {
 	projectRepo     outbound.ProjectPort
 }
 
+func (u *EnvironmentUseCase) ResetServiceRequests(
+	ctx context.Context, id, serviceID int,
+) (*dto.EnvironmentServiceResponse, *errors.Error) {
+	exists, err := u.environmentRepo.Exists(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return nil, errors.ErrEnvironmentNotFound
+	}
+
+	service, err := u.environmentRepo.ResetAvailableRequests(ctx, id, serviceID)
+	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrServiceNotAssignedToEnvironment
+		}
+		return nil, err
+	}
+
+	return &dto.EnvironmentServiceResponse{
+		ID:               service.ID,
+		Name:             service.Name,
+		Version:          service.Version,
+		MaxRequest:       service.MaxRequest,
+		AvailableRequest: service.AvailableRequest,
+		AssignedAt:       service.AssignedAt,
+	}, nil
+}
+
 func (u *EnvironmentUseCase) GetByID(
 	ctx context.Context, id int,
 ) (*dto.EnvironmentResponse, *errors.Error) {
@@ -51,9 +81,42 @@ func (u *EnvironmentUseCase) GetByID(
 	}, nil
 }
 
+func (u *EnvironmentUseCase) RemoveService(
+	ctx context.Context, id, serviceID int,
+) *errors.Error {
+	exists, err := u.environmentRepo.Exists(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return errors.ErrEnvironmentNotFound
+	}
+
+	n, err := u.environmentRepo.RemoveService(ctx, id, serviceID)
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+		return errors.ErrServiceNotFound
+	}
+
+	return nil
+}
+
 func (u *EnvironmentUseCase) AssignService(
 	ctx context.Context, id int, req *dto.EnvironmentService,
 ) *errors.Error {
+	exists, err := u.environmentRepo.Exists(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if !exists {
+		return errors.ErrEnvironmentNotFound
+	}
+
 	service := entities.EnvironmentService{
 		ID:               req.ID,
 		MaxRequest:       req.MaxRequest,
@@ -64,7 +127,7 @@ func (u *EnvironmentUseCase) AssignService(
 		return err
 	}
 
-	exists, err := u.environmentRepo.ExistsServiceIn(ctx, id, service.ID)
+	exists, err = u.environmentRepo.ExistsServiceIn(ctx, id, service.ID)
 	if err != nil {
 		return err
 	}
@@ -78,7 +141,7 @@ func (u *EnvironmentUseCase) AssignService(
 	)
 	if err != nil {
 		if err == errors.ErrNotFound {
-			return errors.ErrEnvironmentNotFound
+			return errors.ErrServiceNotAssignedToProject
 		}
 		return err
 	}

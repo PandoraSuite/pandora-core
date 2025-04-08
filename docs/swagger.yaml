@@ -616,6 +616,67 @@ paths:
       summary: Assigns a service to an environment
       tags:
       - Environments
+  /api/v1/environments/{id}/services/{service_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Disassociates a service from a specific environment
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Removes a service from an environment
+      tags:
+      - Environments
+  /api/v1/environments/{id}/services/{service_id}/reset-requests:
+    post:
+      description: Resets the available request count for a specific service within
+        an environment
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EnvironmentServiceResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Resets request quota for a service in an environment
+      tags:
+      - Environments
   /api/v1/projects:
     post:
       consumes:
@@ -717,6 +778,8 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/dto.ProjectService'
+      produces:
+      - application/json
       responses:
         "204":
           description: No Content

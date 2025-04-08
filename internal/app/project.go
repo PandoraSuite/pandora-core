@@ -50,9 +50,7 @@ func (u *ProjectUseCase) RemoveService(
 		return err
 	}
 
-	n, err := u.projectRepo.RemoveServiceFromProject(
-		ctx, id, serviceID,
-	)
+	n, err := u.projectRepo.RemoveService(ctx, id, serviceID)
 	if err != nil {
 		return err
 	}

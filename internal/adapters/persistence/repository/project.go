@@ -20,7 +20,7 @@ type ProjectRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
-func (r *ProjectRepository) RemoveServiceFromProject(
+func (r *ProjectRepository) RemoveService(
 	ctx context.Context, id, serviceID int,
 ) (int64, *errors.Error) {
 	query := `
