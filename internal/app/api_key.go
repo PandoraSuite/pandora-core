@@ -95,7 +95,6 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 func (u *APIKeyUseCase) ValidateAndReserve(
 	ctx context.Context, req *dto.APIKeyValidate,
 ) (*dto.APIKeyValidateReserveResponse, *errors.Error) {
-	resp := &dto.APIKeyValidateReserveResponse{}
 
 	apiKey, err := u.apiKeyRepo.FindByKey(ctx, req.Key)
 	if err != nil {
@@ -106,7 +105,7 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 				Code:    enums.ReserveExecutionStatusKeyNotFound,
 			}, nil
 		}
-		return resp, nil
+		return nil, err
 	}
 
 	if !apiKey.IsActive() {
@@ -136,7 +135,7 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 				Code:    enums.ReserveExecutionStatusServiceNotFound,
 			}, nil
 		}
-		return resp, nil
+		return nil, err
 	}
 
 	if service.Status == enums.ServiceDeprecated {
@@ -162,7 +161,7 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 			ctx, apiKey.EnvironmentID, service.ID, apiKey.Key,
 		)
 		if err != nil {
-			return resp, err
+			return nil, err
 		}
 
 		if currentReservations == 0 {
@@ -190,7 +189,7 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		ExpiresAt:     expiresAtTime,
 	}
 	if err := u.reservationRepo.Save(ctx, &reservation); err != nil {
-		return resp, err
+		return nil, err
 	}
 
 	requestLog := entities.RequestLog{
@@ -201,13 +200,13 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		ExecutionStatus: enums.RequestLogPending,
 	}
 	if err := u.requestLog.SaveAsInitialPoint(ctx, &requestLog); err != nil {
-		return resp, err
+		return nil, err
 	}
 	lastUsedKey := dto.APIKeyUpdate{
 		LastUsed: time.Now(),
 	}
 	if err := u.apiKeyRepo.Update(ctx, apiKey.ID, &lastUsedKey); err != nil {
-		return resp, err
+		return nil, err
 	}
 	var availableRequestResp string
 	if availableRequest.MaxRequest == -1 {
@@ -294,11 +293,13 @@ func NewAPIKeyUseCase(
 	requestLog outbound.RequestLogPort,
 	serviceRepo outbound.ServiceFindPort,
 	environmentRepo outbound.EnvironmentPort,
+	reservationRepo outbound.ReservationPort,
 ) *APIKeyUseCase {
 	return &APIKeyUseCase{
 		apiKeyRepo:      apiKeyRepo,
 		requestLog:      requestLog,
 		serviceRepo:     serviceRepo,
 		environmentRepo: environmentRepo,
+		reservationRepo: reservationRepo,
 	}
 }

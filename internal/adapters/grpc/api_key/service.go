@@ -2,10 +2,12 @@ package api_key
 
 import (
 	"context"
+	"fmt"
 
 	"google.golang.org/grpc"
 
 	pb "github.com/MAD-py/pandora-core/internal/adapters/grpc/api_key/v1"
+	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 )
 
@@ -28,12 +30,25 @@ func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndCon
 }
 
 func (s *service) ValidateAndReserve(ctx context.Context, req *pb.ValidateAndReserveRequest) (*pb.ValidateAndReserveResponse, error) {
+	params := req.GetParams()
+	reqValidate := dto.APIKeyValidate{
+		Key:            params.Key,
+		Service:        params.Service,
+		Environment:    params.Environment,
+		ServiceVersion: params.ServiceVersion,
+		RequestTime:    params.RequestTime.AsTime(),
+	}
+	response, err := s.apiKeyService.ValidateAndReserve(ctx, &reqValidate)
+	if err != nil {
+		fmt.Println("error!")
+		fmt.Println(err)
+	}
 	return &pb.ValidateAndReserveResponse{
 		Valid: true,
 		Result: &pb.ValidateAndReserveResponse_Successful_{
 			Successful: &pb.ValidateAndReserveResponse_Successful{
-				RequestId:        "req-123456",
-				ReservationId:    "booking-123456",
+				RequestId:        response.RequestID,
+				ReservationId:    response.ReservationID,
 				AvailableRequest: 1000,
 			},
 		},
