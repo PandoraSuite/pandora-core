@@ -1,6 +1,18 @@
 CREATE DATABASE pandora;
 
-\c pandora;
+\c pandora
+
+CREATE USER pandora_user WITH ENCRYPTED PASSWORD 'supersecure';
+
+GRANT ALL PRIVILEGES ON DATABASE pandora TO pandora_user;
+
+GRANT USAGE ON SCHEMA public TO pandora_user;
+
+REVOKE CREATE ON SCHEMA public FROM pandora_user;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+    GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO pandora_user;
+
 
 CREATE TABLE IF NOT EXISTS service (
     id SERIAL PRIMARY KEY,
@@ -148,8 +160,8 @@ CREATE INDEX IF NOT EXISTS idx_start_point ON request_log (start_point);
 CREATE FUNCTION set_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
-        NEW.updated_at = NOW();
-        RETURN NEW;
+    NEW.updated_at = NOW();
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -187,3 +199,5 @@ CREATE TRIGGER on_update_set_updated_at
     BEFORE UPDATE ON environment_service
     FOR EACH ROW
     EXECUTE FUNCTION set_updated_at();
+
+\c pandora pandora_user

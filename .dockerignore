@@ -1,0 +1,12 @@
+/**
+
+!/cmd
+!/docs
+!/internal
+
+!go.mod
+!go.sum
+
+!/db/init.sql
+
+!/docker/run.sh
