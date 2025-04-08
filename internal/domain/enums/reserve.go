@@ -8,8 +8,8 @@ import (
 type ReserveExecutionStatusCode int
 
 const (
-	//todo: colocale opcion null
-	ReserveExecutionStatusOk ReserveExecutionStatusCode = iota
+	ReserveExecutionStatusNull ReserveExecutionStatusCode = iota
+	ReserveExecutionStatusOk
 	ReserveExecutionStatusKeyNotFound
 	ReserveExecutionStatusInvalidKey
 	ReserveExecutionStatusDeactivatedKey
@@ -17,6 +17,8 @@ const (
 	ReserveExecutionStatusServiceNotFound
 	ReserveExecutionStatusDeactivatedService
 	ReserveExecutionStatusDeprecatedService
+	ReserveExecutionStatusExceededRequests
+	ReserveExecutionStatusActiveReservations
 )
 
 func (es ReserveExecutionStatusCode) String() string {
@@ -37,6 +39,10 @@ func (es ReserveExecutionStatusCode) String() string {
 		return "DEACTIVATED_SERVICE"
 	case ReserveExecutionStatusDeprecatedService:
 		return "DEPRECATED_SERVICE"
+	case ReserveExecutionStatusExceededRequests:
+		return "EXCEEDED_AVAILABLE_REQUEST"
+	case ReserveExecutionStatusActiveReservations:
+		return "ACTIVE_RESERVATIONS"
 	default:
 		panic("unknown ReserveExecutionStatusCode")
 	}
@@ -94,6 +100,10 @@ func ParseReserveExecutionStatusCode(es string) (ReserveExecutionStatusCode, err
 		return ReserveExecutionStatusDeactivatedService, nil
 	case "DEPRECATED_SERVICE":
 		return ReserveExecutionStatusDeprecatedService, nil
+	case "EXCEEDED_AVAILABLE_REQUEST":
+		return ReserveExecutionStatusExceededRequests, nil
+	case "ACTIVE_RESERVATIONS":
+		return ReserveExecutionStatusActiveReservations, nil
 	default:
 		return 0, fmt.Errorf("invalid reserve execution status code: %s", es)
 	}

@@ -36,13 +36,12 @@ type APIKeyValidateBookingResponse struct {
 }
 
 type APIKeyValidateReserveResponse struct {
-	APIKeyValidateResponse `json:",inline"`
-	//todo: coloca omit_empty
-	ReservationID    string `json:"reservation_id"`
-	AvailableRequest string `json:"available_request"`
-	Valid            bool   `json:"valid"`
-	Message          string `json:"message"`
-	Code             string `json:"code"` //todo: colocar el tipo de enum
+	RequestID        string                           `json:"request_id,omitempty"`
+	ReservationID    string                           `json:"reservation_id,omitempty"`
+	AvailableRequest string                           `json:"available_request,omitempty"`
+	Valid            bool                             `json:"valid"`
+	Message          string                           `json:"message"`
+	Code             enums.ReserveExecutionStatusCode `json:"code"`
 }
 type APIKeyCreate struct {
 	ExpiresAt     time.Time `json:"expires_at"`
@@ -61,4 +60,5 @@ type APIKeyResponse struct {
 
 type APIKeyUpdate struct {
 	ExpiresAt time.Time `json:"expires_at,omitempty"`
+	LastUsed  time.Time `json:"last_used,omitempty"`
 }

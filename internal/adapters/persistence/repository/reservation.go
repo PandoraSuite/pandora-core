@@ -18,9 +18,8 @@ type ReservationRepository struct {
 func (r *ReservationRepository) Save(
 	ctx context.Context, Reservation *entities.Reservation,
 ) *errors.Error {
-	//TODO: revisa el orden
 	query := `
-		INSERT INTO request_log (environment_id, service_id, api_key, request_time, expires_at)
+		INSERT INTO reservation (environment_id, service_id, api_key, request_time, expires_at)
 		VALUES ($1, $2, $3, $4, $5) RETURNING id;
 	`
 
@@ -37,6 +36,31 @@ func (r *ReservationRepository) Save(
 	return r.handlerErr(err)
 }
 
+func (r *ReservationRepository) CountReservationsByFields(
+	ctx context.Context, environment_id, service_id int, api_key string,
+) (int, *errors.Error) {
+	query := `
+		SELECT count(*)
+		FROM reservation
+		WHERE environment_id = $1
+		AND service_id = $2
+		AND api_key = $3
+	`
+
+	var currentReservations int
+	err := r.pool.QueryRow(
+		ctx,
+		query,
+		environment_id,
+		service_id,
+		api_key).Scan(
+		&currentReservations)
+	if err != nil {
+		return -1, r.handlerErr(err)
+	}
+
+	return currentReservations, nil
+}
 func NewReservationRepository(
 	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,
 ) *ReservationRepository {

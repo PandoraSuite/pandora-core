@@ -2,6 +2,8 @@ CREATE DATABASE pandora;
 
 \c pandora;
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE IF NOT EXISTS service (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
@@ -110,11 +112,11 @@ CREATE TABLE IF NOT EXISTS environment_service (
 );
 
 CREATE TABLE IF NOT EXISTS request_log (
-    id TEXT PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     environment_id INTEGER NOT NULL,
     service_id INTEGER NOT NULL,
     api_key TEXT NOT NULL,
-    start_point TEXT NOT NULL,
+    start_point UUID NOT NULL,
     request_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     execution_status TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -128,20 +130,21 @@ CREATE TABLE IF NOT EXISTS request_log (
 );
 
 CREATE TABLE IF NOT EXISTS reservation (
-    id TEXT PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     environment_id INTEGER NOT NULL,
     service_id INTEGER NOT NULL,
     api_key TEXT NOT NULL,
     request_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMP WITH TIME ZONE,
 
-    CONSTRAINT request_log_environment_service_fk FOREIGN KEY (environment_id, service_id) 
+    CONSTRAINT reservation_environment_service_fk FOREIGN KEY (environment_id, service_id) 
 	    REFERENCES environment_service(environment_id, service_id) ON DELETE CASCADE
 );
 
 
 CREATE INDEX IF NOT EXISTS idx_key ON api_key (key);
-CREATE INDEX IF NOT EXISTS idx_api_key ON request_log (api_key);
+CREATE INDEX IF NOT EXISTS idx_request_log_api_key ON request_log (api_key);
+CREATE INDEX IF NOT EXISTS idx_reservation_api_key ON reservation (api_key);
 CREATE INDEX IF NOT EXISTS idx_start_point ON request_log (start_point);
 
 

@@ -15,6 +15,7 @@ type Service struct {
 	Version string
 
 	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (s *Service) Validate() *errors.Error {

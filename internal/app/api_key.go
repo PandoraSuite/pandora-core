@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -16,6 +17,7 @@ type APIKeyUseCase struct {
 	requestLog      outbound.RequestLogPort
 	serviceRepo     outbound.ServiceFindPort
 	environmentRepo outbound.EnvironmentPort
+	reservationRepo outbound.ReservationPort
 }
 
 func (u *APIKeyUseCase) ValidateAndConsume(
@@ -93,25 +95,6 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 func (u *APIKeyUseCase) ValidateAndReserve(
 	ctx context.Context, req *dto.APIKeyValidate,
 ) (*dto.APIKeyValidateReserveResponse, *errors.Error) {
-	//TODO:
-
-	/*
-		Recibir: api_key, servicio, version, entorno y request_time
-		1. Se retorna request_version, available_request, reservation_id, valid,
-		optional message text, codigo estado que es enum.
-		2.Validar que el api key existe que este activa y no haya expirado, segun cada caso retornar respuesta
-		3.Validar que el servicio exista que este activo no deprecado
-		4. Validar el entorno
-		5. Revisar más validaciones
-		Sí es exitoso hacer decremento, crear request_log
-		crear reservation y retornar.
-
-		validar si ese servicio y entorno tiene recursos en reserva y no
-		tiene mas disponibles retorna el mensaje de error de que tiene
-		para consumo pero hay reservas pendientes para que el aura pueda
-		asumir que debe reintentar la peticion en x tiempo
-	*/
-
 	resp := &dto.APIKeyValidateReserveResponse{}
 
 	apiKey, err := u.apiKeyRepo.FindByKey(ctx, req.Key)
@@ -120,7 +103,7 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 			return &dto.APIKeyValidateReserveResponse{
 				Valid:   false,
 				Message: "API Key not found",
-				Code:    enums.ReserveExecutionStatusKeyNotFound.String(),
+				Code:    enums.ReserveExecutionStatusKeyNotFound,
 			}, nil
 		}
 		return resp, nil
@@ -130,7 +113,7 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		return &dto.APIKeyValidateReserveResponse{
 			Valid:   false,
 			Message: "API Key is not active",
-			Code:    enums.ReserveExecutionStatusDeactivatedKey.String(),
+			Code:    enums.ReserveExecutionStatusDeactivatedKey,
 		}, nil
 	}
 
@@ -138,7 +121,7 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		return &dto.APIKeyValidateReserveResponse{
 			Valid:   false,
 			Message: "API Key expired",
-			Code:    enums.ReserveExecutionStatusExpiredKey.String(),
+			Code:    enums.ReserveExecutionStatusExpiredKey,
 		}, nil
 	}
 
@@ -150,7 +133,7 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 			return &dto.APIKeyValidateReserveResponse{
 				Valid:   false,
 				Message: "Service not found",
-				Code:    enums.ReserveExecutionStatusServiceNotFound.String(),
+				Code:    enums.ReserveExecutionStatusServiceNotFound,
 			}, nil
 		}
 		return resp, nil
@@ -160,14 +143,14 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		return &dto.APIKeyValidateReserveResponse{
 			Valid:   false,
 			Message: "Service is deprecated",
-			Code:    enums.ReserveExecutionStatusDeprecatedService.String(),
+			Code:    enums.ReserveExecutionStatusDeprecatedService,
 		}, nil
 	}
 	if service.Status == enums.ServiceDeactivated {
 		return &dto.APIKeyValidateReserveResponse{
 			Valid:   false,
 			Message: "Service is deactivated",
-			Code:    enums.ReserveExecutionStatusDeactivatedService.String(),
+			Code:    enums.ReserveExecutionStatusDeactivatedService,
 		}, nil
 	}
 
@@ -175,7 +158,39 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		ctx, apiKey.EnvironmentID, service.ID,
 	)
 	if err != nil {
-		return resp, errors.ErrNoAvailableRequests
+		currentReservations, err := u.reservationRepo.CountReservationsByFields(
+			ctx, apiKey.EnvironmentID, service.ID, apiKey.Key,
+		)
+		if err != nil {
+			return resp, err
+		}
+
+		if currentReservations == 0 {
+			return &dto.APIKeyValidateReserveResponse{
+				Valid:   false,
+				Message: "No available requests",
+				Code:    enums.ReserveExecutionStatusExceededRequests,
+			}, nil
+		}
+
+		if currentReservations > 0 {
+			return &dto.APIKeyValidateReserveResponse{
+				Valid:   false,
+				Message: "Other reservations are being processed and no request is available, please try again later",
+				Code:    enums.ReserveExecutionStatusActiveReservations,
+			}, nil
+		}
+	}
+	expiresAtTime := time.Now().Add(12 * time.Hour)
+	reservation := entities.Reservation{
+		APIKey:        apiKey.Key,
+		ServiceID:     service.ID,
+		EnvironmentID: apiKey.EnvironmentID,
+		RequestTime:   req.RequestTime,
+		ExpiresAt:     expiresAtTime,
+	}
+	if err := u.reservationRepo.Save(ctx, &reservation); err != nil {
+		return resp, err
 	}
 
 	requestLog := entities.RequestLog{
@@ -185,10 +200,15 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		EnvironmentID:   apiKey.EnvironmentID,
 		ExecutionStatus: enums.RequestLogPending,
 	}
-	if err := u.requestLog.Save(ctx, &requestLog); err != nil {
+	if err := u.requestLog.SaveAsInitialPoint(ctx, &requestLog); err != nil {
 		return resp, err
 	}
-
+	lastUsedKey := dto.APIKeyUpdate{
+		LastUsed: time.Now(),
+	}
+	if err := u.apiKeyRepo.Update(ctx, apiKey.ID, &lastUsedKey); err != nil {
+		return resp, err
+	}
 	var availableRequestResp string
 	if availableRequest.MaxRequest == -1 {
 		availableRequestResp = "unlimited"
@@ -196,9 +216,14 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		availableRequestResp = strconv.Itoa(availableRequest.AvailableRequest)
 	}
 
-	println(availableRequestResp)
-
-	return &dto.APIKeyValidateReserveResponse{}, nil
+	return &dto.APIKeyValidateReserveResponse{
+		RequestID:        requestLog.ID,
+		ReservationID:    reservation.ID,
+		AvailableRequest: availableRequestResp,
+		Valid:            true,
+		Message:          "Authentication successful, a request has been reserved",
+		Code:             enums.ReserveExecutionStatusOk,
+	}, nil
 }
 
 func (u *APIKeyUseCase) GetAPIKeysByEnvironment(

@@ -16,6 +16,7 @@ type Client struct {
 	Email string
 
 	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (c *Client) Validate() *errors.Error {
