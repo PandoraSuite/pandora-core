@@ -9,7 +9,6 @@ type ReserveExecutionStatusCode int
 
 const (
 	ReserveExecutionStatusNull ReserveExecutionStatusCode = iota
-	ReserveExecutionStatusOk
 	ReserveExecutionStatusKeyNotFound
 	ReserveExecutionStatusInvalidKey
 	ReserveExecutionStatusDeactivatedKey
@@ -23,8 +22,6 @@ const (
 
 func (es ReserveExecutionStatusCode) String() string {
 	switch es {
-	case ReserveExecutionStatusOk:
-		return "OK"
 	case ReserveExecutionStatusKeyNotFound:
 		return "KEY_NOT_FOUND"
 	case ReserveExecutionStatusInvalidKey:
@@ -84,8 +81,6 @@ func (es *ReserveExecutionStatusCode) MarshalJSON() ([]byte, error) {
 
 func ParseReserveExecutionStatusCode(es string) (ReserveExecutionStatusCode, error) {
 	switch es {
-	case "OK":
-		return ReserveExecutionStatusOk, nil
 	case "KEY_NOT_FOUND":
 		return ReserveExecutionStatusKeyNotFound, nil
 	case "INVALID_KEY":

@@ -2,11 +2,11 @@ package api_key
 
 import (
 	"context"
-	"fmt"
 
 	"google.golang.org/grpc"
 
 	pb "github.com/MAD-py/pandora-core/internal/adapters/grpc/api_key/v1"
+	"github.com/MAD-py/pandora-core/internal/adapters/grpc/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 )
@@ -40,19 +40,38 @@ func (s *service) ValidateAndReserve(ctx context.Context, req *pb.ValidateAndRes
 	}
 	response, err := s.apiKeyService.ValidateAndReserve(ctx, &reqValidate)
 	if err != nil {
-		fmt.Println("error!")
-		fmt.Println(err)
-	}
-	return &pb.ValidateAndReserveResponse{
-		Valid: true,
-		Result: &pb.ValidateAndReserveResponse_Successful_{
-			Successful: &pb.ValidateAndReserveResponse_Successful{
-				RequestId:        response.RequestID,
-				ReservationId:    response.ReservationID,
-				AvailableRequest: 1000,
+		return &pb.ValidateAndReserveResponse{
+			Valid: false,
+			Result: &pb.ValidateAndReserveResponse_Failed_{
+				Failed: &pb.ValidateAndReserveResponse_Failed{
+					Code:    utils.GetDomainErrorStatusCode(err).String(),
+					Message: err.Error(),
+				},
 			},
-		},
-	}, nil
+		}, nil
+	}
+	if response.Valid {
+		return &pb.ValidateAndReserveResponse{
+			Valid: true,
+			Result: &pb.ValidateAndReserveResponse_Successful_{
+				Successful: &pb.ValidateAndReserveResponse_Successful{
+					RequestId:        response.RequestID,
+					ReservationId:    response.ReservationID,
+					AvailableRequest: int64(response.AvailableRequest),
+				},
+			},
+		}, nil
+	} else {
+		return &pb.ValidateAndReserveResponse{
+			Valid: false,
+			Result: &pb.ValidateAndReserveResponse_Failed_{
+				Failed: &pb.ValidateAndReserveResponse_Failed{
+					Code:    response.Code.String(),
+					Message: response.Message,
+				},
+			},
+		}, nil
+	}
 }
 
 func (s *service) ValidateWithReservationRequest(ctx context.Context, req *pb.ValidateWithReservationRequest) (*pb.ValidateWithReservationResponse, error) {

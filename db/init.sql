@@ -109,6 +109,10 @@ CREATE TABLE IF NOT EXISTS environment_service (
         REFERENCES environment(id) ON DELETE CASCADE,
     CONSTRAINT environment_service_service_id_fk FOREIGN KEY (service_id)
         REFERENCES service(id) ON DELETE CASCADE
+
+    CONSTRAINT check_max_request_and_available_request CHECK (
+    (max_request IS NOT NULL AND available_request IS NOT NULL) OR
+    (max_request IS NULL AND available_request IS NULL)
 );
 
 CREATE TABLE IF NOT EXISTS request_log (
@@ -126,7 +130,7 @@ CREATE TABLE IF NOT EXISTS request_log (
     CONSTRAINT request_log_start_point_fk FOREIGN KEY (start_point)
         REFERENCES request_log(id) ON DELETE CASCADE,
 
-    CONSTRAINT request_log_execution_status_check CHECK (execution_status IN ('success', 'failed', 'unauthorized', 'server error'))
+    CONSTRAINT request_log_execution_status_check CHECK (execution_status IN ('success', 'failed', 'pending', 'unauthorized', 'server error'))
 );
 
 CREATE TABLE IF NOT EXISTS reservation (

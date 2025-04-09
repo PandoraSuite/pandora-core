@@ -61,12 +61,6 @@ func (r *APIKeyRepository) Update(
 		argIndex++
 	}
 
-	if !update.LastUsed.IsZero() {
-		updates = append(updates, fmt.Sprintf("last_used = $%d", argIndex))
-		args = append(args, update.LastUsed)
-		argIndex++
-	}
-
 	if len(updates) == 0 {
 		return nil
 	}

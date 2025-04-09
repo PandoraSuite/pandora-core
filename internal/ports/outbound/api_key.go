@@ -14,4 +14,5 @@ type APIKeyPort interface {
 	FindByKey(ctx context.Context, key string) (*entities.APIKey, *errors.Error)
 	FindByEnvironment(ctx context.Context, environmentID int) ([]*entities.APIKey, *errors.Error)
 	Update(ctx context.Context, id int, update *dto.APIKeyUpdate) *errors.Error
+	UpdateLastUsed(ctx context.Context, key string) *errors.Error
 }

@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -95,7 +96,7 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 func (u *APIKeyUseCase) ValidateAndReserve(
 	ctx context.Context, req *dto.APIKeyValidate,
 ) (*dto.APIKeyValidateReserveResponse, *errors.Error) {
-
+	// Validate Key, must be present in api_key entity
 	apiKey, err := u.apiKeyRepo.FindByKey(ctx, req.Key)
 	if err != nil {
 		if err == errors.ErrNotFound {
@@ -108,6 +109,7 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		return nil, err
 	}
 
+	// Key must be active
 	if !apiKey.IsActive() {
 		return &dto.APIKeyValidateReserveResponse{
 			Valid:   false,
@@ -116,6 +118,7 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		}, nil
 	}
 
+	// Expired keys are not accepted
 	if apiKey.IsExpired() {
 		return &dto.APIKeyValidateReserveResponse{
 			Valid:   false,
@@ -124,6 +127,7 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		}, nil
 	}
 
+	// Service in that version must be exist in the service entity
 	service, err := u.serviceRepo.FindByNameAndVersion(
 		ctx, req.Service, req.ServiceVersion,
 	)
@@ -138,6 +142,7 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		return nil, err
 	}
 
+	// Service must be active
 	if service.Status == enums.ServiceDeprecated {
 		return &dto.APIKeyValidateReserveResponse{
 			Valid:   false,
@@ -153,12 +158,17 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		}, nil
 	}
 
+	// Decrement available_request or identify unlimited request
 	availableRequest, err := u.environmentRepo.DecrementAvailableRequest(
 		ctx, apiKey.EnvironmentID, service.ID,
 	)
 	if err != nil {
+		/* When available_request isn't possible to decrement it must check
+		the active reservations for this service in the environment no matter
+		what key you use.
+		*/
 		currentReservations, err := u.reservationRepo.CountReservationsByFields(
-			ctx, apiKey.EnvironmentID, service.ID, apiKey.Key,
+			ctx, apiKey.EnvironmentID, service.ID,
 		)
 		if err != nil {
 			return nil, err
@@ -175,11 +185,13 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 		if currentReservations > 0 {
 			return &dto.APIKeyValidateReserveResponse{
 				Valid:   false,
-				Message: "Other reservations are being processed and no request is available, please try again later",
+				Message: fmt.Sprintf("(%d) reservations are being processed and no request is available, please try again later", currentReservations),
 				Code:    enums.ReserveExecutionStatusActiveReservations,
 			}, nil
 		}
 	}
+
+	// Create an active reservation up to twelve hours later
 	expiresAtTime := time.Now().Add(12 * time.Hour)
 	reservation := entities.Reservation{
 		APIKey:        apiKey.Key,
@@ -191,7 +203,6 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 	if err := u.reservationRepo.Save(ctx, &reservation); err != nil {
 		return nil, err
 	}
-
 	requestLog := entities.RequestLog{
 		APIKey:          apiKey.Key,
 		ServiceID:       service.ID,
@@ -202,26 +213,15 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 	if err := u.requestLog.SaveAsInitialPoint(ctx, &requestLog); err != nil {
 		return nil, err
 	}
-	lastUsedKey := dto.APIKeyUpdate{
-		LastUsed: time.Now(),
-	}
-	if err := u.apiKeyRepo.Update(ctx, apiKey.ID, &lastUsedKey); err != nil {
+	// With an successful key use, then update last_used in api_key entity
+	if err := u.apiKeyRepo.UpdateLastUsed(ctx, apiKey.Key); err != nil {
 		return nil, err
-	}
-	var availableRequestResp string
-	if availableRequest.MaxRequest == -1 {
-		availableRequestResp = "unlimited"
-	} else {
-		availableRequestResp = strconv.Itoa(availableRequest.AvailableRequest)
 	}
 
 	return &dto.APIKeyValidateReserveResponse{
-		RequestID:        requestLog.ID,
 		ReservationID:    reservation.ID,
-		AvailableRequest: availableRequestResp,
+		AvailableRequest: availableRequest.AvailableRequest,
 		Valid:            true,
-		Message:          "Authentication successful, a request has been reserved",
-		Code:             enums.ReserveExecutionStatusOk,
 	}, nil
 }
 
