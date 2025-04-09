@@ -26,7 +26,7 @@ type ProjectServiceResponse struct {
 	Version        string                             `json:"version"`
 	NextReset      time.Time                          `json:"next_reset"`
 	MaxRequest     int                                `json:"max_request"`
-	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency"`
+	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency" enums:"daily,weekly,biweekly,monthly," swaggertype:"string"`
 	AssignedAt     time.Time                          `json:"assigned_at"`
 }
 

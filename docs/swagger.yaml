@@ -218,7 +218,13 @@ definitions:
       next_reset:
         type: string
       reset_frequency:
-        $ref: '#/definitions/enums.ProjectServiceResetFrequency'
+        enum:
+        - daily
+        - weekly
+        - biweekly
+        - monthly
+        - ""
+        type: string
       version:
         type: string
     type: object
@@ -245,20 +251,6 @@ definitions:
       version:
         type: string
     type: object
-  enums.ProjectServiceResetFrequency:
-    enum:
-    - 0
-    - 1
-    - 2
-    - 3
-    - 4
-    type: integer
-    x-enum-varnames:
-    - ProjectServiceNull
-    - ProjectServiceDaily
-    - ProjectServiceWeekly
-    - ProjectServiceBiweekly
-    - ProjectServiceMonthly
   utils.ErrorResponse:
     properties:
       error: {}
@@ -839,9 +831,7 @@ paths:
           description: OK
           schema:
             items:
-              items:
-                $ref: '#/definitions/dto.ServiceResponse'
-              type: array
+              $ref: '#/definitions/dto.ServiceResponse'
             type: array
         default:
           description: Default error response for all failures
