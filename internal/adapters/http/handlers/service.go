@@ -19,7 +19,7 @@ import (
 // @Accept json
 // @Produce json
 // @Param query query dto.ServiceFilter false "Query parameters"
-// @Success 200 {array} []dto.ServiceResponse
+// @Success 200 {array} dto.ServiceResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/services [get]
 func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
