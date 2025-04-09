@@ -919,10 +919,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/definitions/dto.ServiceResponse"
-                                }
+                                "$ref": "#/definitions/dto.ServiceResponse"
                             }
                         }
                     },
@@ -1306,7 +1303,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "reset_frequency": {
-                    "$ref": "#/definitions/enums.ProjectServiceResetFrequency"
+                    "type": "string",
+                    "enum": [
+                        "daily",
+                        "weekly",
+                        "biweekly",
+                        "monthly",
+                        ""
+                    ]
                 },
                 "version": {
                     "type": "string"
@@ -1347,23 +1351,6 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
-        },
-        "enums.ProjectServiceResetFrequency": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3,
-                4
-            ],
-            "x-enum-varnames": [
-                "ProjectServiceNull",
-                "ProjectServiceDaily",
-                "ProjectServiceWeekly",
-                "ProjectServiceBiweekly",
-                "ProjectServiceMonthly"
-            ]
         },
         "utils.ErrorResponse": {
             "type": "object",
