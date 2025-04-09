@@ -51,12 +51,32 @@ func (u *AuthUseCase) ChangePassword(
 		return errors.ErrPasswordMismatch
 	}
 
+	currentCredentials, err := u.credentialsRepo.FindCredentials(
+		ctx, req.Username,
+	)
+	if err != nil {
+		if err == errors.ErrCredentialsNotFound {
+			return errors.ErrPasswordChangeFailed
+		}
+		return err
+	}
+
+	if err := currentCredentials.VerifyPassword(req.NewPassword); err == nil {
+		return errors.ErrPasswordUnchanged
+	}
+
 	credentials := &entities.Credentials{Username: req.Username}
 	if err := credentials.CalculatePasswordHash(req.NewPassword); err != nil {
 		return err
 	}
 
-	return u.credentialsRepo.ChangePassword(ctx, credentials)
+	if err := u.credentialsRepo.ChangePassword(ctx, credentials); err != nil {
+		if err == errors.ErrCredentialsNotFound {
+			return errors.ErrPasswordChangeFailed
+		}
+		return err
+	}
+	return nil
 }
 
 func (u *AuthUseCase) ValidateToken(
