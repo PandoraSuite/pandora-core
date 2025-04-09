@@ -37,14 +37,13 @@ func (r *ReservationRepository) Save(
 }
 
 func (r *ReservationRepository) CountReservationsByFields(
-	ctx context.Context, environment_id, service_id int, api_key string,
+	ctx context.Context, environment_id, service_id int,
 ) (int, *errors.Error) {
 	query := `
 		SELECT count(*)
 		FROM reservation
 		WHERE environment_id = $1
 		AND service_id = $2
-		AND api_key = $3
 	`
 
 	var currentReservations int
@@ -52,14 +51,29 @@ func (r *ReservationRepository) CountReservationsByFields(
 		ctx,
 		query,
 		environment_id,
-		service_id,
-		api_key).Scan(
+		service_id).Scan(
 		&currentReservations)
 	if err != nil {
 		return -1, r.handlerErr(err)
 	}
 
 	return currentReservations, nil
+}
+
+func (r *ReservationRepository) RemoveReservation(
+	ctx context.Context, id string,
+) (int64, *errors.Error) {
+	query := `
+		DELETE FROM reservation
+		WHERE id = $1;
+	`
+
+	result, err := r.pool.Exec(ctx, query, id)
+	if err != nil {
+		return 0, r.handlerErr(err)
+	}
+
+	return result.RowsAffected(), nil
 }
 func NewReservationRepository(
 	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,
