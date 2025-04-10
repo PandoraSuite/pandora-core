@@ -4,8 +4,11 @@ import (
 	"context"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 
 	pb "github.com/MAD-py/pandora-core/internal/adapters/grpc/api_key/v1"
+	"github.com/MAD-py/pandora-core/internal/adapters/grpc/utils"
+	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 )
 
@@ -13,17 +16,6 @@ type service struct {
 	pb.APIKeyServiceServer
 
 	apiKeyService inbound.APIKeyGRPCPort
-}
-
-func (s *service) Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.ValidateResponse, error) {
-	return &pb.ValidateResponse{
-		Valid: true,
-		Result: &pb.ValidateResponse_Successful_{
-			Successful: &pb.ValidateResponse_Successful{
-				RequestId: "req-123456",
-			},
-		},
-	}, nil
 }
 
 func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndConsumeRequest) (*pb.ValidateAndConsumeResponse, error) {
@@ -38,14 +30,52 @@ func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndCon
 	}, nil
 }
 
-func (s *service) ValidateAndReservation(ctx context.Context, req *pb.ValidateAndReservationRequest) (*pb.ValidateAndReservationResponse, error) {
-	return &pb.ValidateAndReservationResponse{
+func (s *service) ValidateAndReserve(ctx context.Context, req *pb.ValidateAndReserveRequest) (*pb.ValidateAndReserveResponse, error) {
+	params := req.GetParams()
+	reqValidate := dto.APIKeyValidate{
+		Key:            params.Key,
+		Service:        params.Service,
+		Environment:    params.Environment,
+		ServiceVersion: params.ServiceVersion,
+		RequestTime:    params.RequestTime.AsTime(),
+	}
+	response, err := s.apiKeyService.ValidateAndReserve(ctx, &reqValidate)
+	if err != nil {
+		return nil, status.Error(
+			utils.GetDomainErrorStatusCode(err),
+			err.Message,
+		)
+	}
+	if response.Valid {
+		return &pb.ValidateAndReserveResponse{
+			Valid: true,
+			Result: &pb.ValidateAndReserveResponse_Successful_{
+				Successful: &pb.ValidateAndReserveResponse_Successful{
+					RequestId:        response.RequestID,
+					ReservationId:    response.ReservationID,
+					AvailableRequest: int64(response.AvailableRequest),
+				},
+			},
+		}, nil
+	} else {
+		return &pb.ValidateAndReserveResponse{
+			Valid: false,
+			Result: &pb.ValidateAndReserveResponse_Failed_{
+				Failed: &pb.ValidateAndReserveResponse_Failed{
+					Code:    response.Code.String(),
+					Message: response.Message,
+				},
+			},
+		}, nil
+	}
+}
+
+func (s *service) ValidateWithReservationRequest(ctx context.Context, req *pb.ValidateWithReservationRequest) (*pb.ValidateWithReservationResponse, error) {
+	return &pb.ValidateWithReservationResponse{
 		Valid: true,
-		Result: &pb.ValidateAndReservationResponse_Successful_{
-			Successful: &pb.ValidateAndReservationResponse_Successful{
-				RequestId:        "req-123456",
-				ReservationId:    "booking-123456",
-				AvailableRequest: 1000,
+		Result: &pb.ValidateWithReservationResponse_Successful_{
+			Successful: &pb.ValidateWithReservationResponse_Successful{
+				RequestId: "req-123456",
 			},
 		},
 	}, nil

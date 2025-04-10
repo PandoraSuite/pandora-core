@@ -36,6 +36,7 @@ func main() {
 	projectRepo := repository.NewProjectRepository(pool, errHandler)
 	requestLogRepo := repository.NewRequestLogRepository(pool, errHandler)
 	environmentRepo := repository.NewEnvironmentRepository(pool, errHandler)
+	reservationRepo := repository.NewReservationRepository(pool, errHandler)
 
 	jwtProvider := security.NewJWTProvider([]byte(cfg.JWTSecret()))
 	credentialsFile, err := cfg.CredentialsFile()
@@ -56,7 +57,7 @@ func main() {
 		environmentRepo, projectRepo,
 	)
 	apiKeyUseCase := app.NewAPIKeyUseCase(
-		apiKeyRepo, requestLogRepo, serviceRepo, environmentRepo,
+		apiKeyRepo, requestLogRepo, serviceRepo, environmentRepo, reservationRepo,
 	)
 
 	srv := http.NewServer(
