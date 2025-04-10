@@ -9,4 +9,5 @@ import (
 
 type RequestLogPort interface {
 	Save(ctx context.Context, requestLog *entities.RequestLog) *errors.Error
+	SaveAsInitialPoint(ctx context.Context, requestLog *entities.RequestLog) *errors.Error
 }
