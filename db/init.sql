@@ -117,11 +117,12 @@ CREATE TABLE IF NOT EXISTS environment_service (
 
 CREATE TABLE IF NOT EXISTS request_log (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    environment_id INTEGER NOT NULL,
-    service_id INTEGER NOT NULL,
+    environment_id INTEGER NULL,
+    service_id INTEGER NULL,
     api_key TEXT NOT NULL,
     start_point UUID NOT NULL,
     request_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    message TEXT NULL
     execution_status TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
