@@ -14,6 +14,7 @@ type RequestLog struct {
 	RequestTime     time.Time
 	EnvironmentID   int
 	StartPoint      string
+	Message         string
 	ExecutionStatus enums.RequestLogExecutionStatus
 
 	CreatedAt time.Time

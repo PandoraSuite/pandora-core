@@ -20,6 +20,6 @@ func GetDomainErrorStatusCode(err *domainErr.Error) codes.Code {
 	case domainErr.CodeValidationError:
 		return codes.FailedPrecondition
 	default:
-		return codes.Internal
+		return codes.Unknown
 	}
 }

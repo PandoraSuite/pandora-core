@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 
 	pb "github.com/MAD-py/pandora-core/internal/adapters/grpc/api_key/v1"
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc/utils"
@@ -40,15 +41,10 @@ func (s *service) ValidateAndReserve(ctx context.Context, req *pb.ValidateAndRes
 	}
 	response, err := s.apiKeyService.ValidateAndReserve(ctx, &reqValidate)
 	if err != nil {
-		return &pb.ValidateAndReserveResponse{
-			Valid: false,
-			Result: &pb.ValidateAndReserveResponse_Failed_{
-				Failed: &pb.ValidateAndReserveResponse_Failed{
-					Code:    utils.GetDomainErrorStatusCode(err).String(),
-					Message: err.Error(),
-				},
-			},
-		}, nil
+		return nil, status.Error(
+			utils.GetDomainErrorStatusCode(err),
+			err.Message,
+		)
 	}
 	if response.Valid {
 		return &pb.ValidateAndReserveResponse{
