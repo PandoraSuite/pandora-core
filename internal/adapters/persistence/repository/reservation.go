@@ -61,7 +61,7 @@ func (r *ReservationRepository) FindByID(
 	return reservation, nil
 }
 
-func (r *ReservationRepository) CountReservationsByFields(
+func (r *ReservationRepository) CountByEnvironmentAndService(
 	ctx context.Context, environment_id, service_id int,
 ) (int, *errors.Error) {
 	query := `
@@ -79,7 +79,7 @@ func (r *ReservationRepository) CountReservationsByFields(
 		service_id).Scan(
 		&currentReservations)
 	if err != nil {
-		return -1, r.handlerErr(err)
+		return 0, r.handlerErr(err)
 	}
 
 	return currentReservations, nil

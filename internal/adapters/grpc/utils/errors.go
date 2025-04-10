@@ -5,10 +5,6 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-type ErrorResponse struct {
-	Error error `json:"error"`
-}
-
 func GetDomainErrorStatusCode(err *domainErr.Error) codes.Code {
 	switch err.Code {
 	case domainErr.CodeNotFound:

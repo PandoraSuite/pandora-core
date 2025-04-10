@@ -230,7 +230,7 @@ func (u *APIKeyUseCase) validateAndReserve(
 		the active reservations for this service in the environment no matter
 		what key you use.
 		*/
-		currentReservations, err := u.reservationRepo.CountReservationsByFields(
+		currentReservations, err := u.reservationRepo.CountByEnvironmentAndService(
 			ctx, apiKey.EnvironmentID, service.ID,
 		)
 		if err != nil {
