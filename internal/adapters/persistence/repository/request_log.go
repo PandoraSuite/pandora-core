@@ -6,6 +6,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
@@ -13,6 +14,31 @@ type RequestLogRepository struct {
 	pool *pgxpool.Pool
 
 	handlerErr func(error) *errors.Error
+}
+
+func (r *RequestLogRepository) UpdateExecutionStatus(
+	ctx context.Context, id int, executionStatus enums.RequestLogExecutionStatus,
+) *errors.Error {
+	if executionStatus == enums.RequestLogExecutionStatusNull {
+		return errors.ErrAPIKeyInvalidStatus
+	}
+
+	query := `
+		UPDATE request_log
+		SET execution_status = $1
+		WHERE id = $2;
+	`
+
+	result, err := r.pool.Exec(ctx, query, executionStatus, id)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.ErrRequestLogNotFound
+	}
+
+	return nil
 }
 
 func (r *RequestLogRepository) Save(
