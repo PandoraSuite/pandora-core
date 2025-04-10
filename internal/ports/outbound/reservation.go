@@ -9,7 +9,7 @@ import (
 
 type ReservationPort interface {
 	Save(ctx context.Context, reservation *entities.Reservation) *errors.Error
-	CountReservationsByFields(
+	CountByEnvironmentAndService(
 		ctx context.Context, environment_id, service_id int,
 	) (int, *errors.Error)
 }

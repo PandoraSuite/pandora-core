@@ -40,8 +40,8 @@ type APIKeyValidateReserveResponse struct {
 	ReservationID    string                           `json:"reservation_id,omitempty"`
 	AvailableRequest int                              `json:"available_request,omitempty"`
 	Valid            bool                             `json:"valid"`
-	Message          string                           `json:"message"`
-	Code             enums.ReserveExecutionStatusCode `json:"code"`
+	Message          string                           `json:"message,omitempty"`
+	Code             enums.ReserveExecutionStatusCode `json:"code,omitempty"`
 }
 type APIKeyCreate struct {
 	ExpiresAt     time.Time `json:"expires_at"`
@@ -60,5 +60,4 @@ type APIKeyResponse struct {
 
 type APIKeyUpdate struct {
 	ExpiresAt time.Time `json:"expires_at,omitempty"`
-	LastUsed  time.Time `json:"last_used,omitempty"`
 }
