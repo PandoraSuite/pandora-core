@@ -71,10 +71,12 @@ func (s *Server) Run() {
 func NewServer(
 	addr string,
 	apiKeyService inbound.APIKeyGRPCPort,
+	reservationService inbound.ReservationGRPCPort,
 ) *Server {
 	return &Server{
-		addr:          addr,
-		apiKeyService: apiKeyService,
+		addr:               addr,
+		apiKeyService:      apiKeyService,
+		reservationService: reservationService,
 	}
 }
 

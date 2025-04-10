@@ -9,6 +9,7 @@ import (
 
 type ReservationUseCase struct {
 	reservationRepo outbound.ReservationPort
+	environmentRepo outbound.EnvironmentPort
 }
 
 func (u *ReservationUseCase) Commit(
@@ -18,6 +19,28 @@ func (u *ReservationUseCase) Commit(
 	return err
 }
 
-func NewReservationUseCase(ReservationRepo outbound.ReservationPort) *ReservationUseCase {
-	return &ReservationUseCase{reservationRepo: ReservationRepo}
+func (u *ReservationUseCase) Rollback(
+	ctx context.Context, id string,
+) *errors.Error {
+	reservation, err := u.reservationRepo.FindByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if _, err := u.reservationRepo.RemoveReservation(ctx, id); err != nil {
+		return err
+	}
+	// Must not exist reservation for increasing available request
+	if err := u.environmentRepo.IncreaseAvailableRequest(
+		ctx, reservation.EnvironmentID, reservation.ServiceID); err != nil {
+		return err
+	}
+	return nil
+}
+
+func NewReservationUseCase(ReservationRepo outbound.ReservationPort,
+	EnvironmentRepo outbound.EnvironmentPort) *ReservationUseCase {
+	return &ReservationUseCase{
+		reservationRepo: ReservationRepo,
+		environmentRepo: EnvironmentRepo,
+	}
 }

@@ -36,6 +36,31 @@ func (r *ReservationRepository) Save(
 	return r.handlerErr(err)
 }
 
+func (r *ReservationRepository) FindByID(
+	ctx context.Context, id string,
+) (*entities.Reservation, *errors.Error) {
+	query := `
+		SELECT *
+		FROM reservation
+		WHERE id = $1;
+	`
+
+	reservation := new(entities.Reservation)
+	err := r.pool.QueryRow(ctx, query, id).Scan(
+		&reservation.ID,
+		&reservation.EnvironmentID,
+		&reservation.ServiceID,
+		&reservation.APIKey,
+		&reservation.RequestTime,
+		&reservation.ExpiresAt,
+	)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return reservation, nil
+}
+
 func (r *ReservationRepository) CountReservationsByFields(
 	ctx context.Context, environment_id, service_id int,
 ) (int, *errors.Error) {

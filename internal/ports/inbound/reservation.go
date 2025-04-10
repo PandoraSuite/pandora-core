@@ -8,4 +8,5 @@ import (
 
 type ReservationGRPCPort interface {
 	Commit(ctx context.Context, id string) *errors.Error
+	Rollback(ctx context.Context, id string) *errors.Error
 }
