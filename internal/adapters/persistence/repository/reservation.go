@@ -98,6 +98,10 @@ func (r *ReservationRepository) RemoveReservation(
 		return 0, r.handlerErr(err)
 	}
 
+	if result.RowsAffected() == 0 {
+		return 0, errors.ErrReservationNotFound
+	}
+
 	return result.RowsAffected(), nil
 }
 func NewReservationRepository(

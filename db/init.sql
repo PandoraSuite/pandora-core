@@ -108,11 +108,13 @@ CREATE TABLE IF NOT EXISTS environment_service (
     CONSTRAINT environment_service_environment_id_fk FOREIGN KEY (environment_id)
         REFERENCES environment(id) ON DELETE CASCADE,
     CONSTRAINT environment_service_service_id_fk FOREIGN KEY (service_id)
-        REFERENCES service(id) ON DELETE CASCADE
+        REFERENCES service(id) ON DELETE CASCADE,
 
-    CONSTRAINT check_max_request_and_available_request CHECK (
+	CONSTRAINT check_max_request_and_available_request CHECK (
     (max_request IS NOT NULL AND available_request IS NOT NULL) OR
-    (max_request IS NULL AND available_request IS NULL)
+    (max_request IS NULL AND available_request IS NULL)),
+    CONSTRAINT check_available_request_less_than_max_request_ CHECK 
+    (available_request <= max_request)
 );
 
 CREATE TABLE IF NOT EXISTS request_log (
@@ -122,7 +124,7 @@ CREATE TABLE IF NOT EXISTS request_log (
     api_key TEXT NOT NULL,
     start_point UUID NOT NULL,
     request_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    message TEXT NULL
+    message TEXT NULL,
     execution_status TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     

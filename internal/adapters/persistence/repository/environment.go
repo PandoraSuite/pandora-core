@@ -203,9 +203,14 @@ func (r *EnvironmentRepository) IncreaseAvailableRequest(
 ) *errors.Error {
 	query := `
 		UPDATE environment_service
-		SET available_request = available_request + 1
+		SET available_request =
+			CASE
+				WHEN available_request IS NOT NULL AND available_request > 0
+				THEN available_request + 1
+				ELSE available_request
+			END
 		WHERE environment_id = $1 AND service_id = $2
-		AND available_request < max_request
+			AND (available_request IS NULL OR available_request > 0)
 		RETURNING COALESCE(max_request, -1), COALESCE(available_request, -1);
 	`
 
