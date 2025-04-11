@@ -7,9 +7,9 @@ import (
 type Reservation struct {
 	ID string
 
-	APIKey        string
-	ServiceID     int
 	EnvironmentID int
+	ServiceID     int
+	APIKey        string
 	RequestTime   time.Time
 	ExpiresAt     time.Time
 }

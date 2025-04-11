@@ -24,13 +24,14 @@ type Server struct {
 
 	server *grpc.Server
 
-	apiKeyService inbound.APIKeyGRPCPort
+	apiKeyService      inbound.APIKeyGRPCPort
+	reservationService inbound.ReservationGRPCPort
 }
 
 func (s *Server) setupServices() {
 	api_key.RegisterService(s.server, s.apiKeyService)
 	request.RegisterService(s.server)
-	reservation.RegisterService(s.server)
+	reservation.RegisterService(s.server, s.reservationService)
 }
 
 func (s *Server) Run() {
@@ -70,10 +71,12 @@ func (s *Server) Run() {
 func NewServer(
 	addr string,
 	apiKeyService inbound.APIKeyGRPCPort,
+	reservationService inbound.ReservationGRPCPort,
 ) *Server {
 	return &Server{
-		addr:          addr,
-		apiKeyService: apiKeyService,
+		addr:               addr,
+		apiKeyService:      apiKeyService,
+		reservationService: reservationService,
 	}
 }
 
