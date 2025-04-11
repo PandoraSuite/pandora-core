@@ -36,6 +36,31 @@ func (r *ReservationRepository) Save(
 	return r.handlerErr(err)
 }
 
+func (r *ReservationRepository) FindByID(
+	ctx context.Context, id string,
+) (*entities.Reservation, *errors.Error) {
+	query := `
+		SELECT *
+		FROM reservation
+		WHERE id = $1;
+	`
+
+	reservation := new(entities.Reservation)
+	err := r.pool.QueryRow(ctx, query, id).Scan(
+		&reservation.ID,
+		&reservation.EnvironmentID,
+		&reservation.ServiceID,
+		&reservation.APIKey,
+		&reservation.RequestTime,
+		&reservation.ExpiresAt,
+	)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return reservation, nil
+}
+
 func (r *ReservationRepository) CountByEnvironmentAndService(
 	ctx context.Context, environment_id, service_id int,
 ) (int, *errors.Error) {
@@ -58,6 +83,26 @@ func (r *ReservationRepository) CountByEnvironmentAndService(
 	}
 
 	return currentReservations, nil
+}
+
+func (r *ReservationRepository) RemoveReservation(
+	ctx context.Context, id string,
+) (int64, *errors.Error) {
+	query := `
+		DELETE FROM reservation
+		WHERE id = $1;
+	`
+
+	result, err := r.pool.Exec(ctx, query, id)
+	if err != nil {
+		return 0, r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return 0, errors.ErrReservationNotFound
+	}
+
+	return result.RowsAffected(), nil
 }
 func NewReservationRepository(
 	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,

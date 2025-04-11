@@ -29,10 +29,14 @@ func main() {
 		apiKeyRepo, requestLogRepo, serviceRepo, environmentRepo, reservationRepo,
 	)
 	requestLogUseCase := app.NewRequestLogUseCase(requestLogRepo)
+	reservationUseCase := app.NewReservationUseCase(reservationRepo, environmentRepo)
+
 	srv := grpc.NewServer(
 		fmt.Sprintf(":%s", "50051"),
 		apiKeyUseCase,
 		requestLogUseCase,
+		reservationUseCase,
 	)
+
 	srv.Run()
 }
