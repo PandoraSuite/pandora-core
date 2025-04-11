@@ -35,6 +35,14 @@ type APIKeyValidateBookingResponse struct {
 	BookingID string `json:"booking_id"`
 }
 
+type APIKeyValidateReserveResponse struct {
+	RequestID        string                           `json:"request_id,omitempty"`
+	ReservationID    string                           `json:"reservation_id,omitempty"`
+	AvailableRequest int                              `json:"available_request,omitempty"`
+	Valid            bool                             `json:"valid"`
+	Message          string                           `json:"message,omitempty"`
+	Code             enums.ReserveExecutionStatusCode `json:"code,omitempty"`
+}
 type APIKeyCreate struct {
 	ExpiresAt     time.Time `json:"expires_at"`
 	EnvironmentID int       `json:"environment_id" binding:"required"`

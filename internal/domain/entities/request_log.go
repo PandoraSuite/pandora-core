@@ -7,12 +7,14 @@ import (
 )
 
 type RequestLog struct {
-	ID int
+	ID string
 
 	APIKey          string
 	ServiceID       int
 	RequestTime     time.Time
 	EnvironmentID   int
+	StartPoint      string
+	Message         string
 	ExecutionStatus enums.RequestLogExecutionStatus
 
 	CreatedAt time.Time

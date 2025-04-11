@@ -198,6 +198,35 @@ func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
 	return quota, r.handlerErr(err)
 }
 
+func (r *EnvironmentRepository) IncreaseAvailableRequest(
+	ctx context.Context, id, serviceID int,
+) *errors.Error {
+	query := `
+		UPDATE environment_service
+		SET available_request =
+			CASE
+				WHEN available_request IS NOT NULL AND available_request > 0
+				THEN available_request + 1
+				ELSE available_request
+			END
+		WHERE environment_id = $1 AND service_id = $2
+			AND (available_request IS NULL OR available_request > 0)
+		RETURNING COALESCE(max_request, -1), COALESCE(available_request, -1);
+	`
+
+	result, err := r.pool.Exec(
+		ctx, query, id, serviceID)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.ErrEnvironmentNotFound
+	}
+
+	return nil
+}
+
 func (r *EnvironmentRepository) DecrementAvailableRequest(
 	ctx context.Context, id, serviceID int,
 ) (*dto.DecrementAvailableRequest, *errors.Error) {
@@ -211,7 +240,7 @@ func (r *EnvironmentRepository) DecrementAvailableRequest(
 			END
 		WHERE environment_id = $1 AND service_id = $2
 			AND (available_request IS NULL OR available_request > 0)
-		RETURNING max_request, available_request;
+		RETURNING COALESCE(max_request, -1), COALESCE(available_request, -1);
 	`
 
 	result := new(dto.DecrementAvailableRequest)

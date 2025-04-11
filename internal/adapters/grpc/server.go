@@ -1,11 +1,16 @@
 package grpc
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net"
+	"os"
 
-	"github.com/bufbuild/protovalidate-go"
-	interceptors "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
+	protovalidator "github.com/bufbuild/protovalidate-go"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
+
 	"google.golang.org/grpc"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc/api_key"
@@ -19,24 +24,34 @@ type Server struct {
 
 	server *grpc.Server
 
-	apiKeyService inbound.APIKeyGRPCPort
+	apiKeyService      inbound.APIKeyGRPCPort
+	reservationService inbound.ReservationGRPCPort
 }
 
 func (s *Server) setupServices() {
 	api_key.RegisterService(s.server, s.apiKeyService)
 	request.RegisterService(s.server)
-	reservation.RegisterService(s.server)
+	reservation.RegisterService(s.server, s.reservationService)
 }
 
 func (s *Server) Run() {
-	validator, err := protovalidate.New()
+	validator, err := protovalidator.New()
 	if err != nil {
 		panic("failed to create protovalidate validator")
 	}
 
+	logger := interceptorLogger()
+
 	s.server = grpc.NewServer(
-		grpc.UnaryInterceptor(
-			interceptors.UnaryServerInterceptor(validator),
+		grpc.ChainUnaryInterceptor(
+			logging.UnaryServerInterceptor(
+				logger,
+				logging.WithLogOnEvents(
+					logging.StartCall,
+					logging.FinishCall,
+				),
+			),
+			protovalidate.UnaryServerInterceptor(validator),
 		),
 	)
 	s.setupServices()
@@ -56,9 +71,30 @@ func (s *Server) Run() {
 func NewServer(
 	addr string,
 	apiKeyService inbound.APIKeyGRPCPort,
+	reservationService inbound.ReservationGRPCPort,
 ) *Server {
 	return &Server{
-		addr:          addr,
-		apiKeyService: apiKeyService,
+		addr:               addr,
+		apiKeyService:      apiKeyService,
+		reservationService: reservationService,
 	}
+}
+
+func interceptorLogger() logging.Logger {
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime|log.Lshortfile)
+	return logging.LoggerFunc(func(_ context.Context, lvl logging.Level, msg string, fields ...any) {
+		switch lvl {
+		case logging.LevelDebug:
+			msg = fmt.Sprintf("DEBUG :%v", msg)
+		case logging.LevelInfo:
+			msg = fmt.Sprintf("INFO :%v", msg)
+		case logging.LevelWarn:
+			msg = fmt.Sprintf("WARN :%v", msg)
+		case logging.LevelError:
+			msg = fmt.Sprintf("ERROR :%v", msg)
+		default:
+			panic(fmt.Sprintf("unknown level %v", lvl))
+		}
+		logger.Println(append([]any{"msg", msg}, fields...))
+	})
 }

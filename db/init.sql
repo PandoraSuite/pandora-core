@@ -14,6 +14,8 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
     GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO pandora_user;
 
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
 CREATE TABLE IF NOT EXISTS service (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
@@ -118,16 +120,23 @@ CREATE TABLE IF NOT EXISTS environment_service (
     CONSTRAINT environment_service_environment_id_fk FOREIGN KEY (environment_id)
         REFERENCES environment(id) ON DELETE CASCADE,
     CONSTRAINT environment_service_service_id_fk FOREIGN KEY (service_id)
-        REFERENCES service(id) ON DELETE CASCADE
+        REFERENCES service(id) ON DELETE CASCADE,
+
+	CONSTRAINT check_max_request_and_available_request CHECK (
+    (max_request IS NOT NULL AND available_request IS NOT NULL) OR
+    (max_request IS NULL AND available_request IS NULL)),
+    CONSTRAINT check_available_request_less_than_max_request_ CHECK 
+    (available_request <= max_request)
 );
 
 CREATE TABLE IF NOT EXISTS request_log (
-    id TEXT PRIMARY KEY,
-    environment_id INTEGER NOT NULL,
-    service_id INTEGER NOT NULL,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    environment_id INTEGER NULL,
+    service_id INTEGER NULL,
     api_key TEXT NOT NULL,
-    start_point TEXT NOT NULL,
+    start_point UUID NOT NULL,
     request_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    message TEXT NULL,
     execution_status TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     
@@ -136,24 +145,25 @@ CREATE TABLE IF NOT EXISTS request_log (
     CONSTRAINT request_log_start_point_fk FOREIGN KEY (start_point)
         REFERENCES request_log(id) ON DELETE CASCADE,
 
-    CONSTRAINT request_log_execution_status_check CHECK (execution_status IN ('success', 'failed', 'unauthorized', 'server error'))
+    CONSTRAINT request_log_execution_status_check CHECK (execution_status IN ('success', 'failed', 'pending', 'unauthorized', 'server error'))
 );
 
 CREATE TABLE IF NOT EXISTS reservation (
-    id TEXT PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     environment_id INTEGER NOT NULL,
     service_id INTEGER NOT NULL,
     api_key TEXT NOT NULL,
     request_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     expires_at TIMESTAMP WITH TIME ZONE,
 
-    CONSTRAINT request_log_environment_service_fk FOREIGN KEY (environment_id, service_id) 
+    CONSTRAINT reservation_environment_service_fk FOREIGN KEY (environment_id, service_id) 
 	    REFERENCES environment_service(environment_id, service_id) ON DELETE CASCADE
 );
 
 
 CREATE INDEX IF NOT EXISTS idx_key ON api_key (key);
-CREATE INDEX IF NOT EXISTS idx_api_key ON request_log (api_key);
+CREATE INDEX IF NOT EXISTS idx_request_log_api_key ON request_log (api_key);
+CREATE INDEX IF NOT EXISTS idx_reservation_api_key ON reservation (api_key);
 CREATE INDEX IF NOT EXISTS idx_start_point ON request_log (start_point);
 
 
