@@ -13,7 +13,7 @@ type RequestLogUseCase struct {
 }
 
 func (u *RequestLogUseCase) UpdateExecutionStatus(
-	ctx context.Context, id int, executionStatus enums.RequestLogExecutionStatus,
+	ctx context.Context, id string, executionStatus enums.RequestLogExecutionStatus,
 ) *errors.Error {
 	switch executionStatus {
 	case enums.RequestLogExecutionStatusNull:

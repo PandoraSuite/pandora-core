@@ -17,7 +17,7 @@ type RequestLogRepository struct {
 }
 
 func (r *RequestLogRepository) UpdateExecutionStatus(
-	ctx context.Context, id int, executionStatus enums.RequestLogExecutionStatus,
+	ctx context.Context, id string, executionStatus enums.RequestLogExecutionStatus,
 ) *errors.Error {
 	if executionStatus == enums.RequestLogExecutionStatusNull {
 		return errors.ErrAPIKeyInvalidStatus

@@ -11,5 +11,5 @@ import (
 type RequestLogPort interface {
 	Save(ctx context.Context, requestLog *entities.RequestLog) *errors.Error
 	SaveAsInitialPoint(ctx context.Context, requestLog *entities.RequestLog) *errors.Error
-	UpdateExecutionStatus(ctx context.Context, id int, executionStatus enums.RequestLogExecutionStatus) *errors.Error
+	UpdateExecutionStatus(ctx context.Context, id string, executionStatus enums.RequestLogExecutionStatus) *errors.Error
 }
