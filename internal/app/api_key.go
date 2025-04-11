@@ -175,12 +175,12 @@ func (u *APIKeyUseCase) validateAndReserve(
 			}, nil, nil
 	}
 
-	environment, err := u.environmentRepo.Active(
+	environmentIsActive, err := u.environmentRepo.IsActive(
 		ctx, apiKey.EnvironmentID)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	if !environment {
+	if !environmentIsActive {
 		message := "Environment is deactivated"
 		return &dto.APIKeyValidateReserveResponse{
 				Valid:   false,

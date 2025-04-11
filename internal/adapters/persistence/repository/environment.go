@@ -172,7 +172,7 @@ func (r *EnvironmentRepository) Exists(
 	return exists, nil
 }
 
-func (r *EnvironmentRepository) Active(
+func (r *EnvironmentRepository) IsActive(
 	ctx context.Context, id int,
 ) (bool, *errors.Error) {
 	query := `
