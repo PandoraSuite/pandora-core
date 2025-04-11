@@ -172,6 +172,27 @@ func (r *EnvironmentRepository) Exists(
 	return exists, nil
 }
 
+func (r *EnvironmentRepository) Active(
+	ctx context.Context, id int,
+) (bool, *errors.Error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM environment
+			WHERE id = $1
+			AND status = $2
+		);
+	`
+
+	var exists bool
+	err := r.pool.QueryRow(ctx, query, id, enums.EnvironmentActive).Scan(&exists)
+	if err != nil {
+		return false, r.handlerErr(err)
+	}
+
+	return exists, nil
+}
+
 func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
 	ctx context.Context, id, serviceID int,
 ) (*dto.QuotaUsage, *errors.Error) {

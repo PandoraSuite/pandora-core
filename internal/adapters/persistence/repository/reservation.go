@@ -19,8 +19,8 @@ func (r *ReservationRepository) Save(
 	ctx context.Context, Reservation *entities.Reservation,
 ) *errors.Error {
 	query := `
-		INSERT INTO reservation (environment_id, service_id, api_key, request_time, expires_at)
-		VALUES ($1, $2, $3, $4, $5) RETURNING id;
+		INSERT INTO reservation (environment_id, service_id, api_key, start_request_id, request_time, expires_at)
+		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;
 	`
 
 	err := r.pool.QueryRow(
@@ -29,6 +29,7 @@ func (r *ReservationRepository) Save(
 		Reservation.EnvironmentID,
 		Reservation.ServiceID,
 		Reservation.APIKey,
+		Reservation.StartRequestID,
 		Reservation.RequestTime,
 		Reservation.ExpiresAt,
 	).Scan(&Reservation.ID)
