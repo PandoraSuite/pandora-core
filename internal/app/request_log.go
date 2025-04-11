@@ -21,7 +21,7 @@ func (u *RequestLogUseCase) UpdateExecutionStatus(
 	case enums.RequestLogPending:
 		return errors.ErrCannotUpdateToPendingExecutionStatus
 	case enums.RequestLogUnauthorized:
-		return errors.ErrCannotUpdateToNullExecutionStatus
+		return errors.ErrCannotUpdateToUnauthorizedExecutionStatus
 	default:
 		return u.requestLogRepo.UpdateExecutionStatus(ctx, id, executionStatus)
 	}
