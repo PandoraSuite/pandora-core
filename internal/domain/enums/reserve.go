@@ -16,6 +16,8 @@ const (
 	ReserveExecutionStatusServiceNotFound
 	ReserveExecutionStatusDeactivatedService
 	ReserveExecutionStatusDeprecatedService
+	ReserveExecutionStatusEnvironmentNotFound
+	ReserveExecutionStatusDeactivatedEnvironment
 	ReserveExecutionStatusExceededRequests
 	ReserveExecutionStatusActiveReservations
 )
@@ -36,6 +38,10 @@ func (es ReserveExecutionStatusCode) String() string {
 		return "DEACTIVATED_SERVICE"
 	case ReserveExecutionStatusDeprecatedService:
 		return "DEPRECATED_SERVICE"
+	case ReserveExecutionStatusEnvironmentNotFound:
+		return "ENVIRONMENT_NOT_FOUND"
+	case ReserveExecutionStatusDeactivatedEnvironment:
+		return "DEACTIVATED_ENVIRONMENT"
 	case ReserveExecutionStatusExceededRequests:
 		return "EXCEEDED_AVAILABLE_REQUEST"
 	case ReserveExecutionStatusActiveReservations:
@@ -95,6 +101,10 @@ func ParseReserveExecutionStatusCode(es string) (ReserveExecutionStatusCode, err
 		return ReserveExecutionStatusDeactivatedService, nil
 	case "DEPRECATED_SERVICE":
 		return ReserveExecutionStatusDeprecatedService, nil
+	case "ENVIRONMENT_NOT_FOUND":
+		return ReserveExecutionStatusEnvironmentNotFound, nil
+	case "DEACTIVATED_ENVIRONMENT":
+		return ReserveExecutionStatusDeactivatedEnvironment, nil
 	case "EXCEEDED_AVAILABLE_REQUEST":
 		return ReserveExecutionStatusExceededRequests, nil
 	case "ACTIVE_RESERVATIONS":

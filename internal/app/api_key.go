@@ -96,7 +96,7 @@ func (u *APIKeyUseCase) ValidateAndConsume(
 func (u *APIKeyUseCase) ValidateAndReserve(
 	ctx context.Context, req *dto.APIKeyValidate,
 ) (*dto.APIKeyValidateReserveResponse, *errors.Error) {
-	validate, requestLog, err := u.validateAndReserve(ctx, req)
+	validate, requestLog, reservation, err := u.validateAndReserve(ctx, req)
 	if err != nil {
 		return nil, err
 	}
@@ -104,13 +104,24 @@ func (u *APIKeyUseCase) ValidateAndReserve(
 	if err := u.requestLog.SaveAsInitialPoint(ctx, requestLog); err != nil {
 		return nil, err
 	}
+	// Return request created
 	validate.RequestID = requestLog.ID
+
+	// When process was valid then create an active reservation up to twelve hours later
+	if reservation != nil {
+		reservation.StartRequestID = requestLog.ID
+		if err := u.reservationRepo.Save(ctx, reservation); err != nil {
+			return nil, err
+		}
+		validate.ReservationID = reservation.ID
+	}
+
 	return validate, nil
 }
 
 func (u *APIKeyUseCase) validateAndReserve(
 	ctx context.Context, req *dto.APIKeyValidate,
-) (*dto.APIKeyValidateReserveResponse, *entities.RequestLog, *errors.Error) {
+) (*dto.APIKeyValidateReserveResponse, *entities.RequestLog, *entities.Reservation, *errors.Error) {
 	// Validate Key, must be present in api_key entity
 	apiKey, err := u.apiKeyRepo.FindByKey(ctx, req.Key)
 	if err != nil {
@@ -126,9 +137,9 @@ func (u *APIKeyUseCase) validateAndReserve(
 					RequestTime:     req.RequestTime,
 					ExecutionStatus: enums.RequestLogUnauthorized,
 					Message:         message,
-				}, nil
+				}, nil, nil
 		}
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	// Key must be active
@@ -144,7 +155,7 @@ func (u *APIKeyUseCase) validateAndReserve(
 				EnvironmentID:   apiKey.EnvironmentID,
 				ExecutionStatus: enums.RequestLogUnauthorized,
 				Message:         message,
-			}, nil
+			}, nil, nil
 	}
 
 	// Expired keys are not accepted
@@ -161,7 +172,28 @@ func (u *APIKeyUseCase) validateAndReserve(
 				EnvironmentID:   apiKey.EnvironmentID,
 				ExecutionStatus: enums.RequestLogUnauthorized,
 				Message:         message,
-			}, nil
+			}, nil, nil
+	}
+
+	environmentIsActive, err := u.environmentRepo.IsActive(
+		ctx, apiKey.EnvironmentID)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if !environmentIsActive {
+		message := "Environment is deactivated"
+		return &dto.APIKeyValidateReserveResponse{
+				Valid:   false,
+				Message: message,
+				Code:    enums.ReserveExecutionStatusDeactivatedEnvironment,
+			},
+			&entities.RequestLog{
+				APIKey:          apiKey.Key,
+				RequestTime:     req.RequestTime,
+				EnvironmentID:   apiKey.EnvironmentID,
+				ExecutionStatus: enums.RequestLogFailed,
+				Message:         message,
+			}, nil, nil
 	}
 
 	// Service in that version must be exist in the service entity
@@ -182,9 +214,9 @@ func (u *APIKeyUseCase) validateAndReserve(
 					EnvironmentID:   apiKey.EnvironmentID,
 					ExecutionStatus: enums.RequestLogFailed,
 					Message:         message,
-				}, nil
+				}, nil, nil
 		}
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
 	// Service must be active
@@ -202,7 +234,7 @@ func (u *APIKeyUseCase) validateAndReserve(
 				EnvironmentID:   apiKey.EnvironmentID,
 				ExecutionStatus: enums.RequestLogFailed,
 				Message:         message,
-			}, nil
+			}, nil, nil
 	}
 	if service.Status == enums.ServiceDeactivated {
 		message := "Service is deactivated"
@@ -218,7 +250,7 @@ func (u *APIKeyUseCase) validateAndReserve(
 				EnvironmentID:   apiKey.EnvironmentID,
 				ExecutionStatus: enums.RequestLogFailed,
 				Message:         message,
-			}, nil
+			}, nil, nil
 	}
 
 	// Decrement available_request or identify unlimited request
@@ -234,7 +266,7 @@ func (u *APIKeyUseCase) validateAndReserve(
 			ctx, apiKey.EnvironmentID, service.ID,
 		)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, nil, err
 		}
 
 		if currentReservations == 0 {
@@ -251,7 +283,7 @@ func (u *APIKeyUseCase) validateAndReserve(
 					EnvironmentID:   apiKey.EnvironmentID,
 					ExecutionStatus: enums.RequestLogFailed,
 					Message:         message,
-				}, nil
+				}, nil, nil
 		}
 
 		if currentReservations > 0 {
@@ -268,29 +300,15 @@ func (u *APIKeyUseCase) validateAndReserve(
 					EnvironmentID:   apiKey.EnvironmentID,
 					ExecutionStatus: enums.RequestLogFailed,
 					Message:         message,
-				}, nil
+				}, nil, nil
 		}
-	}
-
-	// Create an active reservation up to twelve hours later
-	expiresAtTime := time.Now().Add(12 * time.Hour)
-	reservation := entities.Reservation{
-		APIKey:        apiKey.Key,
-		ServiceID:     service.ID,
-		EnvironmentID: apiKey.EnvironmentID,
-		RequestTime:   req.RequestTime,
-		ExpiresAt:     expiresAtTime,
-	}
-	if err := u.reservationRepo.Save(ctx, &reservation); err != nil {
-		return nil, nil, err
 	}
 
 	// With an successful key use, then update last_used in api_key entity
 	if err := u.apiKeyRepo.UpdateLastUsed(ctx, apiKey.Key); err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 	return &dto.APIKeyValidateReserveResponse{
-			ReservationID:    reservation.ID,
 			AvailableRequest: availableRequest.AvailableRequest,
 			Valid:            true,
 		}, &entities.RequestLog{
@@ -299,6 +317,12 @@ func (u *APIKeyUseCase) validateAndReserve(
 			RequestTime:     req.RequestTime,
 			EnvironmentID:   apiKey.EnvironmentID,
 			ExecutionStatus: enums.RequestLogPending,
+		}, &entities.Reservation{
+			APIKey:        apiKey.Key,
+			ServiceID:     service.ID,
+			EnvironmentID: apiKey.EnvironmentID,
+			RequestTime:   req.RequestTime,
+			ExpiresAt:     time.Now().Add(12 * time.Hour),
 		}, nil
 }
 

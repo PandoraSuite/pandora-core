@@ -7,9 +7,10 @@ import (
 type Reservation struct {
 	ID string
 
-	EnvironmentID int
-	ServiceID     int
-	APIKey        string
-	RequestTime   time.Time
-	ExpiresAt     time.Time
+	EnvironmentID  int
+	ServiceID      int
+	APIKey         string
+	StartRequestID string
+	RequestTime    time.Time
+	ExpiresAt      time.Time
 }
