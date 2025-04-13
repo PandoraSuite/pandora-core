@@ -16,7 +16,7 @@ type ProjectUseCase struct {
 
 func (u *ProjectUseCase) AssignService(
 	ctx context.Context, id int, req *dto.ProjectService,
-) *errors.Error {
+) (*dto.ProjectServiceResponse, *errors.Error) {
 	service := &entities.ProjectService{
 		ID:             req.ID,
 		MaxRequest:     req.MaxRequest,
@@ -24,11 +24,23 @@ func (u *ProjectUseCase) AssignService(
 	}
 
 	if err := service.Validate(); err != nil {
-		return err
+		return nil, err
 	}
 
 	service.CalculateNextReset()
-	return u.projectRepo.AddService(ctx, id, service)
+	if err := u.projectRepo.AddService(ctx, id, service); err != nil {
+		return nil, err
+	}
+
+	return &dto.ProjectServiceResponse{
+		ID:             service.ID,
+		Name:           service.Name,
+		Version:        service.Version,
+		NextReset:      service.NextReset,
+		MaxRequest:     service.MaxRequest,
+		ResetFrequency: service.ResetFrequency,
+		AssignedAt:     service.AssignedAt,
+	}, nil
 }
 
 func (u *ProjectUseCase) RemoveService(

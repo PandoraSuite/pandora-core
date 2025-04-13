@@ -258,9 +258,9 @@ func (r *ProjectRepository) AddService(
 		WITH inserted AS (
 			INSERT INTO project_service (project_id, service_id, max_request, reset_frequency, next_reset)
 			VALUES ($1, $2, $3, $4, $5)
-			RETURNING service_id
+			RETURNING service_id, created_at
 		)
-		SELECT s.name, s.version
+		SELECT s.name, s.version, i.created_at
 		FROM inserted i
 			JOIN service s
 				ON i.service_id = s.id;
@@ -284,7 +284,7 @@ func (r *ProjectRepository) AddService(
 		maxRequest,
 		resetFrequency,
 		service.NextReset,
-	).Scan(&service.Name, &service.Version)
+	).Scan(&service.Name, &service.Version, &service.AssignedAt)
 
 	return r.handlerErr(err)
 }
