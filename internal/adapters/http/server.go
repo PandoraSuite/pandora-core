@@ -124,7 +124,7 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 				"/:id/services/:service_id",
 				handlers.RemoveServiceFromEnvironment(s.environmentService),
 			)
-			environments.POST(
+			environments.PATCH(
 				"/:id/services/:service_id/reset-requests",
 				handlers.ResetServiceRequestsFromEnvironment(s.environmentService),
 			)

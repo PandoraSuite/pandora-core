@@ -611,7 +611,7 @@ const docTemplate = `{
             }
         },
         "/api/v1/environments/{id}/services/{service_id}/reset-requests": {
-            "post": {
+            "patch": {
                 "security": [
                     {
                         "OAuth2Password": []

@@ -225,7 +225,7 @@ func RemoveServiceFromEnvironment(environmentUseCase inbound.EnvironmentHTTPPort
 // @Param service_id path int true "Service ID"
 // @Success 200 {object} dto.EnvironmentServiceResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
-// @Router /api/v1/environments/{id}/services/{service_id}/reset-requests [post]
+// @Router /api/v1/environments/{id}/services/{service_id}/reset-requests [patch]
 func ResetServiceRequestsFromEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))
