@@ -5,6 +5,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
@@ -60,6 +61,41 @@ func (r *ReservationRepository) FindByID(
 	}
 
 	return reservation, nil
+}
+
+func (r *ReservationRepository) FindByIDWithDetails(
+	ctx context.Context, id string,
+) (*dto.ReservationWithDetails, *errors.Error) {
+	query := `
+		SELECT r.id, r.start_request_id, r.api_key, 
+		s.id, s.name, s.version, s.status, 
+		e.id, e.name, e.status
+		FROM reservation r
+		INNER JOIN environment_service es ON r.environment_id = es.environment_id 
+		AND r.service_id = es.service_id
+		INNER JOIN environment e ON es.environment_id = e.id
+		INNER JOIN service s ON es.service_id = s.id
+		WHERE r.id = $1;
+	`
+
+	reservationFlow := new(dto.ReservationWithDetails)
+	err := r.pool.QueryRow(ctx, query, id).Scan(
+		&reservationFlow.ID,
+		&reservationFlow.StartRequestID,
+		&reservationFlow.APIKey,
+		&reservationFlow.ServiceID,
+		&reservationFlow.ServiceName,
+		&reservationFlow.ServiceVersion,
+		&reservationFlow.ServiceStatus,
+		&reservationFlow.EnvironmentID,
+		&reservationFlow.EnvironmentName,
+		&reservationFlow.EnvironmentStatus,
+	)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return reservationFlow, nil
 }
 
 func (r *ReservationRepository) CountByEnvironmentAndService(

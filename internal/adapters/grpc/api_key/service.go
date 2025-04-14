@@ -70,15 +70,45 @@ func (s *service) ValidateAndReserve(ctx context.Context, req *pb.ValidateAndRes
 	}
 }
 
-func (s *service) ValidateWithReservationRequest(ctx context.Context, req *pb.ValidateWithReservationRequest) (*pb.ValidateWithReservationResponse, error) {
-	return &pb.ValidateWithReservationResponse{
-		Valid: true,
-		Result: &pb.ValidateWithReservationResponse_Successful_{
-			Successful: &pb.ValidateWithReservationResponse_Successful{
-				RequestId: "req-123456",
-			},
+func (s *service) ValidateWithReservation(ctx context.Context, req *pb.ValidateWithReservationRequest) (*pb.ValidateWithReservationResponse, error) {
+	params := req.GetParams()
+	reqValidate := dto.APIKeyValidateReserve{
+		APIKeyValidate: dto.APIKeyValidate{
+			Key:            params.Key,
+			Service:        params.Service,
+			Environment:    params.Environment,
+			RequestTime:    params.RequestTime.AsTime(),
+			ServiceVersion: params.ServiceVersion,
 		},
-	}, nil
+		ReservationID: req.ReservationId,
+	}
+	response, err := s.apiKeyService.ValidateWithReservation(ctx, &reqValidate)
+	if err != nil {
+		return nil, status.Error(
+			utils.GetDomainErrorStatusCode(err),
+			err.Message,
+		)
+	}
+	if response.Valid {
+		return &pb.ValidateWithReservationResponse{
+			Valid: true,
+			Result: &pb.ValidateWithReservationResponse_Successful_{
+				Successful: &pb.ValidateWithReservationResponse_Successful{
+					RequestId: response.RequestID,
+				},
+			},
+		}, nil
+	} else {
+		return &pb.ValidateWithReservationResponse{
+			Valid: false,
+			Result: &pb.ValidateWithReservationResponse_Failed_{
+				Failed: &pb.ValidateWithReservationResponse_Failed{
+					Code:    response.Code.String(),
+					Message: response.Message,
+				},
+			},
+		}, nil
+	}
 }
 
 func RegisterService(server *grpc.Server, apiKeyService inbound.APIKeyGRPCPort) {

@@ -188,9 +188,8 @@ func (x *ValidateAndReserveRequest) GetParams() *BaseValidateParams {
 
 type ValidateWithReservationRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Params        *BaseValidateParams    `protobuf:"bytes,1,opt,name=params,proto3" json:"params,omitempty"`
 	ReservationId string                 `protobuf:"bytes,2,opt,name=reservation_id,json=reservationId,proto3" json:"reservation_id,omitempty"`
-	RequestTime   *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=request_time,json=requestTime,proto3" json:"request_time,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -225,11 +224,11 @@ func (*ValidateWithReservationRequest) Descriptor() ([]byte, []int) {
 	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ValidateWithReservationRequest) GetKey() string {
+func (x *ValidateWithReservationRequest) GetParams() *BaseValidateParams {
 	if x != nil {
-		return x.Key
+		return x.Params
 	}
-	return ""
+	return nil
 }
 
 func (x *ValidateWithReservationRequest) GetReservationId() string {
@@ -237,13 +236,6 @@ func (x *ValidateWithReservationRequest) GetReservationId() string {
 		return x.ReservationId
 	}
 	return ""
-}
-
-func (x *ValidateWithReservationRequest) GetRequestTime() *timestamppb.Timestamp {
-	if x != nil {
-		return x.RequestTime
-	}
-	return nil
 }
 
 type ValidateAndConsumeResponse struct {
@@ -843,11 +835,10 @@ const file_api_key_v1_api_key_proto_rawDesc = "" +
 	"\x19ValidateAndConsumeRequest\x126\n" +
 	"\x06params\x18\x01 \x01(\v2\x1e.api_key.v1.BaseValidateParamsR\x06params\"S\n" +
 	"\x19ValidateAndReserveRequest\x126\n" +
-	"\x06params\x18\x01 \x01(\v2\x1e.api_key.v1.BaseValidateParamsR\x06params\"\x98\x01\n" +
-	"\x1eValidateWithReservationRequest\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12%\n" +
-	"\x0ereservation_id\x18\x02 \x01(\tR\rreservationId\x12=\n" +
-	"\frequest_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\vrequestTime\"\xec\x02\n" +
+	"\x06params\x18\x01 \x01(\v2\x1e.api_key.v1.BaseValidateParamsR\x06params\"\x7f\n" +
+	"\x1eValidateWithReservationRequest\x126\n" +
+	"\x06params\x18\x01 \x01(\v2\x1e.api_key.v1.BaseValidateParamsR\x06params\x12%\n" +
+	"\x0ereservation_id\x18\x02 \x01(\tR\rreservationId\"\xec\x02\n" +
 	"\x1aValidateAndConsumeResponse\x12\x14\n" +
 	"\x05valid\x18\x01 \x01(\bR\x05valid\x12S\n" +
 	"\n" +
@@ -932,7 +923,7 @@ var file_api_key_v1_api_key_proto_depIdxs = []int32{
 	13, // 0: api_key.v1.BaseValidateParams.request_time:type_name -> google.protobuf.Timestamp
 	0,  // 1: api_key.v1.ValidateAndConsumeRequest.params:type_name -> api_key.v1.BaseValidateParams
 	0,  // 2: api_key.v1.ValidateAndReserveRequest.params:type_name -> api_key.v1.BaseValidateParams
-	13, // 3: api_key.v1.ValidateWithReservationRequest.request_time:type_name -> google.protobuf.Timestamp
+	0,  // 3: api_key.v1.ValidateWithReservationRequest.params:type_name -> api_key.v1.BaseValidateParams
 	7,  // 4: api_key.v1.ValidateAndConsumeResponse.successful:type_name -> api_key.v1.ValidateAndConsumeResponse.Successful
 	8,  // 5: api_key.v1.ValidateAndConsumeResponse.failed:type_name -> api_key.v1.ValidateAndConsumeResponse.Failed
 	9,  // 6: api_key.v1.ValidateAndReserveResponse.successful:type_name -> api_key.v1.ValidateAndReserveResponse.Successful
