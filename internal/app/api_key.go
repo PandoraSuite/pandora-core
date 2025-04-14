@@ -350,6 +350,41 @@ func (u *APIKeyUseCase) GetAPIKeysByEnvironment(
 	return apiKeysResponses, nil
 }
 
+func (u *APIKeyUseCase) Update(
+	ctx context.Context, id int, req *dto.APIKeyUpdate,
+) (*dto.APIKeyResponse, *errors.Error) {
+	if !req.ExpiresAt.IsZero() && req.ExpiresAt.Before(time.Now()) {
+		return nil, errors.ErrAPIKeyInvalidExpiresAt
+	}
+
+	apiKey, err := u.apiKeyRepo.FindByID(ctx, id)
+	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrAPIKeyNotFound
+		}
+		return nil, err
+	}
+
+	if apiKey.IsExpired() {
+		return nil, errors.ErrAPIKeyExpired
+	}
+
+	apiKey, err = u.apiKeyRepo.Update(ctx, id, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.APIKeyResponse{
+		ID:            apiKey.ID,
+		Key:           apiKey.Key,
+		Status:        apiKey.Status,
+		LastUsed:      apiKey.LastUsed,
+		ExpiresAt:     apiKey.ExpiresAt,
+		EnvironmentID: apiKey.EnvironmentID,
+		CreatedAt:     apiKey.CreatedAt,
+	}, nil
+}
+
 func (u *APIKeyUseCase) Create(
 	ctx context.Context, req *dto.APIKeyCreate,
 ) (*dto.APIKeyResponse, *errors.Error) {
@@ -383,6 +418,7 @@ func (u *APIKeyUseCase) Create(
 		ID:            apiKey.ID,
 		Key:           apiKey.Key,
 		Status:        apiKey.Status,
+		LastUsed:      apiKey.LastUsed,
 		ExpiresAt:     apiKey.ExpiresAt,
 		EnvironmentID: apiKey.EnvironmentID,
 		CreatedAt:     apiKey.CreatedAt,

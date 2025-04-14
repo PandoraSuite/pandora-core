@@ -142,7 +142,6 @@ func UpdateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 		}
 
 		var req dto.ClientUpdate
-
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
