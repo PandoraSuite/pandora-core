@@ -127,7 +127,7 @@ func GetClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 // @Produce json
 // @Param id path int true "Client ID"
 // @Param request body dto.ClientUpdate true "Updated client data"
-// @Success 204
+// @Success 200 {object} dto.ClientResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/clients/{id} [patch]
 func UpdateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
@@ -151,7 +151,7 @@ func UpdateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		err := clientService.Update(c.Request.Context(), clientID, &req)
+		client, err := clientService.Update(c.Request.Context(), clientID, &req)
 		if err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
@@ -160,7 +160,7 @@ func UpdateClient(clientService inbound.ClientHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		c.Status(http.StatusNoContent)
+		c.JSON(http.StatusOK, client)
 	}
 }
 
