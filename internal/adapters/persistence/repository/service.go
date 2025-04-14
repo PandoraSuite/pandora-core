@@ -21,27 +21,31 @@ type ServiceRepository struct {
 
 func (r *ServiceRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.ServiceStatus,
-) *errors.Error {
+) (*entities.Service, *errors.Error) {
 	if status == enums.ServiceStatusNull {
-		return errors.ErrServiceInvalidStatus
+		return nil, errors.ErrServiceInvalidStatus
 	}
 
 	query := `
 		UPDATE service
 		SET status = $1
-		WHERE id = $2;
+		WHERE id = $2
+		RETURNING id, name, version, status, created_at;
 	`
 
-	result, err := r.pool.Exec(ctx, query, status, id)
+	service := new(entities.Service)
+	err := r.pool.QueryRow(ctx, query, status, id).Scan(
+		&service.ID,
+		&service.Name,
+		&service.Version,
+		&service.Status,
+		&service.CreatedAt,
+	)
 	if err != nil {
-		return r.handlerErr(err)
+		return nil, r.handlerErr(err)
 	}
 
-	if result.RowsAffected() == 0 {
-		return errors.ErrServiceNotFound
-	}
-
-	return nil
+	return service, nil
 }
 
 func (r *ServiceRepository) FindByNameAndVersion(

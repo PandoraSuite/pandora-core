@@ -247,8 +247,18 @@ definitions:
         enum:
         - active
         - deactivated
+        - deprecated
         type: string
       version:
+        type: string
+    type: object
+  dto.ServiceStatusUpdate:
+    properties:
+      status:
+        enum:
+        - active
+        - deactivated
+        - deprecated
         type: string
     type: object
   utils.ErrorResponse:
@@ -821,6 +831,7 @@ paths:
       - enum:
         - active
         - deactivated
+        - deprecated
         in: query
         name: status
         type: string
@@ -867,6 +878,39 @@ paths:
       security:
       - OAuth2Password: []
       summary: Creates a new service
+      tags:
+      - Services
+  /api/v1/services/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Changes the current status of a specific service by ID
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New service status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ServiceStatusUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ServiceResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates the status of a service
       tags:
       - Services
 securityDefinitions:

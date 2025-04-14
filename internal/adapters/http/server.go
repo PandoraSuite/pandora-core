@@ -72,6 +72,10 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 		{
 			services.GET("", handlers.GetAllServices(s.srvService))
 			services.POST("", handlers.CreateService(s.srvService))
+			services.PATCH(
+				"/:id/status",
+				handlers.UpdateStatusService(s.srvService),
+			)
 		}
 
 		clients := protected.Group("/clients")
