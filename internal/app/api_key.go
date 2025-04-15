@@ -359,6 +359,9 @@ func (u *APIKeyUseCase) Update(
 
 	apiKey, err := u.apiKeyRepo.Update(ctx, id, req)
 	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrAPIKeyNotFound
+		}
 		return nil, err
 	}
 
