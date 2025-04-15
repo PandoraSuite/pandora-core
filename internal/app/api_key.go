@@ -357,19 +357,7 @@ func (u *APIKeyUseCase) Update(
 		return nil, errors.ErrAPIKeyInvalidExpiresAt
 	}
 
-	apiKey, err := u.apiKeyRepo.FindByID(ctx, id)
-	if err != nil {
-		if err == errors.ErrNotFound {
-			return nil, errors.ErrAPIKeyNotFound
-		}
-		return nil, err
-	}
-
-	if apiKey.IsExpired() {
-		return nil, errors.ErrAPIKeyExpired
-	}
-
-	apiKey, err = u.apiKeyRepo.Update(ctx, id, req)
+	apiKey, err := u.apiKeyRepo.Update(ctx, id, req)
 	if err != nil {
 		return nil, err
 	}
