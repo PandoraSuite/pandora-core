@@ -16,6 +16,38 @@ type EnvironmentUseCase struct {
 	projectRepo     outbound.ProjectPort
 }
 
+func (u *EnvironmentUseCase) Update(
+	ctx context.Context, id int, req *dto.EnvironmentUpdate,
+) (*dto.EnvironmentResponse, *errors.Error) {
+	environment, err := u.environmentRepo.Update(ctx, id, req)
+	if err != nil {
+		return nil, err
+	}
+
+	serviceResp := make(
+		[]*dto.EnvironmentServiceResponse, len(environment.Services),
+	)
+	for i, service := range environment.Services {
+		serviceResp[i] = &dto.EnvironmentServiceResponse{
+			ID:               service.ID,
+			Name:             service.Name,
+			Version:          service.Version,
+			MaxRequest:       service.MaxRequest,
+			AvailableRequest: service.AvailableRequest,
+			AssignedAt:       service.AssignedAt,
+		}
+	}
+
+	return &dto.EnvironmentResponse{
+		ID:        environment.ID,
+		Name:      environment.Name,
+		Status:    environment.Status,
+		ProjectID: environment.ProjectID,
+		CreatedAt: environment.CreatedAt,
+		Services:  serviceResp,
+	}, nil
+}
+
 func (u *EnvironmentUseCase) ResetServiceRequests(
 	ctx context.Context, id, serviceID int,
 ) (*dto.EnvironmentServiceResponse, *errors.Error) {

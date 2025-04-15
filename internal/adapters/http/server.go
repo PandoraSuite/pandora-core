@@ -112,6 +112,9 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 			environments.GET(
 				"/:id", handlers.GetEnvironment(s.environmentService),
 			)
+			environments.PATCH(
+				"/:id", handlers.UpdateEnvironment(s.environmentService),
+			)
 			environments.GET(
 				"/:id/api-keys",
 				handlers.GetAPIKeysByEnvironment(s.apiKeyService),

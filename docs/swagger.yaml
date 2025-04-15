@@ -146,6 +146,11 @@ definitions:
       version:
         type: string
     type: object
+  dto.EnvironmentUpdate:
+    properties:
+      name:
+        type: string
+    type: object
   dto.ProjectCreate:
     properties:
       client_id:
@@ -546,6 +551,38 @@ paths:
       security:
       - OAuth2Password: []
       summary: Retrieves an environment by ID
+      tags:
+      - Environments
+    patch:
+      consumes:
+      - application/json
+      description: Modifies the details of a specific environment by ID
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated environment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EnvironmentUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EnvironmentResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates an environment
       tags:
       - Environments
   /api/v1/environments/{id}/api-keys:

@@ -112,9 +112,9 @@ func (r *EnvironmentRepository) UpdateStatus(
 
 func (r *EnvironmentRepository) Update(
 	ctx context.Context, id int, update *dto.EnvironmentUpdate,
-) *errors.Error {
+) (*entities.Environment, *errors.Error) {
 	if update == nil {
-		return nil
+		return r.FindByID(ctx, id)
 	}
 
 	var updates []string
@@ -128,7 +128,7 @@ func (r *EnvironmentRepository) Update(
 	}
 
 	if len(updates) == 0 {
-		return nil
+		return r.FindByID(ctx, id)
 	}
 
 	query := fmt.Sprintf(
@@ -142,14 +142,14 @@ func (r *EnvironmentRepository) Update(
 
 	result, err := r.pool.Exec(ctx, query, args...)
 	if err != nil {
-		return r.handlerErr(err)
+		return nil, r.handlerErr(err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrEnvironmentNotFound
+		return nil, errors.ErrEnvironmentNotFound
 	}
 
-	return nil
+	return r.FindByID(ctx, id)
 }
 
 func (r *EnvironmentRepository) Exists(
