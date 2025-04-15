@@ -45,19 +45,33 @@ func (r *RequestLogRepository) Save(
 	ctx context.Context, requestLog *entities.RequestLog,
 ) *errors.Error {
 	query := `
-		INSERT INTO request_log (environment_id, service_id, api_key, start_point, request_time, execution_status)
-		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, created_at;
+		INSERT INTO request_log (environment_id, service_id, api_key, start_point, request_time, execution_status, message)
+		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at;
 	`
+	var startPoint any
+	if requestLog.StartPoint != "" {
+		startPoint = requestLog.StartPoint
+	}
 
+	var serviceID any
+	if requestLog.ServiceID != 0 {
+		serviceID = requestLog.ServiceID
+	}
+
+	var environmentID any
+	if requestLog.EnvironmentID != 0 {
+		environmentID = requestLog.EnvironmentID
+	}
 	err := r.pool.QueryRow(
 		ctx,
 		query,
-		requestLog.EnvironmentID,
-		requestLog.ServiceID,
+		environmentID,
+		serviceID,
 		requestLog.APIKey,
-		requestLog.StartPoint,
+		startPoint,
 		requestLog.RequestTime,
 		requestLog.ExecutionStatus,
+		requestLog.Message,
 	).Scan(&requestLog.ID, &requestLog.CreatedAt)
 
 	return r.handlerErr(err)

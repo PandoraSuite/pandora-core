@@ -363,12 +363,28 @@ func (u *APIKeyUseCase) validateWithReservation(
 		}
 		return nil, nil, err
 	}
-
+	if req.Key != reservationFlow.APIKey {
+		message := "API Key invalid for the reservation"
+		return &dto.APIKeyValidateReservationResponse{
+				Valid:   false,
+				Message: message,
+				Code:    enums.ReserveExecutionStatusInvalidKey,
+			},
+			&entities.RequestLog{
+				APIKey:          req.Key,
+				ServiceID:       reservationFlow.ServiceID,
+				RequestTime:     req.RequestTime,
+				EnvironmentID:   reservationFlow.EnvironmentID,
+				StartPoint:      reservationFlow.StartRequestID,
+				ExecutionStatus: enums.RequestLogFailed,
+				Message:         message,
+			}, nil
+	}
 	if req.Service != reservationFlow.ServiceName {
 		message := "Service invalid for the reservation"
 		return &dto.APIKeyValidateReservationResponse{
 				Valid:   false,
-				Message: "Service invalid for the reservation",
+				Message: message,
 				Code:    enums.ReservationExecutionStatusInvalidService,
 			},
 			&entities.RequestLog{

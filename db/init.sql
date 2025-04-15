@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS request_log (
     environment_id INTEGER NULL,
     service_id INTEGER NULL,
     api_key TEXT NOT NULL,
-    start_point UUID NOT NULL,
+    start_point UUID NULL,
     request_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     message TEXT NULL,
     execution_status TEXT NOT NULL,
