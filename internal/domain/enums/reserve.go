@@ -20,6 +20,13 @@ const (
 	ReserveExecutionStatusDeactivatedEnvironment
 	ReserveExecutionStatusExceededRequests
 	ReserveExecutionStatusActiveReservations
+
+	ReservationExecutionStatusNotFound
+	ReservationExecutionStatusInvalidService
+	ReservationExecutionStatusInvalidServiceVersion
+	ReservationExecutionStatusServiceNotActive
+	ReservationExecutionStatusInvalidEnvironment
+	ReservationExecutionStatusEnvironmentNotActive
 )
 
 func (es ReserveExecutionStatusCode) String() string {
@@ -46,6 +53,18 @@ func (es ReserveExecutionStatusCode) String() string {
 		return "EXCEEDED_AVAILABLE_REQUEST"
 	case ReserveExecutionStatusActiveReservations:
 		return "ACTIVE_RESERVATIONS"
+	case ReservationExecutionStatusNotFound:
+		return "RESERVATION_NOT_FOUND"
+	case ReservationExecutionStatusInvalidService:
+		return "INVALID_SERVICE"
+	case ReservationExecutionStatusInvalidServiceVersion:
+		return "INVALID_SERVICE_VERSION"
+	case ReservationExecutionStatusServiceNotActive:
+		return "SERVICE_NOT_ACTIVE"
+	case ReservationExecutionStatusInvalidEnvironment:
+		return "INVALID_ENVIRONMENT"
+	case ReservationExecutionStatusEnvironmentNotActive:
+		return "ENVIRONMENT_NOT_ACTIVE"
 	default:
 		panic("unknown ReserveExecutionStatusCode")
 	}
@@ -109,6 +128,18 @@ func ParseReserveExecutionStatusCode(es string) (ReserveExecutionStatusCode, err
 		return ReserveExecutionStatusExceededRequests, nil
 	case "ACTIVE_RESERVATIONS":
 		return ReserveExecutionStatusActiveReservations, nil
+	case "RESERVATION_NOT_FOUND":
+		return ReservationExecutionStatusNotFound, nil
+	case "INVALID_SERVICE":
+		return ReservationExecutionStatusInvalidService, nil
+	case "INVALID_SERVICE_VERSION":
+		return ReservationExecutionStatusInvalidServiceVersion, nil
+	case "SERVICE_NOT_ACTIVE":
+		return ReservationExecutionStatusServiceNotActive, nil
+	case "INVALID_ENVIRONMENT":
+		return ReservationExecutionStatusInvalidEnvironment, nil
+	case "ENVIRONMENT_NOT_ACTIVE":
+		return ReservationExecutionStatusEnvironmentNotActive, nil
 	default:
 		return 0, fmt.Errorf("invalid reserve execution status code: %s", es)
 	}
