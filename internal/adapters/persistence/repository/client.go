@@ -21,9 +21,9 @@ type ClientRepository struct {
 
 func (r *ClientRepository) Update(
 	ctx context.Context, id int, update *dto.ClientUpdate,
-) *errors.Error {
+) (*entities.Client, *errors.Error) {
 	if update == nil {
-		return nil
+		return r.FindByID(ctx, id)
 	}
 
 	var updates []string
@@ -49,28 +49,32 @@ func (r *ClientRepository) Update(
 	}
 
 	if len(updates) == 0 {
-		return nil
+		return r.FindByID(ctx, id)
 	}
 
 	query := fmt.Sprintf(
 		`
 			UPDATE client
 			SET %s
-			WHERE id = $1;
+			WHERE id = $1
+			RETURNING id, type, name, email, created_at;
 		`,
 		strings.Join(updates, ", "),
 	)
 
-	result, err := r.pool.Exec(ctx, query, args...)
+	client := new(entities.Client)
+	err := r.pool.QueryRow(ctx, query, args...).Scan(
+		&client.ID,
+		&client.Type,
+		&client.Name,
+		&client.Email,
+		&client.CreatedAt,
+	)
 	if err != nil {
-		return r.handlerErr(err)
+		return nil, r.handlerErr(err)
 	}
 
-	if result.RowsAffected() == 0 {
-		return errors.ErrClientNotFound
-	}
-
-	return nil
+	return client, nil
 }
 
 func (r *ClientRepository) Exists(
