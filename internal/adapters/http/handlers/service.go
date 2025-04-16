@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -80,5 +81,52 @@ func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusCreated, service)
+	}
+}
+
+// UpdateStatus godoc
+// @Summary Updates the status of a service
+// @Description Changes the current status of a specific service by ID
+// @Tags Services
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "Service ID"
+// @Param request body dto.ServiceStatusUpdate true "New service status"
+// @Success 200 {object} dto.ServiceResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/services/{id}/status [patch]
+func UpdateStatusService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		serviceID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid Service ID"},
+			)
+			return
+		}
+
+		var req dto.ServiceStatusUpdate
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		service, err := srvService.UpdateStatus(
+			c.Request.Context(), serviceID, req.Status,
+		)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.JSON(http.StatusOK, service)
 	}
 }

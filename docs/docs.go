@@ -906,7 +906,8 @@ const docTemplate = `{
                     {
                         "enum": [
                             "active",
-                            "deactivated"
+                            "deactivated",
+                            "deprecated"
                         ],
                         "type": "string",
                         "name": "status",
@@ -962,6 +963,58 @@ const docTemplate = `{
                 "responses": {
                     "201": {
                         "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ServiceResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/services/{id}/status": {
+            "patch": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Changes the current status of a specific service by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Updates the status of a service",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Service ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New service status",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ServiceStatusUpdate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/dto.ServiceResponse"
                         }
@@ -1344,11 +1397,25 @@ const docTemplate = `{
                     "type": "string",
                     "enum": [
                         "active",
-                        "deactivated"
+                        "deactivated",
+                        "deprecated"
                     ]
                 },
                 "version": {
                     "type": "string"
+                }
+            }
+        },
+        "dto.ServiceStatusUpdate": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "active",
+                        "deactivated",
+                        "deprecated"
+                    ]
                 }
             }
         },

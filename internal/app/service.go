@@ -14,6 +14,26 @@ type ServiceUseCase struct {
 	serviceRepo outbound.ServicePort
 }
 
+func (u *ServiceUseCase) UpdateStatus(
+	ctx context.Context, id int, status enums.ServiceStatus,
+) (*dto.ServiceResponse, *errors.Error) {
+	service, err := u.serviceRepo.UpdateStatus(ctx, id, status)
+	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrServiceNotFound
+		}
+		return nil, err
+	}
+
+	return &dto.ServiceResponse{
+		ID:        service.ID,
+		Name:      service.Name,
+		Status:    service.Status,
+		Version:   service.Version,
+		CreatedAt: service.CreatedAt,
+	}, nil
+}
+
 func (u *ServiceUseCase) GetServices(
 	ctx context.Context, req *dto.ServiceFilter,
 ) ([]*dto.ServiceResponse, *errors.Error) {

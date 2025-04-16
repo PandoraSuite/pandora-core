@@ -7,7 +7,7 @@ import (
 )
 
 type ServiceFilter struct {
-	Status enums.ServiceStatus `form:"status,omitempty" enums:"active,deactivated" swaggertype:"string"`
+	Status enums.ServiceStatus `form:"status,omitempty" enums:"active,deactivated,deprecated" swaggertype:"string"`
 }
 
 type ServiceCreate struct {
@@ -18,7 +18,11 @@ type ServiceCreate struct {
 type ServiceResponse struct {
 	ID        int                 `json:"id"`
 	Name      string              `json:"name"`
-	Status    enums.ServiceStatus `json:"status" enums:"active,deactivated" swaggertype:"string"`
+	Status    enums.ServiceStatus `json:"status" enums:"active,deactivated,deprecated" swaggertype:"string"`
 	Version   string              `json:"version"`
 	CreatedAt time.Time           `json:"created_at"`
+}
+
+type ServiceStatusUpdate struct {
+	Status enums.ServiceStatus `json:"status,omitempty" enums:"active,deactivated,deprecated" swaggertype:"string"`
 }
