@@ -162,7 +162,7 @@ func (r *ProjectRepository) FindByID(
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
 					)
-				), '[]'
+				) FILTER (WHERE s.id IS NOT NULL), '[]'
 			)
 		FROM project p
 			LEFT JOIN project_service ps
@@ -205,7 +205,7 @@ func (r *ProjectRepository) FindByClient(
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
 					)
-				), '[]'
+				) FILTER (WHERE s.id IS NOT NULL), '[]'
 			)
 		FROM project p
 			JOIN client c
