@@ -90,6 +90,7 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 		{
 			projects.POST("", handlers.CreateProject(s.projectService))
 			projects.GET("/:id", handlers.GetProject(s.projectService))
+			projects.PATCH("/:id", handlers.UpdateProject(s.projectService))
 			projects.GET(
 				"/:id/environments",
 				handlers.GetEnvironmentsByProject(s.projectService),

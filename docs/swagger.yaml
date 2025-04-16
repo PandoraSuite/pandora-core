@@ -228,6 +228,11 @@ definitions:
       version:
         type: string
     type: object
+  dto.ProjectUpdate:
+    properties:
+      name:
+        type: string
+    type: object
   dto.ServiceCreate:
     properties:
       name:
@@ -722,6 +727,38 @@ paths:
       security:
       - OAuth2Password: []
       summary: Retrieves a project by ID
+      tags:
+      - Projects
+    patch:
+      consumes:
+      - application/json
+      description: Modifies the details of a specific project by ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated project data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProjectUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProjectResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates a project
       tags:
       - Projects
   /api/v1/projects/{id}/environments:
