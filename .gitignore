@@ -30,4 +30,5 @@ storage/
 
 .vscode/
 
-.air.toml
+.air*
+!.air.template.toml
