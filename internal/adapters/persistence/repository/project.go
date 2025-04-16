@@ -63,9 +63,9 @@ func (r *ProjectRepository) UpdateStatus(
 
 func (r *ProjectRepository) Update(
 	ctx context.Context, id int, update *dto.ProjectUpdate,
-) *errors.Error {
+) (*entities.Project, *errors.Error) {
 	if update == nil {
-		return nil
+		return r.FindByID(ctx, id)
 	}
 
 	var updates []string
@@ -79,7 +79,7 @@ func (r *ProjectRepository) Update(
 	}
 
 	if len(updates) == 0 {
-		return nil
+		return r.FindByID(ctx, id)
 	}
 
 	query := fmt.Sprintf(
@@ -93,14 +93,14 @@ func (r *ProjectRepository) Update(
 
 	result, err := r.pool.Exec(ctx, query, args...)
 	if err != nil {
-		return r.handlerErr(err)
+		return nil, r.handlerErr(err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrProjectNotFound
+		return nil, errors.ErrProjectNotFound
 	}
 
-	return nil
+	return r.FindByID(ctx, id)
 }
 
 func (r *ProjectRepository) Exists(

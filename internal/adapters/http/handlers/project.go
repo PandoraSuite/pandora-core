@@ -84,6 +84,53 @@ func GetProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 	}
 }
 
+// UpdateProject godoc
+// @Summary Updates a project
+// @Description Modifies the details of a specific project by ID
+// @Tags Projects
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "Project ID"
+// @Param request body dto.ProjectUpdate true "Updated project data"
+// @Success 200 {object} dto.ProjectResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/projects/{id} [patch]
+func UpdateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		projectID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid Project ID"},
+			)
+			return
+		}
+
+		var req dto.ProjectUpdate
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		project, err := projectService.Update(
+			c.Request.Context(), projectID, &req,
+		)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.JSON(http.StatusOK, project)
+	}
+}
+
 // GetEnvironmentsByProject godoc
 // @Summary Retrieves all environments for a specific project
 // @Description Fetches a list of environments associated with a given project
