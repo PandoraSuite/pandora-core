@@ -112,9 +112,9 @@ func (r *EnvironmentRepository) UpdateStatus(
 
 func (r *EnvironmentRepository) Update(
 	ctx context.Context, id int, update *dto.EnvironmentUpdate,
-) *errors.Error {
+) (*entities.Environment, *errors.Error) {
 	if update == nil {
-		return nil
+		return r.FindByID(ctx, id)
 	}
 
 	var updates []string
@@ -128,7 +128,7 @@ func (r *EnvironmentRepository) Update(
 	}
 
 	if len(updates) == 0 {
-		return nil
+		return r.FindByID(ctx, id)
 	}
 
 	query := fmt.Sprintf(
@@ -142,14 +142,14 @@ func (r *EnvironmentRepository) Update(
 
 	result, err := r.pool.Exec(ctx, query, args...)
 	if err != nil {
-		return r.handlerErr(err)
+		return nil, r.handlerErr(err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrEnvironmentNotFound
+		return nil, errors.ErrEnvironmentNotFound
 	}
 
-	return nil
+	return r.FindByID(ctx, id)
 }
 
 func (r *EnvironmentRepository) Exists(
@@ -372,7 +372,7 @@ func (r *EnvironmentRepository) FindByID(
 						'availableRequest', COALESCE(es.available_request, -1),
 						'assignedAt', es.created_at
 					)
-				), '[]'
+				) FILTER (WHERE s.id IS NOT NULL), '[]'
 			)
 		FROM environment e
 			LEFT JOIN environment_service es
@@ -414,7 +414,7 @@ func (r *EnvironmentRepository) FindByProject(
 						'availableRequest', COALESCE(es.available_request, -1),
 						'assignedAt', es.created_at
 					)
-				), '[]'
+				) FILTER (WHERE s.id IS NOT NULL), '[]'
 			)
 		FROM environment e
 			JOIN project p
@@ -467,9 +467,9 @@ func (r *EnvironmentRepository) AddService(
 		WITH inserted AS (
 			INSERT INTO environment_service (environment_id, service_id, max_request, available_request)
 			VALUES ($1, $2, $3, $4)
-			RETURNING service_id
+			RETURNING service_id, created_at
 		)
-		SELECT s.name, s.version
+		SELECT s.name, s.version, i.created_at
 		FROM inserted i
 			JOIN service s
 				ON i.service_id = s.id;
@@ -492,7 +492,7 @@ func (r *EnvironmentRepository) AddService(
 		service.ID,
 		maxRequest,
 		availableRequest,
-	).Scan(&service.Name, &service.Version)
+	).Scan(&service.Name, &service.Version, &service.AssignedAt)
 
 	return r.handlerErr(err)
 }

@@ -28,6 +28,11 @@ definitions:
         - deactivated
         type: string
     type: object
+  dto.APIKeyUpdate:
+    properties:
+      expires_at:
+        type: string
+    type: object
   dto.AuthenticateResponse:
     properties:
       access_token:
@@ -146,6 +151,11 @@ definitions:
       version:
         type: string
     type: object
+  dto.EnvironmentUpdate:
+    properties:
+      name:
+        type: string
+    type: object
   dto.ProjectCreate:
     properties:
       client_id:
@@ -228,6 +238,11 @@ definitions:
       version:
         type: string
     type: object
+  dto.ProjectUpdate:
+    properties:
+      name:
+        type: string
+    type: object
   dto.ServiceCreate:
     properties:
       name:
@@ -247,8 +262,18 @@ definitions:
         enum:
         - active
         - deactivated
+        - deprecated
         type: string
       version:
+        type: string
+    type: object
+  dto.ServiceStatusUpdate:
+    properties:
+      status:
+        enum:
+        - active
+        - deactivated
+        - deprecated
         type: string
     type: object
   utils.ErrorResponse:
@@ -294,6 +319,39 @@ paths:
       security:
       - OAuth2Password: []
       summary: Creates a new API Key
+      tags:
+      - API Keys
+  /api/v1/api-keys/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Modifies the expiration date of a specific API key by ID
+      parameters:
+      - description: API Key ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated API key data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.APIKeyUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIKeyResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates an API key
       tags:
       - API Keys
   /api/v1/auth/change-password:
@@ -453,8 +511,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ClientResponse'
         default:
           description: Default error response for all failures
           schema:
@@ -548,6 +608,38 @@ paths:
       summary: Retrieves an environment by ID
       tags:
       - Environments
+    patch:
+      consumes:
+      - application/json
+      description: Modifies the details of a specific environment by ID
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated environment data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EnvironmentUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EnvironmentResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates an environment
+      tags:
+      - Environments
   /api/v1/environments/{id}/api-keys:
     get:
       consumes:
@@ -597,8 +689,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EnvironmentServiceResponse'
         default:
           description: Default error response for all failures
           schema:
@@ -639,7 +733,7 @@ paths:
       tags:
       - Environments
   /api/v1/environments/{id}/services/{service_id}/reset-requests:
-    post:
+    patch:
       description: Resets the available request count for a specific service within
         an environment
       parameters:
@@ -724,6 +818,38 @@ paths:
       summary: Retrieves a project by ID
       tags:
       - Projects
+    patch:
+      consumes:
+      - application/json
+      description: Modifies the details of a specific project by ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated project data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProjectUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProjectResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates a project
+      tags:
+      - Projects
   /api/v1/projects/{id}/environments:
     get:
       consumes:
@@ -773,8 +899,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProjectServiceResponse'
         default:
           description: Default error response for all failures
           schema:
@@ -821,6 +949,7 @@ paths:
       - enum:
         - active
         - deactivated
+        - deprecated
         in: query
         name: status
         type: string
@@ -867,6 +996,39 @@ paths:
       security:
       - OAuth2Password: []
       summary: Creates a new service
+      tags:
+      - Services
+  /api/v1/services/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Changes the current status of a specific service by ID
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New service status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ServiceStatusUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ServiceResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates the status of a service
       tags:
       - Services
 securityDefinitions:

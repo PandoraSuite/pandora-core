@@ -84,6 +84,53 @@ func GetEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerF
 	}
 }
 
+// UpdateEnvironment godoc
+// @Summary Updates an environment
+// @Description Modifies the details of a specific environment by ID
+// @Tags Environments
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "Environment ID"
+// @Param request body dto.EnvironmentUpdate true "Updated environment data"
+// @Success 200 {object} dto.EnvironmentResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/environments/{id} [patch]
+func UpdateEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		environmentID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid Environment ID"},
+			)
+			return
+		}
+
+		var req dto.EnvironmentUpdate
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		environment, err := environmentUseCase.Update(
+			c.Request.Context(), environmentID, &req,
+		)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.JSON(http.StatusOK, environment)
+	}
+}
+
 // GetAPIKeysByEnvironment godoc
 // @Summary Retrieves all API Keys for an environment
 // @Description Returns a list of API Keys associated with a specific environment
@@ -130,7 +177,7 @@ func GetAPIKeysByEnvironment(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFu
 // @Produce json
 // @Param id path int true "Environment ID"
 // @Param request body dto.EnvironmentService true "Service data"
-// @Success 204
+// @Success 200 {object} dto.EnvironmentServiceResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/environments/{id}/services [post]
 func AssignServiceToEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
@@ -153,7 +200,7 @@ func AssignServiceToEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) 
 			return
 		}
 
-		err := environmentUseCase.AssignService(
+		service, err := environmentUseCase.AssignService(
 			c.Request.Context(), environmentID, &req,
 		)
 		if err != nil {
@@ -164,7 +211,7 @@ func AssignServiceToEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) 
 			return
 		}
 
-		c.Status(http.StatusNoContent)
+		c.JSON(http.StatusOK, service)
 	}
 }
 
@@ -225,7 +272,7 @@ func RemoveServiceFromEnvironment(environmentUseCase inbound.EnvironmentHTTPPort
 // @Param service_id path int true "Service ID"
 // @Success 200 {object} dto.EnvironmentServiceResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
-// @Router /api/v1/environments/{id}/services/{service_id}/reset-requests [post]
+// @Router /api/v1/environments/{id}/services/{service_id}/reset-requests [patch]
 func ResetServiceRequestsFromEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))

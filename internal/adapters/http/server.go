@@ -72,6 +72,10 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 		{
 			services.GET("", handlers.GetAllServices(s.srvService))
 			services.POST("", handlers.CreateService(s.srvService))
+			services.PATCH(
+				"/:id/status",
+				handlers.UpdateStatusService(s.srvService),
+			)
 		}
 
 		clients := protected.Group("/clients")
@@ -90,6 +94,7 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 		{
 			projects.POST("", handlers.CreateProject(s.projectService))
 			projects.GET("/:id", handlers.GetProject(s.projectService))
+			projects.PATCH("/:id", handlers.UpdateProject(s.projectService))
 			projects.GET(
 				"/:id/environments",
 				handlers.GetEnvironmentsByProject(s.projectService),
@@ -112,6 +117,9 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 			environments.GET(
 				"/:id", handlers.GetEnvironment(s.environmentService),
 			)
+			environments.PATCH(
+				"/:id", handlers.UpdateEnvironment(s.environmentService),
+			)
 			environments.GET(
 				"/:id/api-keys",
 				handlers.GetAPIKeysByEnvironment(s.apiKeyService),
@@ -124,7 +132,7 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 				"/:id/services/:service_id",
 				handlers.RemoveServiceFromEnvironment(s.environmentService),
 			)
-			environments.POST(
+			environments.PATCH(
 				"/:id/services/:service_id/reset-requests",
 				handlers.ResetServiceRequestsFromEnvironment(s.environmentService),
 			)
@@ -133,6 +141,7 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 		apiKeys := protected.Group("/api-keys")
 		{
 			apiKeys.POST("", handlers.CreateAPIKey(s.apiKeyService))
+			apiKeys.PATCH("/:id", handlers.UpdateAPIKey(s.apiKeyService))
 		}
 
 	}

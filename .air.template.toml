@@ -1,0 +1,30 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  pre_cmd = ["swag init -g internal/adapters/http/server.go -o docs"]
+
+  cmd = "go build -gcflags=\"all=-N -l\" -o ./tmp/main ./cmd/http/main.go"
+
+  bin = "tmp/main"
+  full_bin = "dlv exec ./tmp/main --headless --listen=:2345 --api-version=2 --accept-multiclient"
+
+  include_ext = ["go"]
+  exclude_dir = ["storage", "db", "docker", "tmp", "docs", ".vscode"]
+  exclude_file = []
+  exclude_regex = ["_test\\.go"]
+
+  delay = 1000
+
+  force_poll = false
+  stop_on_error = true
+  send_interrupt = false
+
+  log = "air.log"
+
+[misc]
+  clean_on_exit = true
+
+[screen]
+  clear_on_rebuild = true
+  keep_scroll = true

@@ -16,8 +16,19 @@ type ClientUseCase struct {
 
 func (u *ClientUseCase) Update(
 	ctx context.Context, id int, req *dto.ClientUpdate,
-) *errors.Error {
-	return u.clientRepo.Update(ctx, id, req)
+) (*dto.ClientResponse, *errors.Error) {
+	client, err := u.clientRepo.Update(ctx, id, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.ClientResponse{
+		ID:        client.ID,
+		Type:      client.Type,
+		Name:      client.Name,
+		Email:     client.Email,
+		CreatedAt: client.CreatedAt,
+	}, nil
 }
 
 func (u *ClientUseCase) GetByID(

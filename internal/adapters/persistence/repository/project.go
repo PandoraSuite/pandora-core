@@ -63,9 +63,9 @@ func (r *ProjectRepository) UpdateStatus(
 
 func (r *ProjectRepository) Update(
 	ctx context.Context, id int, update *dto.ProjectUpdate,
-) *errors.Error {
+) (*entities.Project, *errors.Error) {
 	if update == nil {
-		return nil
+		return r.FindByID(ctx, id)
 	}
 
 	var updates []string
@@ -79,7 +79,7 @@ func (r *ProjectRepository) Update(
 	}
 
 	if len(updates) == 0 {
-		return nil
+		return r.FindByID(ctx, id)
 	}
 
 	query := fmt.Sprintf(
@@ -93,14 +93,14 @@ func (r *ProjectRepository) Update(
 
 	result, err := r.pool.Exec(ctx, query, args...)
 	if err != nil {
-		return r.handlerErr(err)
+		return nil, r.handlerErr(err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrProjectNotFound
+		return nil, errors.ErrProjectNotFound
 	}
 
-	return nil
+	return r.FindByID(ctx, id)
 }
 
 func (r *ProjectRepository) Exists(
@@ -162,7 +162,7 @@ func (r *ProjectRepository) FindByID(
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
 					)
-				), '[]'
+				) FILTER (WHERE s.id IS NOT NULL), '[]'
 			)
 		FROM project p
 			LEFT JOIN project_service ps
@@ -205,7 +205,7 @@ func (r *ProjectRepository) FindByClient(
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
 					)
-				), '[]'
+				) FILTER (WHERE s.id IS NOT NULL), '[]'
 			)
 		FROM project p
 			JOIN client c
@@ -258,9 +258,9 @@ func (r *ProjectRepository) AddService(
 		WITH inserted AS (
 			INSERT INTO project_service (project_id, service_id, max_request, reset_frequency, next_reset)
 			VALUES ($1, $2, $3, $4, $5)
-			RETURNING service_id
+			RETURNING service_id, created_at
 		)
-		SELECT s.name, s.version
+		SELECT s.name, s.version, i.created_at
 		FROM inserted i
 			JOIN service s
 				ON i.service_id = s.id;
@@ -284,7 +284,7 @@ func (r *ProjectRepository) AddService(
 		maxRequest,
 		resetFrequency,
 		service.NextReset,
-	).Scan(&service.Name, &service.Version)
+	).Scan(&service.Name, &service.Version, &service.AssignedAt)
 
 	return r.handlerErr(err)
 }

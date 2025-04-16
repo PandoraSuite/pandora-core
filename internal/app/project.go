@@ -14,9 +14,42 @@ type ProjectUseCase struct {
 	environmentRepo outbound.EnvironmentPort
 }
 
+func (u *ProjectUseCase) Update(
+	ctx context.Context, id int, req *dto.ProjectUpdate,
+) (*dto.ProjectResponse, *errors.Error) {
+	project, err := u.projectRepo.Update(ctx, id, req)
+	if err != nil {
+		return nil, err
+	}
+
+	serviceResp := make(
+		[]*dto.ProjectServiceResponse, len(project.Services),
+	)
+	for i, service := range project.Services {
+		serviceResp[i] = &dto.ProjectServiceResponse{
+			ID:             service.ID,
+			Name:           service.Name,
+			Version:        service.Version,
+			NextReset:      service.NextReset,
+			MaxRequest:     service.MaxRequest,
+			ResetFrequency: service.ResetFrequency,
+			AssignedAt:     service.AssignedAt,
+		}
+	}
+
+	return &dto.ProjectResponse{
+		ID:        project.ID,
+		Name:      project.Name,
+		Status:    project.Status,
+		ClientID:  project.ClientID,
+		CreatedAt: project.CreatedAt,
+		Services:  serviceResp,
+	}, nil
+}
+
 func (u *ProjectUseCase) AssignService(
 	ctx context.Context, id int, req *dto.ProjectService,
-) *errors.Error {
+) (*dto.ProjectServiceResponse, *errors.Error) {
 	service := &entities.ProjectService{
 		ID:             req.ID,
 		MaxRequest:     req.MaxRequest,
@@ -24,11 +57,23 @@ func (u *ProjectUseCase) AssignService(
 	}
 
 	if err := service.Validate(); err != nil {
-		return err
+		return nil, err
 	}
 
 	service.CalculateNextReset()
-	return u.projectRepo.AddService(ctx, id, service)
+	if err := u.projectRepo.AddService(ctx, id, service); err != nil {
+		return nil, err
+	}
+
+	return &dto.ProjectServiceResponse{
+		ID:             service.ID,
+		Name:           service.Name,
+		Version:        service.Version,
+		NextReset:      service.NextReset,
+		MaxRequest:     service.MaxRequest,
+		ResetFrequency: service.ResetFrequency,
+		AssignedAt:     service.AssignedAt,
+	}, nil
 }
 
 func (u *ProjectUseCase) RemoveService(
