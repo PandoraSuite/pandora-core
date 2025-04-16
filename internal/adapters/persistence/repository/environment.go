@@ -313,7 +313,7 @@ func (r *EnvironmentRepository) FindByID(
 						'availableRequest', COALESCE(es.available_request, -1),
 						'assignedAt', es.created_at
 					)
-				), '[]'
+				) FILTER (WHERE s.id IS NOT NULL), '[]'
 			)
 		FROM environment e
 			LEFT JOIN environment_service es
@@ -355,7 +355,7 @@ func (r *EnvironmentRepository) FindByProject(
 						'availableRequest', COALESCE(es.available_request, -1),
 						'assignedAt', es.created_at
 					)
-				), '[]'
+				) FILTER (WHERE s.id IS NOT NULL), '[]'
 			)
 		FROM environment e
 			JOIN project p
