@@ -9,6 +9,7 @@ import (
 
 type APIKeyHTTPPort interface {
 	Create(ctx context.Context, req *dto.APIKeyCreate) (*dto.APIKeyResponse, *errors.Error)
+	Update(ctx context.Context, id int, req *dto.APIKeyUpdate) (*dto.APIKeyResponse, *errors.Error)
 	GetAPIKeysByEnvironment(ctx context.Context, environmentID int) ([]*dto.APIKeyResponse, *errors.Error)
 }
 

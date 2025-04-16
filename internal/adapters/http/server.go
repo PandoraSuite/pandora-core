@@ -141,6 +141,7 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 		apiKeys := protected.Group("/api-keys")
 		{
 			apiKeys.POST("", handlers.CreateAPIKey(s.apiKeyService))
+			apiKeys.PATCH("/:id", handlers.UpdateAPIKey(s.apiKeyService))
 		}
 
 	}

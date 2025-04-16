@@ -46,9 +46,9 @@ func (r *APIKeyRepository) UpdateStatus(
 
 func (r *APIKeyRepository) Update(
 	ctx context.Context, id int, update *dto.APIKeyUpdate,
-) *errors.Error {
+) (*entities.APIKey, *errors.Error) {
 	if update == nil {
-		return nil
+		return r.FindByID(ctx, id)
 	}
 
 	var updates []string
@@ -62,28 +62,36 @@ func (r *APIKeyRepository) Update(
 	}
 
 	if len(updates) == 0 {
-		return nil
+		return r.FindByID(ctx, id)
 	}
 
 	query := fmt.Sprintf(
 		`
 			UPDATE api_key
 			SET %s
-			WHERE id = $1;
+			WHERE id = $1
+			RETURNING id, environment_id, key, status, created_at,
+				COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
+				COALESCE(last_used, '0001-01-01 00:00:00.0+00');
 		`,
 		strings.Join(updates, ", "),
 	)
 
-	result, err := r.pool.Exec(ctx, query, args...)
+	apiKey := new(entities.APIKey)
+	err := r.pool.QueryRow(ctx, query, args...).Scan(
+		&apiKey.ID,
+		&apiKey.EnvironmentID,
+		&apiKey.Key,
+		&apiKey.Status,
+		&apiKey.CreatedAt,
+		&apiKey.ExpiresAt,
+		&apiKey.LastUsed,
+	)
 	if err != nil {
-		return r.handlerErr(err)
+		return nil, r.handlerErr(err)
 	}
 
-	if result.RowsAffected() == 0 {
-		return errors.ErrAPIKeyNotFound
-	}
-
-	return nil
+	return apiKey, nil
 }
 
 func (r *APIKeyRepository) UpdateLastUsed(

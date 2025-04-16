@@ -28,6 +28,11 @@ definitions:
         - deactivated
         type: string
     type: object
+  dto.APIKeyUpdate:
+    properties:
+      expires_at:
+        type: string
+    type: object
   dto.AuthenticateResponse:
     properties:
       access_token:
@@ -314,6 +319,39 @@ paths:
       security:
       - OAuth2Password: []
       summary: Creates a new API Key
+      tags:
+      - API Keys
+  /api/v1/api-keys/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Modifies the expiration date of a specific API key by ID
+      parameters:
+      - description: API Key ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated API key data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.APIKeyUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.APIKeyResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates an API key
       tags:
       - API Keys
   /api/v1/auth/change-password:
