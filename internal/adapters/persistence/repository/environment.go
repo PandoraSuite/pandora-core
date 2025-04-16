@@ -408,9 +408,9 @@ func (r *EnvironmentRepository) AddService(
 		WITH inserted AS (
 			INSERT INTO environment_service (environment_id, service_id, max_request, available_request)
 			VALUES ($1, $2, $3, $4)
-			RETURNING service_id
+			RETURNING service_id, created_at
 		)
-		SELECT s.name, s.version
+		SELECT s.name, s.version, i.created_at
 		FROM inserted i
 			JOIN service s
 				ON i.service_id = s.id;
@@ -433,7 +433,7 @@ func (r *EnvironmentRepository) AddService(
 		service.ID,
 		maxRequest,
 		availableRequest,
-	).Scan(&service.Name, &service.Version)
+	).Scan(&service.Name, &service.Version, &service.AssignedAt)
 
 	return r.handlerErr(err)
 }

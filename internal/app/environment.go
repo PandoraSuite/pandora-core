@@ -139,14 +139,14 @@ func (u *EnvironmentUseCase) RemoveService(
 
 func (u *EnvironmentUseCase) AssignService(
 	ctx context.Context, id int, req *dto.EnvironmentService,
-) *errors.Error {
+) (*dto.EnvironmentServiceResponse, *errors.Error) {
 	exists, err := u.environmentRepo.Exists(ctx, id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !exists {
-		return errors.ErrEnvironmentNotFound
+		return nil, errors.ErrEnvironmentNotFound
 	}
 
 	service := entities.EnvironmentService{
@@ -156,16 +156,16 @@ func (u *EnvironmentUseCase) AssignService(
 	}
 
 	if err := service.Validate(); err != nil {
-		return err
+		return nil, err
 	}
 
 	exists, err = u.environmentRepo.ExistsServiceIn(ctx, id, service.ID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if exists {
-		return errors.ErrEnvironmentServiceAlreadyExists
+		return nil, errors.ErrEnvironmentServiceAlreadyExists
 	}
 
 	quota, err := u.environmentRepo.GetProjectServiceQuotaUsage(
@@ -173,22 +173,33 @@ func (u *EnvironmentUseCase) AssignService(
 	)
 	if err != nil {
 		if err == errors.ErrNotFound {
-			return errors.ErrServiceNotAssignedToProject
+			return nil, errors.ErrServiceNotAssignedToProject
 		}
-		return err
+		return nil, err
 	}
 
 	if quota.MaxAllowed > -1 {
 		if service.MaxRequest == -1 {
-			return errors.ErrInfiniteRequestsNotAllowed
+			return nil, errors.ErrInfiniteRequestsNotAllowed
 		}
 
 		if quota.CurrentAllocated+service.MaxRequest > quota.MaxAllowed {
-			return errors.ErrMaxRequestExceededForServiceInProyect
+			return nil, errors.ErrMaxRequestExceededForServiceInProyect
 		}
 	}
 
-	return u.environmentRepo.AddService(ctx, id, &service)
+	if err := u.environmentRepo.AddService(ctx, id, &service); err != nil {
+		return nil, err
+	}
+
+	return &dto.EnvironmentServiceResponse{
+		ID:               service.ID,
+		Name:             service.Name,
+		Version:          service.Version,
+		MaxRequest:       service.MaxRequest,
+		AvailableRequest: service.AvailableRequest,
+		AssignedAt:       service.AssignedAt,
+	}, nil
 }
 
 func (u *EnvironmentUseCase) Create(

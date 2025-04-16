@@ -177,7 +177,7 @@ func GetEnvironmentsByProject(projectService inbound.ProjectHTTPPort) gin.Handle
 // @Produce json
 // @Param id path int true "Project ID"
 // @Param request body dto.ProjectService true "Service assignment data"
-// @Success 204
+// @Success 200 {object} dto.ProjectServiceResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/projects/{id}/services [post]
 func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
@@ -200,7 +200,7 @@ func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerF
 			return
 		}
 
-		err := projectService.AssignService(
+		service, err := projectService.AssignService(
 			c.Request.Context(), projectID, &req,
 		)
 		if err != nil {
@@ -211,7 +211,7 @@ func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerF
 			return
 		}
 
-		c.Status(http.StatusNoContent)
+		c.JSON(http.StatusOK, service)
 	}
 }
 

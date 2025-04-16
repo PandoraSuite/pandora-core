@@ -177,7 +177,7 @@ func GetAPIKeysByEnvironment(apiKeyService inbound.APIKeyHTTPPort) gin.HandlerFu
 // @Produce json
 // @Param id path int true "Environment ID"
 // @Param request body dto.EnvironmentService true "Service data"
-// @Success 204
+// @Success 200 {object} dto.EnvironmentServiceResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/environments/{id}/services [post]
 func AssignServiceToEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) gin.HandlerFunc {
@@ -200,7 +200,7 @@ func AssignServiceToEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) 
 			return
 		}
 
-		err := environmentUseCase.AssignService(
+		service, err := environmentUseCase.AssignService(
 			c.Request.Context(), environmentID, &req,
 		)
 		if err != nil {
@@ -211,7 +211,7 @@ func AssignServiceToEnvironment(environmentUseCase inbound.EnvironmentHTTPPort) 
 			return
 		}
 
-		c.Status(http.StatusNoContent)
+		c.JSON(http.StatusOK, service)
 	}
 }
 
