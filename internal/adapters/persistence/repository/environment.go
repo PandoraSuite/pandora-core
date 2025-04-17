@@ -298,6 +298,34 @@ func (r *EnvironmentRepository) ExistsServiceIn(
 	return exists, nil
 }
 
+func (r *EnvironmentRepository) FindServiceByID(
+	ctx context.Context, id, serviceID int,
+) (*entities.EnvironmentService, *errors.Error) {
+	query := `
+		SELECT s.id, s.name, s.version, COALESCE(es.max_request, -1),
+			COALESCE(es.available_request, -1), es.created_at
+		FROM environment_service es
+			JOIN service s
+				ON s.id = es.service_id
+		WHERE es.environment_id = $1 AND es.service_id = $2;
+	`
+
+	service := new(entities.EnvironmentService)
+	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(
+		&service.ID,
+		&service.Name,
+		&service.Version,
+		&service.MaxRequest,
+		&service.AvailableRequest,
+		&service.AssignedAt,
+	)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return service, nil
+}
+
 func (r *EnvironmentRepository) FindByID(
 	ctx context.Context, id int,
 ) (*entities.Environment, *errors.Error) {
@@ -319,7 +347,7 @@ func (r *EnvironmentRepository) FindByID(
 			LEFT JOIN environment_service es
 				ON es.environment_id = e.id
 			LEFT JOIN service s
-			ON s.id = es.service_id
+				ON s.id = es.service_id
 		WHERE e.id = $1
 		GROUP BY e.id;
 	`
