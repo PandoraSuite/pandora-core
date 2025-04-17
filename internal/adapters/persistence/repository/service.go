@@ -19,6 +19,26 @@ type ServiceRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *ServiceRepository) Remove(
+	ctx context.Context, id int,
+) *errors.Error {
+	query := `
+		DELETE FROM service
+		WHERE id = $1;
+	`
+
+	result, err := r.pool.Exec(ctx, query, id)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.ErrServiceNotFound
+	}
+
+	return nil
+}
+
 func (r *ServiceRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.ServiceStatus,
 ) (*entities.Service, *errors.Error) {

@@ -28,11 +28,11 @@ func (u *ServiceUseCase) DeleteService(
 		return errors.ErrServiceAssignedToProjects
 	}
 
-	if err := u.serviceRepo.Delete(ctx, id); err != nil {
+	if err := u.serviceRepo.Remove(ctx, id); err != nil {
 		return err
 	}
 
-	if err := u.requestLogRepo.DeleteByService(ctx, id); err != nil {
+	if err := u.requestLogRepo.RemoveByService(ctx, id); err != nil {
 		return err
 	}
 
