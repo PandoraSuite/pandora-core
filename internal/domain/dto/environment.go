@@ -50,3 +50,7 @@ type EnvironmentResponse struct {
 type EnvironmentUpdate struct {
 	Name string `json:"name,omitempty"`
 }
+
+type EnvironmentServiceUpdate struct {
+	MaxRequest int `json:"max_request,omitempty"`
+}
