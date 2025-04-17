@@ -63,6 +63,12 @@ func (u *EnvironmentUseCase) UpdateService(
 		}
 	}
 
+	if service.AvailableRequest == -1 || service.AvailableRequest > req.MaxRequest {
+		req.AvailableRequest = req.MaxRequest
+	} else {
+		req.AvailableRequest = service.AvailableRequest
+	}
+
 	service, err = u.environmentRepo.UpdateService(
 		ctx, id, serviceID, req,
 	)

@@ -119,27 +119,28 @@ func (r *EnvironmentRepository) UpdateService(
 		return r.FindServiceByID(ctx, id, serviceID)
 	}
 
-	updates := []string{"max_request = $3"}
-	args := []any{id, serviceID, update.MaxRequest}
-
-	query := fmt.Sprintf(
-		`
-			WITH updated AS (
-				UPDATE environment_service
-				SET %s
-				WHERE environment_id = $1 AND service_id = $2
-				RETURNING *
-			)
-			SELECT s.id, s.name, s.version, COALESCE(u.max_request, -1), COALESCE(u.available_request, -1), u.created_at
-			FROM updated u
-				JOIN service s
-					ON s.id = u.service_id;
-		`,
-		strings.Join(updates, ", "),
-	)
+	query := `
+		WITH updated AS (
+			UPDATE environment_service
+			SET max_request = $3, available_request = $4
+			WHERE environment_id = $1 AND service_id = $2
+			RETURNING *
+		)
+		SELECT s.id, s.name, s.version, COALESCE(u.max_request, -1), COALESCE(u.available_request, -1), u.created_at
+		FROM updated u
+			JOIN service s
+				ON s.id = u.service_id;
+	`
 
 	service := new(entities.EnvironmentService)
-	err := r.pool.QueryRow(ctx, query, args...).Scan(
+	err := r.pool.QueryRow(
+		ctx,
+		query,
+		id,
+		serviceID,
+		update.MaxRequest,
+		update.AvailableRequest,
+	).Scan(
 		&service.ID,
 		&service.Name,
 		&service.Version,
