@@ -19,7 +19,7 @@ type ServiceRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
-func (r *ServiceRepository) Remove(
+func (r *ServiceRepository) Delete(
 	ctx context.Context, id int,
 ) *errors.Error {
 	query := `

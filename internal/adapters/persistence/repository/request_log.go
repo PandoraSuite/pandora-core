@@ -16,7 +16,7 @@ type RequestLogRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
-func (r *RequestLogRepository) RemoveByService(
+func (r *RequestLogRepository) DeleteByService(
 	ctx context.Context, serviceID int,
 ) *errors.Error {
 	query := `
