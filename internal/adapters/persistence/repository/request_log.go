@@ -16,6 +16,22 @@ type RequestLogRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *RequestLogRepository) RemoveByService(
+	ctx context.Context, serviceID int,
+) *errors.Error {
+	query := `
+		DELETE FROM request_log
+		WHERE serice_id = $1;
+	`
+
+	_, err := r.pool.Exec(ctx, query, serviceID)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	return nil
+}
+
 func (r *RequestLogRepository) UpdateExecutionStatus(
 	ctx context.Context, id string, executionStatus enums.RequestLogExecutionStatus,
 ) *errors.Error {
