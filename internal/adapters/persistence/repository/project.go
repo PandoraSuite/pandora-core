@@ -20,6 +20,26 @@ type ProjectRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *ProjectRepository) ExistsServiceIn(
+	ctx context.Context, serviceID int,
+) (bool, *errors.Error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM project_service
+			WHERE service_id = $1
+		);
+	`
+
+	var exists bool
+	err := r.pool.QueryRow(ctx, query, serviceID).Scan(&exists)
+	if err != nil {
+		return false, r.handlerErr(err)
+	}
+
+	return exists, nil
+}
+
 func (r *ProjectRepository) RemoveService(
 	ctx context.Context, id, serviceID int,
 ) (int64, *errors.Error) {
