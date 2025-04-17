@@ -11,7 +11,32 @@ import (
 )
 
 type ServiceUseCase struct {
-	serviceRepo outbound.ServicePort
+	serviceRepo    outbound.ServicePort
+	projectRepo    outbound.ProjectPort
+	requestLogRepo outbound.RequestLogPort
+}
+
+func (u *ServiceUseCase) DeleteService(
+	ctx context.Context, id int,
+) *errors.Error {
+	isAssigned, err := u.projectRepo.ExistsServiceIn(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if isAssigned {
+		return errors.ErrServiceAssignedToProjects
+	}
+
+	if err := u.serviceRepo.Delete(ctx, id); err != nil {
+		return err
+	}
+
+	if err := u.requestLogRepo.DeleteByService(ctx, id); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (u *ServiceUseCase) UpdateStatus(

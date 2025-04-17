@@ -16,5 +16,6 @@ type ProjectPort interface {
 	AddService(ctx context.Context, id int, service *entities.ProjectService) *errors.Error
 	FindByClient(ctx context.Context, clientID int) ([]*entities.Project, *errors.Error)
 	RemoveService(ctx context.Context, id, serviceID int) (int64, *errors.Error)
+	ExistsServiceIn(ctx context.Context, serviceID int) (bool, *errors.Error)
 	GetProjectServiceQuotaUsage(ctx context.Context, id, serviceID int) (*dto.QuotaUsage, *errors.Error)
 }
