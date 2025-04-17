@@ -62,6 +62,9 @@ func (u *ProjectUseCase) AssignService(
 
 	service.CalculateNextReset()
 	if err := u.projectRepo.AddService(ctx, id, service); err != nil {
+		if err == errors.ErrUniqueViolation {
+			return nil, errors.ErrProjectServiceAlreadyExists
+		}
 		return nil, err
 	}
 
