@@ -33,7 +33,7 @@ func (a *APIKey) GenerateKey() *errors.Error {
 }
 
 func (a *APIKey) IsExpired() bool {
-	return !a.ExpiresAt.IsZero() && a.ExpiresAt.Before(time.Now().UTC())
+	return !a.ExpiresAt.IsZero() && a.ExpiresAt.Before(time.Now())
 }
 
 func (a *APIKey) IsActive() bool {

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/MAD-py/pandora-core/cmd/http/config"
 	"github.com/MAD-py/pandora-core/internal/adapters/http"
@@ -13,6 +14,8 @@ import (
 )
 
 func main() {
+	time.Local = time.UTC
+
 	log.Println("[INFO] Starting Pandora Core (API RESTful)...")
 
 	cfg, err := config.LoadConfig()

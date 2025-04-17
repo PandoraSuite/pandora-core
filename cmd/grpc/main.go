@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
@@ -11,6 +12,8 @@ import (
 )
 
 func main() {
+	time.Local = time.UTC
+
 	log.Println("[INFO] Starting Pandora Core (gRPC)...")
 	db, err := persistence.NewPersistence("postgresql://postgres:postgres@localhost:5436/pandora")
 	if err != nil {

@@ -37,7 +37,7 @@ func (p *ProjectService) Validate() *errors.Error {
 }
 
 func (p *ProjectService) CalculateNextReset() {
-	now := time.Now().UTC()
+	now := time.Now()
 	startOfDay := time.Date(
 		now.Year(),
 		now.Month(),
