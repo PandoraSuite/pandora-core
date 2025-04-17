@@ -17,7 +17,7 @@ type JWTProvider struct {
 func (p *JWTProvider) GenerateToken(
 	ctx context.Context, subject string,
 ) (*dto.TokenResponse, *errors.Error) {
-	now := time.Now()
+	now := time.Now().UTC()
 	expTime := now.Add(time.Hour)
 
 	claims := jwt.MapClaims{

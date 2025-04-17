@@ -322,7 +322,7 @@ func (u *APIKeyUseCase) validateAndReserve(
 			ServiceID:     service.ID,
 			EnvironmentID: apiKey.EnvironmentID,
 			RequestTime:   req.RequestTime,
-			ExpiresAt:     time.Now().Add(12 * time.Hour),
+			ExpiresAt:     time.Now().UTC().Add(12 * time.Hour),
 		}, nil
 }
 
@@ -506,7 +506,7 @@ func (u *APIKeyUseCase) GetAPIKeysByEnvironment(
 func (u *APIKeyUseCase) Update(
 	ctx context.Context, id int, req *dto.APIKeyUpdate,
 ) (*dto.APIKeyResponse, *errors.Error) {
-	if !req.ExpiresAt.IsZero() && req.ExpiresAt.Before(time.Now()) {
+	if !req.ExpiresAt.IsZero() && req.ExpiresAt.Before(time.Now().UTC()) {
 		return nil, errors.ErrAPIKeyInvalidExpiresAt
 	}
 

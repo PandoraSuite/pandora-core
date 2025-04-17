@@ -10,7 +10,7 @@ type APIKeyValidate struct {
 	Key            string    `json:"key"`
 	Service        string    `json:"service"`
 	Environment    string    `json:"environment"`
-	RequestTime    time.Time `json:"request_time"`
+	RequestTime    time.Time `json:"request_time" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
 	ServiceVersion string    `json:"service_version"`
 }
 
@@ -55,7 +55,7 @@ type APIKeyValidateReservationResponse struct {
 	Code      enums.ReserveExecutionStatusCode `json:"code,omitempty"`
 }
 type APIKeyCreate struct {
-	ExpiresAt     time.Time `json:"expires_at"`
+	ExpiresAt     time.Time `json:"expires_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
 	EnvironmentID int       `json:"environment_id" binding:"required"`
 }
 
@@ -63,12 +63,12 @@ type APIKeyResponse struct {
 	ID            int                `json:"id"`
 	Key           string             `json:"key"`
 	Status        enums.APIKeyStatus `json:"status" enums:"active,deactivated" swaggertype:"string"`
-	LastUsed      time.Time          `json:"last_used"`
-	ExpiresAt     time.Time          `json:"expires_at"`
+	LastUsed      time.Time          `json:"last_used" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	ExpiresAt     time.Time          `json:"expires_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
 	EnvironmentID int                `json:"environment_id"`
-	CreatedAt     time.Time          `json:"created_at"`
+	CreatedAt     time.Time          `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
 }
 
 type APIKeyUpdate struct {
-	ExpiresAt time.Time `json:"expires_at,omitempty"`
+	ExpiresAt time.Time `json:"expires_at,omitempty" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
 }
