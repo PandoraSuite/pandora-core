@@ -151,6 +151,11 @@ definitions:
       version:
         type: string
     type: object
+  dto.EnvironmentServiceUpdate:
+    properties:
+      max_request:
+        type: integer
+    type: object
   dto.EnvironmentUpdate:
     properties:
       name:
@@ -730,6 +735,43 @@ paths:
       security:
       - OAuth2Password: []
       summary: Removes a service from an environment
+      tags:
+      - Environments
+    patch:
+      consumes:
+      - application/json
+      description: Modifies the configuration of a service within a specific environment
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      - description: Updated service configuration
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EnvironmentServiceUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EnvironmentServiceResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates a service assigned to an environment
       tags:
       - Environments
   /api/v1/environments/{id}/services/{service_id}/reset-requests:

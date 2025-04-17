@@ -134,6 +134,10 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 				handlers.RemoveServiceFromEnvironment(s.environmentService),
 			)
 			environments.PATCH(
+				"/:id/services/:service_id",
+				handlers.UpdateEnvironmentService(s.environmentService),
+			)
+			environments.PATCH(
 				"/:id/services/:service_id/reset-requests",
 				handlers.ResetServiceRequestsFromEnvironment(s.environmentService),
 			)
