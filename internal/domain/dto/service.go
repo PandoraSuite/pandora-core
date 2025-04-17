@@ -20,7 +20,7 @@ type ServiceResponse struct {
 	Name      string              `json:"name"`
 	Status    enums.ServiceStatus `json:"status" enums:"active,deactivated,deprecated" swaggertype:"string"`
 	Version   string              `json:"version"`
-	CreatedAt time.Time           `json:"created_at"`
+	CreatedAt time.Time           `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
 }
 
 type ServiceStatusUpdate struct {
