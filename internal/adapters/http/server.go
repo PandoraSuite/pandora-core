@@ -72,6 +72,7 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 		{
 			services.GET("", handlers.GetAllServices(s.srvService))
 			services.POST("", handlers.CreateService(s.srvService))
+			services.DELETE("/:id", handlers.DeleteService(s.srvService))
 			services.PATCH(
 				"/:id/status",
 				handlers.UpdateStatusService(s.srvService),

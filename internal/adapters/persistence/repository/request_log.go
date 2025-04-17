@@ -21,7 +21,7 @@ func (r *RequestLogRepository) DeleteByService(
 ) *errors.Error {
 	query := `
 		DELETE FROM request_log
-		WHERE serice_id = $1;
+		WHERE service_id = $1;
 	`
 
 	_, err := r.pool.Exec(ctx, query, serviceID)

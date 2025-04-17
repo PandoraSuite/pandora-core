@@ -84,6 +84,39 @@ func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	}
 }
 
+// DeleteService godoc
+// @Summary Deletes a service
+// @Description Permanently removes a service by its ID
+// @Tags Services
+// @Security OAuth2Password
+// @Produce json
+// @Param id path int true "Service ID"
+// @Success 204
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/services/{id} [delete]
+func DeleteService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		serviceID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid Service ID"},
+			)
+			return
+		}
+
+		if err := srvService.Delete(c.Request.Context(), serviceID); err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.Status(http.StatusNoContent)
+	}
+}
+
 // UpdateStatus godoc
 // @Summary Updates the status of a service
 // @Description Changes the current status of a specific service by ID

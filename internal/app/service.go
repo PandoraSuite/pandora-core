@@ -16,7 +16,7 @@ type ServiceUseCase struct {
 	requestLogRepo outbound.RequestLogPort
 }
 
-func (u *ServiceUseCase) DeleteService(
+func (u *ServiceUseCase) Delete(
 	ctx context.Context, id int,
 ) *errors.Error {
 	isAssigned, err := u.projectRepo.ExistsServiceIn(ctx, id)
@@ -107,6 +107,14 @@ func (u *ServiceUseCase) Create(
 	}, nil
 }
 
-func NewServiceUseCase(serviceRepo outbound.ServicePort) *ServiceUseCase {
-	return &ServiceUseCase{serviceRepo: serviceRepo}
+func NewServiceUseCase(
+	serviceRepo outbound.ServicePort,
+	projectRepo outbound.ProjectPort,
+	requestLogRepo outbound.RequestLogPort,
+) *ServiceUseCase {
+	return &ServiceUseCase{
+		serviceRepo:    serviceRepo,
+		projectRepo:    projectRepo,
+		requestLogRepo: requestLogRepo,
+	}
 }
