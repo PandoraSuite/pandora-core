@@ -998,6 +998,29 @@ paths:
       summary: Creates a new service
       tags:
       - Services
+  /api/v1/services/{id}:
+    delete:
+      description: Permanently removes a service by its ID
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Deletes a service
+      tags:
+      - Services
   /api/v1/services/{id}/status:
     patch:
       consumes:

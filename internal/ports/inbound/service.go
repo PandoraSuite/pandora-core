@@ -10,6 +10,7 @@ import (
 
 type ServiceHTTPPort interface {
 	Create(ctx context.Context, req *dto.ServiceCreate) (*dto.ServiceResponse, *errors.Error)
+	Delete(ctx context.Context, id int) *errors.Error
 	GetServices(ctx context.Context, req *dto.ServiceFilter) ([]*dto.ServiceResponse, *errors.Error)
 	UpdateStatus(ctx context.Context, id int, status enums.ServiceStatus) (*dto.ServiceResponse, *errors.Error)
 }

@@ -15,8 +15,7 @@ type ReservationUseCase struct {
 func (u *ReservationUseCase) Commit(
 	ctx context.Context, id string,
 ) *errors.Error {
-	_, err := u.reservationRepo.RemoveReservation(ctx, id)
-	return err
+	return u.reservationRepo.Delete(ctx, id)
 }
 
 func (u *ReservationUseCase) Rollback(
@@ -26,7 +25,7 @@ func (u *ReservationUseCase) Rollback(
 	if err != nil {
 		return err
 	}
-	if _, err := u.reservationRepo.RemoveReservation(ctx, id); err != nil {
+	if err := u.reservationRepo.Delete(ctx, id); err != nil {
 		return err
 	}
 	// Must not exist reservation for increasing available request
