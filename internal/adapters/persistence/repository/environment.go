@@ -20,6 +20,32 @@ type EnvironmentRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *EnvironmentRepository) ExistsServiceWithInfiniteMaxRequest(
+	ctx context.Context, projectID, serviceID int,
+) (bool, *errors.Error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM project_service ps
+				JOIN environment e
+					ON e.project_id = ps.project_id
+				JOIN environment_service es
+					ON es.environment_id = e.id
+						AND es.service_id = ps.service_id
+			WHERE ps.project_id = $1 AND ps.service_id = $2
+				AND es.max_request IS NULL;
+		)
+	`
+
+	var hasInfinite bool
+	err := r.pool.QueryRow(ctx, query, projectID, serviceID).Scan(&hasInfinite)
+	if err != nil {
+		return false, r.handlerErr(err)
+	}
+
+	return hasInfinite, nil
+}
+
 func (r *EnvironmentRepository) ResetAvailableRequests(
 	ctx context.Context, id, serviceID int,
 ) (*entities.EnvironmentService, *errors.Error) {

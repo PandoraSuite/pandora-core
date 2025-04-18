@@ -24,6 +24,6 @@ type EnvironmentPort interface {
 	IncreaseAvailableRequest(ctx context.Context, id, serviceID int) *errors.Error
 	DecrementAvailableRequest(ctx context.Context, id, serviceID int) (*dto.DecrementAvailableRequest, *errors.Error)
 	GetProjectServiceQuotaUsage(ctx context.Context, id, serviceID int) (*dto.QuotaUsage, *errors.Error)
-	HasInfiniteEnvironmentService(ctx context.Context, projectID, serviceID int) (bool, *errors.Error)
+	ExistsServiceWithInfiniteMaxRequest(ctx context.Context, projectID, serviceID int) (bool, *errors.Error)
 	RemoveServiceFromProjectEnvironments(ctx context.Context, projectID, serviceID int) (int64, *errors.Error)
 }
