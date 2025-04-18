@@ -37,7 +37,7 @@ func (u *EnvironmentUseCase) UpdateService(
 	)
 	if err != nil {
 		if err == errors.ErrNotFound {
-			return nil, errors.ErrEnvironmentServiceNotFound
+			return nil, errors.ErrServiceNotAssignedToEnvironment
 		}
 		return nil, err
 	}

@@ -260,3 +260,60 @@ func RemoveServiceFromProject(projectService inbound.ProjectHTTPPort) gin.Handle
 		c.Status(http.StatusNoContent)
 	}
 }
+
+// UpdateProjectService godoc
+// @Summary Updates a service assigned to a project
+// @Description Modifies the configuration of a service within a specific project
+// @Tags Projects
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "Project ID"
+// @Param service_id path int true "Service ID"
+// @Param request body dto.ProjectServiceUpdate true "Updated service configuration"
+// @Success 200 {object} dto.ProjectServiceResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/projects/{id}/services/{service_id} [patch]
+func UpdateProjectService(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		projectID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid Project ID"},
+			)
+			return
+		}
+
+		serviceID, paramErr := strconv.Atoi(c.Param("service_id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid Service ID"},
+			)
+			return
+		}
+
+		var req dto.ProjectServiceUpdate
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		service, err := projectService.UpdateService(
+			c.Request.Context(), projectID, serviceID, &req,
+		)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.JSON(http.StatusOK, service)
+	}
+}

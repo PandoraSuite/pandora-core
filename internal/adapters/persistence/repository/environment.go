@@ -33,8 +33,8 @@ func (r *EnvironmentRepository) ExistsServiceWithInfiniteMaxRequest(
 					ON es.environment_id = e.id
 						AND es.service_id = ps.service_id
 			WHERE ps.project_id = $1 AND ps.service_id = $2
-				AND es.max_request IS NULL;
-		)
+				AND es.max_request IS NULL
+		);
 	`
 
 	var hasInfinite bool

@@ -52,6 +52,6 @@ type EnvironmentUpdate struct {
 }
 
 type EnvironmentServiceUpdate struct {
-	MaxRequest       int `json:"max_request" binding:"required"`
+	MaxRequest       int `json:"max_request"`
 	AvailableRequest int `json:"-" swaggerignore:"true"`
 }

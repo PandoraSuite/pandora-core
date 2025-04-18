@@ -63,8 +63,8 @@ func (r *ProjectRepository) UpdateService(
 			WHERE project_id = $1 AND service_id = $2
 			RETURNING *
 		)
-		SELECT s.id, s.name, s.version, COALESCE(ps.max_request, -1),
-			ps.reset_frequency, ps.next_reset, ps.created_at
+		SELECT s.id, s.name, s.version, COALESCE(u.max_request, -1),
+			u.reset_frequency, u.next_reset, u.created_at
 		FROM updated u
 			JOIN service s
 				ON s.id = u.service_id;
