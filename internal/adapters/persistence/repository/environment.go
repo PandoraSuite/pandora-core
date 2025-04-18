@@ -158,14 +158,24 @@ func (r *EnvironmentRepository) UpdateService(
 				ON s.id = u.service_id;
 	`
 
+	var maxRequest any
+	if update.MaxRequest != -1 {
+		maxRequest = update.MaxRequest
+	}
+
+	var availableRequest any
+	if update.AvailableRequest != -1 {
+		availableRequest = update.AvailableRequest
+	}
+
 	service := new(entities.EnvironmentService)
 	err := r.pool.QueryRow(
 		ctx,
 		query,
 		id,
 		serviceID,
-		update.MaxRequest,
-		update.AvailableRequest,
+		maxRequest,
+		availableRequest,
 	).Scan(
 		&service.ID,
 		&service.Name,
