@@ -1712,6 +1712,9 @@ const docTemplate = `{
                 "max_request": {
                     "type": "integer"
                 },
+                "next_reset": {
+                    "type": "string"
+                },
                 "reset_frequency": {
                     "type": "string",
                     "enum": [

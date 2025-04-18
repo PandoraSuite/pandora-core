@@ -2,14 +2,13 @@ package app
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
-	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
+	"github.com/MAD-py/pandora-core/internal/utils"
 )
 
 type ProjectUseCase struct {
@@ -17,36 +16,22 @@ type ProjectUseCase struct {
 	environmentRepo outbound.EnvironmentPort
 }
 
-func (*ProjectUseCase) resetFrequencyToDays(
-	rf enums.ProjectServiceResetFrequency,
-) int {
-	switch rf {
-	case enums.ProjectServiceDaily:
-		return 1
-	case enums.ProjectServiceWeekly:
-		return 7
-	case enums.ProjectServiceBiweekly:
-		return 14
-	case enums.ProjectServiceMonthly:
-		now := time.Now()
-		firstOfMonth := time.Date(
-			now.Year(),
-			now.Month(),
-			1, 0, 0, 0, 0,
-			now.Location(),
-		)
-		firstOfNextMonth := firstOfMonth.AddDate(0, 1, 0)
-		return int(firstOfNextMonth.Sub(firstOfMonth).Hours() / 24)
-	default:
-		panic(fmt.Sprintf("invalid reset frequency: %s", rf))
-	}
-}
-
 func (u *ProjectUseCase) UpdateService(
 	ctx context.Context, id, serviceID int, req *dto.ProjectServiceUpdate,
 ) (*dto.ProjectServiceResponse, *errors.Error) {
 	if req.MaxRequest < -1 {
 		return nil, errors.ErrInvalidMaxRequest
+	}
+
+	today := utils.TruncateToDay(time.Now())
+	req.NextReset = utils.TruncateToDay(req.NextReset)
+	if !req.NextReset.IsZero() {
+		if req.NextReset.Before(today) {
+			return nil, errors.ErrProjectServiceNextResetInPast
+		}
+		if req.MaxRequest == -1 {
+			return nil, errors.ErrProjectServiceNextResetWithInfiniteQuota
+		}
 	}
 
 	exists, err := u.projectRepo.Exists(ctx, id)
@@ -92,33 +77,12 @@ func (u *ProjectUseCase) UpdateService(
 		return nil, err
 	}
 
-	service, err := u.projectRepo.FindServiceByID(ctx, id, serviceID)
-	if err != nil {
-		return nil, err
+	if req.NextReset.IsZero() {
+		tmp.CalculateNextReset()
+		req.NextReset = tmp.NextReset
 	}
 
-	if req.ResetFrequency != enums.ProjectServiceNull {
-		if service.NextReset.IsZero() {
-			tmp.CalculateNextReset()
-			req.NextReset = tmp.NextReset
-		} else {
-			now := time.Now()
-			startOfDay := time.Date(
-				now.Year(),
-				now.Month(),
-				now.Day(),
-				0, 0, 0, 0,
-				now.Location(),
-			)
-			n := int(service.NextReset.Sub(startOfDay).Hours() / 24)
-			f1 := u.resetFrequencyToDays(service.ResetFrequency)
-			f2 := u.resetFrequencyToDays(req.ResetFrequency)
-
-			req.NextReset = startOfDay.AddDate(0, 0, (f2 - (f1 - n)))
-		}
-	}
-
-	service, err = u.projectRepo.UpdateService(ctx, id, serviceID, req)
+	service, err := u.projectRepo.UpdateService(ctx, id, serviceID, req)
 	if err != nil {
 		return nil, err
 	}
