@@ -108,6 +108,10 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 				"/:id/services/:service_id",
 				handlers.RemoveServiceFromProject(s.projectService),
 			)
+			projects.PATCH(
+				"/:id/services/:service_id",
+				handlers.UpdateProjectService(s.projectService),
+			)
 		}
 
 		environments := protected.Group("/environments")

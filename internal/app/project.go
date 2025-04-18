@@ -2,16 +2,100 @@ package app
 
 import (
 	"context"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
+	"github.com/MAD-py/pandora-core/internal/utils"
 )
 
 type ProjectUseCase struct {
 	projectRepo     outbound.ProjectPort
 	environmentRepo outbound.EnvironmentPort
+}
+
+func (u *ProjectUseCase) UpdateService(
+	ctx context.Context, id, serviceID int, req *dto.ProjectServiceUpdate,
+) (*dto.ProjectServiceResponse, *errors.Error) {
+	if req.MaxRequest < -1 {
+		return nil, errors.ErrInvalidMaxRequest
+	}
+
+	today := utils.TruncateToDay(time.Now())
+	req.NextReset = utils.TruncateToDay(req.NextReset)
+	if !req.NextReset.IsZero() {
+		if req.NextReset.Before(today) {
+			return nil, errors.ErrProjectServiceNextResetInPast
+		}
+		if req.MaxRequest == -1 {
+			return nil, errors.ErrProjectServiceNextResetWithInfiniteQuota
+		}
+	}
+
+	exists, err := u.projectRepo.Exists(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return nil, errors.ErrProjectNotFound
+	}
+
+	quota, err := u.projectRepo.GetProjectServiceQuotaUsage(
+		ctx, id, serviceID,
+	)
+	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrServiceNotAssignedToProject
+		}
+		return nil, err
+	}
+
+	if req.MaxRequest != -1 {
+		if req.MaxRequest < quota.CurrentAllocated {
+			return nil, errors.ErrProjectServiceMaxRequestBelow
+		}
+		hasInfinite, err := u.environmentRepo.ExistsServiceWithInfiniteMaxRequest(
+			ctx, id, serviceID,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if hasInfinite {
+			return nil, errors.ErrProjectServiceFiniteQuotaWithInfiniteEnvs
+		}
+	}
+
+	tmp := entities.ProjectService{
+		MaxRequest:     req.MaxRequest,
+		ResetFrequency: req.ResetFrequency,
+	}
+	if err := tmp.Validate(); err != nil {
+		return nil, err
+	}
+
+	if req.NextReset.IsZero() {
+		tmp.CalculateNextReset()
+		req.NextReset = tmp.NextReset
+	}
+
+	service, err := u.projectRepo.UpdateService(ctx, id, serviceID, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.ProjectServiceResponse{
+		ID:             service.ID,
+		Name:           service.Name,
+		Version:        service.Version,
+		NextReset:      service.NextReset,
+		MaxRequest:     service.MaxRequest,
+		ResetFrequency: service.ResetFrequency,
+		AssignedAt:     service.AssignedAt,
+	}, nil
 }
 
 func (u *ProjectUseCase) Update(

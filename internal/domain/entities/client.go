@@ -3,9 +3,9 @@ package entities
 import (
 	"time"
 
-	"github.com/MAD-py/pandora-core/internal/domain/entities/utils"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/MAD-py/pandora-core/internal/utils"
 )
 
 type Client struct {

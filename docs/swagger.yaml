@@ -243,6 +243,21 @@ definitions:
       version:
         type: string
     type: object
+  dto.ProjectServiceUpdate:
+    properties:
+      max_request:
+        type: integer
+      next_reset:
+        type: string
+      reset_frequency:
+        enum:
+        - daily
+        - weekly
+        - biweekly
+        - monthly
+        - ""
+        type: string
+    type: object
   dto.ProjectUpdate:
     properties:
       name:
@@ -980,6 +995,43 @@ paths:
       security:
       - OAuth2Password: []
       summary: Removes a service from a project
+      tags:
+      - Projects
+    patch:
+      consumes:
+      - application/json
+      description: Modifies the configuration of a service within a specific project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      - description: Updated service configuration
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProjectServiceUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProjectServiceResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates a service assigned to a project
       tags:
       - Projects
   /api/v1/services:
