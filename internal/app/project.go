@@ -2,9 +2,11 @@ package app
 
 import (
 	"context"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound"
 )
@@ -64,10 +66,33 @@ func (u *ProjectUseCase) UpdateService(
 		return nil, err
 	}
 
-	tmp.CalculateNextReset()
-	req.NextReset = tmp.NextReset
+	service, err := u.projectRepo.FindServiceByID(ctx, id, serviceID)
+	if err != nil {
+		return nil, err
+	}
 
-	service, err := u.projectRepo.UpdateService(ctx, id, serviceID, req)
+	if req.ResetFrequency != enums.ProjectServiceNull {
+		if service.NextReset.IsZero() {
+			tmp.CalculateNextReset()
+			req.NextReset = tmp.NextReset
+		} else {
+			now := time.Now()
+			startOfDay := time.Date(
+				now.Year(),
+				now.Month(),
+				now.Day(),
+				0, 0, 0, 0,
+				now.Location(),
+			)
+			n := int(service.NextReset.Sub(startOfDay).Hours() / 24)
+			f1 := service.ResetFrequency.Days()
+			f2 := req.ResetFrequency.Days()
+
+			req.NextReset = startOfDay.AddDate(0, 0, (f2 - (f1 - n)))
+		}
+	}
+
+	service, err = u.projectRepo.UpdateService(ctx, id, serviceID, req)
 	if err != nil {
 		return nil, err
 	}
