@@ -43,3 +43,9 @@ type ProjectResponse struct {
 type ProjectUpdate struct {
 	Name string `json:"name,omitempty"`
 }
+
+type ProjectServiceUpdate struct {
+	NextReset      time.Time                          `json:"-" swaggerignore:"true" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	MaxRequest     int                                `json:"max_request" binding:"required"`
+	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency" binding:"required"`
+}

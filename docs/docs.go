@@ -1517,6 +1517,9 @@ const docTemplate = `{
         },
         "dto.EnvironmentServiceUpdate": {
             "type": "object",
+            "required": [
+                "max_request"
+            ],
             "properties": {
                 "max_request": {
                     "type": "integer"

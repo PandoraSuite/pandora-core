@@ -14,6 +14,75 @@ type ProjectUseCase struct {
 	environmentRepo outbound.EnvironmentPort
 }
 
+func (u *ProjectUseCase) UpdateService(
+	ctx context.Context, id, serviceID int, req *dto.ProjectServiceUpdate,
+) (*dto.ProjectServiceResponse, *errors.Error) {
+	if req.MaxRequest < -1 {
+		return nil, errors.ErrInvalidMaxRequest
+	}
+
+	exists, err := u.projectRepo.Exists(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return nil, errors.ErrProjectNotFound
+	}
+
+	quota, err := u.projectRepo.GetProjectServiceQuotaUsage(
+		ctx, id, serviceID,
+	)
+	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrServiceNotAssignedToProject
+		}
+		return nil, err
+	}
+
+	if req.MaxRequest != -1 {
+		if req.MaxRequest < quota.CurrentAllocated {
+			return nil, errors.ErrProjectServiceMaxRequestBelow
+		}
+		hasInfinite, err := u.environmentRepo.HasInfiniteEnvironmentService(
+			ctx, id, serviceID,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		if hasInfinite {
+			return nil, errors.ErrProjectServiceFiniteQuotaWithInfiniteEnvs
+		}
+	}
+
+	tmp := entities.ProjectService{
+		MaxRequest:     req.MaxRequest,
+		ResetFrequency: req.ResetFrequency,
+	}
+	if err := tmp.Validate(); err != nil {
+		return nil, err
+	}
+
+	tmp.CalculateNextReset()
+	req.NextReset = tmp.NextReset
+
+	service, err := u.projectRepo.UpdateService(ctx, id, serviceID, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.ProjectServiceResponse{
+		ID:             service.ID,
+		Name:           service.Name,
+		Version:        service.Version,
+		NextReset:      service.NextReset,
+		MaxRequest:     service.MaxRequest,
+		ResetFrequency: service.ResetFrequency,
+		AssignedAt:     service.AssignedAt,
+	}, nil
+}
+
 func (u *ProjectUseCase) Update(
 	ctx context.Context, id int, req *dto.ProjectUpdate,
 ) (*dto.ProjectResponse, *errors.Error) {
