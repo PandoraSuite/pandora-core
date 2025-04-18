@@ -15,23 +15,6 @@ const (
 	ProjectServiceMonthly
 )
 
-func (rf ProjectServiceResetFrequency) Days() int {
-	switch rf {
-	case ProjectServiceNull:
-		return -1
-	case ProjectServiceDaily:
-		return 1
-	case ProjectServiceWeekly:
-		return 7
-	case ProjectServiceBiweekly:
-		return 14
-	case ProjectServiceMonthly:
-		return 30
-	default:
-		panic("unknown ProjectServiceResetFrequency")
-	}
-}
-
 func (rf ProjectServiceResetFrequency) String() string {
 	switch rf {
 	case ProjectServiceNull:

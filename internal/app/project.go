@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
@@ -14,6 +15,31 @@ import (
 type ProjectUseCase struct {
 	projectRepo     outbound.ProjectPort
 	environmentRepo outbound.EnvironmentPort
+}
+
+func (*ProjectUseCase) resetFrequencyToDays(
+	rf enums.ProjectServiceResetFrequency,
+) int {
+	switch rf {
+	case enums.ProjectServiceDaily:
+		return 1
+	case enums.ProjectServiceWeekly:
+		return 7
+	case enums.ProjectServiceBiweekly:
+		return 14
+	case enums.ProjectServiceMonthly:
+		now := time.Now()
+		firstOfMonth := time.Date(
+			now.Year(),
+			now.Month(),
+			1, 0, 0, 0, 0,
+			now.Location(),
+		)
+		firstOfNextMonth := firstOfMonth.AddDate(0, 1, 0)
+		return int(firstOfNextMonth.Sub(firstOfMonth).Hours() / 24)
+	default:
+		panic(fmt.Sprintf("invalid reset frequency: %s", rf))
+	}
 }
 
 func (u *ProjectUseCase) UpdateService(
@@ -85,8 +111,8 @@ func (u *ProjectUseCase) UpdateService(
 				now.Location(),
 			)
 			n := int(service.NextReset.Sub(startOfDay).Hours() / 24)
-			f1 := service.ResetFrequency.Days()
-			f2 := req.ResetFrequency.Days()
+			f1 := u.resetFrequencyToDays(service.ResetFrequency)
+			f2 := u.resetFrequencyToDays(req.ResetFrequency)
 
 			req.NextReset = startOfDay.AddDate(0, 0, (f2 - (f1 - n)))
 		}
