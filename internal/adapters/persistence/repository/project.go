@@ -20,6 +20,81 @@ type ProjectRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *ProjectRepository) FindServiceByID(
+	ctx context.Context, id, serviceID int,
+) (*entities.ProjectService, *errors.Error) {
+	query := `
+		SELECT s.id, s.name, s.version, COALESCE(ps.max_request, -1),
+			ps.reset_frequency, ps.next_reset, ps.created_at
+		FROM project_service ps
+			JOIN service s
+				ON s.id = ps.service_id
+		WHERE ps.project_id = $1 AND ps.service_id = $2;
+	`
+
+	service := new(entities.ProjectService)
+	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(
+		&service.ID,
+		&service.Name,
+		&service.Version,
+		&service.MaxRequest,
+		&service.ResetFrequency,
+		&service.NextReset,
+		&service.AssignedAt,
+	)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return service, nil
+}
+
+func (r *ProjectRepository) UpdateService(
+	ctx context.Context, id, serviceID int, update *dto.ProjectServiceUpdate,
+) (*entities.ProjectService, *errors.Error) {
+	if update == nil {
+		return r.FindServiceByID(ctx, id, serviceID)
+	}
+
+	query := `
+		WITH updated AS (
+			UPDATE project_service
+			SET max_request = $3, reset_frequency = $4, next_reset = $5
+			WHERE project_id = $1 AND service_id = $2
+			RETURNING *
+		)
+		SELECT s.id, s.name, s.version, COALESCE(ps.max_request, -1),
+			ps.reset_frequency, ps.next_reset, ps.created_at
+		FROM updated u
+			JOIN service s
+				ON s.id = u.service_id;
+	`
+
+	service := new(entities.ProjectService)
+	err := r.pool.QueryRow(
+		ctx,
+		query,
+		id,
+		serviceID,
+		update.MaxRequest,
+		update.ResetFrequency,
+		update.NextReset,
+	).Scan(
+		&service.ID,
+		&service.Name,
+		&service.Version,
+		&service.MaxRequest,
+		&service.ResetFrequency,
+		&service.NextReset,
+		&service.AssignedAt,
+	)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return service, nil
+}
+
 func (r *ProjectRepository) ExistsServiceIn(
 	ctx context.Context, serviceID int,
 ) (bool, *errors.Error) {

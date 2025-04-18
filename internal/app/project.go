@@ -44,7 +44,7 @@ func (u *ProjectUseCase) UpdateService(
 		if req.MaxRequest < quota.CurrentAllocated {
 			return nil, errors.ErrProjectServiceMaxRequestBelow
 		}
-		hasInfinite, err := u.environmentRepo.HasInfiniteEnvironmentService(
+		hasInfinite, err := u.environmentRepo.ExistsServiceWithInfiniteMaxRequest(
 			ctx, id, serviceID,
 		)
 		if err != nil {
