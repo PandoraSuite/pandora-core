@@ -55,3 +55,10 @@ type EnvironmentServiceUpdate struct {
 	MaxRequest       int `json:"max_request"`
 	AvailableRequest int `json:"-" swaggerignore:"true"`
 }
+
+type EnvironmentServiceReset struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+
+	Service *EnvironmentServiceResponse `json:"service"`
+}
