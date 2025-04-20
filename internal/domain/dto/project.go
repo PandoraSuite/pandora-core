@@ -49,3 +49,13 @@ type ProjectServiceUpdate struct {
 	MaxRequest     int                                `json:"max_request"`
 	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency" enums:"daily,weekly,biweekly,monthly," swaggertype:"string"`
 }
+
+type ProjectServiceResetRequest struct {
+	RecalculateNextReset bool `json:"recalculate_next_reset"`
+}
+
+type ProjectServiceResetRequestResponse struct {
+	ResetCount          int                        `json:"reset_count"`
+	ProjectService      *ProjectServiceResponse    `json:"project_service"`
+	EnvironmentServices []*EnvironmentServiceReset `json:"environment_services"`
+}

@@ -136,6 +136,20 @@ definitions:
     - id
     - max_request
     type: object
+  dto.EnvironmentServiceReset:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      service:
+        $ref: '#/definitions/dto.EnvironmentServiceResponse'
+      status:
+        enum:
+        - active
+        - deactivated
+        type: string
+    type: object
   dto.EnvironmentServiceResponse:
     properties:
       assigned_at:
@@ -219,6 +233,22 @@ definitions:
     required:
     - id
     - max_request
+    type: object
+  dto.ProjectServiceResetRequest:
+    properties:
+      recalculate_next_reset:
+        type: boolean
+    type: object
+  dto.ProjectServiceResetRequestResponse:
+    properties:
+      environment_services:
+        items:
+          $ref: '#/definitions/dto.EnvironmentServiceReset'
+        type: array
+      project_service:
+        $ref: '#/definitions/dto.ProjectServiceResponse'
+      reset_count:
+        type: integer
     type: object
   dto.ProjectServiceResponse:
     properties:
@@ -1032,6 +1062,44 @@ paths:
       security:
       - OAuth2Password: []
       summary: Updates a service assigned to a project
+      tags:
+      - Projects
+  /api/v1/projects/{id}/services/{service_id}/reset-requests:
+    post:
+      consumes:
+      - application/json
+      description: Resets the request quota for a specific service assigned to a project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      - description: Reset configuration
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProjectServiceResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProjectServiceResetRequestResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Resets available requests for a service in a project
       tags:
       - Projects
   /api/v1/services:

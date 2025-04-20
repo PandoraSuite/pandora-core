@@ -16,6 +16,59 @@ type ProjectUseCase struct {
 	environmentRepo outbound.EnvironmentPort
 }
 
+func (u *ProjectUseCase) ResetServiceAvailableRequests(
+	ctx context.Context, id, serviceID int, req *dto.ProjectServiceResetRequest,
+) (*dto.ProjectServiceResetRequestResponse, *errors.Error) {
+	exists, err := u.projectRepo.Exists(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return nil, errors.ErrProjectNotFound
+	}
+
+	service, err := u.projectRepo.FindServiceByID(ctx, id, serviceID)
+	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrServiceNotAssignedToProject
+		}
+		return nil, err
+	}
+
+	var envServices []*dto.EnvironmentServiceReset
+	if req.RecalculateNextReset {
+		service.CalculateNextReset()
+		envServices, err = u.projectRepo.
+			ResetProjectServiceUsage(
+				ctx, id, serviceID, service.NextReset,
+			)
+	} else {
+		envServices, err = u.projectRepo.
+			ResetAvailableRequestsForEnvsService(
+				ctx, id, serviceID,
+			)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.ProjectServiceResetRequestResponse{
+		ResetCount:          len(envServices),
+		EnvironmentServices: envServices,
+		ProjectService: &dto.ProjectServiceResponse{
+			ID:             service.ID,
+			Name:           service.Name,
+			Version:        service.Version,
+			NextReset:      service.NextReset,
+			MaxRequest:     service.MaxRequest,
+			ResetFrequency: service.ResetFrequency,
+			AssignedAt:     service.AssignedAt,
+		},
+	}, nil
+}
+
 func (u *ProjectUseCase) UpdateService(
 	ctx context.Context, id, serviceID int, req *dto.ProjectServiceUpdate,
 ) (*dto.ProjectServiceResponse, *errors.Error) {

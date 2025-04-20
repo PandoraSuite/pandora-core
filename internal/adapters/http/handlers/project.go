@@ -317,3 +317,60 @@ func UpdateProjectService(projectService inbound.ProjectHTTPPort) gin.HandlerFun
 		c.JSON(http.StatusOK, service)
 	}
 }
+
+// ResetServiceAvailableRequests godoc
+// @Summary Resets available requests for a service in a project
+// @Description Resets the request quota for a specific service assigned to a project
+// @Tags Projects
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "Project ID"
+// @Param service_id path int true "Service ID"
+// @Param request body dto.ProjectServiceResetRequest true "Reset configuration"
+// @Success 200 {object} dto.ProjectServiceResetRequestResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/projects/{id}/services/{service_id}/reset-requests [post]
+func ResetServiceAvailableRequests(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		projectID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid Project ID"},
+			)
+			return
+		}
+
+		serviceID, paramErr := strconv.Atoi(c.Param("service_id"))
+		if paramErr != nil {
+			c.AbortWithStatusJSON(
+				http.StatusBadRequest,
+				gin.H{"error": "Invalid Service ID"},
+			)
+			return
+		}
+
+		var req dto.ProjectServiceResetRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetBindJSONErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		resp, err := projectService.ResetServiceAvailableRequests(
+			c.Request.Context(), projectID, serviceID, &req,
+		)
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		c.JSON(http.StatusOK, resp)
+	}
+}
