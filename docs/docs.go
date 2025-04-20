@@ -1159,6 +1159,65 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/projects/{id}/services/{service_id}/reset-requests": {
+            "post": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Resets the request quota for a specific service assigned to a project",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Resets available requests for a service in a project",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Service ID",
+                        "name": "service_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Reset configuration",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProjectServiceResetRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ProjectServiceResetRequestResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/services": {
             "get": {
                 "security": [
@@ -1549,6 +1608,27 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.EnvironmentServiceReset": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "service": {
+                    "$ref": "#/definitions/dto.EnvironmentServiceResponse"
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "active",
+                        "deactivated"
+                    ]
+                }
+            }
+        },
         "dto.EnvironmentServiceResponse": {
             "type": "object",
             "properties": {
@@ -1670,6 +1750,31 @@ const docTemplate = `{
                         "monthly",
                         ""
                     ]
+                }
+            }
+        },
+        "dto.ProjectServiceResetRequest": {
+            "type": "object",
+            "properties": {
+                "recalculate_next_reset": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.ProjectServiceResetRequestResponse": {
+            "type": "object",
+            "properties": {
+                "environment_services": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.EnvironmentServiceReset"
+                    }
+                },
+                "project_service": {
+                    "$ref": "#/definitions/dto.ProjectServiceResponse"
+                },
+                "reset_count": {
+                    "type": "integer"
                 }
             }
         },

@@ -112,6 +112,10 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 				"/:id/services/:service_id",
 				handlers.UpdateProjectService(s.projectService),
 			)
+			projects.POST(
+				"/:id/services/:service_id/reset-requests",
+				handlers.ResetServiceAvailableRequests(s.projectService),
+			)
 		}
 
 		environments := protected.Group("/environments")

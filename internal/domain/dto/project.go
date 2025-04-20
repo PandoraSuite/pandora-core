@@ -51,7 +51,7 @@ type ProjectServiceUpdate struct {
 }
 
 type ProjectServiceResetRequest struct {
-	RecalculateNextReset bool `json:"recalculate_next_reset" binding:"required"`
+	RecalculateNextReset bool `json:"recalculate_next_reset"`
 }
 
 type ProjectServiceResetRequestResponse struct {

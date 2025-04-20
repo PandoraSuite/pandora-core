@@ -97,9 +97,9 @@ func (r *ProjectRepository) resetAvailableRequestsForEnvsService(
 			'id', s.id,
 			'name', s.name,
 			'version', s.version,
-			'maxRequest', COALESCE(u.max_request, -1),
-			'availableRequest', COALESCE(u.available_request, -1),
-			'assignedAt', u.created_at
+			'max_request', COALESCE(u.max_request, -1),
+			'available_request', COALESCE(u.available_request, -1),
+			'assigned_at', u.created_at
 		)
 		FROM updated u
 			JOIN service s
