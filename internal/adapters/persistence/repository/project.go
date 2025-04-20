@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -18,6 +19,129 @@ type ProjectRepository struct {
 	pool *pgxpool.Pool
 
 	handlerErr func(error) *errors.Error
+}
+
+func (r *ProjectRepository) ResetAvailableRequestsForEnvsService(
+	ctx context.Context, id, serviceID int,
+) ([]*dto.EnvironmentServiceReset, *errors.Error) {
+	return r.resetAvailableRequestsForEnvsService(
+		ctx, nil, id, serviceID,
+	)
+}
+
+func (r *ProjectRepository) ResetProjectServiceUsage(
+	ctx context.Context, id, serviceID int, nextReset time.Time,
+) ([]*dto.EnvironmentServiceReset, *errors.Error) {
+	tx, txErr := r.pool.Begin(ctx)
+	if txErr != nil {
+		return nil, r.handlerErr(txErr)
+	}
+
+	if err := r.updateNextReset(ctx, tx, id, serviceID, nextReset); err != nil {
+		tx.Rollback(ctx)
+		return nil, err
+	}
+
+	environmentsService, err := r.resetAvailableRequestsForEnvsService(
+		ctx, tx, id, serviceID,
+	)
+	if err != nil {
+		tx.Rollback(ctx)
+		return nil, r.handlerErr(err)
+	}
+
+	return environmentsService, r.handlerErr(tx.Commit(ctx))
+}
+
+func (r *ProjectRepository) updateNextReset(
+	ctx context.Context, tx pgx.Tx, id, serviceID int, nextReset time.Time,
+) *errors.Error {
+	query := `
+		UPDATE project_service
+		SET next_reset = $3
+		WHERE project_id = $1 AND service_id = $2;
+	`
+
+	var internalNextReset any
+	if !nextReset.IsZero() {
+		internalNextReset = nextReset
+	}
+
+	result, err := tx.Exec(ctx, query, id, serviceID, internalNextReset)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.ErrProjectServiceNotFound
+	}
+
+	return nil
+}
+
+func (r *ProjectRepository) resetAvailableRequestsForEnvsService(
+	ctx context.Context, tx pgx.Tx, id, serviceID int,
+) ([]*dto.EnvironmentServiceReset, *errors.Error) {
+	query := `
+		WITH updated AS (
+			UPDATE environment_service es
+			SET available_request = max_request
+			FROM project p
+				JOIN environment e
+					ON e.project_id = p.id
+			WHERE es.environment_id = e.id AND p.id = $1 AND es.service_id = $2
+			RETURNING e.id, e.name, e.status, es.max_request,
+				es.available_request, es.created_at, es.service_id
+		)
+		SELECT u.id, u.name, u.status, JSON_BUILD_OBJECT(
+			'id', s.id,
+			'name', s.name,
+			'version', s.version,
+			'maxRequest', COALESCE(u.max_request, -1),
+			'availableRequest', COALESCE(u.available_request, -1),
+			'assignedAt', u.created_at
+		)
+		FROM updated u
+			JOIN service s
+				ON s.id = u.service_id;
+	`
+
+	var err error
+	var rows pgx.Rows
+	if tx != nil {
+		rows, err = tx.Query(ctx, query, id, serviceID)
+	} else {
+		rows, err = r.pool.Query(ctx, query, id, serviceID)
+	}
+
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	defer rows.Close()
+
+	var environmentsService []*dto.EnvironmentServiceReset
+	for rows.Next() {
+		environmentService := new(dto.EnvironmentServiceReset)
+
+		err = rows.Scan(
+			&environmentService.ID,
+			&environmentService.Name,
+			&environmentService.Status,
+			&environmentService.Service,
+		)
+		if err != nil {
+			return nil, r.handlerErr(err)
+		}
+
+		environmentsService = append(environmentsService, environmentService)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return environmentsService, nil
 }
 
 func (r *ProjectRepository) FindServiceByID(

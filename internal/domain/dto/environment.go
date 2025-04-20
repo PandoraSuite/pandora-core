@@ -57,8 +57,9 @@ type EnvironmentServiceUpdate struct {
 }
 
 type EnvironmentServiceReset struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID     int                     `json:"id"`
+	Name   string                  `json:"name"`
+	Status enums.EnvironmentStatus `json:"status" enums:"active,deactivated" swaggertype:"string"`
 
 	Service *EnvironmentServiceResponse `json:"service"`
 }

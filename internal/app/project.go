@@ -36,16 +36,15 @@ func (u *ProjectUseCase) ResetServiceAvailableRequests(
 		return nil, err
 	}
 
-	var resetCount int
 	var envServices []*dto.EnvironmentServiceReset
 	if req.RecalculateNextReset {
 		service.CalculateNextReset()
-		resetCount, envServices, err = u.projectRepo.
+		envServices, err = u.projectRepo.
 			ResetProjectServiceUsage(
 				ctx, id, serviceID, service.NextReset,
 			)
 	} else {
-		resetCount, envServices, err = u.projectRepo.
+		envServices, err = u.projectRepo.
 			ResetAvailableRequestsForEnvsService(
 				ctx, id, serviceID,
 			)
@@ -56,7 +55,7 @@ func (u *ProjectUseCase) ResetServiceAvailableRequests(
 	}
 
 	return &dto.ProjectServiceResetRequestResponse{
-		ResetCount:          resetCount,
+		ResetCount:          len(envServices),
 		EnvironmentServices: envServices,
 		ProjectService: &dto.ProjectServiceResponse{
 			ID:             service.ID,
