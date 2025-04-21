@@ -434,6 +434,6 @@ func (s *ServiceSuite) TestDelete_RequestLogRepoError() {
 	s.Equal(errors.ErrPersistence, err)
 }
 
-func TestCreateServiceSuite(t *testing.T) {
+func TestServiceSuite(t *testing.T) {
 	suite.Run(t, new(ServiceSuite))
 }
