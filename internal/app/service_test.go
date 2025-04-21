@@ -5,13 +5,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/suite"
+	"go.uber.org/mock/gomock"
+
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound/mock"
-	"github.com/stretchr/testify/suite"
-	"go.uber.org/mock/gomock"
 )
 
 type ServiceSuite struct {
@@ -95,6 +96,7 @@ func (s *ServiceSuite) TestCreate_ValidationErrors() {
 	for _, test := range tests {
 		s.Run(test.name, func() {
 			ctrl := gomock.NewController(s.T())
+			defer ctrl.Finish()
 
 			serviceRepo := mock.NewMockServicePort(s.ctrl)
 			projectRepo := mock.NewMockProjectPort(s.ctrl)
@@ -112,13 +114,11 @@ func (s *ServiceSuite) TestCreate_ValidationErrors() {
 
 			s.Nil(resp)
 			s.Equal(test.expectedErr, err)
-
-			ctrl.Finish()
 		})
 	}
 }
 
-func (s *ServiceSuite) TestCreate_RepoError() {
+func (s *ServiceSuite) TestCreate_ServiceRepoError() {
 	req := &dto.ServiceCreate{Name: "Service", Version: "1.0.0"}
 
 	s.serviceRepo.EXPECT().
@@ -189,6 +189,7 @@ func (s *ServiceSuite) TestGetServices_Success() {
 	for _, test := range tests {
 		s.Run(test.name, func() {
 			ctrl := gomock.NewController(s.T())
+			defer ctrl.Finish()
 
 			serviceRepo := mock.NewMockServicePort(s.ctrl)
 			projectRepo := mock.NewMockProjectPort(s.ctrl)
@@ -219,13 +220,11 @@ func (s *ServiceSuite) TestGetServices_Success() {
 			s.Equal(test.mockServices[1].Status, resp[1].Status)
 			s.Equal(test.mockServices[1].Version, resp[1].Version)
 			s.Equal(test.mockServices[1].CreatedAt, resp[1].CreatedAt)
-
-			ctrl.Finish()
 		})
 	}
 }
 
-func (s *ServiceSuite) TestGetServices_RepoError() {
+func (s *ServiceSuite) TestGetServices_ServiceRepoError() {
 	req := &dto.ServiceFilter{}
 
 	s.serviceRepo.EXPECT().
@@ -277,7 +276,7 @@ func (s *ServiceSuite) TestUpdateStatus_Success() {
 	s.Equal(mockService.CreatedAt, resp.CreatedAt)
 }
 
-func (s *ServiceSuite) TestUpdateStatus_RepoErrors() {
+func (s *ServiceSuite) TestUpdateStatus_ServiceRepoErrors() {
 	tests := []struct {
 		name        string
 		mockErr     *errors.Error
@@ -298,6 +297,7 @@ func (s *ServiceSuite) TestUpdateStatus_RepoErrors() {
 	for _, test := range tests {
 		s.Run(test.name, func() {
 			ctrl := gomock.NewController(s.T())
+			defer ctrl.Finish()
 
 			serviceRepo := mock.NewMockServicePort(s.ctrl)
 			projectRepo := mock.NewMockProjectPort(s.ctrl)
@@ -318,10 +318,120 @@ func (s *ServiceSuite) TestUpdateStatus_RepoErrors() {
 
 			s.Nil(resp)
 			s.Equal(test.expectedErr, err)
-
-			ctrl.Finish()
 		})
 	}
+}
+
+func (s *ServiceSuite) TestDelete_Success() {
+	id := 42
+
+	gomock.InOrder(
+		s.projectRepo.EXPECT().
+			ExistsServiceIn(s.ctx, id).
+			Return(false, (*errors.Error)(nil)).
+			Times(1),
+
+		s.serviceRepo.EXPECT().
+			Delete(s.ctx, id).
+			Return((*errors.Error)(nil)).
+			Times(1),
+
+		s.requestLogRepo.EXPECT().
+			DeleteByService(s.ctx, id).
+			Return((*errors.Error)(nil)).
+			Times(1),
+	)
+
+	err := s.useCase.Delete(s.ctx, id)
+
+	s.Require().Nil(err)
+}
+
+func (s *ServiceSuite) TestDelete_AssignedToProjects() {
+	id := 42
+
+	s.projectRepo.EXPECT().
+		ExistsServiceIn(s.ctx, id).
+		Return(true, (*errors.Error)(nil)).
+		Times(1)
+
+	s.serviceRepo.EXPECT().
+		Delete(s.ctx, id).
+		Times(0)
+
+	s.requestLogRepo.EXPECT().
+		DeleteByService(s.ctx, id).
+		Times(0)
+
+	err := s.useCase.Delete(s.ctx, id)
+
+	s.Equal(errors.ErrServiceAssignedToProjects, err)
+}
+
+func (s *ServiceSuite) TestDelete_ProjectRepoError() {
+	id := 42
+
+	s.projectRepo.EXPECT().
+		ExistsServiceIn(s.ctx, id).
+		Return(false, errors.ErrPersistence).
+		Times(1)
+
+	s.serviceRepo.EXPECT().
+		Delete(s.ctx, id).
+		Times(0)
+
+	s.requestLogRepo.EXPECT().
+		DeleteByService(s.ctx, id).
+		Times(0)
+
+	err := s.useCase.Delete(s.ctx, id)
+
+	s.Equal(errors.ErrPersistence, err)
+}
+
+func (s *ServiceSuite) TestDelete_ServiceRepoError() {
+	id := 42
+
+	s.projectRepo.EXPECT().
+		ExistsServiceIn(s.ctx, id).
+		Return(false, (*errors.Error)(nil)).
+		Times(1)
+
+	s.serviceRepo.EXPECT().
+		Delete(s.ctx, id).
+		Return(errors.ErrPersistence).
+		Times(1)
+
+	s.requestLogRepo.EXPECT().
+		DeleteByService(s.ctx, id).
+		Times(0)
+
+	err := s.useCase.Delete(s.ctx, id)
+
+	s.Equal(errors.ErrPersistence, err)
+}
+
+func (s *ServiceSuite) TestDelete_RequestLogRepoError() {
+	id := 42
+
+	s.projectRepo.EXPECT().
+		ExistsServiceIn(s.ctx, id).
+		Return(false, (*errors.Error)(nil)).
+		Times(1)
+
+	s.serviceRepo.EXPECT().
+		Delete(s.ctx, id).
+		Return((*errors.Error)(nil)).
+		Times(1)
+
+	s.requestLogRepo.EXPECT().
+		DeleteByService(s.ctx, id).
+		Return(errors.ErrPersistence).
+		Times(1)
+
+	err := s.useCase.Delete(s.ctx, id)
+
+	s.Equal(errors.ErrPersistence, err)
 }
 
 func TestCreateServiceSuite(t *testing.T) {
