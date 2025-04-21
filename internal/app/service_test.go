@@ -239,6 +239,91 @@ func (s *ServiceSuite) TestGetServices_RepoError() {
 	s.Error(err)
 }
 
+func (s *ServiceSuite) TestUpdateStatus_Success() {
+	status := enums.ServiceDeprecated
+	id := 42
+
+	now := time.Now().UTC()
+	mockService := &entities.Service{
+		ID:        id,
+		Name:      "Service",
+		Status:    enums.ServiceActive,
+		Version:   "1.0.0",
+		CreatedAt: now.Add(-24 * time.Hour),
+		UpdatedAt: now.Add(-24 * time.Hour),
+	}
+
+	s.serviceRepo.EXPECT().
+		UpdateStatus(s.ctx, id, status).
+		DoAndReturn(
+			func(
+				_ context.Context, id int, status enums.ServiceStatus,
+			) (*entities.Service, *errors.Error) {
+				mockService.Status = status
+				mockService.UpdatedAt = now
+				return mockService, nil
+			},
+		).
+		Times(1)
+
+	resp, err := s.useCase.UpdateStatus(s.ctx, id, status)
+
+	s.Require().Nil(err)
+
+	s.Equal(status, resp.Status)
+	s.Equal(mockService.ID, resp.ID)
+	s.Equal(mockService.Name, resp.Name)
+	s.Equal(mockService.Version, resp.Version)
+	s.Equal(mockService.CreatedAt, resp.CreatedAt)
+}
+
+func (s *ServiceSuite) TestUpdateStatus_RepoErrors() {
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "ErrNotFound",
+			mockErr:     errors.ErrNotFound,
+			expectedErr: errors.ErrServiceNotFound,
+		},
+		{
+			name:        "ErrPersistence",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			ctrl := gomock.NewController(s.T())
+
+			serviceRepo := mock.NewMockServicePort(s.ctrl)
+			projectRepo := mock.NewMockProjectPort(s.ctrl)
+			requestLogRepo := mock.NewMockRequestLogPort(s.ctrl)
+
+			uc := NewServiceUseCase(
+				serviceRepo, projectRepo, requestLogRepo,
+			)
+
+			serviceRepo.EXPECT().
+				UpdateStatus(s.ctx, 42, enums.ServiceDeprecated).
+				Return(nil, test.mockErr).
+				Times(1)
+
+			resp, err := uc.UpdateStatus(
+				s.ctx, 42, enums.ServiceDeprecated,
+			)
+
+			s.Nil(resp)
+			s.Equal(test.expectedErr, err)
+
+			ctrl.Finish()
+		})
+	}
+}
+
 func TestCreateServiceSuite(t *testing.T) {
 	suite.Run(t, new(ServiceSuite))
 }
