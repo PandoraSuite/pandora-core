@@ -123,7 +123,8 @@ func (s *ServiceSuite) TestCreate_RepoError() {
 
 	s.serviceRepo.EXPECT().
 		Save(gomock.Any(), gomock.Any()).
-		Return(errors.ErrPersistence)
+		Return(errors.ErrPersistence).
+		Times(1)
 
 	resp, err := s.useCase.Create(s.ctx, req)
 
@@ -132,17 +133,56 @@ func (s *ServiceSuite) TestCreate_RepoError() {
 }
 
 func (s *ServiceSuite) TestGetServices_Success() {
+	now := time.Now().UTC()
+
 	tests := []struct {
-		name string
-		req  *dto.ServiceFilter
+		name         string
+		req          *dto.ServiceFilter
+		mockServices []*entities.Service
 	}{
 		{
 			name: "WithoutFilter",
 			req:  &dto.ServiceFilter{},
+			mockServices: []*entities.Service{
+				{
+					ID:        1,
+					Name:      "Service 1",
+					Status:    enums.ServiceActive,
+					Version:   "1.0.0",
+					CreatedAt: now.Add(-24 * time.Hour),
+					UpdatedAt: now.Add(-24 * time.Hour),
+				},
+				{
+					ID:        2,
+					Name:      "Service 2",
+					Status:    enums.ServiceDeactivated,
+					Version:   "2.0.0",
+					CreatedAt: now,
+					UpdatedAt: now,
+				},
+			},
 		},
 		{
 			name: "WithFilter",
 			req:  &dto.ServiceFilter{Status: enums.ServiceActive},
+			mockServices: []*entities.Service{
+				{
+					ID:        1,
+					Name:      "Service 1",
+					Status:    enums.ServiceActive,
+					Version:   "1.0.0",
+					CreatedAt: now.Add(-24 * time.Hour),
+					UpdatedAt: now.Add(-24 * time.Hour),
+				},
+				{
+					ID:        2,
+					Name:      "Service 2",
+					Status:    enums.ServiceActive,
+					Version:   "2.0.0",
+					CreatedAt: now,
+					UpdatedAt: now,
+				},
+			},
 		},
 	}
 
@@ -159,18 +199,44 @@ func (s *ServiceSuite) TestGetServices_Success() {
 			)
 
 			serviceRepo.EXPECT().
-				FindAll(s.ctx, test.req).
-				Return().
+				FindAll(gomock.Any(), gomock.Any()).
+				Return(test.mockServices, (*errors.Error)(nil)).
 				Times(1)
 
 			resp, err := uc.GetServices(s.ctx, test.req)
 
-			s.Nil(resp)
-			s.Equal(test.expectedErr, err)
+			s.Require().Nil(err)
+			s.Require().Len(resp, len(test.mockServices))
+
+			s.Equal(test.mockServices[0].ID, resp[0].ID)
+			s.Equal(test.mockServices[0].Name, resp[0].Name)
+			s.Equal(test.mockServices[0].Status, resp[0].Status)
+			s.Equal(test.mockServices[0].Version, resp[0].Version)
+			s.Equal(test.mockServices[0].CreatedAt, resp[0].CreatedAt)
+
+			s.Equal(test.mockServices[1].ID, resp[1].ID)
+			s.Equal(test.mockServices[1].Name, resp[1].Name)
+			s.Equal(test.mockServices[1].Status, resp[1].Status)
+			s.Equal(test.mockServices[1].Version, resp[1].Version)
+			s.Equal(test.mockServices[1].CreatedAt, resp[1].CreatedAt)
 
 			ctrl.Finish()
 		})
 	}
+}
+
+func (s *ServiceSuite) TestGetServices_RepoError() {
+	req := &dto.ServiceFilter{}
+
+	s.serviceRepo.EXPECT().
+		FindAll(gomock.Any(), gomock.Any()).
+		Return(nil, errors.ErrPersistence).
+		Times(1)
+
+	resp, err := s.useCase.GetServices(s.ctx, req)
+
+	s.Nil(resp)
+	s.Error(err)
 }
 
 func TestCreateServiceSuite(t *testing.T) {
