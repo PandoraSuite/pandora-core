@@ -42,21 +42,21 @@ func (u *APIKeyUseCase) validateAndConsume(
 
 	// API Key must be valid, active and not expirated.
 	apiKey,
-		validate, request_log, err := u.APIKeyEnable(ctx, req)
+		validate, request_log, err := u.apiKeyEnable(ctx, req)
 	if apiKey == nil {
 		return validate, request_log, err
 	}
 
 	// Environment must be valid, active and matched with API Key
 	environment,
-		validate, request_log, err := u.EnvironmentEnable(ctx, req, apiKey)
+		validate, request_log, err := u.environmentEnable(ctx, req, apiKey)
 	if environment == nil {
 		return validate, request_log, err
 	}
 
 	// Service must be valid and active
 	service,
-		validate, request_log, err := u.ServiceEnable(ctx, req, apiKey)
+		validate, request_log, err := u.serviceEnable(ctx, req, apiKey)
 	if service == nil {
 		return validate, request_log, err
 	}
@@ -67,7 +67,7 @@ func (u *APIKeyUseCase) validateAndConsume(
 	)
 	if err != nil {
 		if err == errors.ErrNotFound {
-			validate, request_log, err := u.HandlerErrorNotQuotes(
+			validate, request_log, err := u.handlerErrorNotQuotes(
 				ctx, req, apiKey, environment.ID, service.ID,
 			)
 			return validate, request_log, err
@@ -90,7 +90,7 @@ func (u *APIKeyUseCase) validateAndConsume(
 		}, nil
 }
 
-func (u *APIKeyUseCase) APIKeyEnable(
+func (u *APIKeyUseCase) apiKeyEnable(
 	ctx context.Context, req *dto.APIKeyValidate,
 ) (*entities.APIKey, *dto.APIKeyValidateResponse, *entities.RequestLog, *errors.Error) {
 	apiKey, err := u.apiKeyRepo.FindByKey(ctx, req.Key)
@@ -147,7 +147,7 @@ func (u *APIKeyUseCase) APIKeyEnable(
 	return apiKey, nil, nil, nil
 }
 
-func (u *APIKeyUseCase) EnvironmentEnable(
+func (u *APIKeyUseCase) environmentEnable(
 	ctx context.Context, req *dto.APIKeyValidate, apiKey *entities.APIKey,
 ) (*entities.Environment, *dto.APIKeyValidateResponse, *entities.RequestLog, *errors.Error) {
 	environment, err := u.environmentRepo.FindByID(
@@ -185,7 +185,7 @@ func (u *APIKeyUseCase) EnvironmentEnable(
 	}
 	return environment, nil, nil, nil
 }
-func (u *APIKeyUseCase) ServiceEnable(
+func (u *APIKeyUseCase) serviceEnable(
 	ctx context.Context, req *dto.APIKeyValidate, apiKey *entities.APIKey,
 ) (*entities.Service, *dto.APIKeyValidateResponse, *entities.RequestLog, *errors.Error) {
 	// Service in that version must be exist in the service entity
@@ -231,7 +231,7 @@ func (u *APIKeyUseCase) ServiceEnable(
 	return service, nil, nil, nil
 }
 
-func (u *APIKeyUseCase) HandlerErrorNotQuotes(
+func (u *APIKeyUseCase) handlerErrorNotQuotes(
 	ctx context.Context,
 	req *dto.APIKeyValidate,
 	apiKey *entities.APIKey,
