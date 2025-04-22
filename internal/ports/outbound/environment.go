@@ -23,6 +23,5 @@ type EnvironmentPort interface {
 	GetProjectServiceQuotaUsage(ctx context.Context, id, serviceID int) (*dto.QuotaUsage, *errors.Error)
 	RemoveServiceFromProjectEnvironments(ctx context.Context, projectID, serviceID int) (int64, *errors.Error)
 	IncreaseAvailableRequest(ctx context.Context, id, serviceID int) *errors.Error
-	FindByName(ctx context.Context, name string) (*entities.Environment, *errors.Error)
 	MissingResourceDiagnosis(ctx context.Context, id int, service_id int) (bool, bool, *errors.Error)
 }

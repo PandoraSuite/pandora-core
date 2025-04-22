@@ -172,29 +172,6 @@ func (r *EnvironmentRepository) Exists(
 	return exists, nil
 }
 
-func (r *EnvironmentRepository) FindByName(
-	ctx context.Context, name string,
-) (*entities.Environment, *errors.Error) {
-	query := `
-		SELECT id, name, status, project_id, created_at
-		FROM environment
-		WHERE name = $1;
-	`
-
-	environment := new(entities.Environment)
-	err := r.pool.QueryRow(ctx, query, name).Scan(
-		&environment.ID,
-		&environment.Name,
-		&environment.Status,
-		&environment.ProjectID,
-		&environment.CreatedAt,
-	)
-	if err != nil {
-		return nil, r.handlerErr(err)
-	}
-	return environment, nil
-}
-
 func (r *EnvironmentRepository) IsActive(
 	ctx context.Context, id int,
 ) (bool, *errors.Error) {

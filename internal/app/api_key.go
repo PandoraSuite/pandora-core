@@ -63,7 +63,7 @@ func (u *APIKeyUseCase) validateAndConsume(
 
 	// Decrement available_request or identify unlimited request
 	availableRequest, err := u.environmentRepo.DecrementAvailableRequest(
-		ctx, apiKey.EnvironmentID, service.ID,
+		ctx, environment.ID, service.ID,
 	)
 	if err != nil {
 		if err == errors.ErrNotFound {
@@ -85,7 +85,7 @@ func (u *APIKeyUseCase) validateAndConsume(
 			APIKey:          apiKey.Key,
 			ServiceID:       service.ID,
 			RequestTime:     req.RequestTime,
-			EnvironmentID:   apiKey.EnvironmentID,
+			EnvironmentID:   environment.ID,
 			ExecutionStatus: enums.RequestLogPending,
 		}, nil
 }
@@ -150,24 +150,24 @@ func (u *APIKeyUseCase) APIKeyEnable(
 func (u *APIKeyUseCase) EnvironmentEnable(
 	ctx context.Context, req *dto.APIKeyValidate, apiKey *entities.APIKey,
 ) (*entities.Environment, *dto.APIKeyValidateResponse, *entities.RequestLog, *errors.Error) {
-	environment, err := u.environmentRepo.FindByName(
-		ctx, req.Environment)
+	environment, err := u.environmentRepo.FindByID(
+		ctx, apiKey.EnvironmentID)
 	if err != nil {
-		if err == errors.ErrNotFound {
-			message := "Environment not found"
-			return nil, &dto.APIKeyValidateResponse{
-					Valid:   false,
-					Message: message,
-					Code:    enums.ReserveExecutionStatusEnvironmentNotFound,
-				},
-				&entities.RequestLog{
-					APIKey:          req.Key,
-					RequestTime:     req.RequestTime,
-					ExecutionStatus: enums.RequestLogUnauthorized,
-					Message:         message,
-				}, nil
-		}
 		return nil, nil, nil, err
+	}
+	if environment.Name != req.Environment {
+		message := "API Key doesn't belong to the environment"
+		return nil, &dto.APIKeyValidateResponse{
+				Valid:   false,
+				Message: message,
+				Code:    enums.ValidateStatusInvalidEnvironmentKey,
+			}, &entities.RequestLog{
+				APIKey:          apiKey.Key,
+				RequestTime:     req.RequestTime,
+				EnvironmentID:   environment.ID,
+				ExecutionStatus: enums.RequestLogUnauthorized,
+				Message:         message,
+			}, nil
 	}
 	if !environment.IsActive() {
 		message := "Environment is not active"
@@ -179,20 +179,6 @@ func (u *APIKeyUseCase) EnvironmentEnable(
 				APIKey:          apiKey.Key,
 				RequestTime:     req.RequestTime,
 				EnvironmentID:   environment.ID,
-				ExecutionStatus: enums.RequestLogUnauthorized,
-				Message:         message,
-			}, nil
-	}
-	if apiKey.EnvironmentID != environment.ID {
-		message := "API Key invalid for the environment"
-		return nil, &dto.APIKeyValidateResponse{
-				Valid:   false,
-				Message: message,
-				Code:    enums.ValidateStatusInvalidEnvironmentKey,
-			}, &entities.RequestLog{
-				APIKey:          apiKey.Key,
-				RequestTime:     req.RequestTime,
-				EnvironmentID:   apiKey.EnvironmentID,
 				ExecutionStatus: enums.RequestLogUnauthorized,
 				Message:         message,
 			}, nil
@@ -269,7 +255,6 @@ func (u *APIKeyUseCase) HandlerErrorNotQuotes(
 				APIKey:          apiKey.Key,
 				ServiceID:       service_id,
 				RequestTime:     req.RequestTime,
-				EnvironmentID:   apiKey.EnvironmentID,
 				ExecutionStatus: enums.RequestLogUnauthorized,
 				Message:         message,
 			}, nil
