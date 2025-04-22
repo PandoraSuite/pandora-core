@@ -72,6 +72,7 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 		{
 			services.GET("", handlers.GetAllServices(s.srvService))
 			services.POST("", handlers.CreateService(s.srvService))
+			services.DELETE("/:id", handlers.DeleteService(s.srvService))
 			services.PATCH(
 				"/:id/status",
 				handlers.UpdateStatusService(s.srvService),
@@ -107,6 +108,14 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 				"/:id/services/:service_id",
 				handlers.RemoveServiceFromProject(s.projectService),
 			)
+			projects.PATCH(
+				"/:id/services/:service_id",
+				handlers.UpdateProjectService(s.projectService),
+			)
+			projects.POST(
+				"/:id/services/:service_id/reset-requests",
+				handlers.ResetServiceAvailableRequests(s.projectService),
+			)
 		}
 
 		environments := protected.Group("/environments")
@@ -131,6 +140,10 @@ func (s *Server) setupRoutes(router *gin.RouterGroup) {
 			environments.DELETE(
 				"/:id/services/:service_id",
 				handlers.RemoveServiceFromEnvironment(s.environmentService),
+			)
+			environments.PATCH(
+				"/:id/services/:service_id",
+				handlers.UpdateEnvironmentService(s.environmentService),
 			)
 			environments.PATCH(
 				"/:id/services/:service_id/reset-requests",

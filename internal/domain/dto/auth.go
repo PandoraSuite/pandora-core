@@ -10,7 +10,7 @@ type Authenticate struct {
 type TokenResponse struct {
 	Token     string    `json:"access_token"`
 	TokenType string    `json:"token_type"`
-	ExpiresIn time.Time `json:"expires_in"`
+	ExpiresIn time.Time `json:"expires_in" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
 }
 
 type AuthenticateResponse struct {

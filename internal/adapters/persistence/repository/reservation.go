@@ -122,9 +122,9 @@ func (r *ReservationRepository) CountByEnvironmentAndService(
 	return currentReservations, nil
 }
 
-func (r *ReservationRepository) RemoveReservation(
+func (r *ReservationRepository) Delete(
 	ctx context.Context, id string,
-) (int64, *errors.Error) {
+) *errors.Error {
 	query := `
 		DELETE FROM reservation
 		WHERE id = $1;
@@ -132,14 +132,14 @@ func (r *ReservationRepository) RemoveReservation(
 
 	result, err := r.pool.Exec(ctx, query, id)
 	if err != nil {
-		return 0, r.handlerErr(err)
+		return r.handlerErr(err)
 	}
 
 	if result.RowsAffected() == 0 {
-		return 0, errors.ErrReservationNotFound
+		return errors.ErrReservationNotFound
 	}
 
-	return result.RowsAffected(), nil
+	return nil
 }
 func NewReservationRepository(
 	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,

@@ -2,6 +2,7 @@ package outbound
 
 import (
 	"context"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -15,6 +16,11 @@ type ProjectPort interface {
 	FindByID(ctx context.Context, id int) (*entities.Project, *errors.Error)
 	AddService(ctx context.Context, id int, service *entities.ProjectService) *errors.Error
 	FindByClient(ctx context.Context, clientID int) ([]*entities.Project, *errors.Error)
+	UpdateService(ctx context.Context, id, serviceID int, update *dto.ProjectServiceUpdate) (*entities.ProjectService, *errors.Error)
 	RemoveService(ctx context.Context, id, serviceID int) (int64, *errors.Error)
+	FindServiceByID(ctx context.Context, id, serviceID int) (*entities.ProjectService, *errors.Error)
+	ExistsServiceIn(ctx context.Context, serviceID int) (bool, *errors.Error)
+	ResetProjectServiceUsage(ctx context.Context, id, serviceID int, nextReset time.Time) ([]*dto.EnvironmentServiceReset, *errors.Error)
 	GetProjectServiceQuotaUsage(ctx context.Context, id, serviceID int) (*dto.QuotaUsage, *errors.Error)
+	ResetAvailableRequestsForEnvsService(ctx context.Context, id, serviceID int) ([]*dto.EnvironmentServiceReset, *errors.Error)
 }

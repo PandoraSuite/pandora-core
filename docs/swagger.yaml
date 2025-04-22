@@ -136,6 +136,20 @@ definitions:
     - id
     - max_request
     type: object
+  dto.EnvironmentServiceReset:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      service:
+        $ref: '#/definitions/dto.EnvironmentServiceResponse'
+      status:
+        enum:
+        - active
+        - deactivated
+        type: string
+    type: object
   dto.EnvironmentServiceResponse:
     properties:
       assigned_at:
@@ -150,6 +164,11 @@ definitions:
         type: string
       version:
         type: string
+    type: object
+  dto.EnvironmentServiceUpdate:
+    properties:
+      max_request:
+        type: integer
     type: object
   dto.EnvironmentUpdate:
     properties:
@@ -215,6 +234,22 @@ definitions:
     - id
     - max_request
     type: object
+  dto.ProjectServiceResetRequest:
+    properties:
+      recalculate_next_reset:
+        type: boolean
+    type: object
+  dto.ProjectServiceResetRequestResponse:
+    properties:
+      environment_services:
+        items:
+          $ref: '#/definitions/dto.EnvironmentServiceReset'
+        type: array
+      project_service:
+        $ref: '#/definitions/dto.ProjectServiceResponse'
+      reset_count:
+        type: integer
+    type: object
   dto.ProjectServiceResponse:
     properties:
       assigned_at:
@@ -236,6 +271,21 @@ definitions:
         - ""
         type: string
       version:
+        type: string
+    type: object
+  dto.ProjectServiceUpdate:
+    properties:
+      max_request:
+        type: integer
+      next_reset:
+        type: string
+      reset_frequency:
+        enum:
+        - daily
+        - weekly
+        - biweekly
+        - monthly
+        - ""
         type: string
     type: object
   dto.ProjectUpdate:
@@ -732,6 +782,43 @@ paths:
       summary: Removes a service from an environment
       tags:
       - Environments
+    patch:
+      consumes:
+      - application/json
+      description: Modifies the configuration of a service within a specific environment
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      - description: Updated service configuration
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EnvironmentServiceUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.EnvironmentServiceResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates a service assigned to an environment
+      tags:
+      - Environments
   /api/v1/environments/{id}/services/{service_id}/reset-requests:
     patch:
       description: Resets the available request count for a specific service within
@@ -940,6 +1027,81 @@ paths:
       summary: Removes a service from a project
       tags:
       - Projects
+    patch:
+      consumes:
+      - application/json
+      description: Modifies the configuration of a service within a specific project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      - description: Updated service configuration
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProjectServiceUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProjectServiceResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Updates a service assigned to a project
+      tags:
+      - Projects
+  /api/v1/projects/{id}/services/{service_id}/reset-requests:
+    post:
+      consumes:
+      - application/json
+      description: Resets the request quota for a specific service assigned to a project
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      - description: Reset configuration
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ProjectServiceResetRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.ProjectServiceResetRequestResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Resets available requests for a service in a project
+      tags:
+      - Projects
   /api/v1/services:
     get:
       consumes:
@@ -996,6 +1158,29 @@ paths:
       security:
       - OAuth2Password: []
       summary: Creates a new service
+      tags:
+      - Services
+  /api/v1/services/{id}:
+    delete:
+      description: Permanently removes a service by its ID
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      security:
+      - OAuth2Password: []
+      summary: Deletes a service
       tags:
       - Services
   /api/v1/services/{id}/status:

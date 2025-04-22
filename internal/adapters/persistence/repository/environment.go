@@ -20,6 +20,32 @@ type EnvironmentRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *EnvironmentRepository) ExistsServiceWithInfiniteMaxRequest(
+	ctx context.Context, projectID, serviceID int,
+) (bool, *errors.Error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM project_service ps
+				JOIN environment e
+					ON e.project_id = ps.project_id
+				JOIN environment_service es
+					ON es.environment_id = e.id
+						AND es.service_id = ps.service_id
+			WHERE ps.project_id = $1 AND ps.service_id = $2
+				AND es.max_request IS NULL
+		);
+	`
+
+	var hasInfinite bool
+	err := r.pool.QueryRow(ctx, query, projectID, serviceID).Scan(&hasInfinite)
+	if err != nil {
+		return false, r.handlerErr(err)
+	}
+
+	return hasInfinite, nil
+}
+
 func (r *EnvironmentRepository) ResetAvailableRequests(
 	ctx context.Context, id, serviceID int,
 ) (*entities.EnvironmentService, *errors.Error) {
@@ -108,6 +134,61 @@ func (r *EnvironmentRepository) UpdateStatus(
 	}
 
 	return nil
+}
+
+func (r *EnvironmentRepository) UpdateService(
+	ctx context.Context,
+	id, serviceID int,
+	update *dto.EnvironmentServiceUpdate,
+) (*entities.EnvironmentService, *errors.Error) {
+	if update == nil {
+		return r.FindServiceByID(ctx, id, serviceID)
+	}
+
+	query := `
+		WITH updated AS (
+			UPDATE environment_service
+			SET max_request = $3, available_request = $4
+			WHERE environment_id = $1 AND service_id = $2
+			RETURNING *
+		)
+		SELECT s.id, s.name, s.version, COALESCE(u.max_request, -1), COALESCE(u.available_request, -1), u.created_at
+		FROM updated u
+			JOIN service s
+				ON s.id = u.service_id;
+	`
+
+	var maxRequest any
+	if update.MaxRequest != -1 {
+		maxRequest = update.MaxRequest
+	}
+
+	var availableRequest any
+	if update.AvailableRequest != -1 {
+		availableRequest = update.AvailableRequest
+	}
+
+	service := new(entities.EnvironmentService)
+	err := r.pool.QueryRow(
+		ctx,
+		query,
+		id,
+		serviceID,
+		maxRequest,
+		availableRequest,
+	).Scan(
+		&service.ID,
+		&service.Name,
+		&service.Version,
+		&service.MaxRequest,
+		&service.AvailableRequest,
+		&service.AssignedAt,
+	)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return service, nil
 }
 
 func (r *EnvironmentRepository) Update(
@@ -334,6 +415,34 @@ func (r *EnvironmentRepository) ExistsServiceIn(
 	return exists, nil
 }
 
+func (r *EnvironmentRepository) FindServiceByID(
+	ctx context.Context, id, serviceID int,
+) (*entities.EnvironmentService, *errors.Error) {
+	query := `
+		SELECT s.id, s.name, s.version, COALESCE(es.max_request, -1),
+			COALESCE(es.available_request, -1), es.created_at
+		FROM environment_service es
+			JOIN service s
+				ON s.id = es.service_id
+		WHERE es.environment_id = $1 AND es.service_id = $2;
+	`
+
+	service := new(entities.EnvironmentService)
+	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(
+		&service.ID,
+		&service.Name,
+		&service.Version,
+		&service.MaxRequest,
+		&service.AvailableRequest,
+		&service.AssignedAt,
+	)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return service, nil
+}
+
 func (r *EnvironmentRepository) FindByID(
 	ctx context.Context, id int,
 ) (*entities.Environment, *errors.Error) {
@@ -355,7 +464,7 @@ func (r *EnvironmentRepository) FindByID(
 			LEFT JOIN environment_service es
 				ON es.environment_id = e.id
 			LEFT JOIN service s
-			ON s.id = es.service_id
+				ON s.id = es.service_id
 		WHERE e.id = $1
 		GROUP BY e.id;
 	`

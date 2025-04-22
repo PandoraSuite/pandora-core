@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/MAD-py/pandora-core/cmd/http/config"
 	"github.com/MAD-py/pandora-core/internal/adapters/http"
@@ -13,6 +14,8 @@ import (
 )
 
 func main() {
+	time.Local = time.UTC
+
 	log.Println("[INFO] Starting Pandora Core (API RESTful)...")
 
 	cfg, err := config.LoadConfig()
@@ -51,7 +54,9 @@ func main() {
 
 	authUseCase := app.NewAuthUseCase(jwtProvider, credentialsRepo)
 	clientUseCase := app.NewClientUseCase(clientRepo, projectRepo)
-	serviceUseCase := app.NewServiceUseCase(serviceRepo)
+	serviceUseCase := app.NewServiceUseCase(
+		serviceRepo, projectRepo, requestLogRepo,
+	)
 	projectUseCase := app.NewProjectUseCase(projectRepo, environmentRepo)
 	environmentUseCase := app.NewEnvironmentUseCase(
 		environmentRepo, projectRepo,

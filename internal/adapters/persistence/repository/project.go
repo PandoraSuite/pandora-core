@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -18,6 +19,241 @@ type ProjectRepository struct {
 	pool *pgxpool.Pool
 
 	handlerErr func(error) *errors.Error
+}
+
+func (r *ProjectRepository) ResetAvailableRequestsForEnvsService(
+	ctx context.Context, id, serviceID int,
+) ([]*dto.EnvironmentServiceReset, *errors.Error) {
+	return r.resetAvailableRequestsForEnvsService(
+		ctx, nil, id, serviceID,
+	)
+}
+
+func (r *ProjectRepository) ResetProjectServiceUsage(
+	ctx context.Context, id, serviceID int, nextReset time.Time,
+) ([]*dto.EnvironmentServiceReset, *errors.Error) {
+	tx, txErr := r.pool.Begin(ctx)
+	if txErr != nil {
+		return nil, r.handlerErr(txErr)
+	}
+
+	if err := r.updateNextReset(ctx, tx, id, serviceID, nextReset); err != nil {
+		tx.Rollback(ctx)
+		return nil, err
+	}
+
+	environmentsService, err := r.resetAvailableRequestsForEnvsService(
+		ctx, tx, id, serviceID,
+	)
+	if err != nil {
+		tx.Rollback(ctx)
+		return nil, r.handlerErr(err)
+	}
+
+	return environmentsService, r.handlerErr(tx.Commit(ctx))
+}
+
+func (r *ProjectRepository) updateNextReset(
+	ctx context.Context, tx pgx.Tx, id, serviceID int, nextReset time.Time,
+) *errors.Error {
+	query := `
+		UPDATE project_service
+		SET next_reset = $3
+		WHERE project_id = $1 AND service_id = $2;
+	`
+
+	var internalNextReset any
+	if !nextReset.IsZero() {
+		internalNextReset = nextReset
+	}
+
+	result, err := tx.Exec(ctx, query, id, serviceID, internalNextReset)
+	if err != nil {
+		return r.handlerErr(err)
+	}
+
+	if result.RowsAffected() == 0 {
+		return errors.ErrProjectServiceNotFound
+	}
+
+	return nil
+}
+
+func (r *ProjectRepository) resetAvailableRequestsForEnvsService(
+	ctx context.Context, tx pgx.Tx, id, serviceID int,
+) ([]*dto.EnvironmentServiceReset, *errors.Error) {
+	query := `
+		WITH updated AS (
+			UPDATE environment_service es
+			SET available_request = max_request
+			FROM project p
+				JOIN environment e
+					ON e.project_id = p.id
+			WHERE es.environment_id = e.id AND p.id = $1 AND es.service_id = $2
+			RETURNING e.id, e.name, e.status, es.max_request,
+				es.available_request, es.created_at, es.service_id
+		)
+		SELECT u.id, u.name, u.status, JSON_BUILD_OBJECT(
+			'id', s.id,
+			'name', s.name,
+			'version', s.version,
+			'max_request', COALESCE(u.max_request, -1),
+			'available_request', COALESCE(u.available_request, -1),
+			'assigned_at', u.created_at
+		)
+		FROM updated u
+			JOIN service s
+				ON s.id = u.service_id;
+	`
+
+	var err error
+	var rows pgx.Rows
+	if tx != nil {
+		rows, err = tx.Query(ctx, query, id, serviceID)
+	} else {
+		rows, err = r.pool.Query(ctx, query, id, serviceID)
+	}
+
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	defer rows.Close()
+
+	var environmentsService []*dto.EnvironmentServiceReset
+	for rows.Next() {
+		environmentService := new(dto.EnvironmentServiceReset)
+
+		err = rows.Scan(
+			&environmentService.ID,
+			&environmentService.Name,
+			&environmentService.Status,
+			&environmentService.Service,
+		)
+		if err != nil {
+			return nil, r.handlerErr(err)
+		}
+
+		environmentsService = append(environmentsService, environmentService)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return environmentsService, nil
+}
+
+func (r *ProjectRepository) FindServiceByID(
+	ctx context.Context, id, serviceID int,
+) (*entities.ProjectService, *errors.Error) {
+	query := `
+		SELECT s.id, s.name, s.version, COALESCE(ps.max_request, -1),
+			ps.reset_frequency, COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
+			ps.created_at
+		FROM project_service ps
+			JOIN service s
+				ON s.id = ps.service_id
+		WHERE ps.project_id = $1 AND ps.service_id = $2;
+	`
+
+	service := new(entities.ProjectService)
+	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(
+		&service.ID,
+		&service.Name,
+		&service.Version,
+		&service.MaxRequest,
+		&service.ResetFrequency,
+		&service.NextReset,
+		&service.AssignedAt,
+	)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return service, nil
+}
+
+func (r *ProjectRepository) UpdateService(
+	ctx context.Context, id, serviceID int, update *dto.ProjectServiceUpdate,
+) (*entities.ProjectService, *errors.Error) {
+	if update == nil {
+		return r.FindServiceByID(ctx, id, serviceID)
+	}
+
+	query := `
+		WITH updated AS (
+			UPDATE project_service
+			SET max_request = $3, reset_frequency = $4, next_reset = $5
+			WHERE project_id = $1 AND service_id = $2
+			RETURNING *
+		)
+		SELECT s.id, s.name, s.version, COALESCE(u.max_request, -1),
+			u.reset_frequency, COALESCE(u.next_reset, '0001-01-01 00:00:00.0+00'),
+			u.created_at
+		FROM updated u
+			JOIN service s
+				ON s.id = u.service_id;
+	`
+
+	var resetFrequency any
+	if s := update.ResetFrequency.String(); s != "" {
+		resetFrequency = s
+	}
+
+	var maxRequest any
+	if update.MaxRequest != -1 {
+		maxRequest = update.MaxRequest
+	}
+
+	var nextReset any
+	if !update.NextReset.IsZero() {
+		nextReset = update.NextReset
+	}
+
+	service := new(entities.ProjectService)
+	err := r.pool.QueryRow(
+		ctx,
+		query,
+		id,
+		serviceID,
+		maxRequest,
+		resetFrequency,
+		nextReset,
+	).Scan(
+		&service.ID,
+		&service.Name,
+		&service.Version,
+		&service.MaxRequest,
+		&service.ResetFrequency,
+		&service.NextReset,
+		&service.AssignedAt,
+	)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return service, nil
+}
+
+func (r *ProjectRepository) ExistsServiceIn(
+	ctx context.Context, serviceID int,
+) (bool, *errors.Error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM project_service
+			WHERE service_id = $1
+		);
+	`
+
+	var exists bool
+	err := r.pool.QueryRow(ctx, query, serviceID).Scan(&exists)
+	if err != nil {
+		return false, r.handlerErr(err)
+	}
+
+	return exists, nil
 }
 
 func (r *ProjectRepository) RemoveService(
@@ -157,7 +393,7 @@ func (r *ProjectRepository) FindByID(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'nextReset', ps.next_reset,
+						'nextReset', COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
 						'maxRequest', COALESCE(ps.max_request, -1),
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
@@ -200,7 +436,7 @@ func (r *ProjectRepository) FindByClient(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'nextReset', ps.next_reset,
+						'nextReset', COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
 						'maxRequest', COALESCE(ps.max_request, -1),
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
@@ -370,13 +606,18 @@ func (r *ProjectRepository) saveProjectServices(
 			maxRequest = service.MaxRequest
 		}
 
+		var nextReset any
+		if !service.NextReset.IsZero() {
+			nextReset = service.NextReset
+		}
+
 		args = append(
 			args,
 			projectID,
 			service.ID,
 			maxRequest,
 			resetFrequency,
-			service.NextReset,
+			nextReset,
 		)
 		argIndex += 5
 	}
@@ -388,7 +629,7 @@ func (r *ProjectRepository) saveProjectServices(
 				VALUES %s
 				RETURNING *
 			)
-			SELECT s.id, s.name, s.version, COALESCE(i.max_request, -1), i.reset_frequency, i.next_reset, i.created_at
+			SELECT s.id, s.name, s.version, COALESCE(i.max_request, -1), i.reset_frequency, COALESCE(i.next_reset, '0001-01-01 00:00:00.0+00'), i.created_at
 			FROM inserted i
 				JOIN service s
 					ON i.service_id = s.id;

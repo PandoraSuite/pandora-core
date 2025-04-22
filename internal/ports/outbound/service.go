@@ -11,8 +11,9 @@ import (
 
 type ServicePort interface {
 	Save(ctx context.Context, service *entities.Service) *errors.Error
-	UpdateStatus(ctx context.Context, id int, status enums.ServiceStatus) (*entities.Service, *errors.Error)
+	Delete(ctx context.Context, id int) *errors.Error
 	FindAll(ctx context.Context, filter *dto.ServiceFilter) ([]*entities.Service, *errors.Error)
+	UpdateStatus(ctx context.Context, id int, status enums.ServiceStatus) (*entities.Service, *errors.Error)
 }
 
 type ServiceFindPort interface {

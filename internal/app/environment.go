@@ -16,6 +16,76 @@ type EnvironmentUseCase struct {
 	projectRepo     outbound.ProjectPort
 }
 
+func (u *EnvironmentUseCase) UpdateService(
+	ctx context.Context, id, serviceID int, req *dto.EnvironmentServiceUpdate,
+) (*dto.EnvironmentServiceResponse, *errors.Error) {
+	if req.MaxRequest < -1 {
+		return nil, errors.ErrInvalidMaxRequest
+	}
+
+	exists, err := u.environmentRepo.Exists(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return nil, errors.ErrEnvironmentNotFound
+	}
+
+	service, err := u.environmentRepo.FindServiceByID(
+		ctx, id, serviceID,
+	)
+	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrServiceNotAssignedToEnvironment
+		}
+		return nil, err
+	}
+
+	quota, err := u.environmentRepo.GetProjectServiceQuotaUsage(
+		ctx, id, serviceID,
+	)
+	if err != nil {
+		if err == errors.ErrNotFound {
+			return nil, errors.ErrServiceNotAssignedToProject
+		}
+		return nil, err
+	}
+
+	if req.MaxRequest == -1 {
+		if quota.MaxAllowed != -1 {
+			return nil, errors.ErrInfiniteRequestsNotAllowed
+		}
+	} else if quota.MaxAllowed != -1 {
+		newAllocated := quota.CurrentAllocated - service.MaxRequest + req.MaxRequest
+		if newAllocated > quota.MaxAllowed {
+			return nil, errors.ErrMaxRequestExceededForServiceInProyect
+		}
+	}
+
+	if service.AvailableRequest == -1 || service.AvailableRequest > req.MaxRequest {
+		req.AvailableRequest = req.MaxRequest
+	} else {
+		req.AvailableRequest = service.AvailableRequest
+	}
+
+	service, err = u.environmentRepo.UpdateService(
+		ctx, id, serviceID, req,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.EnvironmentServiceResponse{
+		ID:               service.ID,
+		Name:             service.Name,
+		Version:          service.Version,
+		MaxRequest:       service.MaxRequest,
+		AvailableRequest: service.AvailableRequest,
+		AssignedAt:       service.AssignedAt,
+	}, nil
+}
+
 func (u *EnvironmentUseCase) Update(
 	ctx context.Context, id int, req *dto.EnvironmentUpdate,
 ) (*dto.EnvironmentResponse, *errors.Error) {
@@ -140,15 +210,6 @@ func (u *EnvironmentUseCase) RemoveService(
 func (u *EnvironmentUseCase) AssignService(
 	ctx context.Context, id int, req *dto.EnvironmentService,
 ) (*dto.EnvironmentServiceResponse, *errors.Error) {
-	exists, err := u.environmentRepo.Exists(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-
-	if !exists {
-		return nil, errors.ErrEnvironmentNotFound
-	}
-
 	service := entities.EnvironmentService{
 		ID:               req.ID,
 		MaxRequest:       req.MaxRequest,
@@ -157,6 +218,15 @@ func (u *EnvironmentUseCase) AssignService(
 
 	if err := service.Validate(); err != nil {
 		return nil, err
+	}
+
+	exists, err := u.environmentRepo.Exists(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if !exists {
+		return nil, errors.ErrEnvironmentNotFound
 	}
 
 	exists, err = u.environmentRepo.ExistsServiceIn(ctx, id, service.ID)
