@@ -419,6 +419,65 @@ func (s *AuthSuite) TestValidateToken_TokenProviderError() {
 	s.Equal(errors.ErrInvalidToken, err)
 }
 
+func (s *AuthSuite) TestIsPasswordResetRequired_Successes() {
+	tests := []struct {
+		name      string
+		username  string
+		mockReset bool
+	}{
+		{
+			name:      "PasswordResetRequired",
+			username:  "User",
+			mockReset: true,
+		},
+		{
+			name:      "PasswordResetNotRequired",
+			username:  "User",
+			mockReset: false,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.credentialsRepo.EXPECT().
+				FindCredentials(s.ctx, test.username).
+				DoAndReturn(
+					func(
+						_ context.Context, username string,
+					) (*entities.Credentials, *errors.Error) {
+						return &entities.Credentials{
+							Username:           username,
+							HashedPassword:     "$2a$12$mtqngRdUqtAmrc3TMSKoteeVe4lwMmq0FBJiArGse8WrzuQVm8wW.",
+							ForcePasswordReset: test.mockReset,
+						}, nil
+					},
+				).
+				Times(1)
+
+			resetRequired, err := s.useCase.IsPasswordResetRequired(
+				s.ctx, test.username,
+			)
+
+			s.Require().Nil(err)
+			s.Equal(test.mockReset, resetRequired)
+		})
+	}
+}
+
+func (s *AuthSuite) TestIsPasswordResetRequired_CredentialsRepoError() {
+	username := "User"
+
+	s.credentialsRepo.EXPECT().
+		FindCredentials(s.ctx, username).
+		Return(nil, errors.ErrCredentialsNotFound).
+		Times(1)
+
+	resetRequired, err := s.useCase.IsPasswordResetRequired(s.ctx, username)
+
+	s.Require().False(resetRequired)
+	s.Equal(errors.ErrCredentialsNotFound, err)
+}
+
 func TestAuthSuite(t *testing.T) {
 	suite.Run(t, new(AuthSuite))
 }
