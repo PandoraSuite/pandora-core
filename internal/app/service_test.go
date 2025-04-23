@@ -112,7 +112,7 @@ func (s *ServiceSuite) TestCreate_ValidationErrors() {
 
 			resp, err := uc.Create(s.ctx, test.req)
 
-			s.Nil(resp)
+			s.Require().Nil(resp)
 			s.Equal(test.expectedErr, err)
 		})
 	}
@@ -128,7 +128,7 @@ func (s *ServiceSuite) TestCreate_ServiceRepoError() {
 
 	resp, err := s.useCase.Create(s.ctx, req)
 
-	s.Nil(resp)
+	s.Require().Nil(resp)
 	s.Error(err)
 }
 
@@ -234,7 +234,7 @@ func (s *ServiceSuite) TestGetServices_ServiceRepoError() {
 
 	resp, err := s.useCase.GetServices(s.ctx, req)
 
-	s.Nil(resp)
+	s.Require().Nil(resp)
 	s.Error(err)
 }
 
@@ -316,7 +316,7 @@ func (s *ServiceSuite) TestUpdateStatus_ServiceRepoErrors() {
 				s.ctx, 42, enums.ServiceDeprecated,
 			)
 
-			s.Nil(resp)
+			s.Require().Nil(resp)
 			s.Equal(test.expectedErr, err)
 		})
 	}
