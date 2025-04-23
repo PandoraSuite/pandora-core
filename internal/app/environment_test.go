@@ -14,8 +14,8 @@ type EnvironmentSuite struct {
 
 	ctrl *gomock.Controller
 
-	clientRepo  *mock.MockEnvironmentPort
-	projectRepo *mock.MockProjectPort
+	environmentRepo *mock.MockEnvironmentPort
+	projectRepo     *mock.MockProjectPort
 
 	useCase *EnvironmentUseCase
 
@@ -25,10 +25,10 @@ type EnvironmentSuite struct {
 func (s *EnvironmentSuite) SetupTest() {
 	s.ctrl = gomock.NewController(s.T())
 
-	s.clientRepo = mock.NewMockEnvironmentPort(s.ctrl)
+	s.environmentRepo = mock.NewMockEnvironmentPort(s.ctrl)
 	s.projectRepo = mock.NewMockProjectPort(s.ctrl)
 
-	s.useCase = NewEnvironmentUseCase(s.clientRepo, s.projectRepo)
+	s.useCase = NewEnvironmentUseCase(s.environmentRepo, s.projectRepo)
 
 	s.ctx = context.Background()
 }
