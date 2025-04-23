@@ -383,6 +383,42 @@ func (s *AuthSuite) TestChangePassword_CredentialsRepoChangeErrors() {
 	}
 }
 
+func (s *AuthSuite) TestValidateToken_Success() {
+	req := &dto.TokenRequest{
+		Key:  "dummy-jwt",
+		Type: "Bearer",
+	}
+
+	mockUsername := "User"
+
+	s.tokenProvider.EXPECT().
+		ValidateToken(s.ctx, req).
+		Return(mockUsername, nil).
+		Times(1)
+
+	subject, err := s.useCase.ValidateToken(s.ctx, req)
+
+	s.Require().Nil(err)
+	s.Equal(mockUsername, subject)
+}
+
+func (s *AuthSuite) TestValidateToken_TokenProviderError() {
+	req := &dto.TokenRequest{
+		Key:  "dummy-jwt",
+		Type: "Bearer",
+	}
+
+	s.tokenProvider.EXPECT().
+		ValidateToken(s.ctx, req).
+		Return("", errors.ErrInvalidToken).
+		Times(1)
+
+	username, err := s.useCase.ValidateToken(s.ctx, req)
+
+	s.Require().Empty(username)
+	s.Equal(errors.ErrInvalidToken, err)
+}
+
 func TestAuthSuite(t *testing.T) {
 	suite.Run(t, new(AuthSuite))
 }
