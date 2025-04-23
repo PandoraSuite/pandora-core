@@ -95,22 +95,11 @@ func (s *ServiceSuite) TestCreate_ValidationErrors() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
-			ctrl := gomock.NewController(s.T())
-			defer ctrl.Finish()
-
-			serviceRepo := mock.NewMockServicePort(s.ctrl)
-			projectRepo := mock.NewMockProjectPort(s.ctrl)
-			requestLogRepo := mock.NewMockRequestLogPort(s.ctrl)
-
-			uc := NewServiceUseCase(
-				serviceRepo, projectRepo, requestLogRepo,
-			)
-
-			serviceRepo.EXPECT().
+			s.serviceRepo.EXPECT().
 				Save(gomock.Any(), gomock.Any()).
 				Times(0)
 
-			resp, err := uc.Create(s.ctx, test.req)
+			resp, err := s.useCase.Create(s.ctx, test.req)
 
 			s.Require().Nil(resp)
 			s.Equal(test.expectedErr, err)
@@ -188,23 +177,12 @@ func (s *ServiceSuite) TestGetServices_Success() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
-			ctrl := gomock.NewController(s.T())
-			defer ctrl.Finish()
-
-			serviceRepo := mock.NewMockServicePort(s.ctrl)
-			projectRepo := mock.NewMockProjectPort(s.ctrl)
-			requestLogRepo := mock.NewMockRequestLogPort(s.ctrl)
-
-			uc := NewServiceUseCase(
-				serviceRepo, projectRepo, requestLogRepo,
-			)
-
-			serviceRepo.EXPECT().
+			s.serviceRepo.EXPECT().
 				FindAll(gomock.Any(), gomock.Any()).
 				Return(test.mockServices, (*errors.Error)(nil)).
 				Times(1)
 
-			resp, err := uc.GetServices(s.ctx, test.req)
+			resp, err := s.useCase.GetServices(s.ctx, test.req)
 
 			s.Require().Nil(err)
 			s.Require().Len(resp, len(test.mockServices))
@@ -296,23 +274,12 @@ func (s *ServiceSuite) TestUpdateStatus_ServiceRepoErrors() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
-			ctrl := gomock.NewController(s.T())
-			defer ctrl.Finish()
-
-			serviceRepo := mock.NewMockServicePort(s.ctrl)
-			projectRepo := mock.NewMockProjectPort(s.ctrl)
-			requestLogRepo := mock.NewMockRequestLogPort(s.ctrl)
-
-			uc := NewServiceUseCase(
-				serviceRepo, projectRepo, requestLogRepo,
-			)
-
-			serviceRepo.EXPECT().
+			s.serviceRepo.EXPECT().
 				UpdateStatus(s.ctx, 42, enums.ServiceDeprecated).
 				Return(nil, test.mockErr).
 				Times(1)
 
-			resp, err := uc.UpdateStatus(
+			resp, err := s.useCase.UpdateStatus(
 				s.ctx, 42, enums.ServiceDeprecated,
 			)
 

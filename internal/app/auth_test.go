@@ -42,7 +42,7 @@ func (s *AuthSuite) TearDownTest() {
 }
 
 func (s *AuthSuite) TestAuthenticate_Success() {
-	req := &dto.Authenticate{Username: "User", Password: "Password"}
+	req := &dto.Authenticate{Username: "User", Password: "Password1234"}
 
 	mockToken := &dto.TokenResponse{
 		Token:     "dummy-jwt",
@@ -59,7 +59,7 @@ func (s *AuthSuite) TestAuthenticate_Success() {
 				) (*entities.Credentials, *errors.Error) {
 					return &entities.Credentials{
 						Username:           username,
-						HashedPassword:     "$2a$12$PeI5jw3hPZvOh5IQ7fTElO/iCatcyLcaw3d1lQjrSwSnhDEmLPn9q",
+						HashedPassword:     "$2a$12$mtqngRdUqtAmrc3TMSKoteeVe4lwMmq0FBJiArGse8WrzuQVm8wW.",
 						ForcePasswordReset: false,
 					}, nil
 				},
@@ -93,7 +93,7 @@ func (s *AuthSuite) TestAuthenticate_VerifyPasswordError() {
 				) (*entities.Credentials, *errors.Error) {
 					return &entities.Credentials{
 						Username:           username,
-						HashedPassword:     "$2a$12$PeI5jw3hPZvOh5IQ7fTElO/iCatcyLcaw3d1lQjrSwSnhDEmLPn9q",
+						HashedPassword:     "$2a$12$mtqngRdUqtAmrc3TMSKoteeVe4lwMmq0FBJiArGse8WrzuQVm8wW.",
 						ForcePasswordReset: false,
 					}, nil
 				},
@@ -131,28 +131,20 @@ func (s *AuthSuite) TestAuthenticate_CredentialsRepoErrors() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
-			ctrl := gomock.NewController(s.T())
-			defer ctrl.Finish()
-
-			tokenProvider := mock.NewMockTokenPort(ctrl)
-			credentialsRepo := mock.NewMockCredentialsPort(ctrl)
-
-			uc := NewAuthUseCase(tokenProvider, credentialsRepo)
-
-			req := &dto.Authenticate{Username: "User", Password: "Password"}
+			req := &dto.Authenticate{Username: "User", Password: "Password1234"}
 
 			gomock.InOrder(
-				credentialsRepo.EXPECT().
+				s.credentialsRepo.EXPECT().
 					FindCredentials(s.ctx, req.Username).
 					Return(nil, test.mockErr).
 					Times(1),
 
-				tokenProvider.EXPECT().
+				s.tokenProvider.EXPECT().
 					GenerateToken(gomock.Any(), gomock.Any()).
 					Times(0),
 			)
 
-			resp, err := uc.Authenticate(s.ctx, req)
+			resp, err := s.useCase.Authenticate(s.ctx, req)
 
 			s.Require().Nil(resp)
 			s.Equal(test.expectedErr, err)
@@ -161,7 +153,7 @@ func (s *AuthSuite) TestAuthenticate_CredentialsRepoErrors() {
 }
 
 func (s *AuthSuite) TestAuthenticate_TokenProviderError() {
-	req := &dto.Authenticate{Username: "User", Password: "Password"}
+	req := &dto.Authenticate{Username: "User", Password: "Password1234"}
 
 	gomock.InOrder(
 		s.credentialsRepo.EXPECT().
@@ -172,7 +164,7 @@ func (s *AuthSuite) TestAuthenticate_TokenProviderError() {
 				) (*entities.Credentials, *errors.Error) {
 					return &entities.Credentials{
 						Username:           username,
-						HashedPassword:     "$2a$12$PeI5jw3hPZvOh5IQ7fTElO/iCatcyLcaw3d1lQjrSwSnhDEmLPn9q",
+						HashedPassword:     "$2a$12$mtqngRdUqtAmrc3TMSKoteeVe4lwMmq0FBJiArGse8WrzuQVm8wW.",
 						ForcePasswordReset: false,
 					}, nil
 				},
@@ -189,6 +181,206 @@ func (s *AuthSuite) TestAuthenticate_TokenProviderError() {
 
 	s.Require().Nil(resp)
 	s.Equal(errors.ErrTokenSigningFailed, err)
+}
+
+func (s *AuthSuite) TestChangePassword_Success() {
+	req := &dto.ChangePassword{
+		Username:        "User",
+		NewPassword:     "NewPassword123",
+		ConfirmPassword: "NewPassword123",
+	}
+
+	gomock.InOrder(
+		s.credentialsRepo.EXPECT().
+			FindCredentials(s.ctx, req.Username).
+			DoAndReturn(
+				func(
+					_ context.Context, username string,
+				) (*entities.Credentials, *errors.Error) {
+					return &entities.Credentials{
+						Username:           username,
+						HashedPassword:     "$2a$12$mtqngRdUqtAmrc3TMSKoteeVe4lwMmq0FBJiArGse8WrzuQVm8wW.",
+						ForcePasswordReset: false,
+					}, nil
+				},
+			).
+			Times(1),
+
+		s.credentialsRepo.EXPECT().
+			ChangePassword(gomock.Any(), gomock.Any()).
+			Return(nil).
+			Times(1),
+	)
+
+	err := s.useCase.ChangePassword(s.ctx, req)
+
+	s.Require().Nil(err)
+}
+
+func (s *AuthSuite) TestCreate_ValidationErrors() {
+	tests := []struct {
+		name        string
+		req         *dto.ChangePassword
+		expectedErr *errors.Error
+	}{
+		{
+			name: "PasswordTooShort",
+			req: &dto.ChangePassword{
+				Username:        "User",
+				NewPassword:     "Short",
+				ConfirmPassword: "Short",
+			},
+			expectedErr: errors.ErrPasswordTooShort,
+		},
+		{
+			name: "PasswordMismatch",
+			req: &dto.ChangePassword{
+				Username:        "User",
+				NewPassword:     "NewPassword123",
+				ConfirmPassword: "DifferentPassword123",
+			},
+			expectedErr: errors.ErrPasswordMismatch,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			err := s.useCase.ChangePassword(s.ctx, test.req)
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
+func (s *AuthSuite) TestChangePassword_CredentialsRepoFindErrors() {
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "CredentialsNotFound",
+			mockErr:     errors.ErrCredentialsNotFound,
+			expectedErr: errors.ErrPasswordChangeFailed,
+		},
+		{
+			name:        "PersistenceError",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			req := &dto.ChangePassword{
+				Username:        "User",
+				NewPassword:     "NewPassword123",
+				ConfirmPassword: "NewPassword123",
+			}
+
+			gomock.InOrder(
+				s.credentialsRepo.EXPECT().
+					FindCredentials(s.ctx, req.Username).
+					Return(nil, test.mockErr).
+					Times(1),
+
+				s.credentialsRepo.EXPECT().
+					ChangePassword(gomock.Any(), gomock.Any()).
+					Times(0),
+			)
+
+			err := s.useCase.ChangePassword(s.ctx, req)
+
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
+func (s *AuthSuite) TestChangePassword_VerifyPasswordError() {
+	req := &dto.ChangePassword{
+		Username:        "User",
+		NewPassword:     "Password1234",
+		ConfirmPassword: "Password1234",
+	}
+
+	gomock.InOrder(
+		s.credentialsRepo.EXPECT().
+			FindCredentials(s.ctx, req.Username).
+			DoAndReturn(
+				func(
+					_ context.Context, username string,
+				) (*entities.Credentials, *errors.Error) {
+					return &entities.Credentials{
+						Username:           username,
+						HashedPassword:     "$2a$12$mtqngRdUqtAmrc3TMSKoteeVe4lwMmq0FBJiArGse8WrzuQVm8wW.",
+						ForcePasswordReset: false,
+					}, nil
+				},
+			).
+			Times(1),
+
+		s.credentialsRepo.EXPECT().
+			ChangePassword(gomock.Any(), gomock.Any()).
+			Times(0),
+	)
+
+	err := s.useCase.ChangePassword(s.ctx, req)
+
+	s.Equal(errors.ErrPasswordUnchanged, err)
+}
+
+func (s *AuthSuite) TestChangePassword_CredentialsRepoChangeErrors() {
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "CredentialsNotFound",
+			mockErr:     errors.ErrCredentialsNotFound,
+			expectedErr: errors.ErrPasswordChangeFailed,
+		},
+		{
+			name:        "PersistenceError",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			req := &dto.ChangePassword{
+				Username:        "User",
+				NewPassword:     "NewPassword123",
+				ConfirmPassword: "NewPassword123",
+			}
+
+			gomock.InOrder(
+				s.credentialsRepo.EXPECT().
+					FindCredentials(s.ctx, req.Username).
+					DoAndReturn(
+						func(
+							_ context.Context, username string,
+						) (*entities.Credentials, *errors.Error) {
+							return &entities.Credentials{
+								Username:           username,
+								HashedPassword:     "$2a$12$mtqngRdUqtAmrc3TMSKoteeVe4lwMmq0FBJiArGse8WrzuQVm8wW.",
+								ForcePasswordReset: false,
+							}, nil
+						},
+					).
+					Times(1),
+
+				s.credentialsRepo.EXPECT().
+					ChangePassword(s.ctx, gomock.Any()).
+					Return(test.mockErr).
+					Times(1),
+			)
+
+			err := s.useCase.ChangePassword(s.ctx, req)
+
+			s.Equal(test.expectedErr, err)
+		})
+	}
 }
 
 func TestAuthSuite(t *testing.T) {
