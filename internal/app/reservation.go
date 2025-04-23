@@ -36,10 +36,10 @@ func (u *ReservationUseCase) Rollback(
 	return nil
 }
 
-func NewReservationUseCase(ReservationRepo outbound.ReservationPort,
-	EnvironmentRepo outbound.EnvironmentPort) *ReservationUseCase {
+func NewReservationUseCase(reservationRepo outbound.ReservationPort,
+	environmentRepo outbound.EnvironmentPort) *ReservationUseCase {
 	return &ReservationUseCase{
-		reservationRepo: ReservationRepo,
-		environmentRepo: EnvironmentRepo,
+		reservationRepo: reservationRepo,
+		environmentRepo: environmentRepo,
 	}
 }
