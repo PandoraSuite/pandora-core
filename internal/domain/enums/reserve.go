@@ -5,21 +5,18 @@ import (
 	"fmt"
 )
 
-type ReserveExecutionStatusCode int
+type ValidateStatusCode int
 
 const (
-	ReserveExecutionStatusNull ReserveExecutionStatusCode = iota
-	ReserveExecutionStatusKeyNotFound
-	ReserveExecutionStatusInvalidKey
-	ReserveExecutionStatusDeactivatedKey
-	ReserveExecutionStatusExpiredKey
-	ReserveExecutionStatusServiceNotFound
-	ReserveExecutionStatusDeactivatedService
-	ReserveExecutionStatusDeprecatedService
-	ReserveExecutionStatusEnvironmentNotFound
-	ReserveExecutionStatusDeactivatedEnvironment
-	ReserveExecutionStatusExceededRequests
-	ReserveExecutionStatusActiveReservations
+	ValidateStatusNull ValidateStatusCode = iota
+	ValidateStatusDeactivatedKey
+	ValidateStatusExpiredKey
+	ValidateStatusServiceNotFound
+	ValidateStatusDeactivatedEnvironment
+	ValidateStatusExceededRequests
+	ValidateStatusActiveReservations
+	ValidateStatusInvalidEnvironmentKey
+	ValidateStatusEnvironmentServiceInvalid
 
 	ReservationExecutionStatusNotFound
 	ReservationExecutionStatusInvalidService
@@ -28,33 +25,27 @@ const (
 	ReservationExecutionStatusInvalidEnvironment
 	ReservationExecutionStatusEnvironmentNotActive
 
-	ValidateStatusInvalidEnvironmentKey
-	ValidateStatusEnvironmentServiceInvalid
+	ValidateStatusKeyNotFound
+	ValidateStatusInvalidKey
 )
 
-func (es ReserveExecutionStatusCode) String() string {
+func (es ValidateStatusCode) String() string {
 	switch es {
-	case ReserveExecutionStatusKeyNotFound:
+	case ValidateStatusKeyNotFound:
 		return "KEY_NOT_FOUND"
-	case ReserveExecutionStatusInvalidKey:
+	case ValidateStatusInvalidKey:
 		return "INVALID_KEY"
-	case ReserveExecutionStatusDeactivatedKey:
+	case ValidateStatusDeactivatedKey:
 		return "DEACTIVATED_KEY"
-	case ReserveExecutionStatusExpiredKey:
+	case ValidateStatusExpiredKey:
 		return "EXPIRED_KEY"
-	case ReserveExecutionStatusServiceNotFound:
+	case ValidateStatusServiceNotFound:
 		return "SERVICE_NOT_FOUND"
-	case ReserveExecutionStatusDeactivatedService:
-		return "DEACTIVATED_SERVICE"
-	case ReserveExecutionStatusDeprecatedService:
-		return "DEPRECATED_SERVICE"
-	case ReserveExecutionStatusEnvironmentNotFound:
-		return "ENVIRONMENT_NOT_FOUND"
-	case ReserveExecutionStatusDeactivatedEnvironment:
+	case ValidateStatusDeactivatedEnvironment:
 		return "DEACTIVATED_ENVIRONMENT"
-	case ReserveExecutionStatusExceededRequests:
+	case ValidateStatusExceededRequests:
 		return "EXCEEDED_AVAILABLE_REQUEST"
-	case ReserveExecutionStatusActiveReservations:
+	case ValidateStatusActiveReservations:
 		return "ACTIVE_RESERVATIONS"
 	case ReservationExecutionStatusNotFound:
 		return "RESERVATION_NOT_FOUND"
@@ -73,17 +64,17 @@ func (es ReserveExecutionStatusCode) String() string {
 	case ValidateStatusEnvironmentServiceInvalid:
 		return "ENVIRONMENT_SERVICE_INVALID"
 	default:
-		panic("unknown ReserveExecutionStatusCode")
+		panic("unknown ValidateStatusCode")
 	}
 }
 
-func (s *ReserveExecutionStatusCode) Scan(v any) error {
+func (s *ValidateStatusCode) Scan(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("invalid reserve execution status code: %v", v)
 	}
 
-	status, err := ParseReserveExecutionStatusCode(str)
+	status, err := ParseValidateStatusCode(str)
 	if err != nil {
 		return err
 	}
@@ -92,13 +83,13 @@ func (s *ReserveExecutionStatusCode) Scan(v any) error {
 	return nil
 }
 
-func (es *ReserveExecutionStatusCode) UnmarshalJSON(b []byte) error {
+func (es *ValidateStatusCode) UnmarshalJSON(b []byte) error {
 	var ss string
 	if err := json.Unmarshal(b, &ss); err != nil {
 		return err
 	}
 
-	parsed, err := ParseReserveExecutionStatusCode(ss)
+	parsed, err := ParseValidateStatusCode(ss)
 	if err != nil {
 		return err
 	}
@@ -107,34 +98,28 @@ func (es *ReserveExecutionStatusCode) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (es *ReserveExecutionStatusCode) MarshalJSON() ([]byte, error) {
+func (es *ValidateStatusCode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(es.String())
 }
 
-func ParseReserveExecutionStatusCode(es string) (ReserveExecutionStatusCode, error) {
+func ParseValidateStatusCode(es string) (ValidateStatusCode, error) {
 	switch es {
 	case "KEY_NOT_FOUND":
-		return ReserveExecutionStatusKeyNotFound, nil
+		return ValidateStatusKeyNotFound, nil
 	case "INVALID_KEY":
-		return ReserveExecutionStatusInvalidKey, nil
+		return ValidateStatusInvalidKey, nil
 	case "DEACTIVATED_KEY":
-		return ReserveExecutionStatusDeactivatedKey, nil
+		return ValidateStatusDeactivatedKey, nil
 	case "EXPIRED_KEY":
-		return ReserveExecutionStatusExpiredKey, nil
+		return ValidateStatusExpiredKey, nil
 	case "SERVICE_NOT_FOUND":
-		return ReserveExecutionStatusServiceNotFound, nil
-	case "DEACTIVATED_SERVICE":
-		return ReserveExecutionStatusDeactivatedService, nil
-	case "DEPRECATED_SERVICE":
-		return ReserveExecutionStatusDeprecatedService, nil
-	case "ENVIRONMENT_NOT_FOUND":
-		return ReserveExecutionStatusEnvironmentNotFound, nil
+		return ValidateStatusServiceNotFound, nil
 	case "DEACTIVATED_ENVIRONMENT":
-		return ReserveExecutionStatusDeactivatedEnvironment, nil
+		return ValidateStatusDeactivatedEnvironment, nil
 	case "EXCEEDED_AVAILABLE_REQUEST":
-		return ReserveExecutionStatusExceededRequests, nil
+		return ValidateStatusExceededRequests, nil
 	case "ACTIVE_RESERVATIONS":
-		return ReserveExecutionStatusActiveReservations, nil
+		return ValidateStatusActiveReservations, nil
 	case "RESERVATION_NOT_FOUND":
 		return ReservationExecutionStatusNotFound, nil
 	case "INVALID_SERVICE":
