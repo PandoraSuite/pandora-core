@@ -29,3 +29,7 @@ func (s *Service) Validate() *errors.Error {
 
 	return nil
 }
+
+func (a *Service) IsActive() bool {
+	return a.Status == enums.ServiceActive
+}

@@ -24,7 +24,11 @@ type APIKeyValidateBooking struct {
 }
 
 type APIKeyValidateResponse struct {
-	RequestID string `json:"request_id"`
+	RequestID        string                           `json:"request_id,omitempty"`
+	AvailableRequest int                              `json:"available_request,omitempty"`
+	Valid            bool                             `json:"valid"`
+	Message          string                           `json:"message,omitempty"`
+	Code             enums.ReserveExecutionStatusCode `json:"code,omitempty"`
 }
 
 type APIKeyValidateConsumeResponse struct {

@@ -19,15 +19,42 @@ type service struct {
 }
 
 func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndConsumeRequest) (*pb.ValidateAndConsumeResponse, error) {
-	return &pb.ValidateAndConsumeResponse{
-		Valid: true,
-		Result: &pb.ValidateAndConsumeResponse_Successful_{
-			Successful: &pb.ValidateAndConsumeResponse_Successful{
-				RequestId:        "req-123456",
-				AvailableRequest: 1000,
+	params := req.GetParams()
+	reqValidate := dto.APIKeyValidate{
+		Key:            params.Key,
+		Service:        params.Service,
+		Environment:    params.Environment,
+		ServiceVersion: params.ServiceVersion,
+		RequestTime:    params.RequestTime.AsTime(),
+	}
+	response, err := s.apiKeyService.ValidateAndConsume(ctx, &reqValidate)
+	if err != nil {
+		return nil, status.Error(
+			utils.GetDomainErrorStatusCode(err),
+			err.Message,
+		)
+	}
+	if response.Valid {
+		return &pb.ValidateAndConsumeResponse{
+			Valid: true,
+			Result: &pb.ValidateAndConsumeResponse_Successful_{
+				Successful: &pb.ValidateAndConsumeResponse_Successful{
+					RequestId:        response.RequestID,
+					AvailableRequest: int64(response.AvailableRequest),
+				},
 			},
-		},
-	}, nil
+		}, nil
+	} else {
+		return &pb.ValidateAndConsumeResponse{
+			Valid: false,
+			Result: &pb.ValidateAndConsumeResponse_Failed_{
+				Failed: &pb.ValidateAndConsumeResponse_Failed{
+					Code:    response.Code.String(),
+					Message: response.Message,
+				},
+			},
+		}, nil
+	}
 }
 
 func (s *service) ValidateAndReserve(ctx context.Context, req *pb.ValidateAndReserveRequest) (*pb.ValidateAndReserveResponse, error) {
