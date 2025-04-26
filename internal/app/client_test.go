@@ -161,6 +161,150 @@ func (s *ClientSuite) TestGetByID_ClientRepoError() {
 	}
 }
 
+func (s *ClientSuite) TestGetProjects_Successes() {
+	id := 1
+	now := time.Now().UTC()
+
+	tests := []struct {
+		name         string
+		mockProjects []*entities.Project
+	}{
+		{
+			name:         "ProjectEmpty",
+			mockProjects: []*entities.Project{},
+		},
+		{
+			name: "Projects",
+			mockProjects: []*entities.Project{
+				{
+					ID:        1,
+					Name:      "Project 1",
+					Status:    enums.ProjectInProduction,
+					ClientID:  id,
+					CreatedAt: now.Add(-24 * time.Hour),
+					Services: []*entities.ProjectService{
+						{
+							ID:             1,
+							Name:           "Service 1",
+							Version:        "1.0.0",
+							NextReset:      now.Add(24 * time.Hour),
+							MaxRequest:     100,
+							ResetFrequency: enums.ProjectServiceDaily,
+							AssignedAt:     now.Add(-24 * time.Hour),
+						},
+					},
+				},
+				{
+					ID:        2,
+					Name:      "Project 2",
+					Status:    enums.ProjectInDevelopment,
+					ClientID:  id,
+					CreatedAt: now.Add(-24 * time.Hour),
+					Services:  []*entities.ProjectService{},
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.clientRepo.EXPECT().
+				Exists(s.ctx, id).
+				Return(true, nil).
+				Times(1)
+
+			s.projectRepo.EXPECT().
+				FindByClient(s.ctx, id).
+				Return(test.mockProjects, nil).
+				Times(1)
+
+			resp, err := s.useCase.GetProjects(s.ctx, id)
+
+			s.Require().Nil(err)
+			s.Len(resp, len(test.mockProjects))
+
+			for i, mockProject := range test.mockProjects {
+				s.Equal(mockProject.ID, resp[i].ID)
+				s.Equal(mockProject.Name, resp[i].Name)
+				s.Equal(mockProject.Status, resp[i].Status)
+				s.Equal(mockProject.ClientID, resp[i].ClientID)
+				s.Equal(mockProject.CreatedAt, resp[i].CreatedAt)
+
+				for j, mockService := range mockProject.Services {
+					s.Equal(mockService.ID, resp[i].Services[j].ID)
+					s.Equal(mockService.Name, resp[i].Services[j].Name)
+					s.Equal(mockService.Version, resp[i].Services[j].Version)
+					s.Equal(mockService.NextReset, resp[i].Services[j].NextReset)
+					s.Equal(mockService.MaxRequest, resp[i].Services[j].MaxRequest)
+					s.Equal(mockService.ResetFrequency, resp[i].Services[j].ResetFrequency)
+					s.Equal(mockService.AssignedAt, resp[i].Services[j].AssignedAt)
+				}
+			}
+		})
+	}
+}
+
+func (s *ClientSuite) TestGetProjects_ClientRepoErrors() {
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		mockExists  bool
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "DoesNotExist",
+			mockErr:     nil,
+			mockExists:  false,
+			expectedErr: errors.ErrClientNotFound,
+		},
+		{
+			name:        "ErrPersistence",
+			mockErr:     errors.ErrPersistence,
+			mockExists:  true,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			id := 1
+
+			s.clientRepo.EXPECT().
+				Exists(s.ctx, id).
+				Return(test.mockExists, test.mockErr).
+				Times(1)
+
+			s.projectRepo.EXPECT().
+				FindByClient(s.ctx, id).
+				Times(0)
+
+			resp, err := s.useCase.GetProjects(s.ctx, id)
+
+			s.Require().Nil(resp)
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
+func (s *ClientSuite) TestGetProjects_ProjectRepoError() {
+	id := 1
+
+	s.clientRepo.EXPECT().
+		Exists(s.ctx, id).
+		Return(true, nil).
+		Times(1)
+
+	s.projectRepo.EXPECT().
+		FindByClient(s.ctx, id).
+		Return(nil, errors.ErrPersistence).
+		Times(1)
+
+	resp, err := s.useCase.GetProjects(s.ctx, id)
+
+	s.Require().Nil(resp)
+	s.Equal(errors.ErrPersistence, err)
+}
+
 func TestClientSuite(t *testing.T) {
 	suite.Run(t, new(ClientSuite))
 }

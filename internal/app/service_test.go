@@ -187,17 +187,13 @@ func (s *ServiceSuite) TestGetServices_Success() {
 			s.Require().Nil(err)
 			s.Require().Len(resp, len(test.mockServices))
 
-			s.Equal(test.mockServices[0].ID, resp[0].ID)
-			s.Equal(test.mockServices[0].Name, resp[0].Name)
-			s.Equal(test.mockServices[0].Status, resp[0].Status)
-			s.Equal(test.mockServices[0].Version, resp[0].Version)
-			s.Equal(test.mockServices[0].CreatedAt, resp[0].CreatedAt)
-
-			s.Equal(test.mockServices[1].ID, resp[1].ID)
-			s.Equal(test.mockServices[1].Name, resp[1].Name)
-			s.Equal(test.mockServices[1].Status, resp[1].Status)
-			s.Equal(test.mockServices[1].Version, resp[1].Version)
-			s.Equal(test.mockServices[1].CreatedAt, resp[1].CreatedAt)
+			for i, mockService := range test.mockServices {
+				s.Equal(mockService.ID, resp[i].ID)
+				s.Equal(mockService.Name, resp[i].Name)
+				s.Equal(mockService.Status, resp[i].Status)
+				s.Equal(mockService.Version, resp[i].Version)
+				s.Equal(mockService.CreatedAt, resp[i].CreatedAt)
+			}
 		})
 	}
 }
