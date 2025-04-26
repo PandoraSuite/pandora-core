@@ -634,6 +634,97 @@ func (s *EnvironmentSuite) TestResetServiceRequests_EnvironmentRepoErrors() {
 	}
 }
 
+func (s *EnvironmentSuite) TestGetByID_Success() {
+	id := 1
+
+	now := time.Now().UTC()
+
+	mockEnvironment := &entities.Environment{
+		ID:        id,
+		Name:      "Environment",
+		Status:    enums.EnvironmentActive,
+		ProjectID: 1,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               1,
+				Name:             "Service 1",
+				Version:          "1.0.0",
+				MaxRequest:       20,
+				AvailableRequest: 20,
+				AssignedAt:       now.Add(-24 * time.Hour),
+			},
+			{
+				ID:               2,
+				Name:             "Service 2",
+				Version:          "1.0.0",
+				MaxRequest:       20,
+				AvailableRequest: 20,
+				AssignedAt:       now.Add(-24 * time.Hour),
+			},
+		},
+	}
+
+	s.environmentRepo.EXPECT().
+		FindByID(s.ctx, id).
+		Return(mockEnvironment, nil).
+		Times(1)
+
+	resp, err := s.useCase.GetByID(s.ctx, id)
+
+	s.Require().Nil(err)
+
+	s.Equal(mockEnvironment.ID, resp.ID)
+	s.Equal(mockEnvironment.Name, resp.Name)
+	s.Equal(mockEnvironment.Status, resp.Status)
+	s.Equal(mockEnvironment.ProjectID, resp.ProjectID)
+
+	s.Equal(len(mockEnvironment.Services), len(resp.Services))
+
+	for i, service := range mockEnvironment.Services {
+		s.Equal(service.ID, resp.Services[i].ID)
+		s.Equal(service.Name, resp.Services[i].Name)
+		s.Equal(service.Version, resp.Services[i].Version)
+		s.Equal(service.MaxRequest, resp.Services[i].MaxRequest)
+		s.Equal(service.AvailableRequest, resp.Services[i].AvailableRequest)
+		s.Equal(service.AssignedAt, resp.Services[i].AssignedAt)
+	}
+}
+
+func (s *EnvironmentSuite) TestGetByID_EnvironmentRepoErrors() {
+	id := 1
+
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "ErrNotFound",
+			mockErr:     errors.ErrNotFound,
+			expectedErr: errors.ErrEnvironmentNotFound,
+		},
+		{
+			name:        "ErrPersistence",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.environmentRepo.EXPECT().
+				FindByID(s.ctx, id).
+				Return(nil, test.mockErr).
+				Times(1)
+
+			resp, err := s.useCase.GetByID(s.ctx, id)
+
+			s.Require().Nil(resp)
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
 func TestEnvironmentSuite(t *testing.T) {
 	suite.Run(t, new(EnvironmentSuite))
 }
