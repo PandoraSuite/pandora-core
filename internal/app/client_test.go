@@ -81,7 +81,7 @@ func (s *ClientSuite) TestUpdate_Success() {
 	s.Equal(now.Add(-24*time.Hour), resp.CreatedAt)
 }
 
-func (s *ClientSuite) TestUpdate_ClientError() {
+func (s *ClientSuite) TestUpdate_ClientRepoError() {
 	req := &dto.ClientUpdate{}
 
 	id := 1
@@ -95,6 +95,70 @@ func (s *ClientSuite) TestUpdate_ClientError() {
 
 	s.Require().Nil(resp)
 	s.Equal(errors.ErrPersistence, err)
+}
+
+func (s *ClientSuite) TestGetByID_Success() {
+	id := 1
+	now := time.Now().UTC()
+
+	mockClient := &entities.Client{
+		ID:        id,
+		Type:      enums.ClientDeveloper,
+		Name:      "Name",
+		Email:     "updated@test.com",
+		CreatedAt: now.Add(-24 * time.Hour),
+		UpdatedAt: now.Add(-24 * time.Hour),
+	}
+
+	s.clientRepo.EXPECT().
+		FindByID(s.ctx, id).
+		Return(mockClient, nil).
+		Times(1)
+
+	resp, err := s.useCase.GetByID(s.ctx, id)
+
+	s.Require().Nil(err)
+
+	s.Equal(id, resp.ID)
+	s.Equal(mockClient.Type, resp.Type)
+	s.Equal(mockClient.Name, resp.Name)
+	s.Equal(mockClient.Email, resp.Email)
+	s.Equal(mockClient.CreatedAt, resp.CreatedAt)
+}
+
+func (s *ClientSuite) TestGetByID_ClientRepoError() {
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "ErrNotFound",
+			mockErr:     errors.ErrNotFound,
+			expectedErr: errors.ErrClientNotFound,
+		},
+		{
+			name:        "ErrPersistence",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			id := 1
+
+			s.clientRepo.EXPECT().
+				FindByID(s.ctx, id).
+				Return(nil, test.mockErr).
+				Times(1)
+
+			resp, err := s.useCase.GetByID(s.ctx, id)
+
+			s.Require().Nil(resp)
+			s.Equal(test.expectedErr, err)
+		})
+	}
 }
 
 func TestClientSuite(t *testing.T) {
