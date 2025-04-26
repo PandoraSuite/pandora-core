@@ -260,7 +260,7 @@ func (s *ClientSuite) TestGetProjects_ClientRepoErrors() {
 		{
 			name:        "ErrPersistence",
 			mockErr:     errors.ErrPersistence,
-			mockExists:  true,
+			mockExists:  false,
 			expectedErr: errors.ErrPersistence,
 		},
 	}
