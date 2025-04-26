@@ -105,7 +105,7 @@ func (s *ClientSuite) TestGetByID_Success() {
 		ID:        id,
 		Type:      enums.ClientDeveloper,
 		Name:      "Name",
-		Email:     "updated@test.com",
+		Email:     "client@test.com",
 		CreatedAt: now.Add(-24 * time.Hour),
 		UpdatedAt: now.Add(-24 * time.Hour),
 	}
@@ -300,6 +300,97 @@ func (s *ClientSuite) TestGetProjects_ProjectRepoError() {
 		Times(1)
 
 	resp, err := s.useCase.GetProjects(s.ctx, id)
+
+	s.Require().Nil(resp)
+	s.Equal(errors.ErrPersistence, err)
+}
+
+func (s *ClientSuite) TestGetAll_Success() {
+	now := time.Now().UTC()
+
+	tests := []struct {
+		name        string
+		req         *dto.ClientFilter
+		mockClients []*entities.Client
+	}{
+		{
+			name: "WithoutFilter",
+			req:  &dto.ClientFilter{},
+			mockClients: []*entities.Client{
+				{
+					ID:        1,
+					Type:      enums.ClientDeveloper,
+					Name:      "Client 1",
+					Email:     "client1@test.com",
+					CreatedAt: now.Add(-24 * time.Hour),
+					UpdatedAt: now.Add(-24 * time.Hour),
+				},
+				{
+					ID:        2,
+					Type:      enums.ClientOrganization,
+					Name:      "Client 2",
+					Email:     "client2@test.com",
+					CreatedAt: now.Add(-24 * time.Hour),
+					UpdatedAt: now.Add(-24 * time.Hour),
+				},
+			},
+		},
+		{
+			name: "WithFilter",
+			req:  &dto.ClientFilter{Type: enums.ClientDeveloper},
+			mockClients: []*entities.Client{
+				{
+					ID:        1,
+					Type:      enums.ClientDeveloper,
+					Name:      "Client 1",
+					Email:     "client1@test.com",
+					CreatedAt: now.Add(-24 * time.Hour),
+					UpdatedAt: now.Add(-24 * time.Hour),
+				},
+				{
+					ID:        2,
+					Type:      enums.ClientDeveloper,
+					Name:      "Client 2",
+					Email:     "client2@test.com",
+					CreatedAt: now.Add(-24 * time.Hour),
+					UpdatedAt: now.Add(-24 * time.Hour),
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.clientRepo.EXPECT().
+				FindAll(s.ctx, test.req).
+				Return(test.mockClients, nil).
+				Times(1)
+
+			resp, err := s.useCase.GetAll(s.ctx, test.req)
+
+			s.Require().Nil(err)
+			s.Len(resp, len(test.mockClients))
+
+			for i, mockClient := range test.mockClients {
+				s.Equal(mockClient.ID, resp[i].ID)
+				s.Equal(mockClient.Type, resp[i].Type)
+				s.Equal(mockClient.Name, resp[i].Name)
+				s.Equal(mockClient.Email, resp[i].Email)
+				s.Equal(mockClient.CreatedAt, resp[i].CreatedAt)
+			}
+		})
+	}
+}
+
+func (s *ClientSuite) TestGetAll_ClientRepoError() {
+	req := &dto.ClientFilter{}
+
+	s.clientRepo.EXPECT().
+		FindAll(s.ctx, req).
+		Return(nil, errors.ErrPersistence).
+		Times(1)
+
+	resp, err := s.useCase.GetAll(s.ctx, req)
 
 	s.Require().Nil(resp)
 	s.Equal(errors.ErrPersistence, err)
