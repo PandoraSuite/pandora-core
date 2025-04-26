@@ -209,19 +209,16 @@ func (s *EnvironmentSuite) TestUpdateService_ExistsErrors() {
 	tests := []struct {
 		name        string
 		mockErr     *errors.Error
-		mockExists  bool
 		expectedErr *errors.Error
 	}{
 		{
 			name:        "DoesNotExist",
 			mockErr:     nil,
-			mockExists:  false,
 			expectedErr: errors.ErrEnvironmentNotFound,
 		},
 		{
 			name:        "ErrPersistence",
 			mockErr:     errors.ErrPersistence,
-			mockExists:  false,
 			expectedErr: errors.ErrPersistence,
 		},
 	}
@@ -232,7 +229,7 @@ func (s *EnvironmentSuite) TestUpdateService_ExistsErrors() {
 
 			s.environmentRepo.EXPECT().
 				Exists(s.ctx, id).
-				Return(test.mockExists, test.mockErr).
+				Return(false, test.mockErr).
 				Times(1)
 
 			s.environmentRepo.EXPECT().
@@ -519,6 +516,122 @@ func (s *EnvironmentSuite) TestUpdate_EnvironmentRepoError() {
 
 	s.Require().Nil(resp)
 	s.Equal(errors.ErrPersistence, err)
+}
+
+func (s *EnvironmentSuite) TestResetServiceRequests_Success() {
+	id := 1
+	serviceID := 1
+
+	mockService := &entities.EnvironmentService{
+		ID:               serviceID,
+		Name:             "Service",
+		Version:          "1.0.0",
+		MaxRequest:       20,
+		AvailableRequest: 20,
+		AssignedAt:       time.Now().UTC().Add(-24 * time.Hour),
+	}
+
+	s.environmentRepo.EXPECT().
+		Exists(s.ctx, id).
+		Return(true, nil).
+		Times(1)
+
+	s.environmentRepo.EXPECT().
+		ResetAvailableRequests(s.ctx, id, serviceID).
+		Return(mockService, nil).
+		Times(1)
+
+	resp, err := s.useCase.ResetServiceRequests(s.ctx, id, serviceID)
+
+	s.Require().Nil(err)
+
+	s.Equal(mockService.ID, resp.ID)
+	s.Equal(mockService.Name, resp.Name)
+	s.Equal(mockService.Version, resp.Version)
+	s.Equal(mockService.MaxRequest, resp.MaxRequest)
+	s.Equal(mockService.AvailableRequest, resp.AvailableRequest)
+	s.Equal(mockService.AssignedAt, resp.AssignedAt)
+}
+
+func (s *EnvironmentSuite) TestResetServiceRequests_ExistsErrors() {
+	id := 1
+	serviceID := 1
+
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "DoesNotExist",
+			mockErr:     nil,
+			expectedErr: errors.ErrEnvironmentNotFound,
+		},
+		{
+			name:        "ErrPersistence",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.environmentRepo.EXPECT().
+				Exists(s.ctx, id).
+				Return(false, test.mockErr).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				ResetAvailableRequests(s.ctx, id, serviceID).
+				Times(0)
+
+			resp, err := s.useCase.ResetServiceRequests(s.ctx, id, serviceID)
+
+			s.Require().Nil(resp)
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
+func (s *EnvironmentSuite) TestResetServiceRequests_EnvironmentRepoErrors() {
+	id := 1
+	serviceID := 1
+
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "ErrNotFound",
+			mockErr:     errors.ErrNotFound,
+			expectedErr: errors.ErrServiceNotAssignedToEnvironment,
+		},
+		{
+			name:        "ErrPersistence",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.environmentRepo.EXPECT().
+				Exists(s.ctx, id).
+				Return(true, nil).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				ResetAvailableRequests(s.ctx, id, serviceID).
+				Return(nil, test.mockErr).
+				Times(1)
+
+			resp, err := s.useCase.ResetServiceRequests(s.ctx, id, serviceID)
+
+			s.Require().Nil(resp)
+			s.Equal(test.expectedErr, err)
+		})
+	}
 }
 
 func TestEnvironmentSuite(t *testing.T) {
