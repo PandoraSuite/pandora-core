@@ -217,7 +217,7 @@ func (s *AuthSuite) TestChangePassword_Success() {
 	s.Require().Nil(err)
 }
 
-func (s *AuthSuite) TestCreate_ValidationErrors() {
+func (s *AuthSuite) TestChangePassword_ValidationErrors() {
 	tests := []struct {
 		name        string
 		req         *dto.ChangePassword
@@ -245,6 +245,18 @@ func (s *AuthSuite) TestCreate_ValidationErrors() {
 
 	for _, test := range tests {
 		s.Run(test.name, func() {
+			gomock.InOrder(
+				s.credentialsRepo.EXPECT().
+					FindCredentials(gomock.Any(), gomock.Any()).
+					Return(nil, (*errors.Error)(nil)).
+					Times(0),
+
+				s.credentialsRepo.EXPECT().
+					ChangePassword(gomock.Any(), gomock.Any()).
+					Return(nil).
+					Times(0),
+			)
+
 			err := s.useCase.ChangePassword(s.ctx, test.req)
 			s.Equal(test.expectedErr, err)
 		})
