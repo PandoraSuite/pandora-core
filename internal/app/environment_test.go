@@ -7,6 +7,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound/mock"
 	"github.com/stretchr/testify/suite"
@@ -434,6 +435,87 @@ func (s *EnvironmentSuite) TestUpdateService_UpdateError() {
 		Times(1)
 
 	resp, err := s.useCase.UpdateService(s.ctx, id, serviceID, req)
+
+	s.Require().Nil(resp)
+	s.Equal(errors.ErrPersistence, err)
+}
+
+func (s *EnvironmentSuite) TestUpdate_Success() {
+	id := 1
+	now := time.Now().UTC()
+
+	req := &dto.EnvironmentUpdate{Name: "Updated"}
+
+	mockEnvironment := &entities.Environment{
+		ID:        id,
+		Name:      req.Name,
+		Status:    enums.EnvironmentActive,
+		ProjectID: 1,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               1,
+				Name:             "Service 1",
+				Version:          "1.0.0",
+				MaxRequest:       20,
+				AvailableRequest: 20,
+				AssignedAt:       now.Add(-24 * time.Hour),
+			},
+			{
+				ID:               2,
+				Name:             "Service 2",
+				Version:          "1.0.0",
+				MaxRequest:       20,
+				AvailableRequest: 20,
+				AssignedAt:       now.Add(-24 * time.Hour),
+			},
+		},
+		CreatedAt: now.Add(-24 * time.Hour),
+	}
+
+	s.environmentRepo.EXPECT().
+		Update(s.ctx, id, req).
+		DoAndReturn(
+			func(
+				ctx context.Context, id int, req *dto.EnvironmentUpdate,
+			) (*entities.Environment, *errors.Error) {
+				mockEnvironment.Name = req.Name
+				return mockEnvironment, nil
+			},
+		).
+		Times(1)
+
+	resp, err := s.useCase.Update(s.ctx, id, req)
+
+	s.Require().Nil(err)
+
+	s.Equal(mockEnvironment.ID, resp.ID)
+	s.Equal(mockEnvironment.Name, resp.Name)
+	s.Equal(mockEnvironment.Status, resp.Status)
+	s.Equal(mockEnvironment.ProjectID, resp.ProjectID)
+	s.Equal(mockEnvironment.CreatedAt, resp.CreatedAt)
+
+	s.Equal(len(mockEnvironment.Services), len(resp.Services))
+
+	for i, service := range mockEnvironment.Services {
+		s.Equal(service.ID, resp.Services[i].ID)
+		s.Equal(service.Name, resp.Services[i].Name)
+		s.Equal(service.Version, resp.Services[i].Version)
+		s.Equal(service.MaxRequest, resp.Services[i].MaxRequest)
+		s.Equal(service.AvailableRequest, resp.Services[i].AvailableRequest)
+		s.Equal(service.AssignedAt, resp.Services[i].AssignedAt)
+	}
+}
+
+func (s *EnvironmentSuite) TestUpdate_EnvironmentRepoError() {
+	id := 1
+	req := &dto.EnvironmentUpdate{Name: "Updated"}
+
+	s.environmentRepo.EXPECT().
+		Update(s.ctx, id, req).
+		Return(nil, errors.ErrPersistence).
+		Times(1)
+
+	resp, err := s.useCase.Update(s.ctx, id, req)
 
 	s.Require().Nil(resp)
 	s.Equal(errors.ErrPersistence, err)
