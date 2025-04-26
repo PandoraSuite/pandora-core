@@ -725,6 +725,104 @@ func (s *EnvironmentSuite) TestGetByID_EnvironmentRepoErrors() {
 	}
 }
 
+func (s *EnvironmentSuite) TestRemoveService_Success() {
+	id := 1
+	serviceID := 1
+
+	s.environmentRepo.EXPECT().
+		Exists(s.ctx, id).
+		Return(true, nil).
+		Times(1)
+
+	s.environmentRepo.EXPECT().
+		RemoveService(s.ctx, id, serviceID).
+		Return(int64(1), nil).
+		Times(1)
+
+	err := s.useCase.RemoveService(s.ctx, id, serviceID)
+
+	s.Require().Nil(err)
+}
+
+func (s *EnvironmentSuite) TestRemoveService_ExistsErrors() {
+	id := 1
+	serviceID := 1
+
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "DoesNotExist",
+			mockErr:     nil,
+			expectedErr: errors.ErrEnvironmentNotFound,
+		},
+		{
+			name:        "ErrPersistence",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.environmentRepo.EXPECT().
+				Exists(s.ctx, id).
+				Return(false, test.mockErr).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				RemoveService(s.ctx, id, serviceID).
+				Times(0)
+
+			err := s.useCase.RemoveService(s.ctx, id, serviceID)
+
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
+func (s *EnvironmentSuite) TestRemoveService_EnvironmentRepoErrors() {
+	id := 1
+	serviceID := 1
+
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "ErrPersistence",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+		{
+			name:        "ErrServiceNotFound",
+			mockErr:     nil,
+			expectedErr: errors.ErrServiceNotFound,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.environmentRepo.EXPECT().
+				Exists(s.ctx, id).
+				Return(true, nil).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				RemoveService(s.ctx, id, serviceID).
+				Return(int64(0), test.mockErr).
+				Times(1)
+
+			err := s.useCase.RemoveService(s.ctx, id, serviceID)
+
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
 func TestEnvironmentSuite(t *testing.T) {
 	suite.Run(t, new(EnvironmentSuite))
 }
