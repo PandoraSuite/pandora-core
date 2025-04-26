@@ -396,6 +396,107 @@ func (s *ClientSuite) TestGetAll_ClientRepoError() {
 	s.Equal(errors.ErrPersistence, err)
 }
 
+func (s *ClientSuite) TestCreate_Success() {
+	req := &dto.ClientCreate{
+		Type:  enums.ClientDeveloper,
+		Name:  "Name",
+		Email: "create@test.com",
+	}
+
+	now := time.Now().UTC()
+
+	s.clientRepo.EXPECT().
+		Save(s.ctx, gomock.AssignableToTypeOf(&entities.Client{})).
+		DoAndReturn(
+			func(
+				ctx context.Context, client *entities.Client,
+			) *errors.Error {
+				client.ID = 1
+				client.CreatedAt = now
+				client.UpdatedAt = now
+				return nil
+			},
+		).
+		Times(1)
+
+	resp, err := s.useCase.Create(s.ctx, req)
+
+	s.Require().Nil(err)
+
+	s.Equal(1, resp.ID)
+	s.Equal(req.Type, resp.Type)
+	s.Equal(req.Name, resp.Name)
+	s.Equal(req.Email, resp.Email)
+	s.Equal(now, resp.CreatedAt)
+}
+
+func (s *ClientSuite) TestCreate_ValidationErrors() {
+	tests := []struct {
+		name        string
+		req         *dto.ClientCreate
+		expectedErr *errors.Error
+	}{
+		{
+			name: "EmptyName",
+			req: &dto.ClientCreate{
+				Type:  enums.ClientDeveloper,
+				Name:  "",
+				Email: "create@test.com",
+			},
+			expectedErr: errors.ErrNameCannotBeEmpty,
+		},
+		{
+			name: "InvalidEmail",
+			req: &dto.ClientCreate{
+				Type:  enums.ClientDeveloper,
+				Name:  "Name",
+				Email: "invalid-email",
+			},
+			expectedErr: errors.ErrInvalidEmailFormat,
+		},
+		{
+			name: "NullType",
+			req: &dto.ClientCreate{
+				Type:  enums.ClientTypeNull,
+				Name:  "Name",
+				Email: "create@test.com",
+			},
+			expectedErr: errors.ErrClientTypeCannotBeNull,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.clientRepo.EXPECT().
+				Save(gomock.Any(), gomock.Any()).
+				Times(0)
+
+			resp, err := s.useCase.Create(s.ctx, test.req)
+
+			s.Require().Nil(resp)
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
+func (s *ClientSuite) TestCreate_ClientRepoError() {
+	req := &dto.ClientCreate{
+		Type:  enums.ClientDeveloper,
+		Name:  "Name",
+		Email: "create@test.com",
+	}
+
+	s.clientRepo.EXPECT().
+		Save(gomock.Any(), gomock.Any()).
+		Return(errors.ErrPersistence).
+		Times(1)
+
+	resp, err := s.useCase.Create(s.ctx, req)
+
+	s.Require().Nil(resp)
+	s.Equal(errors.ErrPersistence, err)
+}
+
 func TestClientSuite(t *testing.T) {
 	suite.Run(t, new(ClientSuite))
 }
