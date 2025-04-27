@@ -1120,6 +1120,93 @@ func (s *ProjectSuite) TestRemoveService_RemoveServiceErrors() {
 	}
 }
 
+func (s *ProjectSuite) TestGetByID_Success() {
+	id := 1
+
+	now := time.Now()
+
+	mockProject := &entities.Project{
+		ID:       id,
+		Name:     "Name",
+		Status:   enums.ProjectInProduction,
+		ClientID: 1,
+		Services: []*entities.ProjectService{
+			{
+				ID:             1,
+				Name:           "Service 1",
+				Version:        "1.0.0",
+				MaxRequest:     100,
+				ResetFrequency: enums.ProjectServiceDaily,
+				NextReset:      now.Add(24 * time.Hour),
+				AssignedAt:     now.Add(-24 * time.Hour),
+			},
+		},
+		CreatedAt: now.Add(-24 * time.Hour),
+	}
+
+	s.projectRepo.EXPECT().
+		FindByID(s.ctx, id).
+		Return(mockProject, nil).
+		Times(1)
+
+	resp, err := s.useCase.GetByID(s.ctx, id)
+
+	s.Require().Nil(err)
+
+	s.Equal(mockProject.ID, resp.ID)
+	s.Equal(mockProject.Name, resp.Name)
+	s.Equal(mockProject.Status, resp.Status)
+	s.Equal(mockProject.ClientID, resp.ClientID)
+	s.Equal(mockProject.CreatedAt, resp.CreatedAt)
+
+	s.Equal(len(mockProject.Services), len(resp.Services))
+
+	for i, service := range mockProject.Services {
+		s.Equal(service.ID, resp.Services[i].ID)
+		s.Equal(service.Name, resp.Services[i].Name)
+		s.Equal(service.Version, resp.Services[i].Version)
+		s.Equal(service.MaxRequest, resp.Services[i].MaxRequest)
+		s.Equal(service.ResetFrequency, resp.Services[i].ResetFrequency)
+		s.Equal(service.NextReset, resp.Services[i].NextReset)
+		s.Equal(service.AssignedAt, resp.Services[i].AssignedAt)
+	}
+}
+
+func (s *ProjectSuite) TestGetByID_ProjectRepoErrors() {
+	id := 1
+
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "ErrNotFound",
+			mockErr:     errors.ErrNotFound,
+			expectedErr: errors.ErrProjectNotFound,
+		},
+		{
+			name:        "ErrPersistence",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.projectRepo.EXPECT().
+				FindByID(s.ctx, id).
+				Return(nil, test.mockErr).
+				Times(1)
+
+			resp, err := s.useCase.GetByID(s.ctx, id)
+
+			s.Require().Nil(resp)
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
 func TestProjectSuite(t *testing.T) {
 	suite.Run(t, new(ProjectSuite))
 }
