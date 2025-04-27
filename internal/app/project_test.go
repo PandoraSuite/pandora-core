@@ -795,6 +795,87 @@ func (s *ProjectSuite) TestUpdateService_UpdateServiceError() {
 	s.Equal(errors.ErrPersistence, err)
 }
 
+func (s *ProjectSuite) TestUpdate_Success() {
+	id := 1
+
+	now := time.Now().UTC()
+
+	mockProject := &entities.Project{
+		ID:       id,
+		Name:     "Name",
+		Status:   enums.ProjectInProduction,
+		ClientID: 1,
+		Services: []*entities.ProjectService{
+			{
+				ID:             1,
+				Name:           "Service 1",
+				Version:        "1.0.0",
+				MaxRequest:     100,
+				ResetFrequency: enums.ProjectServiceDaily,
+				NextReset:      now.Add(24 * time.Hour),
+				AssignedAt:     now.Add(-24 * time.Hour),
+			},
+		},
+		CreatedAt: now.Add(-24 * time.Hour),
+	}
+
+	req := &dto.ProjectUpdate{
+		Name: "Updated Project",
+	}
+
+	s.projectRepo.EXPECT().
+		Update(s.ctx, id, req).
+		DoAndReturn(
+			func(
+				ctx context.Context, id int, update *dto.ProjectUpdate,
+			) (*entities.Project, *errors.Error) {
+				mockProject.Name = update.Name
+				return mockProject, nil
+			},
+		).
+		Times(1)
+
+	resp, err := s.useCase.Update(s.ctx, id, req)
+
+	s.Require().Nil(err)
+
+	s.Equal(mockProject.ID, resp.ID)
+	s.Equal(req.Name, resp.Name)
+	s.Equal(mockProject.Status, resp.Status)
+	s.Equal(mockProject.ClientID, resp.ClientID)
+	s.Equal(mockProject.CreatedAt, resp.CreatedAt)
+
+	s.Equal(len(mockProject.Services), len(resp.Services))
+
+	for i, service := range mockProject.Services {
+		s.Equal(service.ID, resp.Services[i].ID)
+		s.Equal(service.Name, resp.Services[i].Name)
+		s.Equal(service.Version, resp.Services[i].Version)
+		s.Equal(service.MaxRequest, resp.Services[i].MaxRequest)
+		s.Equal(service.ResetFrequency, resp.Services[i].ResetFrequency)
+		s.Equal(service.NextReset, resp.Services[i].NextReset)
+		s.Equal(service.AssignedAt, resp.Services[i].AssignedAt)
+	}
+}
+
+func (s *ProjectSuite) TestUpdate_ProjectRepoError() {
+	id := 1
+
+	req := &dto.ProjectUpdate{
+		Name: "Updated Project",
+	}
+
+	s.projectRepo.EXPECT().
+		Update(s.ctx, id, req).
+		Return(nil, errors.ErrPersistence).
+		Times(1)
+
+	resp, err := s.useCase.Update(s.ctx, id, req)
+
+	s.Require().Nil(resp)
+	s.Equal(errors.ErrPersistence, err)
+}
+
 func TestProjectSuite(t *testing.T) {
 	suite.Run(t, new(ProjectSuite))
 }
