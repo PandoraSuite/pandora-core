@@ -29,6 +29,8 @@ type EnvironmentSuite struct {
 }
 
 func (s *EnvironmentSuite) SetupTest() {
+	time.Local = time.UTC
+
 	s.ctrl = gomock.NewController(s.T())
 
 	s.environmentRepo = mock.NewMockEnvironmentPort(s.ctrl)
@@ -55,7 +57,7 @@ func (s *EnvironmentSuite) TestUpdateService_Successes() {
 			Version:          "1.0.0",
 			MaxRequest:       20,
 			AvailableRequest: 20,
-			AssignedAt:       time.Now().UTC().Add(-24 * time.Hour),
+			AssignedAt:       time.Now().Add(-24 * time.Hour),
 		}
 		if opt != nil {
 			opt(s)
@@ -314,7 +316,7 @@ func (s *EnvironmentSuite) TestUpdateService_QuotaErrors() {
 		Version:          "1.0.0",
 		MaxRequest:       20,
 		AvailableRequest: 20,
-		AssignedAt:       time.Now().UTC().Add(-24 * time.Hour),
+		AssignedAt:       time.Now().Add(-24 * time.Hour),
 	}
 
 	mockQuota := &dto.QuotaUsage{
@@ -404,7 +406,7 @@ func (s *EnvironmentSuite) TestUpdateService_UpdateError() {
 		Version:          "1.0.0",
 		MaxRequest:       20,
 		AvailableRequest: 20,
-		AssignedAt:       time.Now().UTC().Add(-24 * time.Hour),
+		AssignedAt:       time.Now().Add(-24 * time.Hour),
 	}
 
 	mockQuota := &dto.QuotaUsage{
@@ -440,7 +442,7 @@ func (s *EnvironmentSuite) TestUpdateService_UpdateError() {
 
 func (s *EnvironmentSuite) TestUpdate_Success() {
 	id := 1
-	now := time.Now().UTC()
+	now := time.Now()
 
 	req := &dto.EnvironmentUpdate{Name: "Updated"}
 
@@ -529,7 +531,7 @@ func (s *EnvironmentSuite) TestResetServiceRequests_Success() {
 		Version:          "1.0.0",
 		MaxRequest:       20,
 		AvailableRequest: 20,
-		AssignedAt:       time.Now().UTC().Add(-24 * time.Hour),
+		AssignedAt:       time.Now().Add(-24 * time.Hour),
 	}
 
 	s.environmentRepo.EXPECT().
@@ -638,7 +640,7 @@ func (s *EnvironmentSuite) TestResetServiceRequests_EnvironmentRepoErrors() {
 func (s *EnvironmentSuite) TestGetByID_Success() {
 	id := 1
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	mockEnvironment := &entities.Environment{
 		ID:        id,
@@ -828,7 +830,7 @@ func (s *EnvironmentSuite) TestAssignService_Successes() {
 	id := 1
 	serviceID := 1
 
-	mockAssignedAt := time.Now().UTC().Add(-24 * time.Hour)
+	mockAssignedAt := time.Now().Add(-24 * time.Hour)
 
 	req := &dto.EnvironmentService{
 		ID:         serviceID,
@@ -1169,7 +1171,7 @@ func (s *EnvironmentSuite) TestAssignService_AddServiceError() {
 }
 
 func (s *EnvironmentSuite) TestCreate_Success() {
-	now := time.Now().UTC()
+	now := time.Now()
 
 	req := &dto.EnvironmentCreate{
 		Name:      "Name",

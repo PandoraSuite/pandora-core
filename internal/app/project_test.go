@@ -28,6 +28,8 @@ type ProjectSuite struct {
 }
 
 func (s *ProjectSuite) SetupTest() {
+	time.Local = time.UTC
+
 	s.ctrl = gomock.NewController(s.T())
 
 	s.projectRepo = mock.NewMockProjectPort(s.ctrl)
@@ -46,7 +48,7 @@ func (s *ProjectSuite) TestResetServiceAvailableRequests_Successes() {
 	id := 1
 	serviceID := 2
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	mockService := &entities.ProjectService{
 		ID:             serviceID,
@@ -275,7 +277,7 @@ func (s *ProjectSuite) TestResetServiceAvailableRequests_EnvServicesErrors() {
 	id := 1
 	serviceID := 2
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	mockService := &entities.ProjectService{
 		ID:             serviceID,
@@ -347,7 +349,7 @@ func (s *ProjectSuite) TestUpdateService_Successes() {
 	id := 1
 	serviceID := 2
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	mockQuota := &dto.QuotaUsage{
 		MaxAllowed:       -1,
@@ -451,7 +453,7 @@ func (s *ProjectSuite) TestUpdateService_ValidationErrors() {
 	id := 1
 	serviceID := 2
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	tests := []struct {
 		name        string
@@ -519,7 +521,7 @@ func (s *ProjectSuite) TestUpdateService_ExistsErrors() {
 	id := 1
 	serviceID := 2
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	req := &dto.ProjectServiceUpdate{
 		MaxRequest:     100,
@@ -577,7 +579,7 @@ func (s *ProjectSuite) TestUpdateService_QuotaErrors() {
 	id := 1
 	serviceID := 2
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	req := &dto.ProjectServiceUpdate{
 		MaxRequest:     100,
@@ -648,7 +650,7 @@ func (s *ProjectSuite) TestUpdateService_EnvWithInfiniteErrors() {
 	id := 1
 	serviceID := 2
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	mockQuota := &dto.QuotaUsage{
 		MaxAllowed:       -1,
@@ -798,7 +800,7 @@ func (s *ProjectSuite) TestUpdateService_UpdateServiceError() {
 func (s *ProjectSuite) TestUpdate_Success() {
 	id := 1
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	mockProject := &entities.Project{
 		ID:       id,
@@ -874,6 +876,110 @@ func (s *ProjectSuite) TestUpdate_ProjectRepoError() {
 
 	s.Require().Nil(resp)
 	s.Equal(errors.ErrPersistence, err)
+}
+
+func (s *ProjectSuite) TestAssignService_Success() {
+	id := 1
+
+	now := time.Now()
+
+	req := &dto.ProjectService{
+		ID:             1,
+		MaxRequest:     10,
+		ResetFrequency: enums.ProjectServiceDaily,
+	}
+
+	s.projectRepo.EXPECT().
+		AddService(
+			s.ctx, id, gomock.AssignableToTypeOf(&entities.ProjectService{}),
+		).
+		DoAndReturn(
+			func(
+				ctx context.Context, id int, service *entities.ProjectService,
+			) *errors.Error {
+				service.Name = "Service"
+				service.Version = "1.0.0"
+				service.AssignedAt = now
+				return nil
+			},
+		).
+		Times(1)
+
+	resp, err := s.useCase.AssignService(s.ctx, id, req)
+
+	s.Require().Nil(err)
+
+	s.Equal(req.ID, resp.ID)
+	s.Equal("Service", resp.Name)
+	s.Equal("1.0.0", resp.Version)
+	s.Equal(req.MaxRequest, resp.MaxRequest)
+	s.Equal(req.ResetFrequency, resp.ResetFrequency)
+	s.Equal(now, resp.AssignedAt)
+	s.True(resp.NextReset.Equal(now.Add(24 * time.Hour).Truncate(24 * time.Hour)))
+}
+
+func (s *ProjectSuite) TestAssignService_ValidateError() {
+	id := 1
+
+	req := &dto.ProjectService{
+		ID:             1,
+		MaxRequest:     -1,
+		ResetFrequency: enums.ProjectServiceDaily,
+	}
+
+	s.projectRepo.EXPECT().
+		AddService(
+			s.ctx, id, gomock.AssignableToTypeOf(&entities.ProjectService{}),
+		).
+		Times(0)
+
+	resp, err := s.useCase.AssignService(s.ctx, id, req)
+
+	s.Require().Nil(resp)
+	s.Equal(errors.ErrProjectServiceResetFrequencyNotPermitted, err)
+}
+
+func (s *ProjectSuite) TestAssignService_ProjectRepoErrors() {
+	id := 1
+
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "ErrUniqueViolation",
+			mockErr:     errors.ErrUniqueViolation,
+			expectedErr: errors.ErrProjectServiceAlreadyExists,
+		},
+		{
+			name:        "ErrPersistence",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			req := &dto.ProjectService{
+				ID:             1,
+				MaxRequest:     10,
+				ResetFrequency: enums.ProjectServiceDaily,
+			}
+
+			s.projectRepo.EXPECT().
+				AddService(
+					s.ctx, id, gomock.AssignableToTypeOf(&entities.ProjectService{}),
+				).
+				Return(test.mockErr).
+				Times(1)
+
+			resp, err := s.useCase.AssignService(s.ctx, id, req)
+
+			s.Require().Nil(resp)
+			s.Equal(test.expectedErr, err)
+		})
+	}
 }
 
 func TestProjectSuite(t *testing.T) {

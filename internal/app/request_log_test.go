@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
@@ -24,6 +25,8 @@ type RequestLogSuite struct {
 }
 
 func (s *RequestLogSuite) SetupTest() {
+	time.Local = time.UTC
+
 	s.ctrl = gomock.NewController(s.T())
 
 	s.requestLogRepo = mock.NewMockRequestLogPort(s.ctrl)

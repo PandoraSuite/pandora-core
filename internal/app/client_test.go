@@ -28,6 +28,8 @@ type ClientSuite struct {
 }
 
 func (s *ClientSuite) SetupTest() {
+	time.Local = time.UTC
+
 	s.ctrl = gomock.NewController(s.T())
 
 	s.clientRepo = mock.NewMockClientPort(s.ctrl)
@@ -50,7 +52,7 @@ func (s *ClientSuite) TestUpdate_Success() {
 	}
 
 	id := 1
-	now := time.Now().UTC()
+	now := time.Now()
 
 	s.clientRepo.EXPECT().
 		Update(s.ctx, id, req).
@@ -99,7 +101,7 @@ func (s *ClientSuite) TestUpdate_ClientRepoError() {
 
 func (s *ClientSuite) TestGetByID_Success() {
 	id := 1
-	now := time.Now().UTC()
+	now := time.Now()
 
 	mockClient := &entities.Client{
 		ID:        id,
@@ -163,7 +165,7 @@ func (s *ClientSuite) TestGetByID_ClientRepoError() {
 
 func (s *ClientSuite) TestGetProjects_Successes() {
 	id := 1
-	now := time.Now().UTC()
+	now := time.Now()
 
 	tests := []struct {
 		name         string
@@ -306,7 +308,7 @@ func (s *ClientSuite) TestGetProjects_ProjectRepoError() {
 }
 
 func (s *ClientSuite) TestGetAll_Success() {
-	now := time.Now().UTC()
+	now := time.Now()
 
 	tests := []struct {
 		name        string
@@ -403,7 +405,7 @@ func (s *ClientSuite) TestCreate_Success() {
 		Email: "create@test.com",
 	}
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	s.clientRepo.EXPECT().
 		Save(s.ctx, gomock.AssignableToTypeOf(&entities.Client{})).

@@ -30,6 +30,8 @@ type ServiceSuite struct {
 }
 
 func (s *ServiceSuite) SetupTest() {
+	time.Local = time.UTC
+
 	s.ctrl = gomock.NewController(s.T())
 
 	s.serviceRepo = mock.NewMockServicePort(s.ctrl)
@@ -50,7 +52,7 @@ func (s *ServiceSuite) TearDownTest() {
 func (s *ServiceSuite) TestCreate_Success() {
 	req := &dto.ServiceCreate{Name: "Service", Version: "1.0.0"}
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	s.serviceRepo.EXPECT().
 		Save(s.ctx, gomock.AssignableToTypeOf(&entities.Service{})).
@@ -122,7 +124,7 @@ func (s *ServiceSuite) TestCreate_ServiceRepoError() {
 }
 
 func (s *ServiceSuite) TestGetServices_Success() {
-	now := time.Now().UTC()
+	now := time.Now()
 
 	tests := []struct {
 		name         string
@@ -216,7 +218,7 @@ func (s *ServiceSuite) TestUpdateStatus_Success() {
 	status := enums.ServiceDeprecated
 	id := 42
 
-	now := time.Now().UTC()
+	now := time.Now()
 	mockService := &entities.Service{
 		ID:        id,
 		Name:      "Service",

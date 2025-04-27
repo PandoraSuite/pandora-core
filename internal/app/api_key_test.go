@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/MAD-py/pandora-core/internal/ports/outbound/mock"
 	"github.com/stretchr/testify/suite"
@@ -26,6 +27,8 @@ type APIKeySuite struct {
 }
 
 func (s *APIKeySuite) SetupTest() {
+	time.Local = time.UTC
+
 	s.ctrl = gomock.NewController(s.T())
 
 	s.apiKeyRepo = mock.NewMockAPIKeyPort(s.ctrl)

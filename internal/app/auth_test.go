@@ -27,6 +27,8 @@ type AuthSuite struct {
 }
 
 func (s *AuthSuite) SetupTest() {
+	time.Local = time.UTC
+
 	s.ctrl = gomock.NewController(s.T())
 
 	s.tokenProvider = mock.NewMockTokenPort(s.ctrl)

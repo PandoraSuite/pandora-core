@@ -26,6 +26,8 @@ type ReservationSuite struct {
 }
 
 func (s *ReservationSuite) SetupTest() {
+	time.Local = time.UTC
+
 	s.ctrl = gomock.NewController(s.T())
 
 	s.reservationRepo = mock.NewMockReservationPort(s.ctrl)
@@ -69,7 +71,7 @@ func (s *ReservationSuite) TestCommit_ReservationRepoErrors() {
 func (s *ReservationSuite) TestRollback_Success() {
 	id := "test-id"
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	mockReservation := &entities.Reservation{
 		ID:             id,
@@ -129,7 +131,7 @@ func (s *ReservationSuite) TestRollback_FindByIDError() {
 func (s *ReservationSuite) TestRollback_DeleteError() {
 	id := "test-id"
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	mockReservation := &entities.Reservation{
 		ID:             id,
@@ -163,7 +165,7 @@ func (s *ReservationSuite) TestRollback_DeleteError() {
 func (s *ReservationSuite) TestRollback_IncreaseAvailableRequestError() {
 	id := "test-id"
 
-	now := time.Now().UTC()
+	now := time.Now()
 
 	mockReservation := &entities.Reservation{
 		ID:             id,
