@@ -206,6 +206,22 @@ func (mr *MockEnvironmentPortMockRecorder) IsActive(ctx, id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsActive", reflect.TypeOf((*MockEnvironmentPort)(nil).IsActive), ctx, id)
 }
 
+// MissingResourceDiagnosis mocks base method.
+func (m *MockEnvironmentPort) MissingResourceDiagnosis(ctx context.Context, id, service_id int) (bool, bool, *errors.Error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MissingResourceDiagnosis", ctx, id, service_id)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(bool)
+	ret2, _ := ret[2].(*errors.Error)
+	return ret0, ret1, ret2
+}
+
+// MissingResourceDiagnosis indicates an expected call of MissingResourceDiagnosis.
+func (mr *MockEnvironmentPortMockRecorder) MissingResourceDiagnosis(ctx, id, service_id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MissingResourceDiagnosis", reflect.TypeOf((*MockEnvironmentPort)(nil).MissingResourceDiagnosis), ctx, id, service_id)
+}
+
 // RemoveService mocks base method.
 func (m *MockEnvironmentPort) RemoveService(ctx context.Context, id, serviceID int) (int64, *errors.Error) {
 	m.ctrl.T.Helper()
