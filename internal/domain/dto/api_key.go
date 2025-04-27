@@ -24,11 +24,12 @@ type APIKeyValidateBooking struct {
 }
 
 type APIKeyValidateResponse struct {
-	RequestID        string                           `json:"request_id,omitempty"`
-	AvailableRequest int                              `json:"available_request,omitempty"`
-	Valid            bool                             `json:"valid"`
-	Message          string                           `json:"message,omitempty"`
-	Code             enums.ReserveExecutionStatusCode `json:"code,omitempty"`
+	RequestID        string                   `json:"request_id,omitempty"`
+	ReservationID    string                   `json:"reservation_id,omitempty"` // Only for reservations
+	AvailableRequest int                      `json:"available_request,omitempty"`
+	Valid            bool                     `json:"valid"`
+	Message          string                   `json:"message,omitempty"`
+	Code             enums.ValidateStatusCode `json:"code,omitempty"`
 }
 
 type APIKeyValidateConsumeResponse struct {
@@ -43,20 +44,11 @@ type APIKeyValidateBookingResponse struct {
 	BookingID string `json:"booking_id"`
 }
 
-type APIKeyValidateReserveResponse struct {
-	RequestID        string                           `json:"request_id,omitempty"`
-	ReservationID    string                           `json:"reservation_id,omitempty"`
-	AvailableRequest int                              `json:"available_request,omitempty"`
-	Valid            bool                             `json:"valid"`
-	Message          string                           `json:"message,omitempty"`
-	Code             enums.ReserveExecutionStatusCode `json:"code,omitempty"`
-}
-
 type APIKeyValidateReservationResponse struct {
-	RequestID string                           `json:"request_id,omitempty"`
-	Valid     bool                             `json:"valid"`
-	Message   string                           `json:"message,omitempty"`
-	Code      enums.ReserveExecutionStatusCode `json:"code,omitempty"`
+	RequestID string                   `json:"request_id,omitempty"`
+	Valid     bool                     `json:"valid"`
+	Message   string                   `json:"message,omitempty"`
+	Code      enums.ValidateStatusCode `json:"code,omitempty"`
 }
 type APIKeyCreate struct {
 	ExpiresAt     time.Time `json:"expires_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
