@@ -1207,6 +1207,138 @@ func (s *ProjectSuite) TestGetByID_ProjectRepoErrors() {
 	}
 }
 
+func (s *ProjectSuite) TestGetEnvironments_Success() {
+	id := 1
+
+	now := time.Now()
+
+	mockProject := []*entities.Environment{
+		{
+			ID:     1,
+			Name:   "Environment 1",
+			Status: enums.EnvironmentActive,
+			Services: []*entities.EnvironmentService{
+				{
+					ID:               1,
+					Name:             "Service 1",
+					Version:          "1.0.0",
+					MaxRequest:       100,
+					AvailableRequest: 100,
+					AssignedAt:       now.Add(-24 * time.Hour),
+				},
+				{
+					ID:               2,
+					Name:             "Service 2",
+					Version:          "1.0.0",
+					MaxRequest:       -1,
+					AvailableRequest: -1,
+					AssignedAt:       now.Add(-24 * time.Hour),
+				},
+			},
+			CreatedAt: now.Add(-24 * time.Hour),
+		},
+		{
+			ID:        2,
+			Name:      "Environment 2",
+			Status:    enums.EnvironmentActive,
+			Services:  []*entities.EnvironmentService{},
+			CreatedAt: now.Add(-24 * time.Hour),
+		},
+	}
+
+	s.projectRepo.EXPECT().
+		Exists(s.ctx, id).
+		Return(true, nil).
+		Times(1)
+
+	s.environmentRepo.EXPECT().
+		FindByProject(s.ctx, id).
+		Return(mockProject, nil).
+		Times(1)
+
+	resp, err := s.useCase.GetEnvironments(s.ctx, id)
+
+	s.Require().Nil(err)
+
+	s.Equal(len(mockProject), len(resp))
+
+	for i, env := range mockProject {
+		s.Equal(env.ID, resp[i].ID)
+		s.Equal(env.Name, resp[i].Name)
+		s.Equal(env.Status, resp[i].Status)
+		s.Equal(env.CreatedAt, resp[i].CreatedAt)
+
+		s.Equal(len(env.Services), len(resp[i].Services))
+
+		for j, service := range env.Services {
+			s.Equal(service.ID, resp[i].Services[j].ID)
+			s.Equal(service.Name, resp[i].Services[j].Name)
+			s.Equal(service.Version, resp[i].Services[j].Version)
+			s.Equal(service.MaxRequest, resp[i].Services[j].MaxRequest)
+			s.Equal(service.AvailableRequest, resp[i].Services[j].AvailableRequest)
+			s.Equal(service.AssignedAt, resp[i].Services[j].AssignedAt)
+		}
+	}
+}
+
+func (s *ProjectSuite) TestGetEnvironments_ExistsErrors() {
+	id := 1
+
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "DoesNotExist",
+			mockErr:     nil,
+			expectedErr: errors.ErrProjectNotFound,
+		},
+		{
+			name:        "ErrPersistence",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.projectRepo.EXPECT().
+				Exists(s.ctx, id).
+				Return(false, test.mockErr).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				FindByProject(s.ctx, id).
+				Times(0)
+
+			resp, err := s.useCase.GetEnvironments(s.ctx, id)
+
+			s.Require().Nil(resp)
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
+func (s *ProjectSuite) TestGetEnvironments_EnvironmentRepoError() {
+	id := 1
+
+	s.projectRepo.EXPECT().
+		Exists(s.ctx, id).
+		Return(true, nil).
+		Times(1)
+
+	s.environmentRepo.EXPECT().
+		FindByProject(s.ctx, id).
+		Return(nil, errors.ErrPersistence).
+		Times(1)
+
+	resp, err := s.useCase.GetEnvironments(s.ctx, id)
+
+	s.Require().Nil(resp)
+	s.Equal(errors.ErrPersistence, err)
+}
+
 func TestProjectSuite(t *testing.T) {
 	suite.Run(t, new(ProjectSuite))
 }
