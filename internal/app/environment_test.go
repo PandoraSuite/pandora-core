@@ -823,6 +823,350 @@ func (s *EnvironmentSuite) TestRemoveService_EnvironmentRepoErrors() {
 	}
 }
 
+func (s *EnvironmentSuite) TestAssignService_Successes() {
+	id := 1
+	serviceID := 1
+
+	mockAssignedAt := time.Now().UTC().Add(-24 * time.Hour)
+
+	req := &dto.EnvironmentService{
+		ID:         serviceID,
+		MaxRequest: 10,
+	}
+
+	tests := []struct {
+		name      string
+		mockQuota *dto.QuotaUsage
+	}{
+		{
+			name: "QuotaWithInfiniteMaxAllowed",
+			mockQuota: &dto.QuotaUsage{
+				MaxAllowed:       -1,
+				CurrentAllocated: 0,
+			},
+		},
+		{
+			name: "QuotaWithLimitedMaxAllowed",
+			mockQuota: &dto.QuotaUsage{
+				MaxAllowed:       100,
+				CurrentAllocated: 20,
+			},
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.environmentRepo.EXPECT().
+				Exists(s.ctx, id).
+				Return(true, nil).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				ExistsServiceIn(s.ctx, id, serviceID).
+				Return(false, nil).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				GetProjectServiceQuotaUsage(s.ctx, id, serviceID).
+				Return(test.mockQuota, nil).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				AddService(
+					s.ctx, id,
+					gomock.AssignableToTypeOf(&entities.EnvironmentService{}),
+				).
+				DoAndReturn(
+					func(
+						ctx context.Context, id int,
+						service *entities.EnvironmentService,
+					) *errors.Error {
+						service.Name = "Service"
+						service.Version = "1.0.0"
+						service.AssignedAt = mockAssignedAt
+						return nil
+					},
+				).
+				Times(1)
+
+			resp, err := s.useCase.AssignService(s.ctx, id, req)
+
+			s.Require().Nil(err)
+
+			s.Equal(req.ID, resp.ID)
+			s.Equal(req.MaxRequest, resp.MaxRequest)
+			s.Equal(req.MaxRequest, resp.AvailableRequest)
+			s.Equal("Service", resp.Name)
+			s.Equal("1.0.0", resp.Version)
+			s.Equal(mockAssignedAt, resp.AssignedAt)
+		})
+	}
+}
+
+func (s *EnvironmentSuite) TestAssignService_ValidationErrors() {
+	id := 1
+
+	req := &dto.EnvironmentService{
+		ID:         1,
+		MaxRequest: -2,
+	}
+
+	s.environmentRepo.EXPECT().
+		Exists(s.ctx, id).
+		Times(0)
+
+	s.environmentRepo.EXPECT().
+		ExistsServiceIn(s.ctx, id, req.ID).
+		Times(0)
+
+	s.environmentRepo.EXPECT().
+		GetProjectServiceQuotaUsage(s.ctx, id, req.ID).
+		Times(0)
+
+	s.environmentRepo.EXPECT().
+		AddService(s.ctx, id, gomock.Any()).
+		Times(0)
+
+	resp, err := s.useCase.AssignService(s.ctx, id, req)
+
+	s.Require().Nil(resp)
+	s.Equal(errors.ErrInvalidMaxRequest, err)
+}
+
+func (s *EnvironmentSuite) TestAssignService_ExistsErrors() {
+	id := 1
+	serviceID := 1
+
+	req := &dto.EnvironmentService{
+		ID:         serviceID,
+		MaxRequest: 10,
+	}
+
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "DoesNotExist",
+			mockErr:     nil,
+			expectedErr: errors.ErrEnvironmentNotFound,
+		},
+		{
+			name:        "ErrPersistence",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.environmentRepo.EXPECT().
+				Exists(s.ctx, id).
+				Return(false, test.mockErr).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				ExistsServiceIn(s.ctx, id, serviceID).
+				Times(0)
+
+			s.environmentRepo.EXPECT().
+				GetProjectServiceQuotaUsage(s.ctx, id, serviceID).
+				Times(0)
+
+			s.environmentRepo.EXPECT().
+				AddService(s.ctx, id, gomock.Any()).
+				Times(0)
+
+			resp, err := s.useCase.AssignService(s.ctx, id, req)
+
+			s.Require().Nil(resp)
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
+func (s *EnvironmentSuite) TestAssignService_AlreadyExistsErrors() {
+	id := 1
+	serviceID := 1
+
+	req := &dto.EnvironmentService{
+		ID:         serviceID,
+		MaxRequest: 10,
+	}
+
+	tests := []struct {
+		name        string
+		mockExists  bool
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "ErrAlreadyExists",
+			mockExists:  true,
+			mockErr:     nil,
+			expectedErr: errors.ErrEnvironmentServiceAlreadyExists,
+		},
+		{
+			name:        "ErrPersistence",
+			mockExists:  false,
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.environmentRepo.EXPECT().
+				Exists(s.ctx, id).
+				Return(true, nil).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				ExistsServiceIn(s.ctx, id, serviceID).
+				Return(test.mockExists, test.mockErr).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				GetProjectServiceQuotaUsage(s.ctx, id, serviceID).
+				Times(0)
+
+			s.environmentRepo.EXPECT().
+				AddService(s.ctx, id, gomock.Any()).
+				Times(0)
+
+			resp, err := s.useCase.AssignService(s.ctx, id, req)
+
+			s.Require().Nil(resp)
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
+func (s *EnvironmentSuite) TestAssignService_QuotaErrors() {
+	id := 1
+
+	mockQuota := &dto.QuotaUsage{
+		MaxAllowed:       30,
+		CurrentAllocated: 20,
+	}
+
+	tests := []struct {
+		name        string
+		req         *dto.EnvironmentService
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name: "ErrNotFound",
+			req: &dto.EnvironmentService{
+				ID:         1,
+				MaxRequest: 10,
+			},
+			mockErr:     errors.ErrNotFound,
+			expectedErr: errors.ErrServiceNotAssignedToProject,
+		},
+		{
+			name: "ErrPersistence",
+			req: &dto.EnvironmentService{
+				ID:         1,
+				MaxRequest: 10,
+			},
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+		{
+			name: "ErrInfiniteRequestsNotAllowed",
+			req: &dto.EnvironmentService{
+				ID:         1,
+				MaxRequest: -1,
+			},
+			mockErr:     nil,
+			expectedErr: errors.ErrInfiniteRequestsNotAllowed,
+		},
+		{
+			name: "ErrMaxRequestExceededForServiceInProyect",
+			req: &dto.EnvironmentService{
+				ID:         1,
+				MaxRequest: 1000,
+			},
+			mockErr:     nil,
+			expectedErr: errors.ErrMaxRequestExceededForServiceInProyect,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.environmentRepo.EXPECT().
+				Exists(s.ctx, id).
+				Return(true, nil).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				ExistsServiceIn(s.ctx, id, test.req.ID).
+				Return(false, nil).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				GetProjectServiceQuotaUsage(s.ctx, id, test.req.ID).
+				Return(mockQuota, test.mockErr).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				AddService(s.ctx, id, gomock.Any()).
+				Times(0)
+
+			resp, err := s.useCase.AssignService(s.ctx, id, test.req)
+
+			s.Require().Nil(resp)
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
+func (s *EnvironmentSuite) TestAssignService_AddServiceError() {
+	id := 1
+	serviceID := 1
+
+	req := &dto.EnvironmentService{
+		ID:         serviceID,
+		MaxRequest: 10,
+	}
+
+	mockQuota := &dto.QuotaUsage{
+		MaxAllowed:       -1,
+		CurrentAllocated: 0,
+	}
+
+	s.environmentRepo.EXPECT().
+		Exists(s.ctx, id).
+		Return(true, nil).
+		Times(1)
+
+	s.environmentRepo.EXPECT().
+		ExistsServiceIn(s.ctx, id, serviceID).
+		Return(false, nil).
+		Times(1)
+
+	s.environmentRepo.EXPECT().
+		GetProjectServiceQuotaUsage(s.ctx, id, serviceID).
+		Return(mockQuota, nil).
+		Times(1)
+
+	s.environmentRepo.EXPECT().
+		AddService(
+			s.ctx, id,
+			gomock.AssignableToTypeOf(&entities.EnvironmentService{}),
+		).
+		Return(errors.ErrPersistence).
+		Times(1)
+
+	resp, err := s.useCase.AssignService(s.ctx, id, req)
+
+	s.Require().Nil(resp)
+	s.Equal(errors.ErrPersistence, err)
+}
+
 func TestEnvironmentSuite(t *testing.T) {
 	suite.Run(t, new(EnvironmentSuite))
 }
