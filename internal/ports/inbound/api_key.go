@@ -14,7 +14,6 @@ type APIKeyHTTPPort interface {
 }
 
 type APIKeyGRPCPort interface {
-	//Validate(ctx context.Context, req *dto.APIKeyValidateBooking) (*dto.APIKeyValidateResponse, *errors.Error)
 	ValidateAndConsume(ctx context.Context, req *dto.APIKeyValidate) (*dto.APIKeyValidateResponse, *errors.Error)
 	ValidateAndReserve(ctx context.Context, req *dto.APIKeyValidate) (*dto.APIKeyValidateReserveResponse, *errors.Error)
 	ValidateWithReservation(ctx context.Context, req *dto.APIKeyValidateReserve) (*dto.APIKeyValidateReservationResponse, *errors.Error)

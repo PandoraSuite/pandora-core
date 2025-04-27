@@ -27,6 +27,9 @@ const (
 	ReservationExecutionStatusServiceNotActive
 	ReservationExecutionStatusInvalidEnvironment
 	ReservationExecutionStatusEnvironmentNotActive
+
+	ValidateStatusInvalidEnvironmentKey
+	ValidateStatusEnvironmentServiceInvalid
 )
 
 func (es ReserveExecutionStatusCode) String() string {
@@ -65,6 +68,10 @@ func (es ReserveExecutionStatusCode) String() string {
 		return "INVALID_ENVIRONMENT"
 	case ReservationExecutionStatusEnvironmentNotActive:
 		return "ENVIRONMENT_NOT_ACTIVE"
+	case ValidateStatusInvalidEnvironmentKey:
+		return "INVALID_ENVIRONMENT_KEY"
+	case ValidateStatusEnvironmentServiceInvalid:
+		return "ENVIRONMENT_SERVICE_INVALID"
 	default:
 		panic("unknown ReserveExecutionStatusCode")
 	}
@@ -140,6 +147,10 @@ func ParseReserveExecutionStatusCode(es string) (ReserveExecutionStatusCode, err
 		return ReservationExecutionStatusInvalidEnvironment, nil
 	case "ENVIRONMENT_NOT_ACTIVE":
 		return ReservationExecutionStatusEnvironmentNotActive, nil
+	case "INVALID_ENVIRONMENT_KEY":
+		return ValidateStatusInvalidEnvironmentKey, nil
+	case "ENVIRONMENT_SERVICE_INVALID":
+		return ValidateStatusEnvironmentServiceInvalid, nil
 	default:
 		return 0, fmt.Errorf("invalid reserve execution status code: %s", es)
 	}

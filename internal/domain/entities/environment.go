@@ -74,3 +74,7 @@ func (e *Environment) Validate() *errors.Error {
 
 	return nil
 }
+
+func (a *Environment) IsActive() bool {
+	return a.Status == enums.EnvironmentActive
+}

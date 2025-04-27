@@ -26,4 +26,5 @@ type EnvironmentPort interface {
 	GetProjectServiceQuotaUsage(ctx context.Context, id, serviceID int) (*dto.QuotaUsage, *errors.Error)
 	ExistsServiceWithInfiniteMaxRequest(ctx context.Context, projectID, serviceID int) (bool, *errors.Error)
 	RemoveServiceFromProjectEnvironments(ctx context.Context, projectID, serviceID int) (int64, *errors.Error)
+	MissingResourceDiagnosis(ctx context.Context, id int, service_id int) (bool, bool, *errors.Error)
 }

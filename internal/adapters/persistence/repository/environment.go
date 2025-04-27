@@ -274,6 +274,42 @@ func (r *EnvironmentRepository) IsActive(
 	return exists, nil
 }
 
+func (r *EnvironmentRepository) MissingResourceDiagnosis(
+	ctx context.Context, id int, service_id int,
+) (bool, bool, *errors.Error) {
+	query := `
+		SELECT
+		EXISTS (
+			SELECT 1 FROM environment_service 
+			WHERE environment_id = $1 AND service_id = $2
+		) 
+		AS environment_service_found,
+
+		EXISTS (
+			SELECT 1 FROM environment_service 
+			WHERE environment_id = $1 AND service_id = $2
+			AND (available_request IS NULL OR available_request > 0)
+		) 
+		AS has_available_requests;
+	`
+
+	var environment_service_found, has_available_requests bool
+	err := r.pool.QueryRow(
+		ctx,
+		query,
+		id,
+		service_id,
+	).Scan(
+		&environment_service_found,
+		&has_available_requests,
+	)
+	if err != nil {
+		return false, false, r.handlerErr(err)
+	}
+
+	return environment_service_found, has_available_requests, nil
+}
+
 func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
 	ctx context.Context, id, serviceID int,
 ) (*dto.QuotaUsage, *errors.Error) {
