@@ -982,6 +982,144 @@ func (s *ProjectSuite) TestAssignService_ProjectRepoErrors() {
 	}
 }
 
+func (s *ProjectSuite) TestRemoveService_Success() {
+	id := 1
+	serviceID := 1
+
+	s.projectRepo.EXPECT().
+		Exists(s.ctx, id).
+		Return(true, nil).
+		Times(1)
+
+	s.environmentRepo.EXPECT().
+		RemoveServiceFromProjectEnvironments(s.ctx, id, serviceID).
+		Return(int64(0), nil).
+		Times(1)
+
+	s.projectRepo.EXPECT().
+		RemoveService(s.ctx, id, serviceID).
+		Return(int64(1), nil).
+		Times(1)
+
+	err := s.useCase.RemoveService(s.ctx, id, serviceID)
+
+	s.Require().Nil(err)
+}
+
+func (s *ProjectSuite) TestRemoveService_ExistsError() {
+	id := 1
+	serviceID := 1
+
+	tests := []struct {
+		name        string
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "DoesNotExist",
+			mockErr:     nil,
+			expectedErr: errors.ErrProjectNotFound,
+		},
+		{
+			name:        "ErrPersistence",
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.projectRepo.EXPECT().
+				Exists(s.ctx, id).
+				Return(false, test.mockErr).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				RemoveServiceFromProjectEnvironments(s.ctx, id, serviceID).
+				Times(0)
+
+			s.projectRepo.EXPECT().
+				RemoveService(s.ctx, id, serviceID).
+				Times(0)
+
+			err := s.useCase.RemoveService(s.ctx, id, serviceID)
+
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
+func (s *ProjectSuite) TestRemoveService_EnvironmentRepoError() {
+	id := 1
+	serviceID := 1
+
+	s.projectRepo.EXPECT().
+		Exists(s.ctx, id).
+		Return(true, nil).
+		Times(1)
+
+	s.environmentRepo.EXPECT().
+		RemoveServiceFromProjectEnvironments(s.ctx, id, serviceID).
+		Return(int64(0), errors.ErrPersistence).
+		Times(1)
+
+	s.projectRepo.EXPECT().
+		RemoveService(s.ctx, id, serviceID).
+		Times(0)
+
+	err := s.useCase.RemoveService(s.ctx, id, serviceID)
+
+	s.Equal(errors.ErrPersistence, err)
+}
+
+func (s *ProjectSuite) TestRemoveService_RemoveServiceErrors() {
+	id := 1
+	serviceID := 1
+
+	tests := []struct {
+		name        string
+		mockN       int64
+		mockErr     *errors.Error
+		expectedErr *errors.Error
+	}{
+		{
+			name:        "ErrNotFound",
+			mockN:       0,
+			mockErr:     nil,
+			expectedErr: errors.ErrServiceNotFound,
+		},
+		{
+			name:        "ErrPersistence",
+			mockN:       0,
+			mockErr:     errors.ErrPersistence,
+			expectedErr: errors.ErrPersistence,
+		},
+	}
+
+	for _, test := range tests {
+		s.Run(test.name, func() {
+			s.projectRepo.EXPECT().
+				Exists(s.ctx, id).
+				Return(true, nil).
+				Times(1)
+
+			s.environmentRepo.EXPECT().
+				RemoveServiceFromProjectEnvironments(s.ctx, id, serviceID).
+				Return(int64(0), nil).
+				Times(1)
+
+			s.projectRepo.EXPECT().
+				RemoveService(s.ctx, id, serviceID).
+				Return(test.mockN, test.mockErr).
+				Times(1)
+
+			err := s.useCase.RemoveService(s.ctx, id, serviceID)
+
+			s.Equal(test.expectedErr, err)
+		})
+	}
+}
+
 func TestProjectSuite(t *testing.T) {
 	suite.Run(t, new(ProjectSuite))
 }
