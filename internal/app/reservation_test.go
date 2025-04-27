@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound/mock"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"
@@ -35,6 +36,32 @@ func (s *ReservationSuite) SetupTest() {
 
 func (s *ReservationSuite) TearDownTest() {
 	s.ctrl.Finish()
+}
+
+func (s *ReservationSuite) TestCommit_Success() {
+	id := "test-id"
+
+	s.reservationRepo.EXPECT().
+		Delete(s.ctx, id).
+		Return(nil).
+		Times(1)
+
+	err := s.useCase.Commit(s.ctx, id)
+
+	s.Require().Nil(err)
+}
+
+func (s *ReservationSuite) TestCommit_ReservationRepoErrors() {
+	id := "test-id"
+
+	s.reservationRepo.EXPECT().
+		Delete(s.ctx, id).
+		Return(errors.ErrPersistence).
+		Times(1)
+
+	err := s.useCase.Commit(s.ctx, id)
+
+	s.Equal(errors.ErrPersistence, err)
 }
 
 func TestReservationSuite(t *testing.T) {
