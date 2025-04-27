@@ -3,7 +3,9 @@ package app
 import (
 	"context"
 	"testing"
+	"time"
 
+	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports/outbound/mock"
 	"github.com/stretchr/testify/suite"
@@ -60,6 +62,139 @@ func (s *ReservationSuite) TestCommit_ReservationRepoErrors() {
 		Times(1)
 
 	err := s.useCase.Commit(s.ctx, id)
+
+	s.Equal(errors.ErrPersistence, err)
+}
+
+func (s *ReservationSuite) TestRollback_Success() {
+	id := "test-id"
+
+	now := time.Now().UTC()
+
+	mockReservation := &entities.Reservation{
+		ID:             id,
+		EnvironmentID:  1,
+		ServiceID:      2,
+		APIKey:         "test-api-key",
+		StartRequestID: "test-start-request-id",
+		RequestTime:    now.Add(-time.Hour),
+		ExpiresAt:      now.Add(12 * time.Hour),
+	}
+
+	s.reservationRepo.EXPECT().
+		FindByID(s.ctx, id).
+		Return(mockReservation, nil).
+		Times(1)
+
+	s.reservationRepo.EXPECT().
+		Delete(s.ctx, id).
+		Return(nil).
+		Times(1)
+
+	s.environmentRepo.EXPECT().
+		IncreaseAvailableRequest(
+			s.ctx,
+			mockReservation.EnvironmentID,
+			mockReservation.ServiceID,
+		).
+		Return(nil).
+		Times(1)
+
+	err := s.useCase.Rollback(s.ctx, id)
+
+	s.Require().Nil(err)
+}
+
+func (s *ReservationSuite) TestRollback_FindByIDError() {
+	id := "test-id"
+
+	s.reservationRepo.EXPECT().
+		FindByID(s.ctx, id).
+		Return(nil, errors.ErrPersistence).
+		Times(1)
+
+	s.reservationRepo.EXPECT().
+		Delete(s.ctx, id).
+		Times(0)
+
+	s.environmentRepo.EXPECT().
+		IncreaseAvailableRequest(s.ctx, gomock.Any(), gomock.Any()).
+		Times(0)
+
+	err := s.useCase.Rollback(s.ctx, id)
+
+	s.Equal(errors.ErrPersistence, err)
+}
+
+func (s *ReservationSuite) TestRollback_DeleteError() {
+	id := "test-id"
+
+	now := time.Now().UTC()
+
+	mockReservation := &entities.Reservation{
+		ID:             id,
+		EnvironmentID:  1,
+		ServiceID:      2,
+		APIKey:         "test-api-key",
+		StartRequestID: "test-start-request-id",
+		RequestTime:    now.Add(-time.Hour),
+		ExpiresAt:      now.Add(12 * time.Hour),
+	}
+
+	s.reservationRepo.EXPECT().
+		FindByID(s.ctx, id).
+		Return(mockReservation, nil).
+		Times(1)
+
+	s.reservationRepo.EXPECT().
+		Delete(s.ctx, id).
+		Return(errors.ErrPersistence).
+		Times(1)
+
+	s.environmentRepo.EXPECT().
+		IncreaseAvailableRequest(s.ctx, gomock.Any(), gomock.Any()).
+		Times(0)
+
+	err := s.useCase.Rollback(s.ctx, id)
+
+	s.Equal(errors.ErrPersistence, err)
+}
+
+func (s *ReservationSuite) TestRollback_IncreaseAvailableRequestError() {
+	id := "test-id"
+
+	now := time.Now().UTC()
+
+	mockReservation := &entities.Reservation{
+		ID:             id,
+		EnvironmentID:  1,
+		ServiceID:      2,
+		APIKey:         "test-api-key",
+		StartRequestID: "test-start-request-id",
+		RequestTime:    now.Add(-time.Hour),
+		ExpiresAt:      now.Add(12 * time.Hour),
+	}
+
+	s.reservationRepo.EXPECT().
+		FindByID(s.ctx, id).
+		Return(mockReservation, nil).
+		Times(1)
+
+	s.reservationRepo.EXPECT().
+		Delete(s.ctx, id).
+		Return(nil).
+		Times(1)
+
+	s.environmentRepo.EXPECT().
+		IncreaseAvailableRequest(
+			s.ctx,
+			mockReservation.EnvironmentID,
+			mockReservation.ServiceID,
+		).
+		Return(errors.ErrPersistence).
+		Times(1)
+
+	err := s.useCase.Rollback(s.ctx, id)
 
 	s.Equal(errors.ErrPersistence, err)
 }
