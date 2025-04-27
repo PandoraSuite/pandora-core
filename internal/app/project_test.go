@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"testing"
 	"time"
 
@@ -1334,6 +1335,116 @@ func (s *ProjectSuite) TestGetEnvironments_EnvironmentRepoError() {
 		Times(1)
 
 	resp, err := s.useCase.GetEnvironments(s.ctx, id)
+
+	s.Require().Nil(resp)
+	s.Equal(errors.ErrPersistence, err)
+}
+
+func (s *ProjectSuite) TestCreate_Success() {
+	id := 1
+
+	now := time.Now()
+
+	req := &dto.ProjectCreate{
+		Name:     "New Project",
+		Status:   enums.ProjectInProduction,
+		ClientID: 1,
+		Services: []*dto.ProjectService{
+			{
+				ID:             1,
+				MaxRequest:     100,
+				ResetFrequency: enums.ProjectServiceDaily,
+			},
+			{
+				ID:             2,
+				MaxRequest:     -1,
+				ResetFrequency: enums.ProjectServiceNull,
+			},
+		},
+	}
+
+	s.projectRepo.EXPECT().
+		Save(s.ctx, gomock.AssignableToTypeOf(&entities.Project{})).
+		DoAndReturn(
+			func(
+				ctx context.Context, project *entities.Project,
+			) (*entities.Project, *errors.Error) {
+				project.ID = id
+				project.CreatedAt = now
+
+				for i := range project.Services {
+					project.Services[i].ID = i + 1
+					project.Services[i].Name = "Service"
+					project.Services[i].Version = fmt.Sprintf("%d.0.0", i+1)
+					project.Services[i].AssignedAt = now
+				}
+
+				return project, nil
+			},
+		).
+		Times(1)
+
+	resp, err := s.useCase.Create(s.ctx, req)
+
+	s.Require().Nil(err)
+
+	s.Equal(id, resp.ID)
+	s.Equal(req.Name, resp.Name)
+	s.Equal(req.Status, resp.Status)
+	s.Equal(req.ClientID, resp.ClientID)
+	s.Equal(now, resp.CreatedAt)
+
+	s.Equal(len(req.Services), len(resp.Services))
+
+	for i, service := range req.Services {
+		s.Equal(service.ID, resp.Services[i].ID)
+		s.Equal("Service", resp.Services[i].Name)
+		s.Equal(fmt.Sprintf("%d.0.0", i+1), resp.Services[i].Version)
+		s.Equal(service.MaxRequest, resp.Services[i].MaxRequest)
+
+		if service.MaxRequest != -1 {
+			s.True(resp.Services[i].NextReset.Equal(now.Add(24 * time.Hour).Truncate(24 * time.Hour)))
+		} else {
+			s.True(resp.Services[i].NextReset.IsZero())
+		}
+
+		s.Equal(service.ResetFrequency, resp.Services[i].ResetFrequency)
+		s.Equal(now, resp.Services[i].AssignedAt)
+	}
+}
+
+func (s *ProjectSuite) TestCreate_ValidateError() {
+	req := &dto.ProjectCreate{
+		Name:     "",
+		Status:   enums.ProjectInProduction,
+		ClientID: 1,
+		Services: []*dto.ProjectService{},
+	}
+
+	s.projectRepo.EXPECT().
+		Save(s.ctx, gomock.AssignableToTypeOf(&entities.Project{})).
+		Times(0)
+
+	resp, err := s.useCase.Create(s.ctx, req)
+
+	s.Require().Nil(resp)
+	s.Equal(errors.ErrNameCannotBeEmpty, err)
+}
+
+func (s *ProjectSuite) TestCreate_SaveError() {
+	req := &dto.ProjectCreate{
+		Name:     "New Project",
+		Status:   enums.ProjectInProduction,
+		ClientID: 1,
+		Services: []*dto.ProjectService{},
+	}
+
+	s.projectRepo.EXPECT().
+		Save(s.ctx, gomock.AssignableToTypeOf(&entities.Project{})).
+		Return(errors.ErrPersistence).
+		Times(1)
+
+	resp, err := s.useCase.Create(s.ctx, req)
 
 	s.Require().Nil(resp)
 	s.Equal(errors.ErrPersistence, err)
