@@ -1,7 +1,6 @@
 package entities
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
@@ -19,17 +18,29 @@ type EnvironmentService struct {
 	AssignedAt time.Time
 }
 
-func (e *EnvironmentService) Validate() *errors.Error {
+func (e *EnvironmentService) Validate() errors.Error {
 	if e.MaxRequest < -1 {
-		return errors.ErrInvalidMaxRequest
+		return errors.NewValidationFailed(
+			"environment.service",
+			"max_request",
+			"max request must be greater than or equal to -1",
+		)
 	}
 
 	if e.MaxRequest == -1 && e.AvailableRequest > -1 {
-		return errors.ErrEnvironmentServiceAvailableRequestNotAllowed
+		return errors.NewValidationFailed(
+			"environment.service",
+			"available_request",
+			"available_request cannot be set when max_request is -1 (unlimited)",
+		)
 	}
 
 	if e.AvailableRequest > e.MaxRequest {
-		return errors.ErrEnvironmentServiceAvailableRequestExceedsMax
+		return errors.NewValidationFailed(
+			"environment.service",
+			"available_request",
+			"available_request cannot be greater than max_request",
+		)
 	}
 
 	return nil
@@ -47,29 +58,22 @@ type Environment struct {
 	CreatedAt time.Time
 }
 
-func (e *Environment) Validate() *errors.Error {
+func (e *Environment) Validate() errors.Error {
 	if e.Name == "" {
-		return errors.ErrNameCannotBeEmpty
+		return errors.NewValidationFailed(
+			"environment", "name", "name cannot be empty",
+		)
 	}
 
-	var errs []string
+	errSet := errors.NewErrorSet()
 	for _, s := range e.Services {
-		err := s.Validate()
-
-		if err != nil {
-			errs = append(
-				errs,
-				fmt.Sprintf("service %v: %s", s.ID, err.Message),
-			)
+		if err := s.Validate(); err != nil {
+			errSet.Add(err)
 		}
 	}
 
-	if len(errs) > 0 {
-		return errors.NewError(
-			errors.CodeValidationError,
-			"invalid services assignments",
-			errs...,
-		)
+	if errSet.HasErrors() {
+		return errSet
 	}
 
 	return nil

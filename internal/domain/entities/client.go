@@ -19,17 +19,23 @@ type Client struct {
 	UpdatedAt time.Time
 }
 
-func (c *Client) Validate() *errors.Error {
+func (c *Client) Validate() errors.Error {
 	if c.Type == enums.ClientTypeNull {
-		return errors.ErrClientTypeCannotBeNull
+		return errors.NewValidationFailed(
+			"client", "type", "type cannot be null",
+		)
 	}
 
 	if c.Name == "" {
-		return errors.ErrNameCannotBeEmpty
+		return errors.NewValidationFailed(
+			"client", "name", "name cannot be empty",
+		)
 	}
 
 	if !utils.ValidateEmail(c.Email) {
-		return errors.ErrInvalidEmailFormat
+		return errors.NewValidationFailed(
+			"client", "email", "invalid email format",
+		)
 	}
 
 	return nil

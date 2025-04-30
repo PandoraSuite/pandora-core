@@ -1,46 +1,34 @@
 package errors
 
-import "fmt"
-
 type ErrorCode string
 
 const (
-	CodeNotFound        ErrorCode = "NOT_FOUND"
-	CodeForbidden       ErrorCode = "FORBIDDEN"
-	CodeUnauthorized    ErrorCode = "UNAUTHORIZED"
-	CodeInternalError   ErrorCode = "INTERNAL_ERROR"
-	CodeValidationError ErrorCode = "VALIDATION_ERROR"
+	CodeNotFound         ErrorCode = "NOT_FOUND"
+	CodeInternal         ErrorCode = "INTERNAL"
+	CodeForbidden        ErrorCode = "FORBIDDEN"
+	CodeUnauthorized     ErrorCode = "UNAUTHORIZED"
+	CodeAlreadyExists    ErrorCode = "ALREADY_EXISTS"
+	CodeValidationFailed ErrorCode = "VALIDATION_FAILED"
+
+	codeAggregate ErrorCode = "AGGREGATE"
 )
 
-type Error struct {
-	Code    ErrorCode `json:"code"`
-	Message string    `json:"message"`
-	Details []string  `json:"details,omitempty"`
+type SimpleError struct {
+	code ErrorCode
+
+	shortMsg string
+
+	err error
 }
 
-func (e *Error) AddDetail(detail string) *Error {
-	copyErr := *e
-
-	copyErr.Details = make([]string, len(e.Details))
-	copy(copyErr.Details, e.Details)
-
-	copyErr.Details = append(copyErr.Details, detail)
-
-	return &copyErr
-
+func (e *SimpleError) Error() string {
+	return e.shortMsg
 }
 
-func (e *Error) Error() string {
-	if len(e.Details) > 0 {
-		return fmt.Sprintf("(%s) %s: %v", e.Code, e.Message, e.Details)
-	}
-	return fmt.Sprintf("(%s) %s", e.Code, e.Message)
+func (e *SimpleError) Unwrap() error {
+	return e.err
 }
 
-func NewError(code ErrorCode, message string, details ...string) *Error {
-	return &Error{
-		Code:    code,
-		Message: message,
-		Details: details,
-	}
+func (e *SimpleError) Code() ErrorCode {
+	return e.code
 }
