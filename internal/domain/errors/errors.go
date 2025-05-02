@@ -10,25 +10,19 @@ const (
 	CodeAlreadyExists    ErrorCode = "ALREADY_EXISTS"
 	CodeValidationFailed ErrorCode = "VALIDATION_FAILED"
 
-	codeAggregate ErrorCode = "AGGREGATE"
+	CodeAggregate ErrorCode = "AGGREGATE_ERRORS"
 )
 
-type SimpleError struct {
-	code ErrorCode
+type Error interface {
+	error
 
-	shortMsg string
-
-	err error
+	Code() ErrorCode
 }
 
-func (e *SimpleError) Error() string {
-	return e.shortMsg
-}
-
-func (e *SimpleError) Unwrap() error {
-	return e.err
-}
-
-func (e *SimpleError) Code() ErrorCode {
-	return e.code
+func NewInternal(msg string, err error) Error {
+	return &BaseError{
+		code:     CodeInternal,
+		shortMsg: msg,
+		err:      err,
+	}
 }
