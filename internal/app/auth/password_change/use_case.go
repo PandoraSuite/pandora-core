@@ -70,8 +70,7 @@ func (uc *useCase) validateReq(req *dto.ChangePassword) errors.Error {
 }
 
 func NewUseCase(
-	validator validator.Validator,
-	credentialsRepo CredentialsRepository,
+	validator validator.Validator, credentialsRepo CredentialsRepository,
 ) UseCase {
 	return &useCase{
 		validator:       validator,

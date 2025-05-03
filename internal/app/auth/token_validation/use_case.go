@@ -45,8 +45,7 @@ func (uc *useCase) validateReq(req *dto.TokenValidation) errors.Error {
 }
 
 func NewUseCase(
-	validator validator.Validator,
-	tokenProvider TokenProvider,
+	validator validator.Validator, tokenProvider TokenProvider,
 ) UseCase {
 	return &useCase{
 		validator:     validator,
