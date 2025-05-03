@@ -6,56 +6,60 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
+// ... Requests ...
+
 type ProjectService struct {
-	ID             int                                `json:"id" binding:"required"`
-	MaxRequest     int                                `json:"max_request" binding:"required"`
-	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency" enums:"daily,weekly,biweekly,monthly," swaggertype:"string"`
+	ID             int                                `name:"id" validate:"required,gt=0"`
+	MaxRequest     int                                `name:"max_request" validate:"omitempty,gte=-1"`
+	ResetFrequency enums.ProjectServiceResetFrequency `name:"reset_frequency" validate:"omitempty,enums=,daily,weekly,biweekly,monthly"`
 }
 
 type ProjectCreate struct {
-	Name     string              `json:"name" binding:"required"`
-	Status   enums.ProjectStatus `json:"status" binding:"required" enums:"in_production,in_development" swaggertype:"string"`
-	ClientID int                 `json:"client_id" binding:"required"`
+	Name     string              `name:"name" validate:"required"`
+	Status   enums.ProjectStatus `name:"status" validate:"required,enums=in_production,in_development,deactivated"`
+	ClientID int                 `name:"client_id" validate:"required,gt=0"`
 
-	Services []*ProjectService `json:"services,omitempty"`
-}
-
-type ProjectServiceResponse struct {
-	ID             int                                `json:"id"`
-	Name           string                             `json:"name"`
-	Version        string                             `json:"version"`
-	NextReset      time.Time                          `json:"next_reset" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	MaxRequest     int                                `json:"max_request"`
-	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency" enums:"daily,weekly,biweekly,monthly," swaggertype:"string"`
-	AssignedAt     time.Time                          `json:"assigned_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-}
-
-type ProjectResponse struct {
-	ID        int                 `json:"id"`
-	Name      string              `json:"name"`
-	Status    enums.ProjectStatus `json:"status" enums:"in_production,in_development,deactivated" swaggertype:"string"`
-	ClientID  int                 `json:"client_id"`
-	CreatedAt time.Time           `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-
-	Services []*ProjectServiceResponse `json:"services"`
-}
-
-type ProjectUpdate struct {
-	Name string `json:"name,omitempty"`
-}
-
-type ProjectServiceUpdate struct {
-	NextReset      time.Time                          `json:"next_reset,omitempty" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	MaxRequest     int                                `json:"max_request"`
-	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency" enums:"daily,weekly,biweekly,monthly," swaggertype:"string"`
+	Services []*ProjectService `name:"services" validate:"required,dive"`
 }
 
 type ProjectServiceResetRequest struct {
-	RecalculateNextReset bool `json:"recalculate_next_reset"`
+	RecalculateNextReset bool `name:"recalculate_next_reset" validate:"omitempty"`
+}
+
+type ProjectUpdate struct {
+	Name string `name:"name" validate:"omitempty"`
+}
+
+type ProjectServiceUpdate struct {
+	NextReset      time.Time                          `name:"next_reset" validate:"omitempty,utc"`
+	MaxRequest     int                                `name:"max_request" validate:"required,gte=-1"`
+	ResetFrequency enums.ProjectServiceResetFrequency `name:"reset_frequency" validate:"omitempty,enums=,daily,weekly,biweekly,monthly"`
+}
+
+// ... Responses ...
+
+type ProjectServiceResponse struct {
+	ID             int                                `name:"id"`
+	Name           string                             `name:"name"`
+	Version        string                             `name:"version"`
+	NextReset      time.Time                          `name:"next_reset"`
+	MaxRequest     int                                `name:"max_request"`
+	ResetFrequency enums.ProjectServiceResetFrequency `name:"reset_frequency"`
+	AssignedAt     time.Time                          `name:"assigned_at"`
+}
+
+type ProjectResponse struct {
+	ID        int                 `name:"id"`
+	Name      string              `name:"name"`
+	Status    enums.ProjectStatus `name:"status"`
+	ClientID  int                 `name:"client_id"`
+	CreatedAt time.Time           `name:"created_at"`
+
+	Services []*ProjectServiceResponse `name:"services"`
 }
 
 type ProjectServiceResetRequestResponse struct {
-	ResetCount          int                        `json:"reset_count"`
-	ProjectService      *ProjectServiceResponse    `json:"project_service"`
-	EnvironmentServices []*EnvironmentServiceReset `json:"environment_services"`
+	ResetCount          int                        `name:"reset_count"`
+	ProjectService      *ProjectServiceResponse    `name:"project_service"`
+	EnvironmentServices []*EnvironmentServiceReset `name:"environment_services"`
 }

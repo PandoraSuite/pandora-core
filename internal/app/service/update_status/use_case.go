@@ -67,7 +67,7 @@ func (uc *useCase) validateID(id int) errors.Error {
 		"id",
 		"required,gt=0",
 		map[string]string{
-			"gt=0":     "id must be greater than 0",
+			"gt":       "id must be greater than 0",
 			"required": "id is required",
 		},
 	)
@@ -79,7 +79,7 @@ func (uc *useCase) validateStatus(status enums.ServiceStatus) errors.Error {
 		"status",
 		"required,enums=active,deactivated,deprecated",
 		map[string]string{
-			"oneof":    "status must be one of the following: active, deactivated, deprecated",
+			"enums":    "status must be one of the following: active, deactivated, deprecated",
 			"required": "status is required",
 		},
 	)
