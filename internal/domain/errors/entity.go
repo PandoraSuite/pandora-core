@@ -40,6 +40,28 @@ func (e *EntityError) Error() string {
 		e.code,
 		e.entity,
 		idPart,
-		e.shortMsg,
+		e.message,
 	)
+}
+
+func NewEntityNotFound(entity, message string, identifiers map[string]any) *EntityError {
+	return &EntityError{
+		BaseError: BaseError{
+			code:    CodeNotFound,
+			message: message,
+		},
+		entity:      entity,
+		identifiers: identifiers,
+	}
+}
+
+func NewEntityValidationFailed(entity, message string, identifiers map[string]any) *EntityError {
+	return &EntityError{
+		BaseError: BaseError{
+			code:    CodeValidationFailed,
+			message: message,
+		},
+		entity:      entity,
+		identifiers: identifiers,
+	}
 }

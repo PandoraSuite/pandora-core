@@ -7,13 +7,13 @@ var _ Error = (*BaseError)(nil)
 type BaseError struct {
 	code ErrorCode
 
-	shortMsg string
+	message string
 
 	err error
 }
 
 func (e *BaseError) Error() string {
-	return fmt.Sprintf("<%s> %s", e.code, e.shortMsg)
+	return fmt.Sprintf("<%s> %s", e.code, e.message)
 }
 
 func (e *BaseError) Code() ErrorCode {
@@ -22,4 +22,12 @@ func (e *BaseError) Code() ErrorCode {
 
 func (e *BaseError) Unwrap() error {
 	return e.err
+}
+
+func NewInternal(message string, err error) Error {
+	return &BaseError{
+		err:     err,
+		code:    CodeInternal,
+		message: message,
+	}
 }

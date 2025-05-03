@@ -1,16 +1,16 @@
-package validators
+package validator
 
 import (
 	"fmt"
 	"reflect"
 	"time"
 
-	"github.com/go-playground/validator/v10"
+	govalidator "github.com/go-playground/validator/v10"
 )
 
 const utcTag = "utc"
 
-func validateUTC(fl validator.FieldLevel) bool {
+func validateUTC(fl govalidator.FieldLevel) bool {
 	field := fl.Field()
 
 	var t time.Time

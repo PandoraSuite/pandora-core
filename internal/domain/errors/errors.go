@@ -18,11 +18,3 @@ type Error interface {
 
 	Code() ErrorCode
 }
-
-func NewInternal(msg string, err error) Error {
-	return &BaseError{
-		code:     CodeInternal,
-		shortMsg: msg,
-		err:      err,
-	}
-}
