@@ -17,7 +17,7 @@ type ChangePassword struct {
 
 type TokenValidation struct {
 	TokenType   string `name:"token_type" validate:"required"`
-	AccessToken string `name:"access_token" validate:"required"`
+	AccessToken string `name:"access_token" validate:"required,jwt"`
 }
 
 // ... Responses ...

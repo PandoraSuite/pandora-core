@@ -37,6 +37,7 @@ func (uc *useCase) validateReq(req *dto.TokenValidation) errors.Error {
 	return uc.validator.ValidateStruct(
 		req,
 		map[string]string{
+			"access_token.jwt":      "access_token must be a valid JWT",
 			"token_type.required":   "token_type is required",
 			"access_token.required": "access_token is required",
 		},
