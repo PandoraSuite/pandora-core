@@ -2,29 +2,33 @@ package dto
 
 import "time"
 
+// ... Requests ...
+
 type Authenticate struct {
-	Username string `form:"username"`
-	Password string `form:"password"`
-}
-
-type TokenResponse struct {
-	Token     string    `json:"access_token"`
-	TokenType string    `json:"token_type"`
-	ExpiresIn time.Time `json:"expires_in" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-}
-
-type AuthenticateResponse struct {
-	*TokenResponse     `json:",inline"`
-	ForcePasswordReset bool `json:"force_password_reset"`
+	Username string `name:"username" validate:"required"`
+	Password string `name:"password" validate:"required"`
 }
 
 type ChangePassword struct {
-	Username        string `json:"-" swaggerignore:"true"`
-	NewPassword     string `json:"new_password"`
-	ConfirmPassword string `json:"confirm_password"`
+	Username        string `name:"username" validate:"required"`
+	NewPassword     string `name:"new_password" validate:"required,min=12,eqfield=ConfirmPassword"`
+	ConfirmPassword string `name:"confirm_password" validate:"required"`
 }
 
-type TokenRequest struct {
-	Key  string `json:"token"`
-	Type string `json:"type"`
+type TokenValidation struct {
+	TokenType   string `name:"token_type" validate:"required"`
+	AccessToken string `name:"access_token" validate:"required"`
+}
+
+// ... Responses ...
+
+type TokenResponse struct {
+	AccessToken string    `name:"access_token"`
+	TokenType   string    `name:"token_type"`
+	ExpiresIn   time.Time `name:"expires_in"`
+}
+
+type AuthenticateResponse struct {
+	*TokenResponse
+	ForcePasswordReset bool `name:"force_password_reset"`
 }
