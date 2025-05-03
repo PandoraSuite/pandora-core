@@ -55,6 +55,17 @@ func NewEntityNotFound(entity, message string, identifiers map[string]any) *Enti
 	}
 }
 
+func NewEntityAlreadyExists(entity, message string, identifiers map[string]any) *EntityError {
+	return &EntityError{
+		BaseError: BaseError{
+			code:    CodeAlreadyExists,
+			message: message,
+		},
+		entity:      entity,
+		identifiers: identifiers,
+	}
+}
+
 func NewEntityValidationFailed(entity, message string, identifiers map[string]any) *EntityError {
 	return &EntityError{
 		BaseError: BaseError{
