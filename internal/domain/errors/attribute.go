@@ -27,6 +27,14 @@ func (e *AttributeError) Error() string {
 	)
 }
 
+func (e *AttributeError) PrefixLoc(prefix string) {
+	if e.loc != "" {
+		e.loc = fmt.Sprintf("%s.%s", prefix, e.loc)
+	} else {
+		e.loc = prefix
+	}
+}
+
 func NewAttributeValidationFailed(entity, loc, message string, err error) Error {
 	return &AttributeError{
 		BaseError: BaseError{

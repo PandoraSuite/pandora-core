@@ -6,60 +6,70 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
-type DecrementAvailableRequest struct {
-	MaxRequest       int `json:"max_request"`
-	AvailableRequest int `json:"available_request"`
-}
-
-type QuotaUsage struct {
-	MaxAllowed       int `json:"max_allowed"`
-	CurrentAllocated int `json:"current_allocated"`
-}
+// ... Requests ...
 
 type EnvironmentService struct {
-	ID         int `json:"id" binding:"required"`
-	MaxRequest int `json:"max_request" binding:"required"`
+	ID         int `name:"id" validate:"required,gt=0"`
+	MaxRequest int `name:"max_request" validate:"omitempty,gte=-1"`
 }
 
 type EnvironmentCreate struct {
-	Name      string `json:"name"`
-	ProjectID int    `json:"project_id"`
+	Name      string `name:"name" validate:"required"`
+	ProjectID int    `name:"project_id" validate:"required,gt=0"`
 
-	Services []*EnvironmentService `json:"services,omitempty"`
-}
-
-type EnvironmentServiceResponse struct {
-	ID               int       `json:"id"`
-	Name             string    `json:"name"`
-	Version          string    `json:"version"`
-	MaxRequest       int       `json:"max_request"`
-	AvailableRequest int       `json:"available_request"`
-	AssignedAt       time.Time `json:"assigned_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-}
-
-type EnvironmentResponse struct {
-	ID        int                     `json:"id"`
-	Name      string                  `json:"name"`
-	Status    enums.EnvironmentStatus `json:"status" enums:"active,deactivated" swaggertype:"string"`
-	ProjectID int                     `json:"project_id"`
-	CreatedAt time.Time               `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-
-	Services []*EnvironmentServiceResponse `json:"services"`
+	Services []*EnvironmentService `name:"services" validate:"required,dive"`
 }
 
 type EnvironmentUpdate struct {
-	Name string `json:"name,omitempty"`
+	Name string `name:"name,omitempty"`
 }
 
-type EnvironmentServiceUpdate struct {
-	MaxRequest       int `json:"max_request"`
-	AvailableRequest int `json:"-" swaggerignore:"true"`
+type EnvironmentServiceUpdateInput struct {
+	MaxRequest int `name:"max_request" validate:"omitempty,gte=-1"`
+}
+
+// ... Responses ...
+
+type EnvironmentServiceResponse struct {
+	ID               int       `name:"id"`
+	Name             string    `name:"name"`
+	Version          string    `name:"version"`
+	MaxRequest       int       `name:"max_request"`
+	AvailableRequest int       `name:"available_request"`
+	AssignedAt       time.Time `name:"assigned_at"`
+}
+
+type EnvironmentResponse struct {
+	ID        int                     `name:"id"`
+	Name      string                  `name:"name"`
+	Status    enums.EnvironmentStatus `name:"status"`
+	ProjectID int                     `name:"project_id"`
+	CreatedAt time.Time               `name:"created_at"`
+
+	Services []*EnvironmentServiceResponse `name:"services"`
 }
 
 type EnvironmentServiceReset struct {
-	ID     int                     `json:"id"`
-	Name   string                  `json:"name"`
-	Status enums.EnvironmentStatus `json:"status" enums:"active,deactivated" swaggertype:"string"`
+	ID     int                     `name:"id"`
+	Name   string                  `name:"name"`
+	Status enums.EnvironmentStatus `name:"status"`
 
-	Service *EnvironmentServiceResponse `json:"service"`
+	Service *EnvironmentServiceResponse `name:"service"`
+}
+
+// ... Internal ...
+
+type DecrementAvailableRequest struct {
+	MaxRequest       int `name:"max_request"`
+	AvailableRequest int `name:"available_request"`
+}
+
+type QuotaUsage struct {
+	MaxAllowed       int `name:"max_allowed"`
+	CurrentAllocated int `name:"current_allocated"`
+}
+
+type EnvironmentServiceUpdate struct {
+	MaxRequest       int `name:"max_request"`
+	AvailableRequest int `name:"available_request"`
 }

@@ -1,0 +1,40 @@
+package environment
+
+import (
+	assignservice "github.com/MAD-py/pandora-core/internal/app/environment/assign_service"
+	"github.com/MAD-py/pandora-core/internal/app/environment/create"
+	"github.com/MAD-py/pandora-core/internal/app/environment/get"
+	removeservice "github.com/MAD-py/pandora-core/internal/app/environment/remove_service"
+	resetrequests "github.com/MAD-py/pandora-core/internal/app/environment/reset_requests"
+	"github.com/MAD-py/pandora-core/internal/app/environment/update"
+	updateservice "github.com/MAD-py/pandora-core/internal/app/environment/update_service"
+)
+
+// ... Assign Service Use Case ...
+
+type EnvironmentAssignServiceRepository = assignservice.EnvironmentRepository
+
+// ... Create Use Case ...
+
+type EnvironmentCreateRepository = create.EnvironmentRepository
+type ProjectQuotaRepository = create.ProjectRepository
+
+// ... Get Use Case ...
+
+type EnvironmentGetRepository = get.EnvironmentRepository
+
+// ... Remove Service Use Case ...
+
+type EnvironmentRemoveServiceRepository = removeservice.EnvironmentRepository
+
+// ... Reset Request Use Case ...
+
+type EnvironmentResetRequestRepository = resetrequests.EnvironmentRepository
+
+// ... Update Use Case ...
+
+type EnvironmentUpdateRepository = update.EnvironmentRepository
+
+// ... Update Service Use Case ...
+
+type EnvironmentUpdateServiceRepository = updateservice.EnvironmentRepository

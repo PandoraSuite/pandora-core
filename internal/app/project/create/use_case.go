@@ -2,6 +2,7 @@ package create
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -27,6 +28,9 @@ func (uc *useCase) Execute(
 	services := make([]*entities.ProjectService, len(req.Services))
 	for i, service := range req.Services {
 		if err := uc.validateService(service); err != nil {
+			if err, ok := err.(*errors.AttributeError); ok {
+				err.PrefixLoc(fmt.Sprintf("services[%d]", i))
+			}
 			validationErr = errors.Aggregate(validationErr, err)
 			continue
 		}

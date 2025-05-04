@@ -62,8 +62,8 @@ func (uc *useCase) Execute(
 	if err != nil {
 		if err.Code() == errors.CodeNotFound {
 			return nil, errors.NewEntityNotFound(
-				"ProjectService",
-				"service not assigned to Project",
+				"Service",
+				"service not assigned to project",
 				map[string]any{"id": serviceID},
 			)
 		}
