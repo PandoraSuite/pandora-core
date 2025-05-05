@@ -4,6 +4,7 @@ import (
 	assignservice "github.com/MAD-py/pandora-core/internal/app/environment/assign_service"
 	"github.com/MAD-py/pandora-core/internal/app/environment/create"
 	"github.com/MAD-py/pandora-core/internal/app/environment/get"
+	listapikey "github.com/MAD-py/pandora-core/internal/app/environment/list_api_key"
 	removeservice "github.com/MAD-py/pandora-core/internal/app/environment/remove_service"
 	resetrequests "github.com/MAD-py/pandora-core/internal/app/environment/reset_requests"
 	"github.com/MAD-py/pandora-core/internal/app/environment/update"
@@ -43,6 +44,18 @@ func NewGetUseCase(
 	environmentRepo EnvironmentGetRepository,
 ) GetUseCase {
 	return get.NewUseCase(validator, environmentRepo)
+}
+
+// ... List API Key Use Case ...
+
+type ListAPIKeyUseCase = listapikey.UseCase
+
+func NewListAPIKeyUseCase(
+	validator validator.Validator,
+	apiKeyRepo APIKeyListByEnvironmentRepository,
+	environmentRepo EnvironmentListAPIKeyRepository,
+) ListAPIKeyUseCase {
+	return listapikey.NewUseCase(validator, apiKeyRepo, environmentRepo)
 }
 
 // ... Remove Service Use Case ...

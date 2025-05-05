@@ -4,6 +4,7 @@ import (
 	assignservice "github.com/MAD-py/pandora-core/internal/app/environment/assign_service"
 	"github.com/MAD-py/pandora-core/internal/app/environment/create"
 	"github.com/MAD-py/pandora-core/internal/app/environment/get"
+	listapikey "github.com/MAD-py/pandora-core/internal/app/environment/list_api_key"
 	removeservice "github.com/MAD-py/pandora-core/internal/app/environment/remove_service"
 	resetrequests "github.com/MAD-py/pandora-core/internal/app/environment/reset_requests"
 	"github.com/MAD-py/pandora-core/internal/app/environment/update"
@@ -22,6 +23,11 @@ type ProjectQuotaRepository = create.ProjectRepository
 // ... Get Use Case ...
 
 type EnvironmentGetRepository = get.EnvironmentRepository
+
+// ... List API Key Use Case ...
+
+type EnvironmentListAPIKeyRepository = listapikey.EnvironmentRepository
+type APIKeyListByEnvironmentRepository = listapikey.APIKeyRepository
 
 // ... Remove Service Use Case ...
 
