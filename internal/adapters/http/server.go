@@ -185,8 +185,8 @@ func (s *Server) Run(exposeVersion bool) {
 	)
 
 	{
-		routes.RegisterProtectedAPIKeyRoutes(v1Protected)
 		routes.RegisterProtectedServiceRoutes(v1Protected)
+		routes.RegisterProtectedAPIKeyRoutes(v1Protected)
 	}
 
 	s.server = &http.Server{
