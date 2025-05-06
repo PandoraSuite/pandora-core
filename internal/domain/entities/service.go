@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type Service struct {
@@ -16,18 +15,6 @@ type Service struct {
 
 	CreatedAt time.Time
 	UpdatedAt time.Time
-}
-
-func (s *Service) Validate() *errors.Error {
-	if s.Name == "" {
-		return errors.ErrNameCannotBeEmpty
-	}
-
-	if s.Version == "" {
-		return errors.ErrVersionCannotBeEmpty
-	}
-
-	return nil
 }
 
 func (a *Service) IsActive() bool {
