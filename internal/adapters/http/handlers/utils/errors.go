@@ -23,17 +23,17 @@ func GetBindJSONErrorStatusCode(err error) int {
 	return http.StatusUnprocessableEntity
 }
 
-func GetDomainErrorStatusCode(err *domainErr.Error) int {
-	switch err.Code {
+func GetDomainErrorStatusCode(err domainErr.Error) int {
+	switch err.Code() {
 	case domainErr.CodeNotFound:
 		return http.StatusNotFound
 	case domainErr.CodeForbidden:
 		return http.StatusForbidden
 	case domainErr.CodeUnauthorized:
 		return http.StatusUnauthorized
-	case domainErr.CodeInternalError:
+	case domainErr.CodeInternal:
 		return http.StatusInternalServerError
-	case domainErr.CodeValidationError:
+	case domainErr.CodeValidationFailed:
 		return http.StatusUnprocessableEntity
 	default:
 		return http.StatusInternalServerError

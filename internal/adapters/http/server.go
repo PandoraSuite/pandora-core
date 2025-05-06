@@ -8,6 +8,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/http/middlewares"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/routes"
+	"github.com/MAD-py/pandora-core/internal/app/auth"
 )
 
 // @title Pandora Core
@@ -163,20 +164,29 @@ func (s *Server) Run(exposeVersion bool) {
 	v1 := router.Group("/api/v1")
 
 	{
-
+		routes.RegisterAuthRoutes(v1)
 	}
 
 	v1Protected := v1.Group("")
-	v1Protected.Use(middlewares.ValidateToken(nil))
+	v1Protected.Use(
+		middlewares.ValidateToken(
+			auth.NewTokenValidationUseCase(nil, nil),
+		),
+	)
 
 	{
-
+		routes.RegisterProtectedAuthRoutes(v1Protected)
 	}
 
-	v1Protected.Use(middlewares.ForcePasswordReset(nil))
+	v1Protected.Use(
+		middlewares.ForcePasswordReset(
+			auth.NewResetPasswordUseCase(nil, nil),
+		),
+	)
 
 	{
-		routes.RegisterServiceRoutes(v1)
+		routes.RegisterProtectedAPIKeyRoutes(v1Protected)
+		routes.RegisterProtectedServiceRoutes(v1Protected)
 	}
 
 	s.server = &http.Server{

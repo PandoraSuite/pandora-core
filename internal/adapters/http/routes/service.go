@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterServiceRoutes(rg *gin.RouterGroup) {
+func RegisterProtectedServiceRoutes(rg *gin.RouterGroup) {
 	listUC := service.NewListUseCase(nil, nil)
 	createUC := service.NewCreateUseCase(nil, nil)
 	deleteUC := service.NewDeleteUseCase(nil, nil, nil, nil)

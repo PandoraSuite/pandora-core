@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/http/dto"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
-	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 )
 
@@ -42,7 +42,7 @@ func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 		}
 
 		req.Username = username
-		err := authService.ChangePassword(c.Request.Context(), &req)
+		err := authService.ChangePassword(c.Request.Context(), req.ToDomain())
 		if err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
@@ -78,7 +78,7 @@ func Authenticate(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		res, err := authService.Authenticate(c.Request.Context(), &req)
+		res, err := authService.Authenticate(c.Request.Context(), req.ToDomain())
 		if err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
@@ -87,6 +87,6 @@ func Authenticate(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, res)
+		c.JSON(http.StatusOK, dto.AuthenticateResponseFromDomain(res))
 	}
 }

@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/http/dto"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
 	"github.com/MAD-py/pandora-core/internal/app/auth"
-	"github.com/MAD-py/pandora-core/internal/domain/dto"
 )
 
 func ValidateToken(useCase auth.TokenValidationUseCase) gin.HandlerFunc {
@@ -32,12 +32,12 @@ func ValidateToken(useCase auth.TokenValidationUseCase) gin.HandlerFunc {
 			return
 		}
 
-		req := &dto.TokenValidation{
+		req := dto.TokenValidation{
 			TokenType:   parts[1],
 			AccessToken: parts[0],
 		}
 
-		username, err := useCase.Execute(c.Request.Context(), req)
+		username, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
