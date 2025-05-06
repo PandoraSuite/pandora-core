@@ -1,54 +1,53 @@
 definitions:
   dto.APIKeyCreate:
     properties:
-      environment_id:
+      environmentID:
         type: integer
-      expires_at:
+      expiresAt:
         type: string
     required:
-    - environment_id
+    - environmentID
     type: object
   dto.APIKeyResponse:
     properties:
-      created_at:
+      createdAt:
         type: string
-      environment_id:
+      environmentID:
         type: integer
-      expires_at:
+      expiresAt:
         type: string
       id:
         type: integer
       key:
         type: string
-      last_used:
+      lastUsed:
         type: string
       status:
-        enum:
-        - active
-        - deactivated
-        type: string
+        $ref: '#/definitions/enums.APIKeyStatus'
     type: object
   dto.APIKeyUpdate:
     properties:
-      expires_at:
+      expiresAt:
         type: string
     type: object
   dto.AuthenticateResponse:
     properties:
-      access_token:
+      expiresIn:
         type: string
-      expires_in:
-        type: string
-      force_password_reset:
+      forcePasswordReset:
         type: boolean
-      token_type:
+      token:
+        type: string
+      tokenType:
         type: string
     type: object
   dto.ChangePassword:
     properties:
-      confirm_password:
+      confirmPassword:
         type: string
-      new_password:
+      newPassword:
+        type: string
+      username:
         type: string
     type: object
   dto.ClientCreate:
@@ -58,18 +57,11 @@ definitions:
       name:
         type: string
       type:
-        enum:
-        - developer
-        - organization
-        type: string
-    required:
-    - email
-    - name
-    - type
+        $ref: '#/definitions/enums.ClientType'
     type: object
   dto.ClientResponse:
     properties:
-      created_at:
+      createdAt:
         type: string
       email:
         type: string
@@ -78,10 +70,7 @@ definitions:
       name:
         type: string
       type:
-        enum:
-        - developer
-        - organization
-        type: string
+        $ref: '#/definitions/enums.ClientType'
     type: object
   dto.ClientUpdate:
     properties:
@@ -90,51 +79,48 @@ definitions:
       name:
         type: string
       type:
-        enum:
-        - developer
-        - organization
-        type: string
+        $ref: '#/definitions/enums.ClientType'
     type: object
   dto.EnvironmentCreate:
     properties:
       name:
         type: string
-      project_id:
+      projectID:
         type: integer
       services:
         items:
           $ref: '#/definitions/dto.EnvironmentService'
         type: array
+    required:
+    - name
+    - projectID
+    - services
     type: object
   dto.EnvironmentResponse:
     properties:
-      created_at:
+      createdAt:
         type: string
       id:
         type: integer
       name:
         type: string
-      project_id:
+      projectID:
         type: integer
       services:
         items:
           $ref: '#/definitions/dto.EnvironmentServiceResponse'
         type: array
       status:
-        enum:
-        - active
-        - deactivated
-        type: string
+        $ref: '#/definitions/enums.EnvironmentStatus'
     type: object
   dto.EnvironmentService:
     properties:
       id:
         type: integer
-      max_request:
+      maxRequest:
         type: integer
     required:
     - id
-    - max_request
     type: object
   dto.EnvironmentServiceReset:
     properties:
@@ -145,20 +131,17 @@ definitions:
       service:
         $ref: '#/definitions/dto.EnvironmentServiceResponse'
       status:
-        enum:
-        - active
-        - deactivated
-        type: string
+        $ref: '#/definitions/enums.EnvironmentStatus'
     type: object
   dto.EnvironmentServiceResponse:
     properties:
-      assigned_at:
+      assignedAt:
         type: string
-      available_request:
+      availableRequest:
         type: integer
       id:
         type: integer
-      max_request:
+      maxRequest:
         type: integer
       name:
         type: string
@@ -167,7 +150,9 @@ definitions:
     type: object
   dto.EnvironmentServiceUpdate:
     properties:
-      max_request:
+      availableRequest:
+        type: integer
+      maxRequest:
         type: integer
     type: object
   dto.EnvironmentUpdate:
@@ -177,7 +162,7 @@ definitions:
     type: object
   dto.ProjectCreate:
     properties:
-      client_id:
+      clientID:
         type: integer
       name:
         type: string
@@ -186,20 +171,13 @@ definitions:
           $ref: '#/definitions/dto.ProjectService'
         type: array
       status:
-        enum:
-        - in_production
-        - in_development
-        type: string
-    required:
-    - client_id
-    - name
-    - status
+        $ref: '#/definitions/enums.ProjectStatus'
     type: object
   dto.ProjectResponse:
     properties:
-      client_id:
+      clientID:
         type: integer
-      created_at:
+      createdAt:
         type: string
       id:
         type: integer
@@ -210,83 +188,58 @@ definitions:
           $ref: '#/definitions/dto.ProjectServiceResponse'
         type: array
       status:
-        enum:
-        - in_production
-        - in_development
-        - deactivated
-        type: string
+        $ref: '#/definitions/enums.ProjectStatus'
     type: object
   dto.ProjectService:
     properties:
       id:
         type: integer
-      max_request:
+      maxRequest:
         type: integer
-      reset_frequency:
-        enum:
-        - daily
-        - weekly
-        - biweekly
-        - monthly
-        - ""
-        type: string
-    required:
-    - id
-    - max_request
+      resetFrequency:
+        $ref: '#/definitions/enums.ProjectServiceResetFrequency'
     type: object
   dto.ProjectServiceResetRequest:
     properties:
-      recalculate_next_reset:
+      recalculateNextReset:
         type: boolean
     type: object
   dto.ProjectServiceResetRequestResponse:
     properties:
-      environment_services:
+      environmentServices:
         items:
           $ref: '#/definitions/dto.EnvironmentServiceReset'
         type: array
-      project_service:
+      projectService:
         $ref: '#/definitions/dto.ProjectServiceResponse'
-      reset_count:
+      resetCount:
         type: integer
     type: object
   dto.ProjectServiceResponse:
     properties:
-      assigned_at:
+      assignedAt:
         type: string
       id:
         type: integer
-      max_request:
+      maxRequest:
         type: integer
       name:
         type: string
-      next_reset:
+      nextReset:
         type: string
-      reset_frequency:
-        enum:
-        - daily
-        - weekly
-        - biweekly
-        - monthly
-        - ""
-        type: string
+      resetFrequency:
+        $ref: '#/definitions/enums.ProjectServiceResetFrequency'
       version:
         type: string
     type: object
   dto.ProjectServiceUpdate:
     properties:
-      max_request:
+      maxRequest:
         type: integer
-      next_reset:
+      nextReset:
         type: string
-      reset_frequency:
-        enum:
-        - daily
-        - weekly
-        - biweekly
-        - monthly
-        - ""
-        type: string
+      resetFrequency:
+        $ref: '#/definitions/enums.ProjectServiceResetFrequency'
     type: object
   dto.ProjectUpdate:
     properties:
@@ -299,33 +252,91 @@ definitions:
         type: string
       version:
         type: string
+    required:
+    - name
+    - version
     type: object
   dto.ServiceResponse:
     properties:
-      created_at:
+      createdAt:
         type: string
       id:
         type: integer
       name:
         type: string
       status:
-        enum:
-        - active
-        - deactivated
-        - deprecated
-        type: string
+        $ref: '#/definitions/enums.ServiceStatus'
       version:
         type: string
     type: object
-  dto.ServiceStatusUpdate:
-    properties:
-      status:
-        enum:
-        - active
-        - deactivated
-        - deprecated
-        type: string
-    type: object
+  enums.APIKeyStatus:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - APIKeyStatusNull
+    - APIKeyActive
+    - APIKeyDeactivated
+  enums.ClientType:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - ClientTypeNull
+    - ClientDeveloper
+    - ClientOrganization
+  enums.EnvironmentStatus:
+    enum:
+    - 0
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - EnvironmentStatusNull
+    - EnvironmentActive
+    - EnvironmentDeactivated
+  enums.ProjectServiceResetFrequency:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-varnames:
+    - ProjectServiceNull
+    - ProjectServiceDaily
+    - ProjectServiceWeekly
+    - ProjectServiceBiweekly
+    - ProjectServiceMonthly
+  enums.ProjectStatus:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ProjectStatusNull
+    - ProjectInProduction
+    - ProjectInDevelopment
+    - ProjectDeactivated
+  enums.ServiceStatus:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    type: integer
+    x-enum-varnames:
+    - ServiceStatusNull
+    - ServiceActive
+    - ServiceDeactivated
+    - ServiceDeprecated
   utils.ErrorResponse:
     properties:
       error: {}
@@ -467,11 +478,16 @@ paths:
       description: Fetches a list of clients, optionally filtered by client type
       parameters:
       - enum:
-        - developer
-        - organization
+        - 0
+        - 1
+        - 2
         in: query
         name: type
-        type: string
+        type: integer
+        x-enum-varnames:
+        - ClientTypeNull
+        - ClientDeveloper
+        - ClientOrganization
       produces:
       - application/json
       responses:
@@ -1109,12 +1125,18 @@ paths:
       description: Fetches a list of all registered services
       parameters:
       - enum:
-        - active
-        - deactivated
-        - deprecated
+        - 0
+        - 1
+        - 2
+        - 3
         in: query
         name: status
-        type: string
+        type: integer
+        x-enum-varnames:
+        - ServiceStatusNull
+        - ServiceActive
+        - ServiceDeactivated
+        - ServiceDeprecated
       produces:
       - application/json
       responses:
@@ -1199,7 +1221,9 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/dto.ServiceStatusUpdate'
+          additionalProperties:
+            type: string
+          type: object
       produces:
       - application/json
       responses:
