@@ -6,13 +6,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/http/dto"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
-	"github.com/MAD-py/pandora-core/internal/domain/dto"
+	"github.com/MAD-py/pandora-core/internal/app/service"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 )
 
-// GetAllServices godoc
+// ServiceList godoc
 // @Summary Retrieves all services
 // @Description Fetches a list of all registered services
 // @Tags Services
@@ -23,7 +23,7 @@ import (
 // @Success 200 {array} dto.ServiceResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/services [get]
-func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
+func ServiceList(useCase service.ListUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		status, paramErr := enums.ParseServiceStatus(c.Query("status"))
 		if paramErr != nil {
@@ -35,7 +35,7 @@ func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 		}
 
 		req := dto.ServiceFilter{Status: status}
-		services, err := srvService.GetServices(c.Request.Context(), &req)
+		services, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
@@ -44,11 +44,15 @@ func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, services)
+		resp := make([]*dto.ServiceResponse, len(services))
+		for i, service := range services {
+			resp[i] = dto.ServiceResponseFromDomain(service)
+		}
+		c.JSON(http.StatusOK, resp)
 	}
 }
 
-// CreateService godoc
+// ServiceCreate godoc
 // @Summary Creates a new service
 // @Description Adds a new service to the system
 // @Tags Services
@@ -59,7 +63,7 @@ func GetAllServices(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 // @Success 201 {object} dto.ServiceResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/services [post]
-func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
+func ServiceCreate(useCase service.CreateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ServiceCreate
 
@@ -71,7 +75,7 @@ func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		service, err := srvService.Create(c.Request.Context(), &req)
+		service, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
@@ -80,11 +84,11 @@ func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusCreated, service)
+		c.JSON(http.StatusCreated, dto.ServiceResponseFromDomain(service))
 	}
 }
 
-// DeleteService godoc
+// ServiceDelete godoc
 // @Summary Deletes a service
 // @Description Permanently removes a service by its ID
 // @Tags Services
@@ -94,7 +98,7 @@ func CreateService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 // @Success 204
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/services/{id} [delete]
-func DeleteService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
+func ServiceDelete(useCase service.DeleteUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		serviceID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
@@ -105,7 +109,7 @@ func DeleteService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		if err := srvService.Delete(c.Request.Context(), serviceID); err != nil {
+		if err := useCase.Execute(c.Request.Context(), serviceID); err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
 				gin.H{"error": err.Error()},
@@ -117,7 +121,7 @@ func DeleteService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 	}
 }
 
-// UpdateStatus godoc
+// ServiceUpdateStatus godoc
 // @Summary Updates the status of a service
 // @Description Changes the current status of a specific service by ID
 // @Tags Services
@@ -129,7 +133,7 @@ func DeleteService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 // @Success 200 {object} dto.ServiceResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/services/{id}/status [patch]
-func UpdateStatusService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
+func ServiceUpdateStatus(useCase service.UpdateStatusUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		serviceID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
@@ -149,7 +153,7 @@ func UpdateStatusService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		service, err := srvService.UpdateStatus(
+		service, err := useCase.Execute(
 			c.Request.Context(), serviceID, req.Status,
 		)
 		if err != nil {
@@ -160,6 +164,6 @@ func UpdateStatusService(srvService inbound.ServiceHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, service)
+		c.JSON(http.StatusOK, dto.ServiceResponseFromDomain(service))
 	}
 }
