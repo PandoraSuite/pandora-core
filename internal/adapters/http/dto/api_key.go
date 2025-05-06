@@ -34,13 +34,13 @@ func (a *APIKeyUpdate) ToDomain() *dto.APIKeyUpdate {
 // ... Responses ...
 
 type APIKeyResponse struct {
-	ID            int                `json:"id" example:"1"`
-	Key           string             `json:"key" example:"Wc4w-TpcKtfpLUE9Ve6U1hj1MK0y33qMIqXNgC2i4Ww"`
-	Status        enums.APIKeyStatus `json:"status" example:"active" enums:"active,deactivated" swaggertype:"string"`
-	LastUsed      time.Time          `json:"last_used" example:"2025-01-01T00:00:00Z" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	ExpiresAt     time.Time          `json:"expires_at" example:"2001-01-01T00:00:00Z" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	EnvironmentID int                `json:"environment_id" example:"1"`
-	CreatedAt     time.Time          `json:"created_at" example:"2025-01-01T00:00:00Z" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	ID            int                `json:"id"`
+	Key           string             `json:"key"`
+	Status        enums.APIKeyStatus `json:"status" enums:"active,deactivated" swaggertype:"string"`
+	LastUsed      time.Time          `json:"last_used" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	ExpiresAt     time.Time          `json:"expires_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	EnvironmentID int                `json:"environment_id"`
+	CreatedAt     time.Time          `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
 }
 
 func APIKeyResponseFromDomain(apiKey *dto.APIKeyResponse) *APIKeyResponse {

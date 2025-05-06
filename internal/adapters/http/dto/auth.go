@@ -49,10 +49,10 @@ func (t *TokenValidation) ToDomain() *dto.TokenValidation {
 // ... Responses ...
 
 type AuthenticateResponse struct {
-	TokenType          string    `json:"token_type" example:"Bearer"`
-	ExpiresIn          time.Time `json:"expires_in" example:"2025-01-01T00:00:00Z" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	AccessToken        string    `json:"access_token" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
-	ForcePasswordReset bool      `json:"force_password_reset" example:"false"`
+	TokenType          string    `json:"token_type"`
+	ExpiresIn          time.Time `json:"expires_in" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	AccessToken        string    `json:"access_token"`
+	ForcePasswordReset bool      `json:"force_password_reset"`
 }
 
 func AuthenticateResponseFromDomain(auth *dto.AuthenticateResponse) *AuthenticateResponse {

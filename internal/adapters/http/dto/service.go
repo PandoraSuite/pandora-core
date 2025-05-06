@@ -38,11 +38,11 @@ type ServiceStatusUpdate struct {
 // ... Responses ...
 
 type ServiceResponse struct {
-	ID        int                 `json:"id" example:"1"`
-	Name      string              `json:"name" example:"Service Name"`
-	Status    enums.ServiceStatus `json:"status" example:"active" enums:"active,deactivated,deprecated" swaggertype:"string"`
-	Version   string              `json:"version" example:"1.0.0"`
-	CreatedAt time.Time           `json:"created_at" example:"2025-01-01T00:00:00Z" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	ID        int                 `json:"id"`
+	Name      string              `json:"name"`
+	Status    enums.ServiceStatus `json:"status" enums:"active,deactivated,deprecated" swaggertype:"string"`
+	Version   string              `json:"version"`
+	CreatedAt time.Time           `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
 }
 
 func ServiceResponseFromDomain(service *dto.ServiceResponse) *ServiceResponse {
