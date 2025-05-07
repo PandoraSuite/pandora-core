@@ -24,9 +24,9 @@ type CredentialsRepository struct {
 
 func (r *CredentialsRepository) FindCredentials(
 	ctx context.Context, username string,
-) (*entities.Credentials, *errors.Error) {
+) (*entities.Credentials, errors.Error) {
 	if username != r.credentials.Username {
-		return nil, errors.ErrCredentialsNotFound
+		return nil, errors.NewNotFound("credentials not found")
 	}
 
 	return &entities.Credentials{
@@ -38,9 +38,9 @@ func (r *CredentialsRepository) FindCredentials(
 
 func (r *CredentialsRepository) ChangePassword(
 	ctx context.Context, credentials *entities.Credentials,
-) *errors.Error {
+) errors.Error {
 	if credentials.Username != r.credentials.Username {
-		return errors.ErrCredentialsNotFound
+		return errors.NewNotFound("credentials not found")
 	}
 
 	oldPassword := r.credentials.Password
@@ -52,7 +52,7 @@ func (r *CredentialsRepository) ChangePassword(
 
 	if err := r.saveCredentials(); err != nil {
 		r.credentials.Password = oldPassword
-		return errors.ErrPersistence
+		return errors.NewInternal("failed to save credentials", err)
 	}
 	return nil
 }
