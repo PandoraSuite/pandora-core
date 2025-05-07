@@ -8,6 +8,6 @@ import (
 )
 
 type CredentialsRepository interface {
-	ChangePassword(ctx context.Context, credentials *entities.Credentials) errors.Error
 	GetByUsername(ctx context.Context, username string) (*entities.Credentials, errors.Error)
+	ChangePassword(ctx context.Context, credentials *entities.Credentials) errors.Error
 }

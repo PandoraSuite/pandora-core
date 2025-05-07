@@ -14,7 +14,7 @@ type JWTProvider struct {
 	secret []byte
 }
 
-func (p *JWTProvider) GenerateToken(
+func (p *JWTProvider) Generate(
 	ctx context.Context, subject string,
 ) (*dto.TokenResponse, errors.Error) {
 	now := time.Now()
@@ -41,7 +41,7 @@ func (p *JWTProvider) GenerateToken(
 	}, nil
 }
 
-func (p *JWTProvider) ValidateToken(
+func (p *JWTProvider) Validate(
 	ctx context.Context, token *dto.TokenValidation,
 ) (string, errors.Error) {
 	if token.TokenType != "Bearer" {

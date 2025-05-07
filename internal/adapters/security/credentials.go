@@ -22,7 +22,7 @@ type CredentialsRepository struct {
 	credentials *credentials
 }
 
-func (r *CredentialsRepository) FindCredentials(
+func (r *CredentialsRepository) GetByUsername(
 	ctx context.Context, username string,
 ) (*entities.Credentials, errors.Error) {
 	if username != r.credentials.Username {
