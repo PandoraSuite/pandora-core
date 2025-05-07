@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterProtectedAPIKeyRoutes(rg *gin.RouterGroup) {
+func RegisterAPIKeyRoutes(rg *gin.RouterGroup) {
 	createUC := apikey.NewCreateUseCase(nil, nil)
 	updateUC := apikey.NewUpdateUseCase(nil, nil)
 

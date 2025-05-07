@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterProtectedEnvironmentRoutes(rg *gin.RouterGroup) {
+func RegisterEnvironmentRoutes(rg *gin.RouterGroup) {
 	getUC := environment.NewGetUseCase(nil, nil)
 	createUc := environment.NewCreateUseCase(nil, nil, nil)
 	updateUC := environment.NewUpdateUseCase(nil, nil)

@@ -9,7 +9,7 @@ import (
 )
 
 type UseCase interface {
-	Execute(ctx context.Context, id, serviceID int, req *dto.ProjectServiceResetRequest) (*dto.ProjectServiceResetRequestResponse, errors.Error)
+	Execute(ctx context.Context, id, serviceID int, recalculateNextReset bool) (*dto.ProjectResetRequestResponse, errors.Error)
 }
 
 type useCase struct {
@@ -19,9 +19,9 @@ type useCase struct {
 }
 
 func (uc *useCase) Execute(
-	ctx context.Context, id, serviceID int, req *dto.ProjectServiceResetRequest,
-) (*dto.ProjectServiceResetRequestResponse, errors.Error) {
-	if err := uc.validateInput(id, serviceID, req); err != nil {
+	ctx context.Context, id, serviceID int, recalculateNextReset bool,
+) (*dto.ProjectResetRequestResponse, errors.Error) {
+	if err := uc.validateInput(id, serviceID); err != nil {
 		return nil, err
 	}
 
@@ -51,7 +51,7 @@ func (uc *useCase) Execute(
 	}
 
 	var envServices []*dto.EnvironmentServiceReset
-	if req.RecalculateNextReset {
+	if recalculateNextReset {
 		service.CalculateNextReset()
 		envServices, err = uc.projectRepo.
 			ResetProjectServiceUsage(
@@ -68,7 +68,7 @@ func (uc *useCase) Execute(
 		return nil, err
 	}
 
-	return &dto.ProjectServiceResetRequestResponse{
+	return &dto.ProjectResetRequestResponse{
 		ResetCount:          len(envServices),
 		EnvironmentServices: envServices,
 		ProjectService: &dto.ProjectServiceResponse{
@@ -83,9 +83,7 @@ func (uc *useCase) Execute(
 	}, nil
 }
 
-func (uc *useCase) validateInput(
-	id, serviceID int, req *dto.ProjectServiceResetRequest,
-) errors.Error {
+func (uc *useCase) validateInput(id, serviceID int) errors.Error {
 	var err errors.Error
 
 	if errID := uc.validateID(id); errID != nil {
@@ -94,10 +92,6 @@ func (uc *useCase) validateInput(
 
 	if errServiceID := uc.validateServiceID(serviceID); errServiceID != nil {
 		err = errors.Aggregate(err, errServiceID)
-	}
-
-	if errReq := uc.validateReq(req); errReq != nil {
-		err = errors.Aggregate(err, errReq)
 	}
 
 	return err
@@ -125,10 +119,6 @@ func (uc *useCase) validateServiceID(serviceID int) errors.Error {
 			"required": "service_id is required",
 		},
 	)
-}
-
-func (uc *useCase) validateReq(req *dto.ProjectServiceResetRequest) errors.Error {
-	return uc.validator.ValidateStruct(req, map[string]string{})
 }
 
 func NewUseCase(

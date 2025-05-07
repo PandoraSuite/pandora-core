@@ -10,7 +10,7 @@ import (
 // ... Requests ...
 
 type ServiceFilter struct {
-	Status enums.ServiceStatus `form:"status,omitempty" enums:"active,deactivated,deprecated" swaggertype:"string"`
+	Status enums.ServiceStatus `form:"status" enums:"active,deactivated,deprecated" swaggertype:"string"`
 }
 
 func (s *ServiceFilter) ToDomain() *dto.ServiceFilter {
@@ -32,7 +32,7 @@ func (s *ServiceCreate) ToDomain() *dto.ServiceCreate {
 }
 
 type ServiceStatusUpdate struct {
-	Status enums.ServiceStatus `json:"status,omitempty" enums:"active,deactivated,deprecated" swaggertype:"string"`
+	Status enums.ServiceStatus `json:"status" enums:"active,deactivated,deprecated" swaggertype:"string"`
 }
 
 // ... Responses ...

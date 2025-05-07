@@ -22,10 +22,6 @@ type ProjectCreate struct {
 	Services []*ProjectService `name:"services" validate:"required,dive"`
 }
 
-type ProjectServiceResetRequest struct {
-	RecalculateNextReset bool `name:"recalculate_next_reset" validate:"omitempty"`
-}
-
 type ProjectUpdate struct {
 	Name string `name:"name" validate:"omitempty"`
 }
@@ -58,7 +54,7 @@ type ProjectResponse struct {
 	Services []*ProjectServiceResponse `name:"services"`
 }
 
-type ProjectServiceResetRequestResponse struct {
+type ProjectResetRequestResponse struct {
 	ResetCount          int                        `name:"reset_count"`
 	ProjectService      *ProjectServiceResponse    `name:"project_service"`
 	EnvironmentServices []*EnvironmentServiceReset `name:"environment_services"`

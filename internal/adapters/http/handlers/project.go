@@ -6,12 +6,41 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/http/dto"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
-	"github.com/MAD-py/pandora-core/internal/domain/dto"
-	"github.com/MAD-py/pandora-core/internal/ports/inbound"
+	"github.com/MAD-py/pandora-core/internal/app/project"
 )
 
-// CreateProject godoc
+// ProjectList godoc
+// @Summary Retrieves all projects
+// @Description Fetches a complete list of projects in the system
+// @Tags Projects
+// @Security OAuth2Password
+// @Produce json
+// @Success 200 {array} dto.ProjectResponse
+// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Router /api/v1/projects [get]
+func ProjectList(useCase project.ListUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		projects, err := useCase.Execute(c.Request.Context())
+		if err != nil {
+			c.AbortWithStatusJSON(
+				utils.GetDomainErrorStatusCode(err),
+				gin.H{"error": err.Error()},
+			)
+			return
+		}
+
+		resp := make([]*dto.ProjectResponse, len(projects))
+		for i, project := range projects {
+			resp[i] = dto.ProjectResponseFromDomain(project)
+		}
+
+		c.JSON(http.StatusOK, resp)
+	}
+}
+
+// ProjectCreate godoc
 // @Summary Creates a new project
 // @Description Adds a new project to the system
 // @Tags Projects
@@ -22,7 +51,7 @@ import (
 // @Success 201 {object} dto.ProjectResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/projects [post]
-func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+func ProjectCreate(useCase project.CreateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ProjectCreate
 
@@ -34,7 +63,7 @@ func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		project, err := projectService.Create(c.Request.Context(), &req)
+		project, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
@@ -43,11 +72,11 @@ func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusCreated, project)
+		c.JSON(http.StatusCreated, dto.ProjectResponseFromDomain(project))
 	}
 }
 
-// GetProject godoc
+// ProjectGet godoc
 // @Summary Retrieves a project by ID
 // @Description Fetches the details of a specific project using its ID
 // @Tags Projects
@@ -58,7 +87,7 @@ func CreateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 // @Success 200 {object} dto.ProjectResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/projects/{id} [get]
-func GetProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+func ProjectGet(useCase project.GetUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
@@ -69,9 +98,7 @@ func GetProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		project, err := projectService.GetByID(
-			c.Request.Context(), projectID,
-		)
+		project, err := useCase.Execute(c.Request.Context(), projectID)
 		if err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
@@ -80,11 +107,11 @@ func GetProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, project)
+		c.JSON(http.StatusOK, dto.ProjectResponseFromDomain(project))
 	}
 }
 
-// UpdateProject godoc
+// ProjectUpdate godoc
 // @Summary Updates a project
 // @Description Modifies the details of a specific project by ID
 // @Tags Projects
@@ -96,7 +123,7 @@ func GetProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 // @Success 200 {object} dto.ProjectResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/projects/{id} [patch]
-func UpdateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+func ProjectUpdate(useCase project.UpdateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
@@ -116,8 +143,8 @@ func UpdateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		project, err := projectService.Update(
-			c.Request.Context(), projectID, &req,
+		project, err := useCase.Execute(
+			c.Request.Context(), projectID, req.ToDomain(),
 		)
 		if err != nil {
 			c.AbortWithStatusJSON(
@@ -127,11 +154,11 @@ func UpdateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, project)
+		c.JSON(http.StatusOK, dto.ProjectResponseFromDomain(project))
 	}
 }
 
-// GetEnvironmentsByProject godoc
+// ProjectListEnvironments godoc
 // @Summary Retrieves all environments for a specific project
 // @Description Fetches a list of environments associated with a given project
 // @Tags Projects
@@ -142,7 +169,7 @@ func UpdateProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
 // @Success 200 {array} dto.EnvironmentResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/projects/{id}/environments [get]
-func GetEnvironmentsByProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+func ProjectListEnvironments(useCase project.ListEnvironmentsUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
@@ -153,9 +180,7 @@ func GetEnvironmentsByProject(projectService inbound.ProjectHTTPPort) gin.Handle
 			return
 		}
 
-		environments, err := projectService.GetEnvironments(
-			c.Request.Context(), projectID,
-		)
+		environments, err := useCase.Execute(c.Request.Context(), projectID)
 		if err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
@@ -164,11 +189,16 @@ func GetEnvironmentsByProject(projectService inbound.ProjectHTTPPort) gin.Handle
 			return
 		}
 
-		c.JSON(http.StatusOK, environments)
+		resp := make([]*dto.EnvironmentResponse, len(environments))
+		for i, environment := range environments {
+			resp[i] = dto.EnvironmentResponseFromDomain(environment)
+		}
+
+		c.JSON(http.StatusOK, resp)
 	}
 }
 
-// AssignServiceToProject godoc
+// ProjectAssignService godoc
 // @Summary Assigns a service to a project
 // @Description Associates a service with a given project
 // @Tags Projects
@@ -180,7 +210,7 @@ func GetEnvironmentsByProject(projectService inbound.ProjectHTTPPort) gin.Handle
 // @Success 200 {object} dto.ProjectServiceResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/projects/{id}/services [post]
-func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+func ProjectAssignService(useCase project.AssignServiceUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
@@ -200,8 +230,8 @@ func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerF
 			return
 		}
 
-		service, err := projectService.AssignService(
-			c.Request.Context(), projectID, &req,
+		service, err := useCase.Execute(
+			c.Request.Context(), projectID, req.ToDomain(),
 		)
 		if err != nil {
 			c.AbortWithStatusJSON(
@@ -211,11 +241,11 @@ func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerF
 			return
 		}
 
-		c.JSON(http.StatusOK, service)
+		c.JSON(http.StatusOK, dto.ProjectServiceResponseFromDomain(service))
 	}
 }
 
-// RemoveServiceFromProject godoc
+// ProjectRemoveService godoc
 // @Summary Removes a service from a project
 // @Description Disassociates a service from a specific project
 // @Tags Projects
@@ -226,7 +256,7 @@ func AssignServiceToProject(projectService inbound.ProjectHTTPPort) gin.HandlerF
 // @Success 204
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/projects/{id}/services/{service_id} [delete]
-func RemoveServiceFromProject(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+func ProjectRemoveService(useCase project.RemoveServiceUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
@@ -246,9 +276,7 @@ func RemoveServiceFromProject(projectService inbound.ProjectHTTPPort) gin.Handle
 			return
 		}
 
-		err := projectService.RemoveService(
-			c.Request.Context(), projectID, serviceID,
-		)
+		err := useCase.Execute(c.Request.Context(), projectID, serviceID)
 		if err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
@@ -261,7 +289,7 @@ func RemoveServiceFromProject(projectService inbound.ProjectHTTPPort) gin.Handle
 	}
 }
 
-// UpdateProjectService godoc
+// ProjectUpdateService godoc
 // @Summary Updates a service assigned to a project
 // @Description Modifies the configuration of a service within a specific project
 // @Tags Projects
@@ -274,7 +302,7 @@ func RemoveServiceFromProject(projectService inbound.ProjectHTTPPort) gin.Handle
 // @Success 200 {object} dto.ProjectServiceResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/projects/{id}/services/{service_id} [patch]
-func UpdateProjectService(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+func ProjectUpdateService(useCase project.UpdateServiceUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
@@ -303,8 +331,8 @@ func UpdateProjectService(projectService inbound.ProjectHTTPPort) gin.HandlerFun
 			return
 		}
 
-		service, err := projectService.UpdateService(
-			c.Request.Context(), projectID, serviceID, &req,
+		service, err := useCase.Execute(
+			c.Request.Context(), projectID, serviceID, req.ToDomain(),
 		)
 		if err != nil {
 			c.AbortWithStatusJSON(
@@ -314,11 +342,11 @@ func UpdateProjectService(projectService inbound.ProjectHTTPPort) gin.HandlerFun
 			return
 		}
 
-		c.JSON(http.StatusOK, service)
+		c.JSON(http.StatusOK, dto.ProjectServiceResponseFromDomain(service))
 	}
 }
 
-// ResetServiceAvailableRequests godoc
+// ProjectResetRequest godoc
 // @Summary Resets available requests for a service in a project
 // @Description Resets the request quota for a specific service assigned to a project
 // @Tags Projects
@@ -331,7 +359,7 @@ func UpdateProjectService(projectService inbound.ProjectHTTPPort) gin.HandlerFun
 // @Success 200 {object} dto.ProjectServiceResetRequestResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/projects/{id}/services/{service_id}/reset-requests [post]
-func ResetServiceAvailableRequests(projectService inbound.ProjectHTTPPort) gin.HandlerFunc {
+func ProjectResetRequest(useCase project.ResetRequestUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
@@ -351,7 +379,7 @@ func ResetServiceAvailableRequests(projectService inbound.ProjectHTTPPort) gin.H
 			return
 		}
 
-		var req dto.ProjectServiceResetRequest
+		var req dto.ProjectResetRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetBindJSONErrorStatusCode(err),
@@ -360,8 +388,8 @@ func ResetServiceAvailableRequests(projectService inbound.ProjectHTTPPort) gin.H
 			return
 		}
 
-		resp, err := projectService.ResetServiceAvailableRequests(
-			c.Request.Context(), projectID, serviceID, &req,
+		resp, err := useCase.Execute(
+			c.Request.Context(), projectID, serviceID, req.RecalculateNextReset,
 		)
 		if err != nil {
 			c.AbortWithStatusJSON(
@@ -371,6 +399,6 @@ func ResetServiceAvailableRequests(projectService inbound.ProjectHTTPPort) gin.H
 			return
 		}
 
-		c.JSON(http.StatusOK, resp)
+		c.JSON(http.StatusOK, dto.ProjectResetRequestResponseFromDomain(resp))
 	}
 }

@@ -11,7 +11,7 @@ import (
 
 type EnvironmentService struct {
 	ID         int `json:"id" binding:"required"`
-	MaxRequest int `json:"max_requests,omitempty"`
+	MaxRequest int `json:"max_requests" binding:"required"`
 }
 
 func (e *EnvironmentService) ToDomain() *dto.EnvironmentService {
@@ -25,7 +25,7 @@ type EnvironmentCreate struct {
 	Name      string `json:"name" binding:"required"`
 	ProjectID int    `json:"project_id" binding:"required"`
 
-	Services []*EnvironmentService `json:"services" binding:"required"`
+	Services []*EnvironmentService `json:"services"`
 }
 
 func (e *EnvironmentCreate) ToDomain() *dto.EnvironmentCreate {
@@ -42,7 +42,7 @@ func (e *EnvironmentCreate) ToDomain() *dto.EnvironmentCreate {
 }
 
 type EnvironmentUpdate struct {
-	Name string `json:"name,omitempty"`
+	Name string `json:"name"`
 }
 
 func (e *EnvironmentUpdate) ToDomain() *dto.EnvironmentUpdate {
@@ -52,7 +52,7 @@ func (e *EnvironmentUpdate) ToDomain() *dto.EnvironmentUpdate {
 }
 
 type EnvironmentServiceUpdate struct {
-	MaxRequest int `json:"max_requests,omitempty"`
+	MaxRequest int `json:"max_requests"`
 }
 
 func (e *EnvironmentServiceUpdate) ToDomain() *dto.EnvironmentServiceUpdateInput {

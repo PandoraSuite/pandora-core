@@ -39,117 +39,6 @@ type Server struct {
 	server *http.Server
 }
 
-func (s *Server) setupRoutes(router *gin.RouterGroup) {
-
-	// auth := router.Group("/auth")
-	// {
-	// 	auth.POST("/login", handlers.Authenticate(s.authService))
-	// }
-
-	// protected := router.Group("")
-	// protected.Use(middleware.ValidateToken(s.authService))
-	// {
-	// 	auth := protected.Group("/auth")
-	// 	{
-	// 		auth.POST(
-	// 			"/change-password", handlers.ChangePassword(s.authService),
-	// 		)
-	// 	}
-
-	// 	protected.Use(middleware.ForcePasswordReset(s.authService))
-
-	// 	services := protected.Group("/services")
-	// 	{
-	// 		services.GET("", handlers.GetAllServices(s.srvService))
-	// 		services.POST("", handlers.CreateService(s.srvService))
-	// 		services.DELETE("/:id", handlers.DeleteService(s.srvService))
-	// 		services.PATCH(
-	// 			"/:id/status",
-	// 			handlers.UpdateStatusService(s.srvService),
-	// 		)
-	// 	}
-
-	// 	clients := protected.Group("/clients")
-	// 	{
-	// 		clients.GET("", handlers.GetAllClients(s.clientService))
-	// 		clients.POST("", handlers.CreateClient(s.clientService))
-	// 		clients.GET("/:id", handlers.GetClient(s.clientService))
-	// 		clients.PATCH("/:id", handlers.UpdateClient(s.clientService))
-	// 		clients.GET(
-	// 			"/:id/projects",
-	// 			handlers.GetProjectsByClient(s.clientService),
-	// 		)
-	// 	}
-
-	// 	projects := protected.Group("/projects")
-	// 	{
-	// 		projects.POST("", handlers.CreateProject(s.projectService))
-	// 		projects.GET("/:id", handlers.GetProject(s.projectService))
-	// 		projects.PATCH("/:id", handlers.UpdateProject(s.projectService))
-	// 		projects.GET(
-	// 			"/:id/environments",
-	// 			handlers.GetEnvironmentsByProject(s.projectService),
-	// 		)
-	// 		projects.POST(
-	// 			"/:id/services",
-	// 			handlers.AssignServiceToProject(s.projectService),
-	// 		)
-	// 		projects.DELETE(
-	// 			"/:id/services/:service_id",
-	// 			handlers.RemoveServiceFromProject(s.projectService),
-	// 		)
-	// 		projects.PATCH(
-	// 			"/:id/services/:service_id",
-	// 			handlers.UpdateProjectService(s.projectService),
-	// 		)
-	// 		projects.POST(
-	// 			"/:id/services/:service_id/reset-requests",
-	// 			handlers.ResetServiceAvailableRequests(s.projectService),
-	// 		)
-	// 	}
-
-	// 	environments := protected.Group("/environments")
-	// 	{
-	// 		environments.POST(
-	// 			"", handlers.CreateEnvironment(s.environmentService),
-	// 		)
-	// 		environments.GET(
-	// 			"/:id", handlers.GetEnvironment(s.environmentService),
-	// 		)
-	// 		environments.PATCH(
-	// 			"/:id", handlers.UpdateEnvironment(s.environmentService),
-	// 		)
-	// 		environments.GET(
-	// 			"/:id/api-keys",
-	// 			handlers.GetAPIKeysByEnvironment(s.apiKeyService),
-	// 		)
-	// 		environments.POST(
-	// 			"/:id/services",
-	// 			handlers.AssignServiceToEnvironment(s.environmentService),
-	// 		)
-	// 		environments.DELETE(
-	// 			"/:id/services/:service_id",
-	// 			handlers.RemoveServiceFromEnvironment(s.environmentService),
-	// 		)
-	// 		environments.PATCH(
-	// 			"/:id/services/:service_id",
-	// 			handlers.UpdateEnvironmentService(s.environmentService),
-	// 		)
-	// 		environments.PATCH(
-	// 			"/:id/services/:service_id/reset-requests",
-	// 			handlers.ResetServiceRequestsFromEnvironment(s.environmentService),
-	// 		)
-	// 	}
-
-	// 	apiKeys := protected.Group("/api-keys")
-	// 	{
-	// 		apiKeys.POST("", handlers.CreateAPIKey(s.apiKeyService))
-	// 		apiKeys.PATCH("/:id", handlers.UpdateAPIKey(s.apiKeyService))
-	// 	}
-
-	// }
-}
-
 func (s *Server) Run(exposeVersion bool) {
 	gin.SetMode(gin.ReleaseMode)
 
@@ -164,7 +53,7 @@ func (s *Server) Run(exposeVersion bool) {
 	v1 := router.Group("/api/v1")
 
 	{
-		routes.RegisterAuthRoutes(v1)
+		routes.RegisterLoginRoutes(v1)
 	}
 
 	v1Protected := v1.Group("")
@@ -175,7 +64,7 @@ func (s *Server) Run(exposeVersion bool) {
 	)
 
 	{
-		routes.RegisterProtectedAuthRoutes(v1Protected)
+		routes.RegisterAuthRoutes(v1Protected)
 	}
 
 	v1Protected.Use(
@@ -185,8 +74,11 @@ func (s *Server) Run(exposeVersion bool) {
 	)
 
 	{
-		routes.RegisterProtectedServiceRoutes(v1Protected)
-		routes.RegisterProtectedAPIKeyRoutes(v1Protected)
+		routes.RegisterServiceRoutes(v1Protected)
+		routes.RegisterClientRoutes(v1Protected)
+		routes.RegisterProjectRoutes(v1Protected)
+		routes.RegisterEnvironmentRoutes(v1Protected)
+		routes.RegisterAPIKeyRoutes(v1Protected)
 	}
 
 	s.server = &http.Server{

@@ -5,14 +5,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterAuthRoutes(rg *gin.RouterGroup) {
+func RegisterLoginRoutes(rg *gin.RouterGroup) {
 	auth := rg.Group("/auth")
 	{
 		auth.POST("/login", handlers.Authenticate(nil))
 	}
 }
 
-func RegisterProtectedAuthRoutes(rg *gin.RouterGroup) {
+func RegisterAuthRoutes(rg *gin.RouterGroup) {
 	auth := rg.Group("/auth")
 	{
 		auth.POST("/change-password", handlers.ChangePassword(nil))

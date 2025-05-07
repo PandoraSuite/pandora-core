@@ -10,7 +10,7 @@ import (
 // ... Requests ...
 
 type APIKeyCreate struct {
-	ExpiresAt     time.Time `json:"expires_at,omitempty"`
+	ExpiresAt     time.Time `json:"expires_at"`
 	EnvironmentID int       `json:"environment_id" binding:"required"`
 }
 
@@ -22,7 +22,7 @@ func (a *APIKeyCreate) ToDomain() *dto.APIKeyCreate {
 }
 
 type APIKeyUpdate struct {
-	ExpiresAt time.Time `json:"expires_at,omitempty"`
+	ExpiresAt time.Time `json:"expires_at"`
 }
 
 func (a *APIKeyUpdate) ToDomain() *dto.APIKeyUpdate {
