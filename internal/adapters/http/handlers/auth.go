@@ -7,7 +7,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/adapters/http/dto"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
-	"github.com/MAD-py/pandora-core/internal/ports/inbound"
+	"github.com/MAD-py/pandora-core/internal/app/auth"
 )
 
 // ChangePassword godoc
@@ -21,7 +21,7 @@ import (
 // @Success 204
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/auth/change-password [post]
-func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
+func ChangePassword(useCase auth.PasswordChangeUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		username := c.GetString("username")
 		if username == "" {
@@ -42,7 +42,7 @@ func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 		}
 
 		req.Username = username
-		err := authService.ChangePassword(c.Request.Context(), req.ToDomain())
+		err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
@@ -66,7 +66,7 @@ func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 // @Success 200 {object} dto.AuthenticateResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/auth/login [post]
-func Authenticate(authService inbound.AuthHTTPPort) gin.HandlerFunc {
+func Authenticate(useCase auth.AutenticateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.Authenticate
 
@@ -78,7 +78,7 @@ func Authenticate(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 			return
 		}
 
-		res, err := authService.Authenticate(c.Request.Context(), req.ToDomain())
+		res, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
 			c.AbortWithStatusJSON(
 				utils.GetDomainErrorStatusCode(err),
