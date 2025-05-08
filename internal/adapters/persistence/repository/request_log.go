@@ -13,12 +13,12 @@ import (
 type RequestLogRepository struct {
 	pool *pgxpool.Pool
 
-	handlerErr func(error) *errors.Error
+	handlerErr func(error) errors.Error
 }
 
 func (r *RequestLogRepository) DeleteByService(
 	ctx context.Context, serviceID int,
-) *errors.Error {
+) errors.Error {
 	query := `
 		DELETE FROM request_log
 		WHERE service_id = $1;
@@ -34,7 +34,7 @@ func (r *RequestLogRepository) DeleteByService(
 
 func (r *RequestLogRepository) UpdateExecutionStatus(
 	ctx context.Context, id string, executionStatus enums.RequestLogExecutionStatus,
-) *errors.Error {
+) errors.Error {
 	if executionStatus == enums.RequestLogExecutionStatusNull {
 		return errors.ErrRequestLogInvalidExecutionStatus
 	}
@@ -57,9 +57,9 @@ func (r *RequestLogRepository) UpdateExecutionStatus(
 	return nil
 }
 
-func (r *RequestLogRepository) Save(
+func (r *RequestLogRepository) Create(
 	ctx context.Context, requestLog *entities.RequestLog,
-) *errors.Error {
+) errors.Error {
 	query := `
 		INSERT INTO request_log (environment_id, service_id, api_key, start_point, request_time, execution_status, message)
 		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at;
@@ -93,9 +93,9 @@ func (r *RequestLogRepository) Save(
 	return r.handlerErr(err)
 }
 
-func (r *RequestLogRepository) SaveAsInitialPoint(
+func (r *RequestLogRepository) CreateAsInitialPoint(
 	ctx context.Context, requestLog *entities.RequestLog,
-) *errors.Error {
+) errors.Error {
 	query := `
 		WITH temp_table AS (
 			SELECT gen_random_uuid() AS uuid
@@ -128,7 +128,7 @@ func (r *RequestLogRepository) SaveAsInitialPoint(
 }
 
 func NewRequestLogRepository(
-	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,
+	pool *pgxpool.Pool, handlerErr func(error) errors.Error,
 ) *RequestLogRepository {
 	return &RequestLogRepository{
 		pool:       pool,

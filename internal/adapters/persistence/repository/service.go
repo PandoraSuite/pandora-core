@@ -16,12 +16,12 @@ import (
 type ServiceRepository struct {
 	pool *pgxpool.Pool
 
-	handlerErr func(error) *errors.Error
+	handlerErr func(error) errors.Error
 }
 
 func (r *ServiceRepository) Delete(
 	ctx context.Context, id int,
-) *errors.Error {
+) errors.Error {
 	query := `
 		DELETE FROM service
 		WHERE id = $1;
@@ -33,7 +33,7 @@ func (r *ServiceRepository) Delete(
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrServiceNotFound
+		return errors.NewNotFound("service not found")
 	}
 
 	return nil
@@ -41,9 +41,9 @@ func (r *ServiceRepository) Delete(
 
 func (r *ServiceRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.ServiceStatus,
-) (*entities.Service, *errors.Error) {
+) (*entities.Service, errors.Error) {
 	if status == enums.ServiceStatusNull {
-		return nil, errors.ErrServiceInvalidStatus
+		return nil, errors.NewValidationFailed("cannot store the null status")
 	}
 
 	query := `
@@ -68,9 +68,9 @@ func (r *ServiceRepository) UpdateStatus(
 	return service, nil
 }
 
-func (r *ServiceRepository) FindByNameAndVersion(
+func (r *ServiceRepository) GetByNameAndVersion(
 	ctx context.Context, name, version string,
-) (*entities.Service, *errors.Error) {
+) (*entities.Service, errors.Error) {
 	query := `
 		SELECT id, name, version, status, created_at
 		FROM service
@@ -92,9 +92,9 @@ func (r *ServiceRepository) FindByNameAndVersion(
 	return service, nil
 }
 
-func (r *ServiceRepository) FindAll(
+func (r *ServiceRepository) List(
 	ctx context.Context, filter *dto.ServiceFilter,
-) ([]*entities.Service, *errors.Error) {
+) ([]*entities.Service, errors.Error) {
 	query := `
 		SELECT id, name, version, status, created_at
 		FROM service
@@ -152,9 +152,9 @@ func (r *ServiceRepository) FindAll(
 	return services, nil
 }
 
-func (r *ServiceRepository) Save(
+func (r *ServiceRepository) Create(
 	ctx context.Context, service *entities.Service,
-) *errors.Error {
+) errors.Error {
 	query := `
 		INSERT INTO service (name, version, status)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
@@ -172,7 +172,7 @@ func (r *ServiceRepository) Save(
 }
 
 func NewServiceRepository(
-	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,
+	pool *pgxpool.Pool, handlerErr func(error) errors.Error,
 ) *ServiceRepository {
 	return &ServiceRepository{
 		pool:       pool,

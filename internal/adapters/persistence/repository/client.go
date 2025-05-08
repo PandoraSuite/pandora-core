@@ -16,14 +16,14 @@ import (
 type ClientRepository struct {
 	pool *pgxpool.Pool
 
-	handlerErr func(error) *errors.Error
+	handlerErr func(error) errors.Error
 }
 
 func (r *ClientRepository) Update(
 	ctx context.Context, id int, update *dto.ClientUpdate,
-) (*entities.Client, *errors.Error) {
+) (*entities.Client, errors.Error) {
 	if update == nil {
-		return r.FindByID(ctx, id)
+		return r.GetByID(ctx, id)
 	}
 
 	var updates []string
@@ -49,7 +49,7 @@ func (r *ClientRepository) Update(
 	}
 
 	if len(updates) == 0 {
-		return r.FindByID(ctx, id)
+		return r.GetByID(ctx, id)
 	}
 
 	query := fmt.Sprintf(
@@ -79,7 +79,7 @@ func (r *ClientRepository) Update(
 
 func (r *ClientRepository) Exists(
 	ctx context.Context, id int,
-) (bool, *errors.Error) {
+) (bool, errors.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -97,9 +97,9 @@ func (r *ClientRepository) Exists(
 	return exists, nil
 }
 
-func (r *ClientRepository) FindByID(
+func (r *ClientRepository) GetByID(
 	ctx context.Context, id int,
-) (*entities.Client, *errors.Error) {
+) (*entities.Client, errors.Error) {
 	query := `
 		SELECT id, type, name, email, created_at
 		FROM client
@@ -121,9 +121,9 @@ func (r *ClientRepository) FindByID(
 	return client, nil
 }
 
-func (r *ClientRepository) FindAll(
+func (r *ClientRepository) List(
 	ctx context.Context, filter *dto.ClientFilter,
-) ([]*entities.Client, *errors.Error) {
+) ([]*entities.Client, errors.Error) {
 	query := `
 		SELECT id, type, name, email, created_at
 		FROM client
@@ -181,9 +181,9 @@ func (r *ClientRepository) FindAll(
 	return clients, nil
 }
 
-func (r *ClientRepository) Save(
+func (r *ClientRepository) Create(
 	ctx context.Context, client *entities.Client,
-) *errors.Error {
+) errors.Error {
 	query := `
 		INSERT INTO client (type, name, email)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
@@ -201,7 +201,7 @@ func (r *ClientRepository) Save(
 }
 
 func NewClientRepository(
-	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,
+	pool *pgxpool.Pool, handlerErr func(error) errors.Error,
 ) *ClientRepository {
 	return &ClientRepository{
 		pool:       pool,

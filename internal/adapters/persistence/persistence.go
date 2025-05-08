@@ -3,24 +3,99 @@ package persistence
 import (
 	"context"
 	"errors"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence/repository"
 	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
-type Persistence struct {
-	pool *pgxpool.Pool
+type Repositories interface {
+	// ... Helpers ...
+	ClosePool()
+
+	// ... Repositories ...
+	APIKey() APIKeyRepository
+	Client() ClientRepository
+	Project() ProjectRepository
+	Service() ServiceRepository
+	Request() RequestRepository
+	Environment() EnvironmentRepository
+	Reservation() ReservationRepository
 }
 
-func (db *Persistence) Close() { db.pool.Close() }
+var _ Repositories = (*repositories)(nil)
 
-func (db *Persistence) Pool() *pgxpool.Pool { return db.pool }
+type repositories struct {
+	once sync.Once
 
-func (db *Persistence) HandlerErr() func(error) *domainErr.Error {
+	pool *pgxpool.Pool
+
+	apiKeyRepo      *repository.APIKeyRepository
+	clientRepo      *repository.ClientRepository
+	projectRepo     *repository.ProjectRepository
+	serviceRepo     *repository.ServiceRepository
+	requestRepo     *repository.RequestLogRepository
+	environmentRepo *repository.EnvironmentRepository
+	reservationRepo *repository.ReservationRepository
+}
+
+func (p *repositories) ClosePool() { p.pool.Close() }
+
+func (p *repositories) APIKey() APIKeyRepository {
+	p.once.Do(func() {
+		p.apiKeyRepo = repository.NewAPIKeyRepository(p.pool, nil)
+	})
+	return p.apiKeyRepo
+}
+
+func (p *repositories) Client() ClientRepository {
+	p.once.Do(func() {
+		p.clientRepo = repository.NewClientRepository(p.pool, nil)
+	})
+	return p.clientRepo
+}
+
+func (p *repositories) Project() ProjectRepository {
+	p.once.Do(func() {
+		p.projectRepo = repository.NewProjectRepository(p.pool, nil)
+	})
+	return p.projectRepo
+}
+
+func (p *repositories) Service() ServiceRepository {
+	p.once.Do(func() {
+		p.serviceRepo = repository.NewServiceRepository(p.pool, nil)
+	})
+	return p.serviceRepo
+}
+
+func (p *repositories) Request() RequestRepository {
+	p.once.Do(func() {
+		p.requestRepo = repository.NewRequestLogRepository(p.pool, nil)
+	})
+	return p.requestRepo
+}
+
+func (p *repositories) Environment() EnvironmentRepository {
+	p.once.Do(func() {
+		p.environmentRepo = repository.NewEnvironmentRepository(p.pool, nil)
+	})
+	return p.environmentRepo
+}
+
+func (p *repositories) Reservation() ReservationRepository {
+	p.once.Do(func() {
+		p.reservationRepo = repository.NewReservationRepository(p.pool, nil)
+	})
+	return p.reservationRepo
+}
+
+func (p *repositories) HandlerErr() func(error) *domainErr.Error {
 	uniqueViolation := func(pgErr *pgconn.PgError) *domainErr.Error {
 		switch pgErr.ConstraintName {
 		case "api_key_key_unique":
@@ -106,7 +181,7 @@ func (db *Persistence) HandlerErr() func(error) *domainErr.Error {
 	}
 }
 
-func NewPersistence(dns string) (*Persistence, error) {
+func NewRepositories(dns string) (Repositories, error) {
 	config, err := pgxpool.ParseConfig(dns)
 	if err != nil {
 		return nil, err
@@ -119,5 +194,5 @@ func NewPersistence(dns string) (*Persistence, error) {
 		return nil, err
 	}
 
-	return &Persistence{pool: pool}, nil
+	return &repositories{pool: pool}, nil
 }

@@ -16,12 +16,12 @@ import (
 type APIKeyRepository struct {
 	pool *pgxpool.Pool
 
-	handlerErr func(error) *errors.Error
+	handlerErr func(error) errors.Error
 }
 
 func (r *APIKeyRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.APIKeyStatus,
-) *errors.Error {
+) errors.Error {
 	if status == enums.APIKeyStatusNull {
 		return errors.ErrAPIKeyInvalidStatus
 	}
@@ -46,9 +46,9 @@ func (r *APIKeyRepository) UpdateStatus(
 
 func (r *APIKeyRepository) Update(
 	ctx context.Context, id int, update *dto.APIKeyUpdate,
-) (*entities.APIKey, *errors.Error) {
+) (*entities.APIKey, errors.Error) {
 	if update == nil {
-		return r.FindByID(ctx, id)
+		return r.GetByID(ctx, id)
 	}
 
 	var updates []string
@@ -62,7 +62,7 @@ func (r *APIKeyRepository) Update(
 	}
 
 	if len(updates) == 0 {
-		return r.FindByID(ctx, id)
+		return r.GetByID(ctx, id)
 	}
 
 	query := fmt.Sprintf(
@@ -96,7 +96,7 @@ func (r *APIKeyRepository) Update(
 
 func (r *APIKeyRepository) UpdateLastUsed(
 	ctx context.Context, key string,
-) *errors.Error {
+) errors.Error {
 	query := `
 		UPDATE api_key
 		SET last_used = NOW()
@@ -115,9 +115,9 @@ func (r *APIKeyRepository) UpdateLastUsed(
 	return nil
 }
 
-func (r *APIKeyRepository) FindByEnvironment(
+func (r *APIKeyRepository) ListByEnvironment(
 	ctx context.Context, environmentID int,
-) ([]*entities.APIKey, *errors.Error) {
+) ([]*entities.APIKey, errors.Error) {
 	query := `
 		SELECT id, environment_id, key, status, created_at,
 			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
@@ -160,9 +160,9 @@ func (r *APIKeyRepository) FindByEnvironment(
 	return apiKeys, nil
 }
 
-func (r *APIKeyRepository) FindByKey(
+func (r *APIKeyRepository) GetByKey(
 	ctx context.Context, key string,
-) (*entities.APIKey, *errors.Error) {
+) (*entities.APIKey, errors.Error) {
 	query := `
 		SELECT id, environment_id, key, status, created_at,
 			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
@@ -188,9 +188,9 @@ func (r *APIKeyRepository) FindByKey(
 	return apiKey, nil
 }
 
-func (r *APIKeyRepository) FindByID(
+func (r *APIKeyRepository) GetByID(
 	ctx context.Context, id int,
-) (*entities.APIKey, *errors.Error) {
+) (*entities.APIKey, errors.Error) {
 	query := `
 		SELECT id, environment_id, key, status, created_at,
 			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
@@ -218,7 +218,7 @@ func (r *APIKeyRepository) FindByID(
 
 func (r *APIKeyRepository) Exists(
 	ctx context.Context, key string,
-) (bool, *errors.Error) {
+) (bool, errors.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -236,9 +236,9 @@ func (r *APIKeyRepository) Exists(
 	return exists, nil
 }
 
-func (r *APIKeyRepository) Save(
+func (r *APIKeyRepository) Create(
 	ctx context.Context, apiKey *entities.APIKey,
-) *errors.Error {
+) errors.Error {
 	query := `
 		INSERT INTO api_key (environment_id, key, expires_at, last_used, status)
 		VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at;
@@ -268,7 +268,7 @@ func (r *APIKeyRepository) Save(
 }
 
 func NewAPIKeyRepository(
-	pool *pgxpool.Pool, handlerErr func(error) *errors.Error,
+	pool *pgxpool.Pool, handlerErr func(error) errors.Error,
 ) *APIKeyRepository {
 	return &APIKeyRepository{
 		pool:       pool,
