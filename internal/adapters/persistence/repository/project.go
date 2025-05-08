@@ -425,6 +425,63 @@ func (r *ProjectRepository) GetByID(
 	return project, nil
 }
 
+func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, errors.Error) {
+	query := `
+		SELECT p.id, p.name, p.status, p.client_id, p.created_at,
+			COALESCE(
+				JSON_AGG(
+					JSON_BUILD_OBJECT(
+						'id', s.id,
+						'name', s.name,
+						'version', s.version,
+						'nextReset', COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
+						'maxRequest', COALESCE(ps.max_request, -1),
+						'resetFrequency', ps.reset_frequency,
+						'assignedAt', ps.created_at
+					)
+				) FILTER (WHERE s.id IS NOT NULL), '[]'
+			)
+		FROM project p
+			LEFT JOIN project_service ps
+				ON ps.project_id = p.id
+			LEFT JOIN service s
+				ON s.id = ps.service_id
+		GROUP BY p.id;
+	`
+
+	rows, err := r.pool.Query(ctx, query)
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	defer rows.Close()
+
+	var projects []*entities.Project
+	for rows.Next() {
+		project := new(entities.Project)
+
+		err = rows.Scan(
+			&project.ID,
+			&project.Name,
+			&project.Status,
+			&project.ClientID,
+			&project.CreatedAt,
+			&project.Services,
+		)
+		if err != nil {
+			return nil, r.handlerErr(err)
+		}
+
+		projects = append(projects, project)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return projects, nil
+}
+
 func (r *ProjectRepository) ListByClient(
 	ctx context.Context, clientID int,
 ) ([]*entities.Project, errors.Error) {

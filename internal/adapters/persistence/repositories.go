@@ -91,6 +91,7 @@ type ProjectRepository interface {
 	GetProjectServiceQuotaUsage(ctx context.Context, id, serviceID int) (*dto.QuotaUsage, errors.Error)
 
 	// ... List ...
+	List(ctx context.Context) ([]*entities.Project, errors.Error)
 	ListByClient(ctx context.Context, clientID int) ([]*entities.Project, errors.Error)
 
 	// ... Create ...
