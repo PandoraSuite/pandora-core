@@ -36,12 +36,12 @@ func main() {
 
 	credentialsFile, err := cfg.CredentialsFile()
 	if err != nil {
-		panic(err)
+		log.Fatalf("[ERROR] Failed to load credentials file: %v", err)
 	}
 
 	credentialsRepo, err := security.NewCredentialsRepository(credentialsFile)
 	if err != nil {
-		panic(err)
+		log.Fatalf("[ERROR] Failed to initialize credentials repository: %v", err)
 	}
 
 	httpDeps := bootstrap.NewDependencies(
