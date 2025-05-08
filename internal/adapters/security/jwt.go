@@ -10,11 +10,16 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
-type JWTProvider struct {
+type JWTProvider interface {
+	Generate(ctx context.Context, subject string) (*dto.TokenResponse, errors.Error)
+	Validate(ctx context.Context, token *dto.TokenValidation) (string, errors.Error)
+}
+
+type jwtProvider struct {
 	secret []byte
 }
 
-func (p *JWTProvider) Generate(
+func (p *jwtProvider) Generate(
 	ctx context.Context, subject string,
 ) (*dto.TokenResponse, errors.Error) {
 	now := time.Now()
@@ -41,7 +46,7 @@ func (p *JWTProvider) Generate(
 	}, nil
 }
 
-func (p *JWTProvider) Validate(
+func (p *jwtProvider) Validate(
 	ctx context.Context, token *dto.TokenValidation,
 ) (string, errors.Error) {
 	if token.TokenType != "Bearer" {
@@ -65,6 +70,6 @@ func (p *JWTProvider) Validate(
 	return "", errors.NewUnauthorized("invalid access token claims")
 }
 
-func NewJWTProvider(secret []byte) *JWTProvider {
-	return &JWTProvider{secret: secret}
+func NewJWTProvider(secret []byte) JWTProvider {
+	return &jwtProvider{secret: secret}
 }
