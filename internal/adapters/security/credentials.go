@@ -16,13 +16,18 @@ type credentials struct {
 	ForcePasswordReset bool `json:"force_password_reset"`
 }
 
-type CredentialsRepository struct {
+type CredentialsRepository interface {
+	GetByUsername(ctx context.Context, username string) (*entities.Credentials, errors.Error)
+	ChangePassword(ctx context.Context, credentials *entities.Credentials) errors.Error
+}
+
+type credentialsRepository struct {
 	credentialsFile string
 
 	credentials *credentials
 }
 
-func (r *CredentialsRepository) GetByUsername(
+func (r *credentialsRepository) GetByUsername(
 	ctx context.Context, username string,
 ) (*entities.Credentials, errors.Error) {
 	if username != r.credentials.Username {
@@ -36,7 +41,7 @@ func (r *CredentialsRepository) GetByUsername(
 	}, nil
 }
 
-func (r *CredentialsRepository) ChangePassword(
+func (r *credentialsRepository) ChangePassword(
 	ctx context.Context, credentials *entities.Credentials,
 ) errors.Error {
 	if credentials.Username != r.credentials.Username {
@@ -57,7 +62,7 @@ func (r *CredentialsRepository) ChangePassword(
 	return nil
 }
 
-func (r *CredentialsRepository) saveCredentials() error {
+func (r *credentialsRepository) saveCredentials() error {
 	data, err := json.Marshal(r.credentials)
 	if err != nil {
 		return err
@@ -71,7 +76,7 @@ func (r *CredentialsRepository) saveCredentials() error {
 	return nil
 }
 
-func NewCredentialsRepository(credentialsFile string) (*CredentialsRepository, error) {
+func NewCredentialsRepository(credentialsFile string) (CredentialsRepository, error) {
 	file, err := os.Open(credentialsFile)
 	if err != nil {
 		return nil, err
@@ -83,7 +88,7 @@ func NewCredentialsRepository(credentialsFile string) (*CredentialsRepository, e
 		return nil, err
 	}
 
-	return &CredentialsRepository{
+	return &credentialsRepository{
 		credentials:     &credentials,
 		credentialsFile: credentialsFile,
 	}, nil
