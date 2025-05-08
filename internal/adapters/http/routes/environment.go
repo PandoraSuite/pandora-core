@@ -1,20 +1,41 @@
 package routes
 
 import (
+	"github.com/MAD-py/pandora-core/internal/adapters/http/bootstrap"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers"
 	"github.com/MAD-py/pandora-core/internal/app/environment"
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterEnvironmentRoutes(rg *gin.RouterGroup) {
-	getUC := environment.NewGetUseCase(nil, nil)
-	createUc := environment.NewCreateUseCase(nil, nil, nil)
-	updateUC := environment.NewUpdateUseCase(nil, nil)
-	listAPIKeysUC := environment.NewListAPIKeyUseCase(nil, nil, nil)
-	resetRequestUC := environment.NewResetRequestUseCase(nil, nil)
-	assignServiceUC := environment.NewAssignServiceUseCase(nil, nil)
-	removeServiceUC := environment.NewRemoveServiceUseCase(nil, nil)
-	updateServiceUC := environment.NewUpdateServiceUseCase(nil, nil)
+func RegisterEnvironmentRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
+	getUC := environment.NewGetUseCase(
+		deps.Validator, deps.Repositories.Environment(),
+	)
+	createUc := environment.NewCreateUseCase(
+		deps.Validator,
+		deps.Repositories.Project(),
+		deps.Repositories.Environment(),
+	)
+	updateUC := environment.NewUpdateUseCase(
+		deps.Validator, deps.Repositories.Environment(),
+	)
+	listAPIKeysUC := environment.NewListAPIKeyUseCase(
+		deps.Validator,
+		deps.Repositories.APIKey(),
+		deps.Repositories.Environment(),
+	)
+	resetRequestUC := environment.NewResetRequestUseCase(
+		deps.Validator, deps.Repositories.Environment(),
+	)
+	assignServiceUC := environment.NewAssignServiceUseCase(
+		deps.Validator, deps.Repositories.Environment(),
+	)
+	removeServiceUC := environment.NewRemoveServiceUseCase(
+		deps.Validator, deps.Repositories.Environment(),
+	)
+	updateServiceUC := environment.NewUpdateServiceUseCase(
+		deps.Validator, deps.Repositories.Environment(),
+	)
 
 	environments := rg.Group("/environments")
 	{

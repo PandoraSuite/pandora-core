@@ -1,17 +1,30 @@
 package routes
 
 import (
+	"github.com/MAD-py/pandora-core/internal/adapters/http/bootstrap"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers"
 	"github.com/MAD-py/pandora-core/internal/app/client"
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterClientRoutes(rg *gin.RouterGroup) {
-	getUC := client.NewGetUseCase(nil, nil)
-	listUC := client.NewListUseCase(nil, nil)
-	createUC := client.NewCreateUseCase(nil, nil)
-	updateUC := client.NewUpdateUseCase(nil, nil)
-	listProjectsUC := client.NewListProjectsUseCase(nil, nil, nil)
+func RegisterClientRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
+	getUC := client.NewGetUseCase(
+		deps.Validator, deps.Repositories.Client(),
+	)
+	listUC := client.NewListUseCase(
+		deps.Validator, deps.Repositories.Client(),
+	)
+	createUC := client.NewCreateUseCase(
+		deps.Validator, deps.Repositories.Client(),
+	)
+	updateUC := client.NewUpdateUseCase(
+		deps.Validator, deps.Repositories.Client(),
+	)
+	listProjectsUC := client.NewListProjectsUseCase(
+		deps.Validator,
+		deps.Repositories.Client(),
+		deps.Repositories.Project(),
+	)
 
 	clients := rg.Group("/clients")
 	{

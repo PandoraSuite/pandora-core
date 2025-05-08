@@ -8,6 +8,6 @@ import (
 	_ "github.com/MAD-py/pandora-core/internal/adapters/http/docs"
 )
 
-func setupSwagger(r *gin.Engine) {
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+func setupSwagger(engine *gin.Engine) {
+	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }

@@ -1,21 +1,44 @@
 package routes
 
 import (
+	"github.com/MAD-py/pandora-core/internal/adapters/http/bootstrap"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers"
 	"github.com/MAD-py/pandora-core/internal/app/project"
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterProjectRoutes(rg *gin.RouterGroup) {
-	getUC := project.NewGetUseCase(nil, nil)
-	listUC := project.NewListUseCase(nil)
-	createUC := project.NewCreateUseCase(nil, nil)
-	updateUC := project.NewUpdateUseCase(nil, nil)
-	resetRequest := project.NewResetRequestUseCase(nil, nil)
-	assignService := project.NewAssignServiceUseCase(nil, nil)
-	removeService := project.NewRemoveServiceUseCase(nil, nil, nil)
-	updateService := project.NewUpdateServiceUseCase(nil, nil, nil)
-	listEvntiromentsUC := project.NewListEnvironmentsUseCase(nil, nil, nil)
+func RegisterProjectRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
+	getUC := project.NewGetUseCase(
+		deps.Validator, deps.Repositories.Project(),
+	)
+	listUC := project.NewListUseCase(deps.Repositories.Project())
+	createUC := project.NewCreateUseCase(
+		deps.Validator, deps.Repositories.Project(),
+	)
+	updateUC := project.NewUpdateUseCase(
+		deps.Validator, deps.Repositories.Project(),
+	)
+	resetRequest := project.NewResetRequestUseCase(
+		deps.Validator, deps.Repositories.Project(),
+	)
+	assignService := project.NewAssignServiceUseCase(
+		deps.Validator, deps.Repositories.Project(),
+	)
+	removeService := project.NewRemoveServiceUseCase(
+		deps.Validator,
+		deps.Repositories.Project(),
+		deps.Repositories.Environment(),
+	)
+	updateService := project.NewUpdateServiceUseCase(
+		deps.Validator,
+		deps.Repositories.Project(),
+		deps.Repositories.Environment(),
+	)
+	listEvntiromentsUC := project.NewListEnvironmentsUseCase(
+		deps.Validator,
+		deps.Repositories.Project(),
+		deps.Repositories.Environment(),
+	)
 
 	projects := rg.Group("/projects")
 	{

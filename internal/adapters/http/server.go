@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/http/bootstrap"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/middlewares"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/routes"
 	"github.com/MAD-py/pandora-core/internal/app/auth"
@@ -36,54 +37,62 @@ import (
 type Server struct {
 	addr string
 
+	exposeVersion bool
+
 	server *http.Server
+
+	deps *bootstrap.Dependencies
 }
 
-func (s *Server) Run(exposeVersion bool) {
+func (s *Server) Run() {
 	gin.SetMode(gin.ReleaseMode)
 
-	router := gin.Default()
+	engine := gin.Default()
 
-	if exposeVersion {
-		router.Use(middlewares.VersionHeader())
+	if s.exposeVersion {
+		engine.Use(middlewares.VersionHeader())
 	}
 
-	setupSwagger(router)
+	setupSwagger(engine)
 
-	v1 := router.Group("/api/v1")
+	v1 := engine.Group("/api/v1")
 
 	{
-		routes.RegisterLoginRoutes(v1)
+		routes.RegisterLoginRoutes(v1, s.deps)
 	}
 
 	v1Protected := v1.Group("")
 	v1Protected.Use(
 		middlewares.ValidateToken(
-			auth.NewTokenValidationUseCase(nil, nil),
+			auth.NewTokenValidationUseCase(
+				s.deps.Validator, s.deps.TokenProvider,
+			),
 		),
 	)
 
 	{
-		routes.RegisterAuthRoutes(v1Protected)
+		routes.RegisterAuthRoutes(v1Protected, s.deps)
 	}
 
 	v1Protected.Use(
 		middlewares.ForcePasswordReset(
-			auth.NewResetPasswordUseCase(nil, nil),
+			auth.NewResetPasswordUseCase(
+				s.deps.Validator, s.deps.CredentialsRepo,
+			),
 		),
 	)
 
 	{
-		routes.RegisterServiceRoutes(v1Protected)
-		routes.RegisterClientRoutes(v1Protected)
-		routes.RegisterProjectRoutes(v1Protected)
-		routes.RegisterEnvironmentRoutes(v1Protected)
-		routes.RegisterAPIKeyRoutes(v1Protected)
+		routes.RegisterServiceRoutes(v1Protected, s.deps)
+		routes.RegisterClientRoutes(v1Protected, s.deps)
+		routes.RegisterProjectRoutes(v1Protected, s.deps)
+		routes.RegisterEnvironmentRoutes(v1Protected, s.deps)
+		routes.RegisterAPIKeyRoutes(v1Protected, s.deps)
 	}
 
 	s.server = &http.Server{
 		Addr:    s.addr,
-		Handler: router,
+		Handler: engine,
 	}
 
 	log.Printf("[INFO] API is running on port: %s\n", s.addr)
@@ -93,6 +102,14 @@ func (s *Server) Run(exposeVersion bool) {
 	}
 }
 
-func NewServer(addr string) *Server {
-	return &Server{addr: addr}
+func NewServer(
+	addr string,
+	exposeVersion bool,
+	deps *bootstrap.Dependencies,
+) *Server {
+	return &Server{
+		addr:          addr,
+		deps:          deps,
+		exposeVersion: exposeVersion,
+	}
 }
