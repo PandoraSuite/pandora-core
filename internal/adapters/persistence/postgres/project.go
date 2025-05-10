@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"context"
@@ -7,23 +7,23 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 
+	persistence "github.com/MAD-py/pandora-core/internal/adapters/persistence/errors"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type ProjectRepository struct {
-	pool *pgxpool.Pool
+	*Driver
 
-	handlerErr func(error) errors.Error
+	tableName           string
+	auxServiceTableName string
 }
 
 func (r *ProjectRepository) ResetAvailableRequestsForEnvsService(
 	ctx context.Context, id, serviceID int,
-) ([]*dto.EnvironmentServiceReset, errors.Error) {
+) ([]*dto.EnvironmentServiceReset, persistence.Error) {
 	return r.resetAvailableRequestsForEnvsService(
 		ctx, nil, id, serviceID,
 	)
@@ -31,10 +31,10 @@ func (r *ProjectRepository) ResetAvailableRequestsForEnvsService(
 
 func (r *ProjectRepository) ResetProjectServiceUsage(
 	ctx context.Context, id, serviceID int, nextReset time.Time,
-) ([]*dto.EnvironmentServiceReset, errors.Error) {
+) ([]*dto.EnvironmentServiceReset, persistence.Error) {
 	tx, txErr := r.pool.Begin(ctx)
 	if txErr != nil {
-		return nil, r.handlerErr(txErr)
+		return nil, r.errorMapper(txErr, r.tableName)
 	}
 
 	if err := r.updateNextReset(ctx, tx, id, serviceID, nextReset); err != nil {
@@ -47,15 +47,15 @@ func (r *ProjectRepository) ResetProjectServiceUsage(
 	)
 	if err != nil {
 		tx.Rollback(ctx)
-		return nil, r.handlerErr(err)
+		return nil, err
 	}
 
-	return environmentsService, r.handlerErr(tx.Commit(ctx))
+	return environmentsService, r.errorMapper(tx.Commit(ctx), r.tableName)
 }
 
 func (r *ProjectRepository) updateNextReset(
 	ctx context.Context, tx pgx.Tx, id, serviceID int, nextReset time.Time,
-) errors.Error {
+) persistence.Error {
 	query := `
 		UPDATE project_service
 		SET next_reset = $3
@@ -69,11 +69,11 @@ func (r *ProjectRepository) updateNextReset(
 
 	result, err := tx.Exec(ctx, query, id, serviceID, internalNextReset)
 	if err != nil {
-		return r.handlerErr(err)
+		return r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrProjectServiceNotFound
+		return r.entityNotFoundError(r.auxServiceTableName)
 	}
 
 	return nil
@@ -81,7 +81,7 @@ func (r *ProjectRepository) updateNextReset(
 
 func (r *ProjectRepository) resetAvailableRequestsForEnvsService(
 	ctx context.Context, tx pgx.Tx, id, serviceID int,
-) ([]*dto.EnvironmentServiceReset, errors.Error) {
+) ([]*dto.EnvironmentServiceReset, persistence.Error) {
 	query := `
 		WITH updated AS (
 			UPDATE environment_service es
@@ -115,7 +115,7 @@ func (r *ProjectRepository) resetAvailableRequestsForEnvsService(
 	}
 
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	defer rows.Close()
@@ -131,14 +131,14 @@ func (r *ProjectRepository) resetAvailableRequestsForEnvsService(
 			&environmentService.Service,
 		)
 		if err != nil {
-			return nil, r.handlerErr(err)
+			return nil, r.errorMapper(err, r.tableName)
 		}
 
 		environmentsService = append(environmentsService, environmentService)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return environmentsService, nil
@@ -146,7 +146,7 @@ func (r *ProjectRepository) resetAvailableRequestsForEnvsService(
 
 func (r *ProjectRepository) GetServiceByID(
 	ctx context.Context, id, serviceID int,
-) (*entities.ProjectService, errors.Error) {
+) (*entities.ProjectService, persistence.Error) {
 	query := `
 		SELECT s.id, s.name, s.version, COALESCE(ps.max_request, -1),
 			ps.reset_frequency, COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
@@ -168,7 +168,7 @@ func (r *ProjectRepository) GetServiceByID(
 		&service.AssignedAt,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	return service, nil
@@ -176,7 +176,7 @@ func (r *ProjectRepository) GetServiceByID(
 
 func (r *ProjectRepository) UpdateService(
 	ctx context.Context, id, serviceID int, update *dto.ProjectServiceUpdate,
-) (*entities.ProjectService, errors.Error) {
+) (*entities.ProjectService, persistence.Error) {
 	if update == nil {
 		return r.GetServiceByID(ctx, id, serviceID)
 	}
@@ -230,7 +230,7 @@ func (r *ProjectRepository) UpdateService(
 		&service.AssignedAt,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	return service, nil
@@ -238,7 +238,7 @@ func (r *ProjectRepository) UpdateService(
 
 func (r *ProjectRepository) ExistsServiceIn(
 	ctx context.Context, serviceID int,
-) (bool, errors.Error) {
+) (bool, persistence.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -250,7 +250,7 @@ func (r *ProjectRepository) ExistsServiceIn(
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, serviceID).Scan(&exists)
 	if err != nil {
-		return false, r.handlerErr(err)
+		return false, r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	return exists, nil
@@ -258,7 +258,7 @@ func (r *ProjectRepository) ExistsServiceIn(
 
 func (r *ProjectRepository) RemoveService(
 	ctx context.Context, id, serviceID int,
-) (int64, errors.Error) {
+) (int64, persistence.Error) {
 	query := `
 		DELETE FROM project_service
 		WHERE project_id = $1 AND service_id = $2;
@@ -266,7 +266,7 @@ func (r *ProjectRepository) RemoveService(
 
 	result, err := r.pool.Exec(ctx, query, id, serviceID)
 	if err != nil {
-		return 0, r.handlerErr(err)
+		return 0, r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	return result.RowsAffected(), nil
@@ -274,11 +274,7 @@ func (r *ProjectRepository) RemoveService(
 
 func (r *ProjectRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.ProjectStatus,
-) errors.Error {
-	if status == enums.ProjectStatusNull {
-		return errors.ErrProjectInvalidStatus
-	}
-
+) persistence.Error {
 	query := `
 		UPDATE project
 		SET status = $1
@@ -287,11 +283,11 @@ func (r *ProjectRepository) UpdateStatus(
 
 	result, err := r.pool.Exec(ctx, query, status, id)
 	if err != nil {
-		return r.handlerErr(err)
+		return r.errorMapper(err, r.tableName)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrProjectNotFound
+		return r.entityNotFoundError(r.tableName)
 	}
 
 	return nil
@@ -299,7 +295,7 @@ func (r *ProjectRepository) UpdateStatus(
 
 func (r *ProjectRepository) Update(
 	ctx context.Context, id int, update *dto.ProjectUpdate,
-) (*entities.Project, errors.Error) {
+) (*entities.Project, persistence.Error) {
 	if update == nil {
 		return r.GetByID(ctx, id)
 	}
@@ -329,11 +325,11 @@ func (r *ProjectRepository) Update(
 
 	result, err := r.pool.Exec(ctx, query, args...)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	if result.RowsAffected() == 0 {
-		return nil, errors.ErrProjectNotFound
+		return nil, r.entityNotFoundError(r.tableName)
 	}
 
 	return r.GetByID(ctx, id)
@@ -341,7 +337,7 @@ func (r *ProjectRepository) Update(
 
 func (r *ProjectRepository) Exists(
 	ctx context.Context, id int,
-) (bool, errors.Error) {
+) (bool, persistence.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -353,7 +349,7 @@ func (r *ProjectRepository) Exists(
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, id).Scan(&exists)
 	if err != nil {
-		return false, r.handlerErr(err)
+		return false, r.errorMapper(err, r.tableName)
 	}
 
 	return exists, nil
@@ -361,7 +357,7 @@ func (r *ProjectRepository) Exists(
 
 func (r *ProjectRepository) GetProjectServiceQuotaUsage(
 	ctx context.Context, id, serviceID int,
-) (*dto.QuotaUsage, errors.Error) {
+) (*dto.QuotaUsage, persistence.Error) {
 	query := `
 		SELECT COALESCE(ps.max_request, -1), COALESCE(SUM(es.max_request), 0)
 		FROM project_service ps
@@ -379,12 +375,12 @@ func (r *ProjectRepository) GetProjectServiceQuotaUsage(
 		&quota.MaxAllowed,
 		&quota.CurrentAllocated,
 	)
-	return quota, r.handlerErr(err)
+	return quota, r.errorMapper(err, r.auxServiceTableName)
 }
 
 func (r *ProjectRepository) GetByID(
 	ctx context.Context, id int,
-) (*entities.Project, errors.Error) {
+) (*entities.Project, persistence.Error) {
 	query := `
 		SELECT p.id, p.name, p.status, p.client_id, p.created_at,
 			COALESCE(
@@ -419,13 +415,13 @@ func (r *ProjectRepository) GetByID(
 		&project.Services,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return project, nil
 }
 
-func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, errors.Error) {
+func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, persistence.Error) {
 	query := `
 		SELECT p.id, p.name, p.status, p.client_id, p.created_at,
 			COALESCE(
@@ -451,7 +447,7 @@ func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, erro
 
 	rows, err := r.pool.Query(ctx, query)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	defer rows.Close()
@@ -469,14 +465,14 @@ func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, erro
 			&project.Services,
 		)
 		if err != nil {
-			return nil, r.handlerErr(err)
+			return nil, r.errorMapper(err, r.tableName)
 		}
 
 		projects = append(projects, project)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return projects, nil
@@ -484,7 +480,7 @@ func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, erro
 
 func (r *ProjectRepository) ListByClient(
 	ctx context.Context, clientID int,
-) ([]*entities.Project, errors.Error) {
+) ([]*entities.Project, persistence.Error) {
 	query := `
 		SELECT p.id, p.name, p.status, p.client_id, p.created_at,
 			COALESCE(
@@ -513,7 +509,7 @@ func (r *ProjectRepository) ListByClient(
 
 	rows, err := r.pool.Query(ctx, query, clientID)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	defer rows.Close()
@@ -531,14 +527,14 @@ func (r *ProjectRepository) ListByClient(
 			&project.Services,
 		)
 		if err != nil {
-			return nil, r.handlerErr(err)
+			return nil, r.errorMapper(err, r.tableName)
 		}
 
 		projects = append(projects, project)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return projects, nil
@@ -546,7 +542,7 @@ func (r *ProjectRepository) ListByClient(
 
 func (r *ProjectRepository) AddService(
 	ctx context.Context, id int, service *entities.ProjectService,
-) errors.Error {
+) persistence.Error {
 	query := `
 		WITH inserted AS (
 			INSERT INTO project_service (project_id, service_id, max_request, reset_frequency, next_reset)
@@ -579,15 +575,15 @@ func (r *ProjectRepository) AddService(
 		service.NextReset,
 	).Scan(&service.Name, &service.Version, &service.AssignedAt)
 
-	return r.handlerErr(err)
+	return r.errorMapper(err, r.auxServiceTableName)
 }
 
 func (r *ProjectRepository) Create(
 	ctx context.Context, project *entities.Project,
-) errors.Error {
+) persistence.Error {
 	tx, txErr := r.pool.Begin(ctx)
 	if txErr != nil {
-		return r.handlerErr(txErr)
+		return r.errorMapper(txErr, r.tableName)
 	}
 
 	if err := r.createProject(ctx, tx, project); err != nil {
@@ -604,12 +600,12 @@ func (r *ProjectRepository) Create(
 	}
 
 	project.Services = services
-	return r.handlerErr(tx.Commit(ctx))
+	return r.errorMapper(tx.Commit(ctx), r.tableName)
 }
 
 func (r *ProjectRepository) createProject(
 	ctx context.Context, tx pgx.Tx, project *entities.Project,
-) errors.Error {
+) persistence.Error {
 	query := `
 		INSERT INTO project (client_id, name, status)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
@@ -623,7 +619,7 @@ func (r *ProjectRepository) createProject(
 		project.Status,
 	).Scan(&project.ID, &project.CreatedAt)
 
-	return r.handlerErr(err)
+	return r.errorMapper(err, r.tableName)
 }
 
 func (r *ProjectRepository) createProjectServices(
@@ -631,7 +627,7 @@ func (r *ProjectRepository) createProjectServices(
 	tx pgx.Tx,
 	projectID int,
 	newServices []*entities.ProjectService,
-) ([]*entities.ProjectService, errors.Error) {
+) ([]*entities.ProjectService, persistence.Error) {
 	if len(newServices) == 0 {
 		return nil, nil
 	}
@@ -696,7 +692,7 @@ func (r *ProjectRepository) createProjectServices(
 
 	rows, err := tx.Query(ctx, query, args...)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	defer rows.Close()
@@ -715,24 +711,23 @@ func (r *ProjectRepository) createProjectServices(
 			&service.AssignedAt,
 		)
 		if err != nil {
-			return nil, r.handlerErr(err)
+			return nil, r.errorMapper(err, r.auxServiceTableName)
 		}
 
 		services = append(services, service)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.auxServiceTableName)
 	}
 
-	return services, r.handlerErr(err)
+	return services, r.errorMapper(err, r.auxServiceTableName)
 }
 
-func NewProjectRepository(
-	pool *pgxpool.Pool, handlerErr func(error) errors.Error,
-) *ProjectRepository {
+func NewProjectRepository(driver *Driver) *ProjectRepository {
 	return &ProjectRepository{
-		pool:       pool,
-		handlerErr: handlerErr,
+		Driver:              driver,
+		tableName:           "project",
+		auxServiceTableName: "project_service",
 	}
 }

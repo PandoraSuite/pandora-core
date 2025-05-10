@@ -1,24 +1,22 @@
-package repository
+package postgres
 
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-
+	persistence "github.com/MAD-py/pandora-core/internal/adapters/persistence/errors"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type RequestLogRepository struct {
-	pool *pgxpool.Pool
+	*Driver
 
-	handlerErr func(error) errors.Error
+	tableName string
 }
 
 func (r *RequestLogRepository) DeleteByService(
 	ctx context.Context, serviceID int,
-) errors.Error {
+) persistence.Error {
 	query := `
 		DELETE FROM request_log
 		WHERE service_id = $1;
@@ -26,7 +24,7 @@ func (r *RequestLogRepository) DeleteByService(
 
 	_, err := r.pool.Exec(ctx, query, serviceID)
 	if err != nil {
-		return r.handlerErr(err)
+		return r.errorMapper(err, r.tableName)
 	}
 
 	return nil
@@ -34,11 +32,7 @@ func (r *RequestLogRepository) DeleteByService(
 
 func (r *RequestLogRepository) UpdateExecutionStatus(
 	ctx context.Context, id string, executionStatus enums.RequestLogExecutionStatus,
-) errors.Error {
-	if executionStatus == enums.RequestLogExecutionStatusNull {
-		return errors.ErrRequestLogInvalidExecutionStatus
-	}
-
+) persistence.Error {
 	query := `
 		UPDATE request_log
 		SET execution_status = $1
@@ -47,11 +41,11 @@ func (r *RequestLogRepository) UpdateExecutionStatus(
 
 	result, err := r.pool.Exec(ctx, query, executionStatus, id)
 	if err != nil {
-		return r.handlerErr(err)
+		return r.errorMapper(err, r.tableName)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrRequestLogNotFound
+		return r.entityNotFoundError(r.tableName)
 	}
 
 	return nil
@@ -59,7 +53,7 @@ func (r *RequestLogRepository) UpdateExecutionStatus(
 
 func (r *RequestLogRepository) Create(
 	ctx context.Context, requestLog *entities.RequestLog,
-) errors.Error {
+) persistence.Error {
 	query := `
 		INSERT INTO request_log (environment_id, service_id, api_key, start_point, request_time, execution_status, message)
 		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at;
@@ -90,12 +84,12 @@ func (r *RequestLogRepository) Create(
 		requestLog.Message,
 	).Scan(&requestLog.ID, &requestLog.CreatedAt)
 
-	return r.handlerErr(err)
+	return r.errorMapper(err, r.tableName)
 }
 
 func (r *RequestLogRepository) CreateAsInitialPoint(
 	ctx context.Context, requestLog *entities.RequestLog,
-) errors.Error {
+) persistence.Error {
 	query := `
 		WITH temp_table AS (
 			SELECT gen_random_uuid() AS uuid
@@ -124,14 +118,9 @@ func (r *RequestLogRepository) CreateAsInitialPoint(
 		requestLog.Message,
 	).Scan(&requestLog.ID)
 
-	return r.handlerErr(err)
+	return r.errorMapper(err, r.tableName)
 }
 
-func NewRequestLogRepository(
-	pool *pgxpool.Pool, handlerErr func(error) errors.Error,
-) *RequestLogRepository {
-	return &RequestLogRepository{
-		pool:       pool,
-		handlerErr: handlerErr,
-	}
+func NewRequestLogRepository(driver *Driver) *RequestLogRepository {
+	return &RequestLogRepository{Driver: driver, tableName: "request_log"}
 }

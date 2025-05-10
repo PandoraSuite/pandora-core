@@ -1,31 +1,25 @@
-package repository
+package postgres
 
 import (
 	"context"
 	"fmt"
 	"strings"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-
+	persistence "github.com/MAD-py/pandora-core/internal/adapters/persistence/errors"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type APIKeyRepository struct {
-	pool *pgxpool.Pool
+	*Driver
 
-	handlerErr func(error) errors.Error
+	talbeName string
 }
 
 func (r *APIKeyRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.APIKeyStatus,
-) errors.Error {
-	if status == enums.APIKeyStatusNull {
-		return errors.ErrAPIKeyInvalidStatus
-	}
-
+) persistence.Error {
 	query := `
 		UPDATE api_key
 		SET status = $1
@@ -34,11 +28,11 @@ func (r *APIKeyRepository) UpdateStatus(
 
 	result, err := r.pool.Exec(ctx, query, status, id)
 	if err != nil {
-		return r.handlerErr(err)
+		return r.errorMapper(err, r.talbeName)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrAPIKeyNotFound
+		return r.entityNotFoundError(r.talbeName)
 	}
 
 	return nil
@@ -46,7 +40,7 @@ func (r *APIKeyRepository) UpdateStatus(
 
 func (r *APIKeyRepository) Update(
 	ctx context.Context, id int, update *dto.APIKeyUpdate,
-) (*entities.APIKey, errors.Error) {
+) (*entities.APIKey, persistence.Error) {
 	if update == nil {
 		return r.GetByID(ctx, id)
 	}
@@ -88,7 +82,7 @@ func (r *APIKeyRepository) Update(
 		&apiKey.LastUsed,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.talbeName)
 	}
 
 	return apiKey, nil
@@ -96,7 +90,7 @@ func (r *APIKeyRepository) Update(
 
 func (r *APIKeyRepository) UpdateLastUsed(
 	ctx context.Context, key string,
-) errors.Error {
+) persistence.Error {
 	query := `
 		UPDATE api_key
 		SET last_used = NOW()
@@ -105,11 +99,11 @@ func (r *APIKeyRepository) UpdateLastUsed(
 
 	result, err := r.pool.Exec(ctx, query, key)
 	if err != nil {
-		return r.handlerErr(err)
+		return r.errorMapper(err, r.talbeName)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrAPIKeyNotFound
+		return r.entityNotFoundError(r.talbeName)
 	}
 
 	return nil
@@ -117,7 +111,7 @@ func (r *APIKeyRepository) UpdateLastUsed(
 
 func (r *APIKeyRepository) ListByEnvironment(
 	ctx context.Context, environmentID int,
-) ([]*entities.APIKey, errors.Error) {
+) ([]*entities.APIKey, persistence.Error) {
 	query := `
 		SELECT id, environment_id, key, status, created_at,
 			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
@@ -128,7 +122,7 @@ func (r *APIKeyRepository) ListByEnvironment(
 
 	rows, err := r.pool.Query(ctx, query, environmentID)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.talbeName)
 	}
 
 	defer rows.Close()
@@ -147,14 +141,14 @@ func (r *APIKeyRepository) ListByEnvironment(
 			&apiKey.LastUsed,
 		)
 		if err != nil {
-			return nil, r.handlerErr(err)
+			return nil, r.errorMapper(err, r.talbeName)
 		}
 
 		apiKeys = append(apiKeys, apiKey)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.talbeName)
 	}
 
 	return apiKeys, nil
@@ -162,7 +156,7 @@ func (r *APIKeyRepository) ListByEnvironment(
 
 func (r *APIKeyRepository) GetByKey(
 	ctx context.Context, key string,
-) (*entities.APIKey, errors.Error) {
+) (*entities.APIKey, persistence.Error) {
 	query := `
 		SELECT id, environment_id, key, status, created_at,
 			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
@@ -182,7 +176,7 @@ func (r *APIKeyRepository) GetByKey(
 		&apiKey.LastUsed,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.talbeName)
 	}
 
 	return apiKey, nil
@@ -190,7 +184,7 @@ func (r *APIKeyRepository) GetByKey(
 
 func (r *APIKeyRepository) GetByID(
 	ctx context.Context, id int,
-) (*entities.APIKey, errors.Error) {
+) (*entities.APIKey, persistence.Error) {
 	query := `
 		SELECT id, environment_id, key, status, created_at,
 			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
@@ -210,7 +204,7 @@ func (r *APIKeyRepository) GetByID(
 		&apiKey.LastUsed,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.talbeName)
 	}
 
 	return apiKey, nil
@@ -218,7 +212,7 @@ func (r *APIKeyRepository) GetByID(
 
 func (r *APIKeyRepository) Exists(
 	ctx context.Context, key string,
-) (bool, errors.Error) {
+) (bool, persistence.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -230,7 +224,7 @@ func (r *APIKeyRepository) Exists(
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, key).Scan(&exists)
 	if err != nil {
-		return false, r.handlerErr(err)
+		return false, r.errorMapper(err, r.talbeName)
 	}
 
 	return exists, nil
@@ -238,7 +232,7 @@ func (r *APIKeyRepository) Exists(
 
 func (r *APIKeyRepository) Create(
 	ctx context.Context, apiKey *entities.APIKey,
-) errors.Error {
+) persistence.Error {
 	query := `
 		INSERT INTO api_key (environment_id, key, expires_at, last_used, status)
 		VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at;
@@ -264,14 +258,9 @@ func (r *APIKeyRepository) Create(
 		apiKey.Status,
 	).Scan(&apiKey.ID, &apiKey.CreatedAt)
 
-	return r.handlerErr(err)
+	return r.errorMapper(err, r.talbeName)
 }
 
-func NewAPIKeyRepository(
-	pool *pgxpool.Pool, handlerErr func(error) errors.Error,
-) *APIKeyRepository {
-	return &APIKeyRepository{
-		pool:       pool,
-		handlerErr: handlerErr,
-	}
+func NewAPIKeyRepository(driver *Driver) *APIKeyRepository {
+	return &APIKeyRepository{Driver: driver, talbeName: "api_key"}
 }

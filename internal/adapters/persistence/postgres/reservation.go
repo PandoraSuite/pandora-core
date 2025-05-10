@@ -1,24 +1,22 @@
-package repository
+package postgres
 
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-
+	persistence "github.com/MAD-py/pandora-core/internal/adapters/persistence/errors"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
-	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type ReservationRepository struct {
-	pool *pgxpool.Pool
+	*Driver
 
-	handlerErr func(error) errors.Error
+	tableName string
 }
 
 func (r *ReservationRepository) Create(
 	ctx context.Context, Reservation *entities.Reservation,
-) errors.Error {
+) persistence.Error {
 	query := `
 		INSERT INTO reservation (environment_id, service_id, api_key, start_request_id, request_time, expires_at)
 		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;
@@ -35,12 +33,12 @@ func (r *ReservationRepository) Create(
 		Reservation.ExpiresAt,
 	).Scan(&Reservation.ID)
 
-	return r.handlerErr(err)
+	return r.errorMapper(err, r.tableName)
 }
 
 func (r *ReservationRepository) GetByID(
 	ctx context.Context, id string,
-) (*entities.Reservation, errors.Error) {
+) (*entities.Reservation, persistence.Error) {
 	query := `
 		SELECT *
 		FROM reservation
@@ -57,7 +55,7 @@ func (r *ReservationRepository) GetByID(
 		&reservation.ExpiresAt,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return reservation, nil
@@ -65,7 +63,7 @@ func (r *ReservationRepository) GetByID(
 
 func (r *ReservationRepository) GetByIDWithDetails(
 	ctx context.Context, id string,
-) (*dto.ReservationWithDetails, errors.Error) {
+) (*dto.ReservationWithDetails, persistence.Error) {
 	query := `
 		SELECT r.id, r.start_request_id, r.api_key, 
 		s.id, s.name, s.version, s.status, 
@@ -92,7 +90,7 @@ func (r *ReservationRepository) GetByIDWithDetails(
 		&reservationFlow.EnvironmentStatus,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return reservationFlow, nil
@@ -100,7 +98,7 @@ func (r *ReservationRepository) GetByIDWithDetails(
 
 func (r *ReservationRepository) CountByEnvironmentAndService(
 	ctx context.Context, environment_id, service_id int,
-) (int, errors.Error) {
+) (int, persistence.Error) {
 	query := `
 		SELECT count(*)
 		FROM reservation
@@ -116,7 +114,7 @@ func (r *ReservationRepository) CountByEnvironmentAndService(
 		service_id).Scan(
 		&currentReservations)
 	if err != nil {
-		return 0, r.handlerErr(err)
+		return 0, r.errorMapper(err, r.tableName)
 	}
 
 	return currentReservations, nil
@@ -124,7 +122,7 @@ func (r *ReservationRepository) CountByEnvironmentAndService(
 
 func (r *ReservationRepository) Delete(
 	ctx context.Context, id string,
-) errors.Error {
+) persistence.Error {
 	query := `
 		DELETE FROM reservation
 		WHERE id = $1;
@@ -132,21 +130,16 @@ func (r *ReservationRepository) Delete(
 
 	result, err := r.pool.Exec(ctx, query, id)
 	if err != nil {
-		return r.handlerErr(err)
+		return r.errorMapper(err, r.tableName)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrReservationNotFound
+		return r.entityNotFoundError("reservation")
 	}
 
 	return nil
 }
 
-func NewReservationRepository(
-	pool *pgxpool.Pool, handlerErr func(error) errors.Error,
-) *ReservationRepository {
-	return &ReservationRepository{
-		pool:       pool,
-		handlerErr: handlerErr,
-	}
+func NewReservationRepository(driver *Driver) *ReservationRepository {
+	return &ReservationRepository{Driver: driver, tableName: "reservation"}
 }

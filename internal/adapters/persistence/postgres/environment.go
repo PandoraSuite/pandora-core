@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"context"
@@ -6,23 +6,23 @@ import (
 	"strings"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 
+	persistence "github.com/MAD-py/pandora-core/internal/adapters/persistence/errors"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type EnvironmentRepository struct {
-	pool *pgxpool.Pool
+	*Driver
 
-	handlerErr func(error) errors.Error
+	tableName           string
+	auxServiceTableName string
 }
 
 func (r *EnvironmentRepository) ExistsServiceWithInfiniteMaxRequest(
 	ctx context.Context, projectID, serviceID int,
-) (bool, errors.Error) {
+) (bool, persistence.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -40,7 +40,7 @@ func (r *EnvironmentRepository) ExistsServiceWithInfiniteMaxRequest(
 	var hasInfinite bool
 	err := r.pool.QueryRow(ctx, query, projectID, serviceID).Scan(&hasInfinite)
 	if err != nil {
-		return false, r.handlerErr(err)
+		return false, r.errorMapper(err, r.tableName)
 	}
 
 	return hasInfinite, nil
@@ -48,7 +48,7 @@ func (r *EnvironmentRepository) ExistsServiceWithInfiniteMaxRequest(
 
 func (r *EnvironmentRepository) ResetAvailableRequests(
 	ctx context.Context, id, serviceID int,
-) (*entities.EnvironmentService, errors.Error) {
+) (*entities.EnvironmentService, persistence.Error) {
 	query := `
 		WITH updated AS (
 			UPDATE environment_service
@@ -71,12 +71,12 @@ func (r *EnvironmentRepository) ResetAvailableRequests(
 		&service.AvailableRequest,
 		&service.AssignedAt,
 	)
-	return service, r.handlerErr(err)
+	return service, r.errorMapper(err, r.auxServiceTableName)
 }
 
 func (r *EnvironmentRepository) RemoveService(
 	ctx context.Context, id, serviceID int,
-) (int64, errors.Error) {
+) (int64, persistence.Error) {
 	query := `
 		DELETE FROM environment_service
 		WHERE environment_id = $1 AND service_id = $2;
@@ -84,7 +84,7 @@ func (r *EnvironmentRepository) RemoveService(
 
 	result, err := r.pool.Exec(ctx, query, id, serviceID)
 	if err != nil {
-		return 0, r.handlerErr(err)
+		return 0, r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	return result.RowsAffected(), nil
@@ -92,7 +92,7 @@ func (r *EnvironmentRepository) RemoveService(
 
 func (r *EnvironmentRepository) RemoveServiceFromProjectEnvironments(
 	ctx context.Context, projectID, serviceID int,
-) (int64, errors.Error) {
+) (int64, persistence.Error) {
 	query := `
 		DELETE FROM environment_service
 		WHERE service_id = $2
@@ -105,7 +105,7 @@ func (r *EnvironmentRepository) RemoveServiceFromProjectEnvironments(
 
 	result, err := r.pool.Exec(ctx, query, projectID, serviceID)
 	if err != nil {
-		return 0, r.handlerErr(err)
+		return 0, r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	return result.RowsAffected(), nil
@@ -113,11 +113,7 @@ func (r *EnvironmentRepository) RemoveServiceFromProjectEnvironments(
 
 func (r *EnvironmentRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.EnvironmentStatus,
-) errors.Error {
-	if status == enums.EnvironmentStatusNull {
-		return errors.ErrEnvironmentInvalidStatus
-	}
-
+) persistence.Error {
 	query := `
 		UPDATE environment
 		SET status = $1
@@ -126,11 +122,11 @@ func (r *EnvironmentRepository) UpdateStatus(
 
 	result, err := r.pool.Exec(ctx, query, status, id)
 	if err != nil {
-		return r.handlerErr(err)
+		return r.errorMapper(err, r.tableName)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrEnvironmentNotFound
+		return r.entityNotFoundError(r.tableName)
 	}
 
 	return nil
@@ -140,7 +136,7 @@ func (r *EnvironmentRepository) UpdateService(
 	ctx context.Context,
 	id, serviceID int,
 	update *dto.EnvironmentServiceUpdate,
-) (*entities.EnvironmentService, errors.Error) {
+) (*entities.EnvironmentService, persistence.Error) {
 	if update == nil {
 		return r.GetServiceByID(ctx, id, serviceID)
 	}
@@ -185,7 +181,7 @@ func (r *EnvironmentRepository) UpdateService(
 		&service.AssignedAt,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	return service, nil
@@ -193,7 +189,7 @@ func (r *EnvironmentRepository) UpdateService(
 
 func (r *EnvironmentRepository) Update(
 	ctx context.Context, id int, update *dto.EnvironmentUpdate,
-) (*entities.Environment, errors.Error) {
+) (*entities.Environment, persistence.Error) {
 	if update == nil {
 		return r.GetByID(ctx, id)
 	}
@@ -223,11 +219,11 @@ func (r *EnvironmentRepository) Update(
 
 	result, err := r.pool.Exec(ctx, query, args...)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	if result.RowsAffected() == 0 {
-		return nil, errors.ErrEnvironmentNotFound
+		return nil, r.entityNotFoundError(r.tableName)
 	}
 
 	return r.GetByID(ctx, id)
@@ -235,7 +231,7 @@ func (r *EnvironmentRepository) Update(
 
 func (r *EnvironmentRepository) Exists(
 	ctx context.Context, id int,
-) (bool, errors.Error) {
+) (bool, persistence.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -247,7 +243,7 @@ func (r *EnvironmentRepository) Exists(
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, id).Scan(&exists)
 	if err != nil {
-		return false, r.handlerErr(err)
+		return false, r.errorMapper(err, r.tableName)
 	}
 
 	return exists, nil
@@ -255,7 +251,7 @@ func (r *EnvironmentRepository) Exists(
 
 func (r *EnvironmentRepository) IsActive(
 	ctx context.Context, id int,
-) (bool, errors.Error) {
+) (bool, persistence.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -268,7 +264,7 @@ func (r *EnvironmentRepository) IsActive(
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, id, enums.EnvironmentActive).Scan(&exists)
 	if err != nil {
-		return false, r.handlerErr(err)
+		return false, r.errorMapper(err, r.tableName)
 	}
 
 	return exists, nil
@@ -276,7 +272,7 @@ func (r *EnvironmentRepository) IsActive(
 
 func (r *EnvironmentRepository) MissingResourceDiagnosis(
 	ctx context.Context, id int, serviceID int,
-) (bool, bool, errors.Error) {
+) (bool, bool, persistence.Error) {
 	query := `
 		SELECT
 		EXISTS (
@@ -298,13 +294,13 @@ func (r *EnvironmentRepository) MissingResourceDiagnosis(
 		ctx,
 		query,
 		id,
-		service_id,
+		serviceID,
 	).Scan(
 		&environment_service_found,
 		&has_available_requests,
 	)
 	if err != nil {
-		return false, false, r.handlerErr(err)
+		return false, false, r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	return environment_service_found, has_available_requests, nil
@@ -312,7 +308,7 @@ func (r *EnvironmentRepository) MissingResourceDiagnosis(
 
 func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
 	ctx context.Context, id, serviceID int,
-) (*dto.QuotaUsage, errors.Error) {
+) (*dto.QuotaUsage, persistence.Error) {
 	query := `
 		SELECT COALESCE(ps.max_request, -1), COALESCE(SUM(es.max_request), 0)
 		FROM environment e_target
@@ -333,12 +329,12 @@ func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
 		&quota.MaxAllowed,
 		&quota.CurrentAllocated,
 	)
-	return quota, r.handlerErr(err)
+	return quota, r.errorMapper(err, r.tableName)
 }
 
 func (r *EnvironmentRepository) IncreaseAvailableRequest(
 	ctx context.Context, id, serviceID int,
-) errors.Error {
+) persistence.Error {
 	query := `
 		UPDATE environment_service
 		SET available_request =
@@ -355,11 +351,11 @@ func (r *EnvironmentRepository) IncreaseAvailableRequest(
 	result, err := r.pool.Exec(
 		ctx, query, id, serviceID)
 	if err != nil {
-		return r.handlerErr(err)
+		return r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.ErrEnvironmentNotFound
+		return r.entityNotFoundError(r.auxServiceTableName)
 	}
 
 	return nil
@@ -367,7 +363,7 @@ func (r *EnvironmentRepository) IncreaseAvailableRequest(
 
 func (r *EnvironmentRepository) DecrementAvailableRequest(
 	ctx context.Context, id, serviceID int,
-) (*dto.DecrementAvailableRequest, errors.Error) {
+) (*dto.DecrementAvailableRequest, persistence.Error) {
 	query := `
 		UPDATE environment_service
 		SET available_request =
@@ -389,7 +385,7 @@ func (r *EnvironmentRepository) DecrementAvailableRequest(
 		)
 
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	return result, nil
@@ -397,7 +393,7 @@ func (r *EnvironmentRepository) DecrementAvailableRequest(
 
 func (r *EnvironmentRepository) ExistsServiceIn(
 	ctx context.Context, id, serviceID int,
-) (bool, errors.Error) {
+) (bool, persistence.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -409,7 +405,7 @@ func (r *EnvironmentRepository) ExistsServiceIn(
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, id, serviceID).Scan(&exists)
 	if err != nil {
-		return false, r.handlerErr(err)
+		return false, r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	return exists, nil
@@ -417,7 +413,7 @@ func (r *EnvironmentRepository) ExistsServiceIn(
 
 func (r *EnvironmentRepository) GetServiceByID(
 	ctx context.Context, id, serviceID int,
-) (*entities.EnvironmentService, errors.Error) {
+) (*entities.EnvironmentService, persistence.Error) {
 	query := `
 		SELECT s.id, s.name, s.version, COALESCE(es.max_request, -1),
 			COALESCE(es.available_request, -1), es.created_at
@@ -437,7 +433,7 @@ func (r *EnvironmentRepository) GetServiceByID(
 		&service.AssignedAt,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	return service, nil
@@ -445,7 +441,7 @@ func (r *EnvironmentRepository) GetServiceByID(
 
 func (r *EnvironmentRepository) GetByID(
 	ctx context.Context, id int,
-) (*entities.Environment, errors.Error) {
+) (*entities.Environment, persistence.Error) {
 	query := `
 		SELECT e.id, e.name, e.status, e.project_id, e.created_at,
 			COALESCE(
@@ -479,7 +475,7 @@ func (r *EnvironmentRepository) GetByID(
 		&environment.Services,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return environment, nil
@@ -487,7 +483,7 @@ func (r *EnvironmentRepository) GetByID(
 
 func (r *EnvironmentRepository) ListByProject(
 	ctx context.Context, projectID int,
-) ([]*entities.Environment, errors.Error) {
+) ([]*entities.Environment, persistence.Error) {
 	query := `
 		SELECT e.id, e.name, e.status, e.project_id, e.created_at,
 			COALESCE(
@@ -515,7 +511,7 @@ func (r *EnvironmentRepository) ListByProject(
 
 	rows, err := r.pool.Query(ctx, query, projectID)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	defer rows.Close()
@@ -533,14 +529,14 @@ func (r *EnvironmentRepository) ListByProject(
 			&environment.Services,
 		)
 		if err != nil {
-			return nil, r.handlerErr(err)
+			return nil, r.errorMapper(err, r.tableName)
 		}
 
 		environments = append(environments, environment)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return environments, nil
@@ -548,7 +544,7 @@ func (r *EnvironmentRepository) ListByProject(
 
 func (r *EnvironmentRepository) AddService(
 	ctx context.Context, id int, service *entities.EnvironmentService,
-) errors.Error {
+) persistence.Error {
 	query := `
 		WITH inserted AS (
 			INSERT INTO environment_service (environment_id, service_id, max_request, available_request)
@@ -580,15 +576,15 @@ func (r *EnvironmentRepository) AddService(
 		availableRequest,
 	).Scan(&service.Name, &service.Version, &service.AssignedAt)
 
-	return r.handlerErr(err)
+	return r.errorMapper(err, r.auxServiceTableName)
 }
 
 func (r *EnvironmentRepository) Create(
 	ctx context.Context, environment *entities.Environment,
-) errors.Error {
+) persistence.Error {
 	tx, txErr := r.pool.Begin(ctx)
 	if txErr != nil {
-		return r.handlerErr(txErr)
+		return r.errorMapper(txErr, r.tableName)
 	}
 
 	if err := r.createEnvironment(ctx, tx, environment); err != nil {
@@ -605,12 +601,12 @@ func (r *EnvironmentRepository) Create(
 	}
 
 	environment.Services = services
-	return r.handlerErr(tx.Commit(ctx))
+	return r.errorMapper(tx.Commit(ctx), r.tableName)
 }
 
 func (r *EnvironmentRepository) createEnvironment(
 	ctx context.Context, tx pgx.Tx, environment *entities.Environment,
-) errors.Error {
+) persistence.Error {
 	query := `
 		INSERT INTO environment (project_id, name, status)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
@@ -624,7 +620,7 @@ func (r *EnvironmentRepository) createEnvironment(
 		environment.Status,
 	).Scan(&environment.ID, &environment.CreatedAt)
 
-	return r.handlerErr(err)
+	return r.errorMapper(err, r.tableName)
 }
 
 func (r *EnvironmentRepository) createEnvironmentServices(
@@ -632,7 +628,7 @@ func (r *EnvironmentRepository) createEnvironmentServices(
 	tx pgx.Tx,
 	environmentID int,
 	newServices []*entities.EnvironmentService,
-) ([]*entities.EnvironmentService, errors.Error) {
+) ([]*entities.EnvironmentService, persistence.Error) {
 	if len(newServices) == 0 {
 		return nil, nil
 	}
@@ -690,7 +686,7 @@ func (r *EnvironmentRepository) createEnvironmentServices(
 
 	rows, err := tx.Query(ctx, query, args...)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.auxServiceTableName)
 	}
 
 	defer rows.Close()
@@ -708,24 +704,23 @@ func (r *EnvironmentRepository) createEnvironmentServices(
 			&service.AssignedAt,
 		)
 		if err != nil {
-			return nil, r.handlerErr(err)
+			return nil, r.errorMapper(err, r.auxServiceTableName)
 		}
 
 		services = append(services, service)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.auxServiceTableName)
 	}
 
-	return services, r.handlerErr(err)
+	return services, r.errorMapper(err, r.auxServiceTableName)
 }
 
-func NewEnvironmentRepository(
-	pool *pgxpool.Pool, handlerErr func(error) errors.Error,
-) *EnvironmentRepository {
+func NewEnvironmentRepository(driver *Driver) *EnvironmentRepository {
 	return &EnvironmentRepository{
-		pool:       pool,
-		handlerErr: handlerErr,
+		Driver:              driver,
+		tableName:           "environment",
+		auxServiceTableName: "environment_service",
 	}
 }

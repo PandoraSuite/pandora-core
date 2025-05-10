@@ -1,27 +1,25 @@
-package repository
+package postgres
 
 import (
 	"context"
 	"fmt"
 	"strings"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-
+	persistence "github.com/MAD-py/pandora-core/internal/adapters/persistence/errors"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type ServiceRepository struct {
-	pool *pgxpool.Pool
+	*Driver
 
-	handlerErr func(error) errors.Error
+	tableName string
 }
 
 func (r *ServiceRepository) Delete(
 	ctx context.Context, id int,
-) errors.Error {
+) persistence.Error {
 	query := `
 		DELETE FROM service
 		WHERE id = $1;
@@ -29,11 +27,11 @@ func (r *ServiceRepository) Delete(
 
 	result, err := r.pool.Exec(ctx, query, id)
 	if err != nil {
-		return r.handlerErr(err)
+		return r.errorMapper(err, r.tableName)
 	}
 
 	if result.RowsAffected() == 0 {
-		return errors.NewNotFound("service not found")
+		return r.entityNotFoundError(r.tableName)
 	}
 
 	return nil
@@ -41,11 +39,7 @@ func (r *ServiceRepository) Delete(
 
 func (r *ServiceRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.ServiceStatus,
-) (*entities.Service, errors.Error) {
-	if status == enums.ServiceStatusNull {
-		return nil, errors.NewValidationFailed("cannot store the null status")
-	}
-
+) (*entities.Service, persistence.Error) {
 	query := `
 		UPDATE service
 		SET status = $1
@@ -62,7 +56,7 @@ func (r *ServiceRepository) UpdateStatus(
 		&service.CreatedAt,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return service, nil
@@ -70,7 +64,7 @@ func (r *ServiceRepository) UpdateStatus(
 
 func (r *ServiceRepository) GetByNameAndVersion(
 	ctx context.Context, name, version string,
-) (*entities.Service, errors.Error) {
+) (*entities.Service, persistence.Error) {
 	query := `
 		SELECT id, name, version, status, created_at
 		FROM service
@@ -86,7 +80,7 @@ func (r *ServiceRepository) GetByNameAndVersion(
 		&service.CreatedAt,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return service, nil
@@ -94,7 +88,7 @@ func (r *ServiceRepository) GetByNameAndVersion(
 
 func (r *ServiceRepository) List(
 	ctx context.Context, filter *dto.ServiceFilter,
-) ([]*entities.Service, errors.Error) {
+) ([]*entities.Service, persistence.Error) {
 	query := `
 		SELECT id, name, version, status, created_at
 		FROM service
@@ -122,7 +116,7 @@ func (r *ServiceRepository) List(
 
 	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	defer rows.Close()
@@ -139,14 +133,14 @@ func (r *ServiceRepository) List(
 			&service.CreatedAt,
 		)
 		if err != nil {
-			return nil, r.handlerErr(err)
+			return nil, r.errorMapper(err, r.tableName)
 		}
 
 		services = append(services, service)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return services, nil
@@ -154,7 +148,7 @@ func (r *ServiceRepository) List(
 
 func (r *ServiceRepository) Create(
 	ctx context.Context, service *entities.Service,
-) errors.Error {
+) persistence.Error {
 	query := `
 		INSERT INTO service (name, version, status)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
@@ -168,14 +162,9 @@ func (r *ServiceRepository) Create(
 		service.Status,
 	).Scan(&service.ID, &service.CreatedAt)
 
-	return r.handlerErr(err)
+	return r.errorMapper(err, r.tableName)
 }
 
-func NewServiceRepository(
-	pool *pgxpool.Pool, handlerErr func(error) errors.Error,
-) *ServiceRepository {
-	return &ServiceRepository{
-		pool:       pool,
-		handlerErr: handlerErr,
-	}
+func NewServiceRepository(driver *Driver) *ServiceRepository {
+	return &ServiceRepository{Driver: driver, tableName: "service"}
 }

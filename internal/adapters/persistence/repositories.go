@@ -4,11 +4,31 @@ import (
 	"context"
 	"time"
 
+	"github.com/MAD-py/pandora-core/internal/adapters/persistence/errors"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
+
+type DriverType string
+
+const (
+	PostgresDriver DriverType = "postgres"
+)
+
+type Repositories interface {
+	// ... Helpers ...
+	Close()
+
+	// ... Repositories ...
+	APIKey() APIKeyRepository
+	Client() ClientRepository
+	Project() ProjectRepository
+	Service() ServiceRepository
+	Request() RequestRepository
+	Environment() EnvironmentRepository
+	Reservation() ReservationRepository
+}
 
 type APIKeyRepository interface {
 	// ... Exists ...

@@ -1,27 +1,25 @@
-package repository
+package postgres
 
 import (
 	"context"
 	"fmt"
 	"strings"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-
+	persistence "github.com/MAD-py/pandora-core/internal/adapters/persistence/errors"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type ClientRepository struct {
-	pool *pgxpool.Pool
+	*Driver
 
-	handlerErr func(error) errors.Error
+	tableName string
 }
 
 func (r *ClientRepository) Update(
 	ctx context.Context, id int, update *dto.ClientUpdate,
-) (*entities.Client, errors.Error) {
+) (*entities.Client, persistence.Error) {
 	if update == nil {
 		return r.GetByID(ctx, id)
 	}
@@ -71,7 +69,7 @@ func (r *ClientRepository) Update(
 		&client.CreatedAt,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return client, nil
@@ -79,7 +77,7 @@ func (r *ClientRepository) Update(
 
 func (r *ClientRepository) Exists(
 	ctx context.Context, id int,
-) (bool, errors.Error) {
+) (bool, persistence.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -91,7 +89,7 @@ func (r *ClientRepository) Exists(
 	var exists bool
 	err := r.pool.QueryRow(ctx, query, id).Scan(&exists)
 	if err != nil {
-		return false, r.handlerErr(err)
+		return false, r.errorMapper(err, r.tableName)
 	}
 
 	return exists, nil
@@ -99,7 +97,7 @@ func (r *ClientRepository) Exists(
 
 func (r *ClientRepository) GetByID(
 	ctx context.Context, id int,
-) (*entities.Client, errors.Error) {
+) (*entities.Client, persistence.Error) {
 	query := `
 		SELECT id, type, name, email, created_at
 		FROM client
@@ -115,7 +113,7 @@ func (r *ClientRepository) GetByID(
 		&client.CreatedAt,
 	)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return client, nil
@@ -123,7 +121,7 @@ func (r *ClientRepository) GetByID(
 
 func (r *ClientRepository) List(
 	ctx context.Context, filter *dto.ClientFilter,
-) ([]*entities.Client, errors.Error) {
+) ([]*entities.Client, persistence.Error) {
 	query := `
 		SELECT id, type, name, email, created_at
 		FROM client
@@ -151,7 +149,7 @@ func (r *ClientRepository) List(
 
 	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	defer rows.Close()
@@ -168,14 +166,14 @@ func (r *ClientRepository) List(
 			&client.CreatedAt,
 		)
 		if err != nil {
-			return nil, r.handlerErr(err)
+			return nil, r.errorMapper(err, r.tableName)
 		}
 
 		clients = append(clients, client)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, r.handlerErr(err)
+		return nil, r.errorMapper(err, r.tableName)
 	}
 
 	return clients, nil
@@ -183,7 +181,7 @@ func (r *ClientRepository) List(
 
 func (r *ClientRepository) Create(
 	ctx context.Context, client *entities.Client,
-) errors.Error {
+) persistence.Error {
 	query := `
 		INSERT INTO client (type, name, email)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
@@ -197,14 +195,9 @@ func (r *ClientRepository) Create(
 		client.Email,
 	).Scan(&client.ID, &client.CreatedAt)
 
-	return r.handlerErr(err)
+	return r.errorMapper(err, r.tableName)
 }
 
-func NewClientRepository(
-	pool *pgxpool.Pool, handlerErr func(error) errors.Error,
-) *ClientRepository {
-	return &ClientRepository{
-		pool:       pool,
-		handlerErr: handlerErr,
-	}
+func NewClientRepository(driver *Driver) *ClientRepository {
+	return &ClientRepository{Driver: driver, tableName: "client"}
 }
