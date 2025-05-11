@@ -23,7 +23,7 @@ func NewVariableValidationFailed(name, message string, err error) Error {
 	return &VariableError{
 		BaseError: BaseError{
 			err:     err,
-			code:    CodeValidationFailed,
+			code:    ErrorCodeValidationFailed,
 			message: message,
 		},
 		name: name,

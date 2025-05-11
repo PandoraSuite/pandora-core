@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	persistence "github.com/MAD-py/pandora-core/internal/adapters/persistence/errors"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type APIKeyRepository struct {
@@ -19,7 +19,7 @@ type APIKeyRepository struct {
 
 func (r *APIKeyRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.APIKeyStatus,
-) persistence.Error {
+) errors.PersistenceError {
 	query := `
 		UPDATE api_key
 		SET status = $1
@@ -40,7 +40,7 @@ func (r *APIKeyRepository) UpdateStatus(
 
 func (r *APIKeyRepository) Update(
 	ctx context.Context, id int, update *dto.APIKeyUpdate,
-) (*entities.APIKey, persistence.Error) {
+) (*entities.APIKey, errors.PersistenceError) {
 	if update == nil {
 		return r.GetByID(ctx, id)
 	}
@@ -90,7 +90,7 @@ func (r *APIKeyRepository) Update(
 
 func (r *APIKeyRepository) UpdateLastUsed(
 	ctx context.Context, key string,
-) persistence.Error {
+) errors.PersistenceError {
 	query := `
 		UPDATE api_key
 		SET last_used = NOW()
@@ -111,7 +111,7 @@ func (r *APIKeyRepository) UpdateLastUsed(
 
 func (r *APIKeyRepository) ListByEnvironment(
 	ctx context.Context, environmentID int,
-) ([]*entities.APIKey, persistence.Error) {
+) ([]*entities.APIKey, errors.PersistenceError) {
 	query := `
 		SELECT id, environment_id, key, status, created_at,
 			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
@@ -156,7 +156,7 @@ func (r *APIKeyRepository) ListByEnvironment(
 
 func (r *APIKeyRepository) GetByKey(
 	ctx context.Context, key string,
-) (*entities.APIKey, persistence.Error) {
+) (*entities.APIKey, errors.PersistenceError) {
 	query := `
 		SELECT id, environment_id, key, status, created_at,
 			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
@@ -184,7 +184,7 @@ func (r *APIKeyRepository) GetByKey(
 
 func (r *APIKeyRepository) GetByID(
 	ctx context.Context, id int,
-) (*entities.APIKey, persistence.Error) {
+) (*entities.APIKey, errors.PersistenceError) {
 	query := `
 		SELECT id, environment_id, key, status, created_at,
 			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
@@ -212,7 +212,7 @@ func (r *APIKeyRepository) GetByID(
 
 func (r *APIKeyRepository) Exists(
 	ctx context.Context, key string,
-) (bool, persistence.Error) {
+) (bool, errors.PersistenceError) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -232,7 +232,7 @@ func (r *APIKeyRepository) Exists(
 
 func (r *APIKeyRepository) Create(
 	ctx context.Context, apiKey *entities.APIKey,
-) persistence.Error {
+) errors.PersistenceError {
 	query := `
 		INSERT INTO api_key (environment_id, key, expires_at, last_used, status)
 		VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at;

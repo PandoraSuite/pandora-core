@@ -8,10 +8,10 @@ import (
 
 	"github.com/jackc/pgx/v5"
 
-	persistence "github.com/MAD-py/pandora-core/internal/adapters/persistence/errors"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type ProjectRepository struct {
@@ -23,7 +23,7 @@ type ProjectRepository struct {
 
 func (r *ProjectRepository) ResetAvailableRequestsForEnvsService(
 	ctx context.Context, id, serviceID int,
-) ([]*dto.EnvironmentServiceReset, persistence.Error) {
+) ([]*dto.EnvironmentServiceReset, errors.PersistenceError) {
 	return r.resetAvailableRequestsForEnvsService(
 		ctx, nil, id, serviceID,
 	)
@@ -31,7 +31,7 @@ func (r *ProjectRepository) ResetAvailableRequestsForEnvsService(
 
 func (r *ProjectRepository) ResetProjectServiceUsage(
 	ctx context.Context, id, serviceID int, nextReset time.Time,
-) ([]*dto.EnvironmentServiceReset, persistence.Error) {
+) ([]*dto.EnvironmentServiceReset, errors.PersistenceError) {
 	tx, txErr := r.pool.Begin(ctx)
 	if txErr != nil {
 		return nil, r.errorMapper(txErr, r.tableName)
@@ -55,7 +55,7 @@ func (r *ProjectRepository) ResetProjectServiceUsage(
 
 func (r *ProjectRepository) updateNextReset(
 	ctx context.Context, tx pgx.Tx, id, serviceID int, nextReset time.Time,
-) persistence.Error {
+) errors.PersistenceError {
 	query := `
 		UPDATE project_service
 		SET next_reset = $3
@@ -81,7 +81,7 @@ func (r *ProjectRepository) updateNextReset(
 
 func (r *ProjectRepository) resetAvailableRequestsForEnvsService(
 	ctx context.Context, tx pgx.Tx, id, serviceID int,
-) ([]*dto.EnvironmentServiceReset, persistence.Error) {
+) ([]*dto.EnvironmentServiceReset, errors.PersistenceError) {
 	query := `
 		WITH updated AS (
 			UPDATE environment_service es
@@ -146,7 +146,7 @@ func (r *ProjectRepository) resetAvailableRequestsForEnvsService(
 
 func (r *ProjectRepository) GetServiceByID(
 	ctx context.Context, id, serviceID int,
-) (*entities.ProjectService, persistence.Error) {
+) (*entities.ProjectService, errors.PersistenceError) {
 	query := `
 		SELECT s.id, s.name, s.version, COALESCE(ps.max_request, -1),
 			ps.reset_frequency, COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
@@ -176,7 +176,7 @@ func (r *ProjectRepository) GetServiceByID(
 
 func (r *ProjectRepository) UpdateService(
 	ctx context.Context, id, serviceID int, update *dto.ProjectServiceUpdate,
-) (*entities.ProjectService, persistence.Error) {
+) (*entities.ProjectService, errors.PersistenceError) {
 	if update == nil {
 		return r.GetServiceByID(ctx, id, serviceID)
 	}
@@ -238,7 +238,7 @@ func (r *ProjectRepository) UpdateService(
 
 func (r *ProjectRepository) ExistsServiceIn(
 	ctx context.Context, serviceID int,
-) (bool, persistence.Error) {
+) (bool, errors.PersistenceError) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -258,7 +258,7 @@ func (r *ProjectRepository) ExistsServiceIn(
 
 func (r *ProjectRepository) RemoveService(
 	ctx context.Context, id, serviceID int,
-) (int64, persistence.Error) {
+) (int64, errors.PersistenceError) {
 	query := `
 		DELETE FROM project_service
 		WHERE project_id = $1 AND service_id = $2;
@@ -274,7 +274,7 @@ func (r *ProjectRepository) RemoveService(
 
 func (r *ProjectRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.ProjectStatus,
-) persistence.Error {
+) errors.PersistenceError {
 	query := `
 		UPDATE project
 		SET status = $1
@@ -295,7 +295,7 @@ func (r *ProjectRepository) UpdateStatus(
 
 func (r *ProjectRepository) Update(
 	ctx context.Context, id int, update *dto.ProjectUpdate,
-) (*entities.Project, persistence.Error) {
+) (*entities.Project, errors.PersistenceError) {
 	if update == nil {
 		return r.GetByID(ctx, id)
 	}
@@ -337,7 +337,7 @@ func (r *ProjectRepository) Update(
 
 func (r *ProjectRepository) Exists(
 	ctx context.Context, id int,
-) (bool, persistence.Error) {
+) (bool, errors.PersistenceError) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -357,7 +357,7 @@ func (r *ProjectRepository) Exists(
 
 func (r *ProjectRepository) GetProjectServiceQuotaUsage(
 	ctx context.Context, id, serviceID int,
-) (*dto.QuotaUsage, persistence.Error) {
+) (*dto.QuotaUsage, errors.PersistenceError) {
 	query := `
 		SELECT COALESCE(ps.max_request, -1), COALESCE(SUM(es.max_request), 0)
 		FROM project_service ps
@@ -380,7 +380,7 @@ func (r *ProjectRepository) GetProjectServiceQuotaUsage(
 
 func (r *ProjectRepository) GetByID(
 	ctx context.Context, id int,
-) (*entities.Project, persistence.Error) {
+) (*entities.Project, errors.PersistenceError) {
 	query := `
 		SELECT p.id, p.name, p.status, p.client_id, p.created_at,
 			COALESCE(
@@ -421,7 +421,7 @@ func (r *ProjectRepository) GetByID(
 	return project, nil
 }
 
-func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, persistence.Error) {
+func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, errors.PersistenceError) {
 	query := `
 		SELECT p.id, p.name, p.status, p.client_id, p.created_at,
 			COALESCE(
@@ -480,7 +480,7 @@ func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, pers
 
 func (r *ProjectRepository) ListByClient(
 	ctx context.Context, clientID int,
-) ([]*entities.Project, persistence.Error) {
+) ([]*entities.Project, errors.PersistenceError) {
 	query := `
 		SELECT p.id, p.name, p.status, p.client_id, p.created_at,
 			COALESCE(
@@ -542,7 +542,7 @@ func (r *ProjectRepository) ListByClient(
 
 func (r *ProjectRepository) AddService(
 	ctx context.Context, id int, service *entities.ProjectService,
-) persistence.Error {
+) errors.PersistenceError {
 	query := `
 		WITH inserted AS (
 			INSERT INTO project_service (project_id, service_id, max_request, reset_frequency, next_reset)
@@ -580,7 +580,7 @@ func (r *ProjectRepository) AddService(
 
 func (r *ProjectRepository) Create(
 	ctx context.Context, project *entities.Project,
-) persistence.Error {
+) errors.PersistenceError {
 	tx, txErr := r.pool.Begin(ctx)
 	if txErr != nil {
 		return r.errorMapper(txErr, r.tableName)
@@ -605,7 +605,7 @@ func (r *ProjectRepository) Create(
 
 func (r *ProjectRepository) createProject(
 	ctx context.Context, tx pgx.Tx, project *entities.Project,
-) persistence.Error {
+) errors.PersistenceError {
 	query := `
 		INSERT INTO project (client_id, name, status)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
@@ -627,7 +627,7 @@ func (r *ProjectRepository) createProjectServices(
 	tx pgx.Tx,
 	projectID int,
 	newServices []*entities.ProjectService,
-) ([]*entities.ProjectService, persistence.Error) {
+) ([]*entities.ProjectService, errors.PersistenceError) {
 	if len(newServices) == 0 {
 		return nil, nil
 	}

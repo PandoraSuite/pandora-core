@@ -39,7 +39,7 @@ func NewAttributeValidationFailed(entity, loc, message string, err error) Error 
 	return &AttributeError{
 		BaseError: BaseError{
 			err:     err,
-			code:    CodeValidationFailed,
+			code:    ErrorCodeValidationFailed,
 			message: message,
 		},
 		loc:    loc,

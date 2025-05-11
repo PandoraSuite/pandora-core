@@ -7,6 +7,7 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/MAD-py/pandora-core/internal/ports"
 )
 
 type credentials struct {
@@ -14,11 +15,6 @@ type credentials struct {
 	Password string `json:"password"`
 
 	ForcePasswordReset bool `json:"force_password_reset"`
-}
-
-type CredentialsRepository interface {
-	GetByUsername(ctx context.Context, username string) (*entities.Credentials, errors.Error)
-	ChangePassword(ctx context.Context, credentials *entities.Credentials) errors.Error
 }
 
 type credentialsRepository struct {
@@ -29,9 +25,11 @@ type credentialsRepository struct {
 
 func (r *credentialsRepository) GetByUsername(
 	ctx context.Context, username string,
-) (*entities.Credentials, errors.Error) {
+) (*entities.Credentials, errors.PersistenceError) {
 	if username != r.credentials.Username {
-		return nil, errors.NewNotFound("credentials not found")
+		return nil, errors.NewPersistenceNotFoundError(
+			"Credentials", nil,
+		)
 	}
 
 	return &entities.Credentials{
@@ -43,9 +41,11 @@ func (r *credentialsRepository) GetByUsername(
 
 func (r *credentialsRepository) ChangePassword(
 	ctx context.Context, credentials *entities.Credentials,
-) errors.Error {
+) errors.PersistenceError {
 	if credentials.Username != r.credentials.Username {
-		return errors.NewNotFound("credentials not found")
+		return errors.NewPersistenceNotFoundError(
+			"Credentials", nil,
+		)
 	}
 
 	oldPassword := r.credentials.Password
@@ -57,7 +57,9 @@ func (r *credentialsRepository) ChangePassword(
 
 	if err := r.saveCredentials(); err != nil {
 		r.credentials.Password = oldPassword
-		return errors.NewInternal("failed to save credentials", err)
+		return errors.NewPersistenceConnectionError(
+			"failed to write to disk", err,
+		)
 	}
 	return nil
 }
@@ -76,20 +78,20 @@ func (r *credentialsRepository) saveCredentials() error {
 	return nil
 }
 
-func NewCredentialsRepository(credentialsFile string) (CredentialsRepository, error) {
+func NewCredentialsRepository(credentialsFile string) ports.CredentialsRepository {
 	file, err := os.Open(credentialsFile)
 	if err != nil {
-		return nil, err
+		panic(err)
 	}
 	defer file.Close()
 
 	var credentials credentials
 	if err := json.NewDecoder(file).Decode(&credentials); err != nil {
-		return nil, err
+		panic(err)
 	}
 
 	return &credentialsRepository{
 		credentials:     &credentials,
 		credentialsFile: credentialsFile,
-	}, nil
+	}
 }

@@ -27,7 +27,7 @@ func (e AggregateError) Error() string {
 }
 
 func (e AggregateError) Code() ErrorCode {
-	return CodeAggregate
+	return ErrorCodeAggregate
 }
 
 func NewAggregateError(errs ...Error) Error {

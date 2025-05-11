@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	persistence "github.com/MAD-py/pandora-core/internal/adapters/persistence/errors"
+	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type Driver struct {
@@ -47,29 +47,29 @@ func (d *Driver) entityMapper(table string) string {
 	}
 }
 
-func (d *Driver) errorMapper(err error, tableName string) persistence.Error {
+func (d *Driver) errorMapper(err error, tableName string) domainErr.PersistenceError {
 	if err == nil {
 		return nil
 	}
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return persistence.NewNotFoundError(d.entityMapper(tableName), err)
+		return domainErr.NewPersistenceNotFoundError(d.entityMapper(tableName), err)
 	}
 
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {
 		switch pgErr.Code {
 		case "23505": // UNIQUE_VIOLATION
-			return persistence.NewError(
-				persistence.ErrorCodeUniqueViolation,
+			return domainErr.NewPersistenceError(
+				domainErr.PersistenceErrorCodeUniqueViolation,
 				d.entityMapper(pgErr.TableName),
 				pgErr.ColumnName,
 				pgErr.Message,
 				pgErr,
 			)
 		case "23503": // FOREIGN_KEY_VIOLATION
-			return persistence.NewError(
-				persistence.ErrorCodeInvalidReference,
+			return domainErr.NewPersistenceError(
+				domainErr.PersistenceErrorCodeInvalidReference,
 				d.entityMapper(pgErr.TableName),
 				pgErr.ColumnName,
 				pgErr.Message,
@@ -77,16 +77,16 @@ func (d *Driver) errorMapper(err error, tableName string) persistence.Error {
 			)
 		case "23502", // NOT_NULL_VIOLATION
 			"23514": // CHECK_VIOLATION
-			return persistence.NewError(
-				persistence.ErrorCodeInvalidValue,
+			return domainErr.NewPersistenceError(
+				domainErr.PersistenceErrorCodeInvalidValue,
 				d.entityMapper(pgErr.TableName),
 				pgErr.ColumnName,
 				pgErr.Message,
 				pgErr,
 			)
 		case "42P01": // UNDEFINED_TABLE
-			return persistence.NewError(
-				persistence.ErrorCodeUndefinedEntity,
+			return domainErr.NewPersistenceError(
+				domainErr.PersistenceErrorCodeUndefinedEntity,
 				d.entityMapper(pgErr.TableName),
 				pgErr.ColumnName,
 				pgErr.Message,
@@ -96,17 +96,17 @@ func (d *Driver) errorMapper(err error, tableName string) persistence.Error {
 			"08006", // CONNECTION_FAILURE
 			"08003", // CONNECTION_DOES_NOT_EXIST
 			"57P01": // ADMIN_SHUTDOWN
-			return persistence.NewConnectionError(pgErr.Message, pgErr)
+			return domainErr.NewPersistenceConnectionError(pgErr.Message, pgErr)
 		default:
-			return persistence.NewUnknownError(pgErr.Message, pgErr)
+			return domainErr.NewPersistenceUnknownError(pgErr.Message, pgErr)
 		}
 	}
 
-	return persistence.NewUnknownError(err.Error(), err)
+	return domainErr.NewPersistenceUnknownError(err.Error(), err)
 }
 
-func (d *Driver) entityNotFoundError(tableName string) persistence.Error {
-	return persistence.NewNotFoundError(d.entityMapper(tableName), nil)
+func (d *Driver) entityNotFoundError(tableName string) domainErr.PersistenceError {
+	return domainErr.NewPersistenceNotFoundError(d.entityMapper(tableName), nil)
 }
 
 func NewDriver(dns string) *Driver {

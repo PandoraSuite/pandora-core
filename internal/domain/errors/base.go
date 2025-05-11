@@ -26,21 +26,21 @@ func (e *BaseError) Unwrap() error {
 
 func NewNotFound(message string) Error {
 	return &BaseError{
-		code:    CodeNotFound,
+		code:    ErrorCodeNotFound,
 		message: message,
 	}
 }
 
 func NewValidationFailed(message string) Error {
 	return &BaseError{
-		code:    CodeValidationFailed,
+		code:    ErrorCodeValidationFailed,
 		message: message,
 	}
 }
 
 func NewUnauthorized(message string) Error {
 	return &BaseError{
-		code:    CodeUnauthorized,
+		code:    ErrorCodeUnauthorized,
 		message: message,
 	}
 }
@@ -48,7 +48,7 @@ func NewUnauthorized(message string) Error {
 func NewInternal(message string, err error) Error {
 	return &BaseError{
 		err:     err,
-		code:    CodeInternal,
+		code:    ErrorCodeInternal,
 		message: message,
 	}
 }

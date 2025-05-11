@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	persistence "github.com/MAD-py/pandora-core/internal/adapters/persistence/errors"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type ServiceRepository struct {
@@ -19,7 +19,7 @@ type ServiceRepository struct {
 
 func (r *ServiceRepository) Delete(
 	ctx context.Context, id int,
-) persistence.Error {
+) errors.PersistenceError {
 	query := `
 		DELETE FROM service
 		WHERE id = $1;
@@ -39,7 +39,7 @@ func (r *ServiceRepository) Delete(
 
 func (r *ServiceRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.ServiceStatus,
-) (*entities.Service, persistence.Error) {
+) (*entities.Service, errors.PersistenceError) {
 	query := `
 		UPDATE service
 		SET status = $1
@@ -64,7 +64,7 @@ func (r *ServiceRepository) UpdateStatus(
 
 func (r *ServiceRepository) GetByNameAndVersion(
 	ctx context.Context, name, version string,
-) (*entities.Service, persistence.Error) {
+) (*entities.Service, errors.PersistenceError) {
 	query := `
 		SELECT id, name, version, status, created_at
 		FROM service
@@ -88,7 +88,7 @@ func (r *ServiceRepository) GetByNameAndVersion(
 
 func (r *ServiceRepository) List(
 	ctx context.Context, filter *dto.ServiceFilter,
-) ([]*entities.Service, persistence.Error) {
+) ([]*entities.Service, errors.PersistenceError) {
 	query := `
 		SELECT id, name, version, status, created_at
 		FROM service
@@ -148,7 +148,7 @@ func (r *ServiceRepository) List(
 
 func (r *ServiceRepository) Create(
 	ctx context.Context, service *entities.Service,
-) persistence.Error {
+) errors.PersistenceError {
 	query := `
 		INSERT INTO service (name, version, status)
 		VALUES ($1, $2, $3) RETURNING id, created_at;

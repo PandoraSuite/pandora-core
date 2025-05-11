@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"strings"
 
-	persistence "github.com/MAD-py/pandora-core/internal/adapters/persistence/errors"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type ClientRepository struct {
@@ -19,7 +19,7 @@ type ClientRepository struct {
 
 func (r *ClientRepository) Update(
 	ctx context.Context, id int, update *dto.ClientUpdate,
-) (*entities.Client, persistence.Error) {
+) (*entities.Client, errors.PersistenceError) {
 	if update == nil {
 		return r.GetByID(ctx, id)
 	}
@@ -77,7 +77,7 @@ func (r *ClientRepository) Update(
 
 func (r *ClientRepository) Exists(
 	ctx context.Context, id int,
-) (bool, persistence.Error) {
+) (bool, errors.PersistenceError) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -97,7 +97,7 @@ func (r *ClientRepository) Exists(
 
 func (r *ClientRepository) GetByID(
 	ctx context.Context, id int,
-) (*entities.Client, persistence.Error) {
+) (*entities.Client, errors.PersistenceError) {
 	query := `
 		SELECT id, type, name, email, created_at
 		FROM client
@@ -121,7 +121,7 @@ func (r *ClientRepository) GetByID(
 
 func (r *ClientRepository) List(
 	ctx context.Context, filter *dto.ClientFilter,
-) ([]*entities.Client, persistence.Error) {
+) ([]*entities.Client, errors.PersistenceError) {
 	query := `
 		SELECT id, type, name, email, created_at
 		FROM client
@@ -181,7 +181,7 @@ func (r *ClientRepository) List(
 
 func (r *ClientRepository) Create(
 	ctx context.Context, client *entities.Client,
-) persistence.Error {
+) errors.PersistenceError {
 	query := `
 		INSERT INTO client (type, name, email)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
