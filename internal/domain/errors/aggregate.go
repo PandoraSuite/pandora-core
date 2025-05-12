@@ -27,7 +27,19 @@ func (e AggregateError) Error() string {
 }
 
 func (e AggregateError) Code() ErrorCode {
-	return ErrorCodeAggregate
+	return CodeAggregate
+}
+
+func (e AggregateError) Unwrap() error {
+	if len(e) == 0 {
+		return nil
+	}
+
+	if len(e) == 1 {
+		return e[0]
+	}
+
+	return e
 }
 
 func NewAggregateError(errs ...Error) Error {

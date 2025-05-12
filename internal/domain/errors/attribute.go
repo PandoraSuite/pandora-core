@@ -35,11 +35,35 @@ func (e *AttributeError) PrefixLoc(prefix string) {
 	}
 }
 
+func NewAttributeNotFound(entity, loc, message string, err error) Error {
+	return &AttributeError{
+		BaseError: BaseError{
+			err:     err,
+			code:    CodeNotFound,
+			message: message,
+		},
+		loc:    loc,
+		entity: entity,
+	}
+}
+
+func NewAttributeAlreadyExists(entity, loc, message string, err error) Error {
+	return &AttributeError{
+		BaseError: BaseError{
+			err:     err,
+			code:    CodeAlreadyExists,
+			message: message,
+		},
+		loc:    loc,
+		entity: entity,
+	}
+}
+
 func NewAttributeValidationFailed(entity, loc, message string, err error) Error {
 	return &AttributeError{
 		BaseError: BaseError{
 			err:     err,
-			code:    ErrorCodeValidationFailed,
+			code:    CodeValidationFailed,
 			message: message,
 		},
 		loc:    loc,

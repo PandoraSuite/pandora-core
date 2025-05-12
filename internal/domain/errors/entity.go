@@ -44,10 +44,13 @@ func (e *EntityError) Error() string {
 	)
 }
 
-func NewEntityNotFound(entity, message string, identifiers map[string]any) *EntityError {
+func NewEntityNotFound(
+	entity, message string, identifiers map[string]any, err error,
+) *EntityError {
 	return &EntityError{
 		BaseError: BaseError{
-			code:    ErrorCodeNotFound,
+			err:     err,
+			code:    CodeNotFound,
 			message: message,
 		},
 		entity:      entity,
@@ -55,10 +58,13 @@ func NewEntityNotFound(entity, message string, identifiers map[string]any) *Enti
 	}
 }
 
-func NewEntityAlreadyExists(entity, message string, identifiers map[string]any) *EntityError {
+func NewEntityAlreadyExists(
+	entity, message string, identifiers map[string]any, err error,
+) *EntityError {
 	return &EntityError{
 		BaseError: BaseError{
-			code:    ErrorCodeAlreadyExists,
+			err:     err,
+			code:    CodeAlreadyExists,
 			message: message,
 		},
 		entity:      entity,
@@ -66,10 +72,13 @@ func NewEntityAlreadyExists(entity, message string, identifiers map[string]any) 
 	}
 }
 
-func NewEntityValidationFailed(entity, message string, identifiers map[string]any) *EntityError {
+func NewEntityValidationFailed(
+	entity, message string, identifiers map[string]any, err error,
+) *EntityError {
 	return &EntityError{
 		BaseError: BaseError{
-			code:    ErrorCodeValidationFailed,
+			err:     err,
+			code:    CodeValidationFailed,
 			message: message,
 		},
 		entity:      entity,
