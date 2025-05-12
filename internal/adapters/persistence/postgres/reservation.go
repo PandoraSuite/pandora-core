@@ -16,7 +16,7 @@ type ReservationRepository struct {
 
 func (r *ReservationRepository) Create(
 	ctx context.Context, Reservation *entities.Reservation,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		INSERT INTO reservation (environment_id, service_id, api_key, start_request_id, request_time, expires_at)
 		VALUES ($1, $2, $3, $4, $5, $6) RETURNING id;
@@ -38,7 +38,7 @@ func (r *ReservationRepository) Create(
 
 func (r *ReservationRepository) GetByID(
 	ctx context.Context, id string,
-) (*entities.Reservation, errors.PersistenceError) {
+) (*entities.Reservation, errors.Error) {
 	query := `
 		SELECT *
 		FROM reservation
@@ -63,7 +63,7 @@ func (r *ReservationRepository) GetByID(
 
 func (r *ReservationRepository) GetByIDWithDetails(
 	ctx context.Context, id string,
-) (*dto.ReservationWithDetails, errors.PersistenceError) {
+) (*dto.ReservationWithDetails, errors.Error) {
 	query := `
 		SELECT r.id, r.start_request_id, r.api_key, 
 		s.id, s.name, s.version, s.status, 
@@ -98,7 +98,7 @@ func (r *ReservationRepository) GetByIDWithDetails(
 
 func (r *ReservationRepository) CountByEnvironmentAndService(
 	ctx context.Context, environment_id, service_id int,
-) (int, errors.PersistenceError) {
+) (int, errors.Error) {
 	query := `
 		SELECT count(*)
 		FROM reservation
@@ -122,7 +122,7 @@ func (r *ReservationRepository) CountByEnvironmentAndService(
 
 func (r *ReservationRepository) Delete(
 	ctx context.Context, id string,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		DELETE FROM reservation
 		WHERE id = $1;
@@ -134,7 +134,7 @@ func (r *ReservationRepository) Delete(
 	}
 
 	if result.RowsAffected() == 0 {
-		return r.entityNotFoundError("reservation")
+		return r.entityNotFoundError(r.tableName, map[string]any{"id": id})
 	}
 
 	return nil

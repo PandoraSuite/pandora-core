@@ -16,7 +16,7 @@ type RequestLogRepository struct {
 
 func (r *RequestLogRepository) DeleteByService(
 	ctx context.Context, serviceID int,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		DELETE FROM request_log
 		WHERE service_id = $1;
@@ -32,7 +32,7 @@ func (r *RequestLogRepository) DeleteByService(
 
 func (r *RequestLogRepository) UpdateExecutionStatus(
 	ctx context.Context, id string, executionStatus enums.RequestLogExecutionStatus,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		UPDATE request_log
 		SET execution_status = $1
@@ -45,7 +45,7 @@ func (r *RequestLogRepository) UpdateExecutionStatus(
 	}
 
 	if result.RowsAffected() == 0 {
-		return r.entityNotFoundError(r.tableName)
+		return r.entityNotFoundError(r.tableName, map[string]any{"id": id})
 	}
 
 	return nil
@@ -53,7 +53,7 @@ func (r *RequestLogRepository) UpdateExecutionStatus(
 
 func (r *RequestLogRepository) Create(
 	ctx context.Context, requestLog *entities.RequestLog,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		INSERT INTO request_log (environment_id, service_id, api_key, start_point, request_time, execution_status, message)
 		VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at;
@@ -89,7 +89,7 @@ func (r *RequestLogRepository) Create(
 
 func (r *RequestLogRepository) CreateAsInitialPoint(
 	ctx context.Context, requestLog *entities.RequestLog,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		WITH temp_table AS (
 			SELECT gen_random_uuid() AS uuid

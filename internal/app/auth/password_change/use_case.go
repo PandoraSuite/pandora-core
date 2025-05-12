@@ -39,6 +39,7 @@ func (uc *useCase) Execute(
 	if err := currentCredentials.VerifyPassword(req.NewPassword); err == nil {
 		return errors.NewValidationFailed(
 			"new password must be different from the old password",
+			nil,
 		)
 	}
 

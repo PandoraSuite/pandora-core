@@ -34,6 +34,7 @@ func (uc *useCase) Execute(ctx context.Context, id int) errors.Error {
 			"Service",
 			"service cannot be deleted because it is assigned to projects",
 			map[string]any{"id": id},
+			nil,
 		)
 	}
 

@@ -30,6 +30,7 @@ func (uc *useCase) Execute(ctx context.Context, id int) (*dto.EnvironmentRespons
 				"Environment",
 				"environment not found",
 				map[string]any{"id": id},
+				err,
 			)
 		}
 		return nil, err

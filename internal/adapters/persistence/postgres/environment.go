@@ -22,7 +22,7 @@ type EnvironmentRepository struct {
 
 func (r *EnvironmentRepository) ExistsServiceWithInfiniteMaxRequest(
 	ctx context.Context, projectID, serviceID int,
-) (bool, errors.PersistenceError) {
+) (bool, errors.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -48,7 +48,7 @@ func (r *EnvironmentRepository) ExistsServiceWithInfiniteMaxRequest(
 
 func (r *EnvironmentRepository) ResetAvailableRequests(
 	ctx context.Context, id, serviceID int,
-) (*entities.EnvironmentService, errors.PersistenceError) {
+) (*entities.EnvironmentService, errors.Error) {
 	query := `
 		WITH updated AS (
 			UPDATE environment_service
@@ -76,7 +76,7 @@ func (r *EnvironmentRepository) ResetAvailableRequests(
 
 func (r *EnvironmentRepository) RemoveService(
 	ctx context.Context, id, serviceID int,
-) (int64, errors.PersistenceError) {
+) (int64, errors.Error) {
 	query := `
 		DELETE FROM environment_service
 		WHERE environment_id = $1 AND service_id = $2;
@@ -92,7 +92,7 @@ func (r *EnvironmentRepository) RemoveService(
 
 func (r *EnvironmentRepository) RemoveServiceFromProjectEnvironments(
 	ctx context.Context, projectID, serviceID int,
-) (int64, errors.PersistenceError) {
+) (int64, errors.Error) {
 	query := `
 		DELETE FROM environment_service
 		WHERE service_id = $2
@@ -113,7 +113,7 @@ func (r *EnvironmentRepository) RemoveServiceFromProjectEnvironments(
 
 func (r *EnvironmentRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.EnvironmentStatus,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		UPDATE environment
 		SET status = $1
@@ -126,7 +126,7 @@ func (r *EnvironmentRepository) UpdateStatus(
 	}
 
 	if result.RowsAffected() == 0 {
-		return r.entityNotFoundError(r.tableName)
+		return r.entityNotFoundError(r.tableName, map[string]any{"id": id})
 	}
 
 	return nil
@@ -136,7 +136,7 @@ func (r *EnvironmentRepository) UpdateService(
 	ctx context.Context,
 	id, serviceID int,
 	update *dto.EnvironmentServiceUpdate,
-) (*entities.EnvironmentService, errors.PersistenceError) {
+) (*entities.EnvironmentService, errors.Error) {
 	if update == nil {
 		return r.GetServiceByID(ctx, id, serviceID)
 	}
@@ -189,7 +189,7 @@ func (r *EnvironmentRepository) UpdateService(
 
 func (r *EnvironmentRepository) Update(
 	ctx context.Context, id int, update *dto.EnvironmentUpdate,
-) (*entities.Environment, errors.PersistenceError) {
+) (*entities.Environment, errors.Error) {
 	if update == nil {
 		return r.GetByID(ctx, id)
 	}
@@ -223,7 +223,7 @@ func (r *EnvironmentRepository) Update(
 	}
 
 	if result.RowsAffected() == 0 {
-		return nil, r.entityNotFoundError(r.tableName)
+		return nil, r.entityNotFoundError(r.tableName, map[string]any{"id": id})
 	}
 
 	return r.GetByID(ctx, id)
@@ -231,7 +231,7 @@ func (r *EnvironmentRepository) Update(
 
 func (r *EnvironmentRepository) Exists(
 	ctx context.Context, id int,
-) (bool, errors.PersistenceError) {
+) (bool, errors.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -251,7 +251,7 @@ func (r *EnvironmentRepository) Exists(
 
 func (r *EnvironmentRepository) IsActive(
 	ctx context.Context, id int,
-) (bool, errors.PersistenceError) {
+) (bool, errors.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -272,7 +272,7 @@ func (r *EnvironmentRepository) IsActive(
 
 func (r *EnvironmentRepository) MissingResourceDiagnosis(
 	ctx context.Context, id int, serviceID int,
-) (bool, bool, errors.PersistenceError) {
+) (bool, bool, errors.Error) {
 	query := `
 		SELECT
 		EXISTS (
@@ -308,7 +308,7 @@ func (r *EnvironmentRepository) MissingResourceDiagnosis(
 
 func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
 	ctx context.Context, id, serviceID int,
-) (*dto.QuotaUsage, errors.PersistenceError) {
+) (*dto.QuotaUsage, errors.Error) {
 	query := `
 		SELECT COALESCE(ps.max_request, -1), COALESCE(SUM(es.max_request), 0)
 		FROM environment e_target
@@ -334,7 +334,7 @@ func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
 
 func (r *EnvironmentRepository) IncreaseAvailableRequest(
 	ctx context.Context, id, serviceID int,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		UPDATE environment_service
 		SET available_request =
@@ -355,7 +355,10 @@ func (r *EnvironmentRepository) IncreaseAvailableRequest(
 	}
 
 	if result.RowsAffected() == 0 {
-		return r.entityNotFoundError(r.auxServiceTableName)
+		return r.entityNotFoundError(
+			r.auxServiceTableName,
+			map[string]any{"environment_id": id, "service_id": serviceID},
+		)
 	}
 
 	return nil
@@ -363,7 +366,7 @@ func (r *EnvironmentRepository) IncreaseAvailableRequest(
 
 func (r *EnvironmentRepository) DecrementAvailableRequest(
 	ctx context.Context, id, serviceID int,
-) (*dto.DecrementAvailableRequest, errors.PersistenceError) {
+) (*dto.DecrementAvailableRequest, errors.Error) {
 	query := `
 		UPDATE environment_service
 		SET available_request =
@@ -393,7 +396,7 @@ func (r *EnvironmentRepository) DecrementAvailableRequest(
 
 func (r *EnvironmentRepository) ExistsServiceIn(
 	ctx context.Context, id, serviceID int,
-) (bool, errors.PersistenceError) {
+) (bool, errors.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -413,7 +416,7 @@ func (r *EnvironmentRepository) ExistsServiceIn(
 
 func (r *EnvironmentRepository) GetServiceByID(
 	ctx context.Context, id, serviceID int,
-) (*entities.EnvironmentService, errors.PersistenceError) {
+) (*entities.EnvironmentService, errors.Error) {
 	query := `
 		SELECT s.id, s.name, s.version, COALESCE(es.max_request, -1),
 			COALESCE(es.available_request, -1), es.created_at
@@ -441,7 +444,7 @@ func (r *EnvironmentRepository) GetServiceByID(
 
 func (r *EnvironmentRepository) GetByID(
 	ctx context.Context, id int,
-) (*entities.Environment, errors.PersistenceError) {
+) (*entities.Environment, errors.Error) {
 	query := `
 		SELECT e.id, e.name, e.status, e.project_id, e.created_at,
 			COALESCE(
@@ -483,7 +486,7 @@ func (r *EnvironmentRepository) GetByID(
 
 func (r *EnvironmentRepository) ListByProject(
 	ctx context.Context, projectID int,
-) ([]*entities.Environment, errors.PersistenceError) {
+) ([]*entities.Environment, errors.Error) {
 	query := `
 		SELECT e.id, e.name, e.status, e.project_id, e.created_at,
 			COALESCE(
@@ -544,7 +547,7 @@ func (r *EnvironmentRepository) ListByProject(
 
 func (r *EnvironmentRepository) AddService(
 	ctx context.Context, id int, service *entities.EnvironmentService,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		WITH inserted AS (
 			INSERT INTO environment_service (environment_id, service_id, max_request, available_request)
@@ -581,7 +584,7 @@ func (r *EnvironmentRepository) AddService(
 
 func (r *EnvironmentRepository) Create(
 	ctx context.Context, environment *entities.Environment,
-) errors.PersistenceError {
+) errors.Error {
 	tx, txErr := r.pool.Begin(ctx)
 	if txErr != nil {
 		return r.errorMapper(txErr, r.tableName)
@@ -606,7 +609,7 @@ func (r *EnvironmentRepository) Create(
 
 func (r *EnvironmentRepository) createEnvironment(
 	ctx context.Context, tx pgx.Tx, environment *entities.Environment,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		INSERT INTO environment (project_id, name, status)
 		VALUES ($1, $2, $3) RETURNING id, created_at;
@@ -628,7 +631,7 @@ func (r *EnvironmentRepository) createEnvironmentServices(
 	tx pgx.Tx,
 	environmentID int,
 	newServices []*entities.EnvironmentService,
-) ([]*entities.EnvironmentService, errors.PersistenceError) {
+) ([]*entities.EnvironmentService, errors.Error) {
 	if len(newServices) == 0 {
 		return nil, nil
 	}

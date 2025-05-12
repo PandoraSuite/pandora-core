@@ -32,6 +32,7 @@ func (uc *useCase) Execute(ctx context.Context, id, serviceID int) errors.Error 
 			"Environment",
 			"environment not found",
 			map[string]any{"id": id},
+			nil,
 		)
 	}
 
@@ -45,6 +46,7 @@ func (uc *useCase) Execute(ctx context.Context, id, serviceID int) errors.Error 
 			"Service",
 			"service not found",
 			map[string]any{"id": serviceID},
+			nil,
 		)
 	}
 

@@ -229,16 +229,10 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "enum": [
-                            0,
-                            1,
-                            2
+                            "developer",
+                            "organization"
                         ],
-                        "type": "integer",
-                        "x-enum-varnames": [
-                            "ClientTypeNull",
-                            "ClientDeveloper",
-                            "ClientOrganization"
-                        ],
+                        "type": "string",
                         "name": "type",
                         "in": "query"
                     }
@@ -829,6 +823,38 @@ const docTemplate = `{
             }
         },
         "/api/v1/projects": {
+            "get": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Fetches a complete list of projects in the system",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Retrieves all projects",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.ProjectResponse"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/utils.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -1204,7 +1230,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.ProjectServiceResetRequest"
+                            "$ref": "#/definitions/dto.ProjectResetRequest"
                         }
                     }
                 ],
@@ -1212,7 +1238,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.ProjectServiceResetRequestResponse"
+                            "$ref": "#/definitions/dto.ProjectResetRequestResponse"
                         }
                     },
                     "default": {
@@ -1245,18 +1271,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "enum": [
-                            0,
-                            1,
-                            2,
-                            3
+                            "active",
+                            "deactivated",
+                            "deprecated"
                         ],
-                        "type": "integer",
-                        "x-enum-varnames": [
-                            "ServiceStatusNull",
-                            "ServiceActive",
-                            "ServiceDeactivated",
-                            "ServiceDeprecated"
-                        ],
+                        "type": "string",
                         "name": "status",
                         "in": "query"
                     }
@@ -1392,10 +1411,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/dto.ServiceStatusUpdate"
                         }
                     }
                 ],
@@ -1420,13 +1436,13 @@ const docTemplate = `{
         "dto.APIKeyCreate": {
             "type": "object",
             "required": [
-                "environmentID"
+                "environment_id"
             ],
             "properties": {
-                "environmentID": {
+                "environment_id": {
                     "type": "integer"
                 },
-                "expiresAt": {
+                "expires_at": {
                     "type": "string"
                 }
             }
@@ -1434,13 +1450,13 @@ const docTemplate = `{
         "dto.APIKeyResponse": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
-                "environmentID": {
+                "environment_id": {
                     "type": "integer"
                 },
-                "expiresAt": {
+                "expires_at": {
                     "type": "string"
                 },
                 "id": {
@@ -1449,18 +1465,22 @@ const docTemplate = `{
                 "key": {
                     "type": "string"
                 },
-                "lastUsed": {
+                "last_used": {
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/enums.APIKeyStatus"
+                    "type": "string",
+                    "enum": [
+                        "active",
+                        "deactivated"
+                    ]
                 }
             }
         },
         "dto.APIKeyUpdate": {
             "type": "object",
             "properties": {
-                "expiresAt": {
+                "expires_at": {
                     "type": "string"
                 }
             }
@@ -1468,27 +1488,32 @@ const docTemplate = `{
         "dto.AuthenticateResponse": {
             "type": "object",
             "properties": {
-                "expiresIn": {
+                "access_token": {
                     "type": "string"
                 },
-                "forcePasswordReset": {
+                "expires_in": {
+                    "type": "string"
+                },
+                "force_password_reset": {
                     "type": "boolean"
                 },
-                "token": {
-                    "type": "string"
-                },
-                "tokenType": {
+                "token_type": {
                     "type": "string"
                 }
             }
         },
         "dto.ChangePassword": {
             "type": "object",
+            "required": [
+                "confirm_password",
+                "new_password",
+                "username"
+            ],
             "properties": {
-                "confirmPassword": {
+                "confirm_password": {
                     "type": "string"
                 },
-                "newPassword": {
+                "new_password": {
                     "type": "string"
                 },
                 "username": {
@@ -1498,6 +1523,11 @@ const docTemplate = `{
         },
         "dto.ClientCreate": {
             "type": "object",
+            "required": [
+                "email",
+                "name",
+                "type"
+            ],
             "properties": {
                 "email": {
                     "type": "string"
@@ -1506,14 +1536,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/enums.ClientType"
+                    "type": "string",
+                    "enum": [
+                        "developer",
+                        "organization"
+                    ]
                 }
             }
         },
         "dto.ClientResponse": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "email": {
@@ -1526,7 +1560,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/enums.ClientType"
+                    "type": "string",
+                    "enum": [
+                        "developer",
+                        "organization"
+                    ]
                 }
             }
         },
@@ -1540,7 +1578,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/enums.ClientType"
+                    "type": "string",
+                    "enum": [
+                        "developer",
+                        "organization"
+                    ]
                 }
             }
         },
@@ -1548,14 +1590,13 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "name",
-                "projectID",
-                "services"
+                "project_id"
             ],
             "properties": {
                 "name": {
                     "type": "string"
                 },
-                "projectID": {
+                "project_id": {
                     "type": "integer"
                 },
                 "services": {
@@ -1569,7 +1610,7 @@ const docTemplate = `{
         "dto.EnvironmentResponse": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "id": {
@@ -1578,7 +1619,7 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "projectID": {
+                "project_id": {
                     "type": "integer"
                 },
                 "services": {
@@ -1595,13 +1636,14 @@ const docTemplate = `{
         "dto.EnvironmentService": {
             "type": "object",
             "required": [
-                "id"
+                "id",
+                "max_requests"
             ],
             "properties": {
                 "id": {
                     "type": "integer"
                 },
-                "maxRequest": {
+                "max_requests": {
                     "type": "integer"
                 }
             }
@@ -1626,16 +1668,16 @@ const docTemplate = `{
         "dto.EnvironmentServiceResponse": {
             "type": "object",
             "properties": {
-                "assignedAt": {
+                "assigned_at": {
                     "type": "string"
                 },
-                "availableRequest": {
+                "available_requests": {
                     "type": "integer"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "maxRequest": {
+                "max_requests": {
                     "type": "integer"
                 },
                 "name": {
@@ -1649,10 +1691,7 @@ const docTemplate = `{
         "dto.EnvironmentServiceUpdate": {
             "type": "object",
             "properties": {
-                "availableRequest": {
-                    "type": "integer"
-                },
-                "maxRequest": {
+                "max_requests": {
                     "type": "integer"
                 }
             }
@@ -1667,8 +1706,13 @@ const docTemplate = `{
         },
         "dto.ProjectCreate": {
             "type": "object",
+            "required": [
+                "client_id",
+                "name",
+                "status"
+            ],
             "properties": {
-                "clientID": {
+                "client_id": {
                     "type": "integer"
                 },
                 "name": {
@@ -1685,13 +1729,41 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ProjectResetRequest": {
+            "type": "object",
+            "required": [
+                "recalculate_next_reset"
+            ],
+            "properties": {
+                "recalculate_next_reset": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "dto.ProjectResetRequestResponse": {
+            "type": "object",
+            "properties": {
+                "environment_services": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.EnvironmentServiceReset"
+                    }
+                },
+                "project_service": {
+                    "$ref": "#/definitions/dto.ProjectServiceResponse"
+                },
+                "reset_count": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.ProjectResponse": {
             "type": "object",
             "properties": {
-                "clientID": {
+                "client_id": {
                     "type": "integer"
                 },
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "id": {
@@ -1713,62 +1785,41 @@ const docTemplate = `{
         },
         "dto.ProjectService": {
             "type": "object",
+            "required": [
+                "id",
+                "max_requests"
+            ],
             "properties": {
                 "id": {
                     "type": "integer"
                 },
-                "maxRequest": {
+                "max_requests": {
                     "type": "integer"
                 },
-                "resetFrequency": {
+                "reset_frequency": {
                     "$ref": "#/definitions/enums.ProjectServiceResetFrequency"
-                }
-            }
-        },
-        "dto.ProjectServiceResetRequest": {
-            "type": "object",
-            "properties": {
-                "recalculateNextReset": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "dto.ProjectServiceResetRequestResponse": {
-            "type": "object",
-            "properties": {
-                "environmentServices": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.EnvironmentServiceReset"
-                    }
-                },
-                "projectService": {
-                    "$ref": "#/definitions/dto.ProjectServiceResponse"
-                },
-                "resetCount": {
-                    "type": "integer"
                 }
             }
         },
         "dto.ProjectServiceResponse": {
             "type": "object",
             "properties": {
-                "assignedAt": {
+                "assigned_at": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "maxRequest": {
+                "max_request": {
                     "type": "integer"
                 },
                 "name": {
                     "type": "string"
                 },
-                "nextReset": {
+                "next_reset": {
                     "type": "string"
                 },
-                "resetFrequency": {
+                "reset_frequency": {
                     "$ref": "#/definitions/enums.ProjectServiceResetFrequency"
                 },
                 "version": {
@@ -1779,13 +1830,13 @@ const docTemplate = `{
         "dto.ProjectServiceUpdate": {
             "type": "object",
             "properties": {
-                "maxRequest": {
+                "max_requests": {
                     "type": "integer"
                 },
-                "nextReset": {
+                "next_reset": {
                     "type": "string"
                 },
-                "resetFrequency": {
+                "reset_frequency": {
                     "$ref": "#/definitions/enums.ProjectServiceResetFrequency"
                 }
             }
@@ -1816,7 +1867,7 @@ const docTemplate = `{
         "dto.ServiceResponse": {
             "type": "object",
             "properties": {
-                "createdAt": {
+                "created_at": {
                     "type": "string"
                 },
                 "id": {
@@ -1826,38 +1877,30 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "$ref": "#/definitions/enums.ServiceStatus"
+                    "type": "string",
+                    "enum": [
+                        "active",
+                        "deactivated",
+                        "deprecated"
+                    ]
                 },
                 "version": {
                     "type": "string"
                 }
             }
         },
-        "enums.APIKeyStatus": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "APIKeyStatusNull",
-                "APIKeyActive",
-                "APIKeyDeactivated"
-            ]
-        },
-        "enums.ClientType": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2
-            ],
-            "x-enum-varnames": [
-                "ClientTypeNull",
-                "ClientDeveloper",
-                "ClientOrganization"
-            ]
+        "dto.ServiceStatusUpdate": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "active",
+                        "deactivated",
+                        "deprecated"
+                    ]
+                }
+            }
         },
         "enums.EnvironmentStatus": {
             "type": "integer",
@@ -1902,21 +1945,6 @@ const docTemplate = `{
                 "ProjectInProduction",
                 "ProjectInDevelopment",
                 "ProjectDeactivated"
-            ]
-        },
-        "enums.ServiceStatus": {
-            "type": "integer",
-            "enum": [
-                0,
-                1,
-                2,
-                3
-            ],
-            "x-enum-varnames": [
-                "ServiceStatusNull",
-                "ServiceActive",
-                "ServiceDeactivated",
-                "ServiceDeprecated"
             ]
         },
         "utils.ErrorResponse": {

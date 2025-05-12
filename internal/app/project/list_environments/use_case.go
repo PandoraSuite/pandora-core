@@ -36,6 +36,7 @@ func (uc *useCase) Execute(
 			"Project",
 			"project not found",
 			map[string]any{"id": id},
+			nil,
 		)
 	}
 

@@ -17,7 +17,7 @@ type jwtProvider struct {
 
 func (p *jwtProvider) Generate(
 	ctx context.Context, subject string,
-) (*dto.TokenResponse, errors.TokenError) {
+) (*dto.TokenResponse, errors.Error) {
 	now := time.Now()
 	expTime := now.Add(time.Hour)
 
@@ -44,9 +44,11 @@ func (p *jwtProvider) Generate(
 
 func (p *jwtProvider) Validate(
 	ctx context.Context, token *dto.TokenValidation,
-) (string, errors.TokenError) {
+) (string, errors.Error) {
 	if token.TokenType != "Bearer" {
-		return "", errors.NewUnauthorized("invalid access token type, expected 'Bearer'")
+		return "", errors.NewUnauthorized(
+			"invalid access token type, expected 'Bearer'", nil,
+		)
 	}
 
 	t, err := jwt.Parse(
@@ -57,13 +59,13 @@ func (p *jwtProvider) Validate(
 	)
 
 	if err != nil || !t.Valid {
-		return "", errors.NewUnauthorized("invalid access token")
+		return "", errors.NewUnauthorized("invalid access token", err)
 	}
 
 	if claims, ok := t.Claims.(jwt.MapClaims); ok {
 		return claims["sub"].(string), nil
 	}
-	return "", errors.NewUnauthorized("invalid access token claims")
+	return "", errors.NewUnauthorized("invalid access token claims", nil)
 }
 
 func NewJWTProvider(secret []byte) ports.TokenProvider {

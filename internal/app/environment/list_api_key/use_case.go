@@ -36,6 +36,7 @@ func (uc *useCase) Execute(
 			"Environment",
 			"environment not found",
 			map[string]any{"id": id},
+			nil,
 		)
 	}
 

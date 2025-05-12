@@ -25,10 +25,13 @@ type credentialsRepository struct {
 
 func (r *credentialsRepository) GetByUsername(
 	ctx context.Context, username string,
-) (*entities.Credentials, errors.PersistenceError) {
+) (*entities.Credentials, errors.Error) {
 	if username != r.credentials.Username {
-		return nil, errors.NewPersistenceNotFoundError(
-			"Credentials", nil,
+		return nil, errors.NewEntityNotFound(
+			"Credentials",
+			"crdentials not found",
+			map[string]any{"username": username},
+			nil,
 		)
 	}
 
@@ -41,10 +44,13 @@ func (r *credentialsRepository) GetByUsername(
 
 func (r *credentialsRepository) ChangePassword(
 	ctx context.Context, credentials *entities.Credentials,
-) errors.PersistenceError {
+) errors.Error {
 	if credentials.Username != r.credentials.Username {
-		return errors.NewPersistenceNotFoundError(
-			"Credentials", nil,
+		return errors.NewEntityNotFound(
+			"Credentials",
+			"crdentials not found",
+			map[string]any{"username": credentials.Username},
+			nil,
 		)
 	}
 
@@ -57,9 +63,7 @@ func (r *credentialsRepository) ChangePassword(
 
 	if err := r.saveCredentials(); err != nil {
 		r.credentials.Password = oldPassword
-		return errors.NewPersistenceConnectionError(
-			"failed to write to disk", err,
-		)
+		return errors.NewInternal("failed to write to disk", err)
 	}
 	return nil
 }

@@ -27,10 +27,10 @@ func main() {
 
 	validator := validator.NewValidator()
 
-	repositories, err := persistence.NewRepositories(cfg.DBDNS())
-	if err != nil {
-		log.Fatalf("[ERROR] Failed to initialize persistence: %v", err)
-	}
+	repositories := persistence.NewRepositories(persistence.PostgresDriver, cfg.DBDNS())
+	// if err != nil {
+	// 	log.Fatalf("[ERROR] Failed to initialize persistence: %v", err)
+	// }
 
 	jwtProvider := security.NewJWTProvider([]byte(cfg.JWTSecret()))
 
@@ -39,10 +39,10 @@ func main() {
 		log.Fatalf("[ERROR] Failed to load credentials file: %v", err)
 	}
 
-	credentialsRepo, err := security.NewCredentialsRepository(credentialsFile)
-	if err != nil {
-		log.Fatalf("[ERROR] Failed to initialize credentials repository: %v", err)
-	}
+	credentialsRepo := security.NewCredentialsRepository(credentialsFile)
+	// if err != nil {
+	// 	log.Fatalf("[ERROR] Failed to initialize credentials repository: %v", err)
+	// }
 
 	httpDeps := bootstrap.NewDependencies(
 		validator,

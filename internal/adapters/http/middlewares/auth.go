@@ -33,8 +33,8 @@ func ValidateToken(useCase auth.TokenValidationUseCase) gin.HandlerFunc {
 		}
 
 		req := dto.TokenValidation{
-			TokenType:   parts[1],
-			AccessToken: parts[0],
+			TokenType:   parts[0],
+			AccessToken: parts[1],
 		}
 
 		username, err := useCase.Execute(c.Request.Context(), req.ToDomain())

@@ -36,6 +36,7 @@ func (uc *useCase) Execute(
 			"client",
 			"client not found",
 			map[string]any{"id": id},
+			nil,
 		)
 	}
 

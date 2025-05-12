@@ -53,6 +53,7 @@ func (uc *useCase) Execute(
 			"Project",
 			"project not found",
 			map[string]any{"id": id},
+			nil,
 		)
 	}
 
@@ -65,6 +66,7 @@ func (uc *useCase) Execute(
 				"Service",
 				"service not assigned to project",
 				map[string]any{"id": serviceID},
+				err,
 			)
 		}
 		return nil, err
@@ -89,6 +91,7 @@ func (uc *useCase) Execute(
 		if hasInfinite {
 			return nil, errors.NewValidationFailed(
 				"cannot set a finite max_request while some environments have infinite quota",
+				nil,
 			)
 		}
 	}

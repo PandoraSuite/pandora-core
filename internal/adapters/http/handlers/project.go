@@ -355,8 +355,8 @@ func ProjectUpdateService(useCase project.UpdateServiceUseCase) gin.HandlerFunc 
 // @Produce json
 // @Param id path int true "Project ID"
 // @Param service_id path int true "Service ID"
-// @Param request body dto.ProjectServiceResetRequest true "Reset configuration"
-// @Success 200 {object} dto.ProjectServiceResetRequestResponse
+// @Param request body dto.ProjectResetRequest true "Reset configuration"
+// @Success 200 {object} dto.ProjectResetRequestResponse
 // @Failure default {object} utils.ErrorResponse "Default error response for all failures"
 // @Router /api/v1/projects/{id}/services/{service_id}/reset-requests [post]
 func ProjectResetRequest(useCase project.ResetRequestUseCase) gin.HandlerFunc {

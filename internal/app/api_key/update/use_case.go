@@ -33,6 +33,7 @@ func (uc *useCase) Execute(
 				"APIKey",
 				"api key not found",
 				map[string]any{"id": id},
+				err,
 			)
 		}
 		return nil, err

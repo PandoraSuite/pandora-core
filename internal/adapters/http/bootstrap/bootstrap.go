@@ -2,24 +2,24 @@ package bootstrap
 
 import (
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
-	"github.com/MAD-py/pandora-core/internal/adapters/security"
+	"github.com/MAD-py/pandora-core/internal/ports"
 	"github.com/MAD-py/pandora-core/internal/validator"
 )
 
 type Dependencies struct {
 	Validator validator.Validator
 
-	TokenProvider security.TokenProvider
+	TokenProvider ports.TokenProvider
 
 	Repositories    persistence.Repositories
-	CredentialsRepo security.CredentialsRepository
+	CredentialsRepo ports.CredentialsRepository
 }
 
 func NewDependencies(
 	validator validator.Validator,
 	repositories persistence.Repositories,
-	tokenProvider security.TokenProvider,
-	credentialsRepo security.CredentialsRepository,
+	tokenProvider ports.TokenProvider,
+	credentialsRepo ports.CredentialsRepository,
 ) *Dependencies {
 	return &Dependencies{
 		Validator:       validator,

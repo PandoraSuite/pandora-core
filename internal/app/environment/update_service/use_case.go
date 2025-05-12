@@ -35,6 +35,7 @@ func (uc *useCase) Execute(
 			"Environment",
 			"environment not found",
 			map[string]any{"id": id},
+			nil,
 		)
 	}
 
@@ -47,6 +48,7 @@ func (uc *useCase) Execute(
 				"Service",
 				"service not assigned to environment",
 				map[string]any{"id": serviceID},
+				err,
 			)
 		}
 		return nil, err
@@ -61,6 +63,7 @@ func (uc *useCase) Execute(
 				"Service",
 				"service not assigned to project",
 				map[string]any{"id": serviceID},
+				err,
 			)
 		}
 		return nil, err

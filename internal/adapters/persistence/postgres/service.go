@@ -19,7 +19,7 @@ type ServiceRepository struct {
 
 func (r *ServiceRepository) Delete(
 	ctx context.Context, id int,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		DELETE FROM service
 		WHERE id = $1;
@@ -31,7 +31,7 @@ func (r *ServiceRepository) Delete(
 	}
 
 	if result.RowsAffected() == 0 {
-		return r.entityNotFoundError(r.tableName)
+		return r.entityNotFoundError(r.tableName, map[string]any{"id": id})
 	}
 
 	return nil
@@ -39,7 +39,7 @@ func (r *ServiceRepository) Delete(
 
 func (r *ServiceRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.ServiceStatus,
-) (*entities.Service, errors.PersistenceError) {
+) (*entities.Service, errors.Error) {
 	query := `
 		UPDATE service
 		SET status = $1
@@ -64,7 +64,7 @@ func (r *ServiceRepository) UpdateStatus(
 
 func (r *ServiceRepository) GetByNameAndVersion(
 	ctx context.Context, name, version string,
-) (*entities.Service, errors.PersistenceError) {
+) (*entities.Service, errors.Error) {
 	query := `
 		SELECT id, name, version, status, created_at
 		FROM service
@@ -88,7 +88,7 @@ func (r *ServiceRepository) GetByNameAndVersion(
 
 func (r *ServiceRepository) List(
 	ctx context.Context, filter *dto.ServiceFilter,
-) ([]*entities.Service, errors.PersistenceError) {
+) ([]*entities.Service, errors.Error) {
 	query := `
 		SELECT id, name, version, status, created_at
 		FROM service
@@ -148,7 +148,7 @@ func (r *ServiceRepository) List(
 
 func (r *ServiceRepository) Create(
 	ctx context.Context, service *entities.Service,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		INSERT INTO service (name, version, status)
 		VALUES ($1, $2, $3) RETURNING id, created_at;

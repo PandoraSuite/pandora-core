@@ -19,7 +19,7 @@ type APIKeyRepository struct {
 
 func (r *APIKeyRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.APIKeyStatus,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		UPDATE api_key
 		SET status = $1
@@ -32,7 +32,7 @@ func (r *APIKeyRepository) UpdateStatus(
 	}
 
 	if result.RowsAffected() == 0 {
-		return r.entityNotFoundError(r.talbeName)
+		return r.entityNotFoundError(r.talbeName, map[string]any{"id": id})
 	}
 
 	return nil
@@ -40,7 +40,7 @@ func (r *APIKeyRepository) UpdateStatus(
 
 func (r *APIKeyRepository) Update(
 	ctx context.Context, id int, update *dto.APIKeyUpdate,
-) (*entities.APIKey, errors.PersistenceError) {
+) (*entities.APIKey, errors.Error) {
 	if update == nil {
 		return r.GetByID(ctx, id)
 	}
@@ -90,7 +90,7 @@ func (r *APIKeyRepository) Update(
 
 func (r *APIKeyRepository) UpdateLastUsed(
 	ctx context.Context, key string,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		UPDATE api_key
 		SET last_used = NOW()
@@ -103,7 +103,7 @@ func (r *APIKeyRepository) UpdateLastUsed(
 	}
 
 	if result.RowsAffected() == 0 {
-		return r.entityNotFoundError(r.talbeName)
+		return r.entityNotFoundError(r.talbeName, map[string]any{"key": key})
 	}
 
 	return nil
@@ -111,7 +111,7 @@ func (r *APIKeyRepository) UpdateLastUsed(
 
 func (r *APIKeyRepository) ListByEnvironment(
 	ctx context.Context, environmentID int,
-) ([]*entities.APIKey, errors.PersistenceError) {
+) ([]*entities.APIKey, errors.Error) {
 	query := `
 		SELECT id, environment_id, key, status, created_at,
 			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
@@ -156,7 +156,7 @@ func (r *APIKeyRepository) ListByEnvironment(
 
 func (r *APIKeyRepository) GetByKey(
 	ctx context.Context, key string,
-) (*entities.APIKey, errors.PersistenceError) {
+) (*entities.APIKey, errors.Error) {
 	query := `
 		SELECT id, environment_id, key, status, created_at,
 			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
@@ -184,7 +184,7 @@ func (r *APIKeyRepository) GetByKey(
 
 func (r *APIKeyRepository) GetByID(
 	ctx context.Context, id int,
-) (*entities.APIKey, errors.PersistenceError) {
+) (*entities.APIKey, errors.Error) {
 	query := `
 		SELECT id, environment_id, key, status, created_at,
 			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
@@ -212,7 +212,7 @@ func (r *APIKeyRepository) GetByID(
 
 func (r *APIKeyRepository) Exists(
 	ctx context.Context, key string,
-) (bool, errors.PersistenceError) {
+) (bool, errors.Error) {
 	query := `
 		SELECT EXISTS (
 			SELECT 1
@@ -232,7 +232,7 @@ func (r *APIKeyRepository) Exists(
 
 func (r *APIKeyRepository) Create(
 	ctx context.Context, apiKey *entities.APIKey,
-) errors.PersistenceError {
+) errors.Error {
 	query := `
 		INSERT INTO api_key (environment_id, key, expires_at, last_used, status)
 		VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at;

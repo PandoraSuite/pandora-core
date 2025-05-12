@@ -39,6 +39,7 @@ func (uc *useCase) Execute(
 			"Project",
 			"project not found",
 			map[string]any{"id": req.ProjectID},
+			nil,
 		)
 	}
 
@@ -54,6 +55,7 @@ func (uc *useCase) Execute(
 					"Service",
 					"service not assigned to project",
 					map[string]any{"id": service.ID},
+					err,
 				)
 			}
 			errs = errors.Aggregate(errs, err)

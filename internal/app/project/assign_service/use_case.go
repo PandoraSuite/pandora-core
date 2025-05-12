@@ -40,6 +40,7 @@ func (uc *useCase) Execute(
 				"ProjectService",
 				"service already assigned to project",
 				map[string]any{"id": service.ID},
+				err,
 			)
 		}
 		return nil, err
