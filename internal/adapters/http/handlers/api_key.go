@@ -28,7 +28,7 @@ func APIKeyCreate(useCase apikey.CreateUseCase) gin.HandlerFunc {
 
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
+				http.StatusBadRequest,
 				gin.H{"error": err.Error()},
 			)
 			return
@@ -73,7 +73,7 @@ func APIKeyUpdate(useCase apikey.UpdateUseCase) gin.HandlerFunc {
 		var req dto.APIKeyUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
+				http.StatusBadRequest,
 				gin.H{"error": err.Error()},
 			)
 			return

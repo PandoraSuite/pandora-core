@@ -28,7 +28,7 @@ func ClientList(useCase client.ListUseCase) gin.HandlerFunc {
 		t, paramErr := enums.ParseClientType(c.Query("type"))
 		if paramErr != nil {
 			c.AbortWithStatusJSON(
-				http.StatusUnprocessableEntity,
+				http.StatusBadRequest,
 				utils.ErrorResponse{Error: paramErr},
 			)
 			return
@@ -69,7 +69,7 @@ func ClientCreate(useCase client.CreateUseCase) gin.HandlerFunc {
 
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
+				http.StatusBadRequest,
 				gin.H{"error": err.Error()},
 			)
 			return
@@ -148,7 +148,7 @@ func ClientUpdate(useCase client.UpdateUseCase) gin.HandlerFunc {
 		var req dto.ClientUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
+				http.StatusBadRequest,
 				gin.H{"error": err.Error()},
 			)
 			return

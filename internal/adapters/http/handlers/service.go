@@ -28,7 +28,7 @@ func ServiceList(useCase service.ListUseCase) gin.HandlerFunc {
 		status, paramErr := enums.ParseServiceStatus(c.Query("status"))
 		if paramErr != nil {
 			c.AbortWithStatusJSON(
-				http.StatusUnprocessableEntity,
+				http.StatusBadRequest,
 				utils.ErrorResponse{Error: paramErr},
 			)
 			return
@@ -38,7 +38,7 @@ func ServiceList(useCase service.ListUseCase) gin.HandlerFunc {
 		services, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
 			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
+				http.StatusBadRequest,
 				gin.H{"error": err.Error()},
 			)
 			return
@@ -69,7 +69,7 @@ func ServiceCreate(useCase service.CreateUseCase) gin.HandlerFunc {
 
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
+				http.StatusBadRequest,
 				gin.H{"error": err.Error()},
 			)
 			return
@@ -147,7 +147,7 @@ func ServiceUpdateStatus(useCase service.UpdateStatusUseCase) gin.HandlerFunc {
 		var req dto.ServiceStatusUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
+				http.StatusBadRequest,
 				gin.H{"error": err.Error()},
 			)
 			return

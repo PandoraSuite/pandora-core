@@ -35,7 +35,7 @@ func ChangePassword(useCase auth.PasswordChangeUseCase) gin.HandlerFunc {
 		var req dto.ChangePassword
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
+				http.StatusBadRequest,
 				gin.H{"error": err.Error()},
 			)
 			return
@@ -72,7 +72,7 @@ func Authenticate(useCase auth.AutenticateUseCase) gin.HandlerFunc {
 
 		if err := c.ShouldBind(&req); err != nil {
 			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
+				http.StatusBadRequest,
 				gin.H{"error": err.Error()},
 			)
 			return

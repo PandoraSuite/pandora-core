@@ -57,7 +57,7 @@ func ProjectCreate(useCase project.CreateUseCase) gin.HandlerFunc {
 
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
+				http.StatusBadRequest,
 				gin.H{"error": err.Error()},
 			)
 			return
@@ -137,7 +137,7 @@ func ProjectUpdate(useCase project.UpdateUseCase) gin.HandlerFunc {
 		var req dto.ProjectUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
+				http.StatusBadRequest,
 				gin.H{"error": err.Error()},
 			)
 			return
@@ -325,7 +325,7 @@ func ProjectUpdateService(useCase project.UpdateServiceUseCase) gin.HandlerFunc 
 		var req dto.ProjectServiceUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
+				http.StatusBadRequest,
 				gin.H{"error": err.Error()},
 			)
 			return
@@ -382,7 +382,7 @@ func ProjectResetRequest(useCase project.ResetRequestUseCase) gin.HandlerFunc {
 		var req dto.ProjectResetRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
+				http.StatusBadRequest,
 				gin.H{"error": err.Error()},
 			)
 			return
