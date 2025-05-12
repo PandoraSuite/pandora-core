@@ -3,24 +3,24 @@ package utils
 import (
 	"net/http"
 
-	domainErr "github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type ErrorResponse struct {
 	Error error `json:"error"`
 }
 
-func GetDomainErrorStatusCode(err domainErr.Error) int {
+func GetDomainErrorStatusCode(err errors.Error) int {
 	switch err.Code() {
-	case domainErr.CodeNotFound:
+	case errors.CodeNotFound:
 		return http.StatusNotFound
-	case domainErr.CodeForbidden:
+	case errors.CodeForbidden:
 		return http.StatusForbidden
-	case domainErr.CodeUnauthorized:
+	case errors.CodeUnauthorized:
 		return http.StatusUnauthorized
-	case domainErr.CodeInternal:
+	case errors.CodeInternal:
 		return http.StatusInternalServerError
-	case domainErr.CodeValidationFailed:
+	case errors.CodeValidationFailed:
 		return http.StatusUnprocessableEntity
 	default:
 		return http.StatusInternalServerError
