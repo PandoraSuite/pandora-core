@@ -63,7 +63,7 @@ func (uc *useCase) validateExecutionStatus(executionStatus enums.RequestLogExecu
 	return uc.validator.ValidateVariable(
 		executionStatus,
 		"executionStatus",
-		"required,enums=success,failed,server_error",
+		"required,enums=success failed server_error",
 		map[string]string{
 			"enums":    "status must be one of the following: success, failed, server_error",
 			"required": "executionStatus is required",

@@ -15,7 +15,7 @@ func validateEnums(fl govalidator.FieldLevel) bool {
 	if allowedValuesParam == "" {
 		return false
 	}
-	allowedValues := strings.Split(allowedValuesParam, ",")
+	allowedValues := strings.Split(allowedValuesParam, " ")
 
 	field := fl.Field()
 

@@ -84,9 +84,7 @@ func (sv *validator) ValidateVariable(value any, fieldName, tags string, message
 		}
 
 		for _, fieldErr := range validationErrors {
-			failedTag := fieldErr.Tag()
-
-			message := sv.getMessage(failedTag, messages)
+			message := sv.getMessage(fieldName, messages)
 
 			agg = errors.Aggregate(
 				agg,
