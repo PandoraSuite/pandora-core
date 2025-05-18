@@ -8,6 +8,7 @@ import (
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc"
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc/bootstrap"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
+	"github.com/MAD-py/pandora-core/internal/config"
 	"github.com/MAD-py/pandora-core/internal/validator"
 )
 
@@ -16,17 +17,18 @@ func main() {
 
 	log.Println("[INFO] Starting Pandora Core (gRPC)...")
 
+	cfg := config.LoadGRPCConfig()
+
 	validator := validator.NewValidator()
 
 	repositories := persistence.NewRepositories(
-		persistence.PostgresDriver,
-		"postgresql://postgres:postgres@localhost:5436/pandora",
+		persistence.PostgresDriver, cfg.DBDNS(),
 	)
 
 	gRPCDeps := bootstrap.NewDependencies(validator, repositories)
 
 	srv := grpc.NewServer(
-		fmt.Sprintf(":%s", "50051"),
+		fmt.Sprintf(":%s", cfg.Port()),
 		gRPCDeps,
 	)
 

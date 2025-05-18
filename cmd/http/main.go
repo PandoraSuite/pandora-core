@@ -27,7 +27,9 @@ func main() {
 
 	validator := validator.NewValidator()
 
-	repositories := persistence.NewRepositories(persistence.PostgresDriver, cfg.DBDNS())
+	repositories := persistence.NewRepositories(
+		persistence.PostgresDriver, cfg.DBDNS(),
+	)
 	// if err != nil {
 	// 	log.Fatalf("[ERROR] Failed to initialize persistence: %v", err)
 	// }
