@@ -34,6 +34,17 @@ func (uc *useCase) Execute(
 	}
 
 	if err := uc.serviceRepo.Create(ctx, &service); err != nil {
+		if err.Code() == errors.CodeAlreadyExists {
+			return nil, errors.NewEntityAlreadyExists(
+				"Service",
+				"Service with this name and version already exists",
+				map[string]any{
+					"name":    req.Name,
+					"version": req.Version,
+				},
+				err.Unwrap(),
+			)
+		}
 		return nil, err
 	}
 

@@ -67,3 +67,11 @@ func NewInternal(message string) *HTTPError {
 		Message: message,
 	}
 }
+
+func NewMultipleErrors(errs []*HTTPError) *HTTPError {
+	return &HTTPError{
+		Code:    errors.CodeAggregate,
+		Message: "Multiple errors occurred",
+		Errors:  errs,
+	}
+}

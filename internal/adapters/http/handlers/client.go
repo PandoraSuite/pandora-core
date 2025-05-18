@@ -65,7 +65,7 @@ func ClientCreate(useCase client.CreateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ClientCreate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToDomainError(err))
+			c.Error(errors.BindingToHTTPError(err))
 			return
 		}
 
@@ -137,7 +137,7 @@ func ClientUpdate(useCase client.UpdateUseCase) gin.HandlerFunc {
 
 		var req dto.ClientUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToDomainError(err))
+			c.Error(errors.BindingToHTTPError(err))
 			return
 		}
 

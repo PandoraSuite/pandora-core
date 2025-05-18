@@ -42,7 +42,7 @@ func MapToHTTPError(err error) *HTTPError {
 
 		return &HTTPError{
 			Code:    e.Code(),
-			Message: "Multiple errors",
+			Message: "Multiple errors occurred",
 
 			Errors: errs,
 		}

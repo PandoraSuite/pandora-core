@@ -52,7 +52,7 @@ func ProjectCreate(useCase project.CreateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ProjectCreate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToDomainError(err))
+			c.Error(errors.BindingToHTTPError(err))
 			return
 		}
 
@@ -125,7 +125,7 @@ func ProjectUpdate(useCase project.UpdateUseCase) gin.HandlerFunc {
 
 		var req dto.ProjectUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToDomainError(err))
+			c.Error(errors.BindingToHTTPError(err))
 			return
 		}
 
@@ -205,7 +205,7 @@ func ProjectAssignService(useCase project.AssignServiceUseCase) gin.HandlerFunc 
 
 		var req dto.ProjectService
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToDomainError(err))
+			c.Error(errors.BindingToHTTPError(err))
 			return
 		}
 
@@ -301,7 +301,7 @@ func ProjectUpdateService(useCase project.UpdateServiceUseCase) gin.HandlerFunc 
 
 		var req dto.ProjectServiceUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToDomainError(err))
+			c.Error(errors.BindingToHTTPError(err))
 			return
 		}
 
@@ -354,7 +354,7 @@ func ProjectResetRequest(useCase project.ResetRequestUseCase) gin.HandlerFunc {
 
 		var req dto.ProjectResetRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToDomainError(err))
+			c.Error(errors.BindingToHTTPError(err))
 			return
 		}
 

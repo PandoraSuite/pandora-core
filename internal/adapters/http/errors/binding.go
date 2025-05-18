@@ -5,46 +5,40 @@ import (
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
-
-	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
-func BindingToDomainError(err error) errors.Error {
+func BindingToHTTPError(err error) *HTTPError {
 	switch e := err.(type) {
 	case validator.ValidationErrors:
-		var domainErr errors.Error
-		for _, ve := range e {
-			errors.Aggregate(
-				domainErr,
-				errors.NewAttributeValidationFailed(
-					"body",
-					ve.Field(),
-					ve.Error(),
-					ve,
-				),
-			)
+		errs := make([]*HTTPError, len(e))
+		for i, ve := range e {
+			errs[i] = NewValidationFailed("body", ve.Field(), ve.Error())
 		}
-		return domainErr
+
+		if len(errs) == 1 {
+			return errs[0]
+		}
+
+		return NewMultipleErrors(errs)
+
 	case *json.UnmarshalTypeError:
-		return errors.NewAttributeValidationFailed(
+		return NewValidationFailed(
 			"body",
 			e.Field,
 			fmt.Sprintf(
 				"Invalid type for field '%s', expected %s",
 				e.Field, e.Type.String(),
 			),
-			e,
 		)
 	case *json.SyntaxError:
-		return errors.NewValidationFailed(
+		return NewValidationFailed(
+			"body",
+			fmt.Sprint(e.Offset),
 			fmt.Sprintf(
 				"Malformed JSON in request body, offset: %d", e.Offset,
 			),
-			e,
 		)
 	default:
-		return errors.NewValidationFailed(
-			"Invalid request payload.", err,
-		)
+		return NewValidationFailed("body", "", "Invalid request payload")
 	}
 }
