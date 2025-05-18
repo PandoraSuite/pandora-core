@@ -6,9 +6,9 @@ inputs:
 plugins:
 
   - remote: buf.build/protocolbuffers/go
-    out: internal/adapters/grpc
+    out: internal/adapters/grpc/services
     opt: paths=source_relative
   
   - remote: buf.build/grpc/go
-    out: internal/adapters/grpc
+    out: internal/adapters/grpc/services
     opt: paths=source_relative

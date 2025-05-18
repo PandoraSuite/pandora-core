@@ -12,23 +12,23 @@ type Credentials struct {
 	ForcePasswordReset bool
 }
 
-func (c *Credentials) CalculatePasswordHash(password string) *errors.Error {
+func (c *Credentials) CalculatePasswordHash(password string) errors.Error {
 	hashed, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
-		return errors.ErrPasswordProcessingFailed
+		return errors.NewInternal("unable to process the password", err)
 	}
 
 	c.HashedPassword = string(hashed)
 	return nil
 }
 
-func (c *Credentials) VerifyPassword(password string) *errors.Error {
+func (c *Credentials) VerifyPassword(password string) errors.Error {
 	err := bcrypt.CompareHashAndPassword(
 		[]byte(c.HashedPassword), []byte(password),
 	)
 
 	if err != nil {
-		return errors.ErrInvalidCredentials
+		return errors.NewUnauthorized("Invalid username or password", err)
 	}
 	return nil
 }

@@ -1,11 +1,9 @@
 package entities
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
-	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type EnvironmentService struct {
@@ -19,20 +17,8 @@ type EnvironmentService struct {
 	AssignedAt time.Time
 }
 
-func (e *EnvironmentService) Validate() *errors.Error {
-	if e.MaxRequest < -1 {
-		return errors.ErrInvalidMaxRequest
-	}
-
-	if e.MaxRequest == -1 && e.AvailableRequest > -1 {
-		return errors.ErrEnvironmentServiceAvailableRequestNotAllowed
-	}
-
-	if e.AvailableRequest > e.MaxRequest {
-		return errors.ErrEnvironmentServiceAvailableRequestExceedsMax
-	}
-
-	return nil
+func (es *EnvironmentService) Is(name, version string) bool {
+	return es.Name == name && es.Version == version
 }
 
 type Environment struct {
@@ -47,34 +33,10 @@ type Environment struct {
 	CreatedAt time.Time
 }
 
-func (e *Environment) Validate() *errors.Error {
-	if e.Name == "" {
-		return errors.ErrNameCannotBeEmpty
-	}
-
-	var errs []string
-	for _, s := range e.Services {
-		err := s.Validate()
-
-		if err != nil {
-			errs = append(
-				errs,
-				fmt.Sprintf("service %v: %s", s.ID, err.Message),
-			)
-		}
-	}
-
-	if len(errs) > 0 {
-		return errors.NewError(
-			errors.CodeValidationError,
-			"invalid services assignments",
-			errs...,
-		)
-	}
-
-	return nil
+func (e *Environment) IsActive() bool {
+	return e.Status == enums.EnvironmentActive
 }
 
-func (a *Environment) IsActive() bool {
-	return a.Status == enums.EnvironmentActive
+func (e *Environment) Is(name string) bool {
+	return e.Name == name
 }

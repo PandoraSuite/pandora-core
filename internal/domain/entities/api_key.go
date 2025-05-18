@@ -21,11 +21,11 @@ type APIKey struct {
 	CreatedAt time.Time
 }
 
-func (a *APIKey) GenerateKey() *errors.Error {
+func (a *APIKey) GenerateKey() errors.Error {
 	bytes := make([]byte, 32)
 	_, err := rand.Read(bytes)
 	if err != nil {
-		return errors.ErrAPIKeyGenerationFailed
+		return errors.NewInternal("api key generation failed", err)
 	}
 
 	a.Key = base64.RawURLEncoding.EncodeToString(bytes)

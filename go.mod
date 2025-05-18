@@ -6,6 +6,7 @@ require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250307204501-0409229c3780.1
 	github.com/bufbuild/protovalidate-go v0.9.1
 	github.com/gin-gonic/gin v1.10.0
+	github.com/go-playground/validator/v10 v10.23.0
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.1
 	github.com/jackc/pgx/v5 v5.7.2
@@ -35,7 +36,6 @@ require (
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.23.0 // indirect
 	github.com/goccy/go-json v0.10.4 // indirect
 	github.com/google/cel-go v0.23.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect

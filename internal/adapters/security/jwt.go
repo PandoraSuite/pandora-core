@@ -8,15 +8,16 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/MAD-py/pandora-core/internal/ports"
 )
 
-type JWTProvider struct {
+type jwtProvider struct {
 	secret []byte
 }
 
-func (p *JWTProvider) GenerateToken(
+func (p *jwtProvider) Generate(
 	ctx context.Context, subject string,
-) (*dto.TokenResponse, *errors.Error) {
+) (*dto.TokenResponse, errors.Error) {
 	now := time.Now()
 	expTime := now.Add(time.Hour)
 
@@ -31,37 +32,42 @@ func (p *JWTProvider) GenerateToken(
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenStr, err := token.SignedString(p.secret)
 	if err != nil {
-		return nil, errors.ErrTokenSigningFailed
+		return nil, errors.NewInternal("failed to sign access token", err)
 	}
 
 	return &dto.TokenResponse{
-		Token:     tokenStr,
-		TokenType: "Bearer",
-		ExpiresIn: expTime,
+		TokenType:   "Bearer",
+		ExpiresIn:   expTime,
+		AccessToken: tokenStr,
 	}, nil
 }
 
-func (p *JWTProvider) ValidateToken(
-	ctx context.Context, token *dto.TokenRequest,
-) (string, *errors.Error) {
-	if token.Type != "Bearer" {
-		return "", errors.ErrInvalidTokenType
+func (p *jwtProvider) Validate(
+	ctx context.Context, token *dto.TokenValidation,
+) (string, errors.Error) {
+	if token.TokenType != "Bearer" {
+		return "", errors.NewUnauthorized(
+			"invalid access token type, expected 'Bearer'", nil,
+		)
 	}
 
-	t, err := jwt.Parse(token.Key, func(token *jwt.Token) (any, error) {
-		return p.secret, nil
-	})
+	t, err := jwt.Parse(
+		token.AccessToken,
+		func(token *jwt.Token) (any, error) {
+			return p.secret, nil
+		},
+	)
 
 	if err != nil || !t.Valid {
-		return "", errors.ErrInvalidToken
+		return "", errors.NewUnauthorized("invalid access token", err)
 	}
 
 	if claims, ok := t.Claims.(jwt.MapClaims); ok {
 		return claims["sub"].(string), nil
 	}
-	return "", errors.ErrInvalidTokenData
+	return "", errors.NewUnauthorized("invalid access token claims", nil)
 }
 
-func NewJWTProvider(secret []byte) *JWTProvider {
-	return &JWTProvider{secret: secret}
+func NewJWTProvider(secret []byte) ports.TokenProvider {
+	return &jwtProvider{secret: secret}
 }

@@ -2,7 +2,7 @@ root = "."
 tmp_dir = "tmp"
 
 [build]
-  pre_cmd = ["swag init -g internal/adapters/http/server.go -o docs"]
+  pre_cmd = ["swag init -d internal/adapters/http,internal/domain/errors,internal/domain/enums -g server.go -o internal/adapters/http/docs"]
 
   cmd = "go build -gcflags=\"all=-N -l\" -o ./tmp/main ./cmd/http/main.go"
 

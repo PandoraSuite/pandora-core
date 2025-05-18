@@ -6,65 +6,71 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
+// ... Requests ...
+
 type APIKeyValidate struct {
-	Key            string    `json:"key"`
-	Service        string    `json:"service"`
-	Environment    string    `json:"environment"`
-	RequestTime    time.Time `json:"request_time" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	ServiceVersion string    `json:"service_version"`
+	APIKey         string    `name:"api_key" validate:"required"`
+	Service        string    `name:"service" validate:"required"`
+	Environment    string    `name:"environment" validate:"required"`
+	RequestTime    time.Time `name:"request_time" validate:"required,utc" time_format:"2006-01-02T15:04:05Z" time_utc:"1"`
+	ServiceVersion string    `name:"service_version" validate:"required"`
 }
 
 type APIKeyValidateReserve struct {
-	APIKeyValidate `json:",inline"`
-	ReservationID  string `json:"reservation_id"`
-}
-type APIKeyValidateBooking struct {
-	Key       string `json:"key"`
-	BookingID string `json:"booking_id"`
+	APIKeyValidate `validate:"required"`
+	ReservationID  string `name:"reservation_id" validate:"required"`
 }
 
-type APIKeyValidateResponse struct {
-	RequestID        string                   `json:"request_id,omitempty"`
-	ReservationID    string                   `json:"reservation_id,omitempty"` // Only for reservations
-	AvailableRequest int                      `json:"available_request,omitempty"`
-	Valid            bool                     `json:"valid"`
-	Message          string                   `json:"message,omitempty"`
-	Code             enums.ValidateStatusCode `json:"code,omitempty"`
-}
-
-type APIKeyValidateConsumeResponse struct {
-	APIKeyValidateResponse `json:",inline"`
-
-	AvailableRequest string `json:"available_request"`
-}
-
-type APIKeyValidateBookingResponse struct {
-	APIKeyValidateConsumeResponse `json:",inline"`
-
-	BookingID string `json:"booking_id"`
-}
-
-type APIKeyValidateReservationResponse struct {
-	RequestID string                   `json:"request_id,omitempty"`
-	Valid     bool                     `json:"valid"`
-	Message   string                   `json:"message,omitempty"`
-	Code      enums.ValidateStatusCode `json:"code,omitempty"`
-}
 type APIKeyCreate struct {
-	ExpiresAt     time.Time `json:"expires_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	EnvironmentID int       `json:"environment_id" binding:"required"`
-}
-
-type APIKeyResponse struct {
-	ID            int                `json:"id"`
-	Key           string             `json:"key"`
-	Status        enums.APIKeyStatus `json:"status" enums:"active,deactivated" swaggertype:"string"`
-	LastUsed      time.Time          `json:"last_used" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	ExpiresAt     time.Time          `json:"expires_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	EnvironmentID int                `json:"environment_id"`
-	CreatedAt     time.Time          `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	ExpiresAt     time.Time `name:"expires_at" validate:"omitempty,utc"`
+	EnvironmentID int       `name:"environment_id" validate:"required,gt=0"`
 }
 
 type APIKeyUpdate struct {
-	ExpiresAt time.Time `json:"expires_at,omitempty" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	ExpiresAt time.Time `name:"expires_at" validate:"omitempty,utc"`
+}
+
+// ... Responses ...
+
+type APIKeyValidateResponse struct {
+	Valid     bool   `name:"valid"`
+	RequestID string `name:"request_id"`
+
+	// Only when valid is true
+	ReservationID    string `name:"reservation_id"` // Only for reservations
+	AvailableRequest int    `name:"available_request"`
+
+	// Only when valid is false
+	Code    enums.ValidateStatusCode `name:"code"`
+	Message string                   `name:"message"`
+}
+
+type APIKeyValidateConsumeResponse struct {
+	APIKeyValidateResponse `name:",inline"`
+
+	AvailableRequest string `name:"available_request"`
+}
+
+type APIKeyValidateReservationResponse struct {
+	RequestID string                   `name:"request_id"`
+	Valid     bool                     `name:"valid"`
+	Message   string                   `name:"message"`
+	Code      enums.ValidateStatusCode `name:"code"`
+}
+
+type APIKeyResponse struct {
+	ID            int                `name:"id"`
+	Key           string             `name:"key"`
+	Status        enums.APIKeyStatus `name:"status"`
+	LastUsed      time.Time          `name:"last_used"`
+	ExpiresAt     time.Time          `name:"expires_at"`
+	EnvironmentID int                `name:"environment_id"`
+	CreatedAt     time.Time          `name:"created_at"`
+}
+
+// ... Internal ...
+
+type APIKeyEnabled struct {
+	Code    enums.ValidateStatusCode
+	Message string
 }

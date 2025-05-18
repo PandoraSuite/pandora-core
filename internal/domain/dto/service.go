@@ -6,23 +6,23 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
+// ... Requests ...
+
 type ServiceFilter struct {
-	Status enums.ServiceStatus `form:"status,omitempty" enums:"active,deactivated,deprecated" swaggertype:"string"`
+	Status enums.ServiceStatus `name:"status" validate:"omitempty,enums=active deactivated deprecated"`
 }
 
 type ServiceCreate struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
+	Name    string `name:"name" validate:"required"`
+	Version string `name:"version" validate:"required"`
 }
+
+// ... Responses ...
 
 type ServiceResponse struct {
-	ID        int                 `json:"id"`
-	Name      string              `json:"name"`
-	Status    enums.ServiceStatus `json:"status" enums:"active,deactivated,deprecated" swaggertype:"string"`
-	Version   string              `json:"version"`
-	CreatedAt time.Time           `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-}
-
-type ServiceStatusUpdate struct {
-	Status enums.ServiceStatus `json:"status,omitempty" enums:"active,deactivated,deprecated" swaggertype:"string"`
+	ID        int                 `name:"id"`
+	Name      string              `name:"name"`
+	Status    enums.ServiceStatus `name:"status"`
+	Version   string              `name:"version"`
+	CreatedAt time.Time           `name:"created_at"`
 }

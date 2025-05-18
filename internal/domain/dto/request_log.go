@@ -7,17 +7,20 @@ import (
 )
 
 type RequestLogCreate struct {
-	APIKey        string `json:"api_key"`
-	ServiceID     int    `json:"service_id"`
-	EnvironmentID int    `json:"environment_id"`
+	APIKey          string                          `name:"api_key"`
+	Message         string                          `name:"message"`
+	ServiceID       int                             `name:"service_id"`
+	RequestTime     time.Time                       `name:"request_time"`
+	EnvironmentID   int                             `name:"environment_id"`
+	ExecutionStatus enums.RequestLogExecutionStatus `name:"execution_status"`
 }
 
 type RequestLogResponse struct {
-	ID              int                             `json:"id"`
-	APIKey          string                          `json:"api_key"`
-	ServiceID       int                             `json:"service_id"`
-	RequestTime     time.Time                       `json:"request_time" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	EnvironmentID   int                             `json:"environment_id"`
-	ExecutionStatus enums.RequestLogExecutionStatus `json:"execution_status" enums:"success,failed,pending,unauthorized,server error" swaggertype:"string"`
-	CreatedAt       time.Time                       `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	ID              int                             `name:"id"`
+	APIKey          string                          `name:"api_key"`
+	ServiceID       int                             `name:"service_id"`
+	RequestTime     time.Time                       `name:"request_time"`
+	EnvironmentID   int                             `name:"environment_id"`
+	ExecutionStatus enums.RequestLogExecutionStatus `name:"execution_status"`
+	CreatedAt       time.Time                       `name:"created_at"`
 }

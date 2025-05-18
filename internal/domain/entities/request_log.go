@@ -10,11 +10,11 @@ type RequestLog struct {
 	ID string
 
 	APIKey          string
+	Message         string
 	ServiceID       int
+	StartPoint      string
 	RequestTime     time.Time
 	EnvironmentID   int
-	StartPoint      string
-	Message         string
 	ExecutionStatus enums.RequestLogExecutionStatus
 
 	CreatedAt time.Time

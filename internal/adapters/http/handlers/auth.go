@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
-	"github.com/MAD-py/pandora-core/internal/domain/dto"
-	"github.com/MAD-py/pandora-core/internal/ports/inbound"
+	"github.com/MAD-py/pandora-core/internal/adapters/http/dto"
+	"github.com/MAD-py/pandora-core/internal/adapters/http/errors"
+	"github.com/MAD-py/pandora-core/internal/app/auth"
 )
 
 // ChangePassword godoc
@@ -19,35 +19,26 @@ import (
 // @Produce json
 // @Param request body dto.ChangePassword true "New password and confirmation"
 // @Success 204
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/auth/change-password [post]
-func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
+func ChangePassword(useCase auth.PasswordChangeUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		username := c.GetString("username")
 		if username == "" {
-			c.AbortWithStatusJSON(
-				http.StatusInternalServerError,
-				gin.H{"error": "username not found in context"},
-			)
+			c.Error(errors.NewInternal("Username not found in context"))
 			return
 		}
 
 		var req dto.ChangePassword
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToHTTPError(req, err))
 			return
 		}
 
 		req.Username = username
-		err := authService.ChangePassword(c.Request.Context(), &req)
+		err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -64,29 +55,22 @@ func ChangePassword(authService inbound.AuthHTTPPort) gin.HandlerFunc {
 // @Param username formData string true "Login username"
 // @Param password formData string true "Login password"
 // @Success 200 {object} dto.AuthenticateResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/auth/login [post]
-func Authenticate(authService inbound.AuthHTTPPort) gin.HandlerFunc {
+func Authenticate(useCase auth.AutenticateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.Authenticate
-
 		if err := c.ShouldBind(&req); err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetBindJSONErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToHTTPError(req, err))
 			return
 		}
 
-		res, err := authService.Authenticate(c.Request.Context(), &req)
+		res, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
-		c.JSON(http.StatusOK, res)
+		c.JSON(http.StatusOK, dto.AuthenticateResponseFromDomain(res))
 	}
 }
