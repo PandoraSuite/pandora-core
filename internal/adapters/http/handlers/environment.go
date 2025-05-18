@@ -26,7 +26,7 @@ func EnvironmentCreate(useCase environment.CreateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.EnvironmentCreate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToHTTPError(err))
+			c.Error(errors.BindingToHTTPError(req, err))
 			return
 		}
 
@@ -99,7 +99,7 @@ func EnvironmentUpdate(useCase environment.UpdateUseCase) gin.HandlerFunc {
 
 		var req dto.EnvironmentUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToHTTPError(err))
+			c.Error(errors.BindingToHTTPError(req, err))
 			return
 		}
 
@@ -178,7 +178,7 @@ func EnvironmentAssignService(useCase environment.AssignServiceUseCase) gin.Hand
 
 		var req dto.EnvironmentService
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToHTTPError(err))
+			c.Error(errors.BindingToHTTPError(req, err))
 			return
 		}
 
@@ -277,7 +277,7 @@ func EnvironmentUpdateService(useCase environment.UpdateServiceUseCase) gin.Hand
 
 		var req dto.EnvironmentServiceUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToHTTPError(err))
+			c.Error(errors.BindingToHTTPError(req, err))
 			return
 		}
 

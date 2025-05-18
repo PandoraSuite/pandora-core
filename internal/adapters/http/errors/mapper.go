@@ -15,14 +15,12 @@ func MapToHTTPError(err error) *HTTPError {
 		return &HTTPError{
 			Code:    e.Code(),
 			Message: e.Message(),
-
-			Loc: e.Name(),
+			Loc:     e.Name(),
 		}
 	case *errors.EntityError:
 		return &HTTPError{
-			Code:    e.Code(),
-			Message: e.Message(),
-
+			Code:        e.Code(),
+			Message:     e.Message(),
 			Entity:      e.Entity(),
 			Identifiers: e.Identifiers(),
 		}
@@ -30,9 +28,8 @@ func MapToHTTPError(err error) *HTTPError {
 		return &HTTPError{
 			Code:    e.Code(),
 			Message: e.Message(),
-
-			Entity: e.Entity(),
-			Loc:    e.Loc(),
+			Entity:  e.Entity(),
+			Loc:     e.Loc(),
 		}
 	case errors.AggregateError:
 		errs := make([]*HTTPError, len(e))
@@ -43,8 +40,7 @@ func MapToHTTPError(err error) *HTTPError {
 		return &HTTPError{
 			Code:    e.Code(),
 			Message: "Multiple errors occurred",
-
-			Errors: errs,
+			Errors:  errs,
 		}
 	default:
 		return &HTTPError{

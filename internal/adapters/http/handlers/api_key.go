@@ -27,7 +27,7 @@ func APIKeyCreate(useCase apikey.CreateUseCase) gin.HandlerFunc {
 		var req dto.APIKeyCreate
 
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToHTTPError(err))
+			c.Error(errors.BindingToHTTPError(req, err))
 			return
 		}
 
@@ -67,7 +67,7 @@ func APIKeyUpdate(useCase apikey.UpdateUseCase) gin.HandlerFunc {
 
 		var req dto.APIKeyUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToHTTPError(err))
+			c.Error(errors.BindingToHTTPError(req, err))
 			return
 		}
 

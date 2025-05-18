@@ -65,7 +65,7 @@ func ServiceCreate(useCase service.CreateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ServiceCreate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToHTTPError(err))
+			c.Error(errors.BindingToHTTPError(req, err))
 			return
 		}
 
@@ -136,7 +136,7 @@ func ServiceUpdateStatus(useCase service.UpdateStatusUseCase) gin.HandlerFunc {
 
 		var req dto.ServiceStatusUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToHTTPError(err))
+			c.Error(errors.BindingToHTTPError(req, err))
 			return
 		}
 
