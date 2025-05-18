@@ -19,32 +19,21 @@ func main() {
 	log.Println("[INFO] Starting Pandora Core (API RESTful)...")
 
 	cfg := config.LoadHTTPConfig()
-	// if err != nil {
-	// 	log.Fatalf("[ERROR] Error loading configuration: %v", err)
-	// }
-
-	log.Println("[INFO] Configuration loaded successfully from environment variables and configuration files.")
+	log.Printf("[INFO] HTTP config loaded")
 
 	validator := validator.NewValidator()
+	log.Println("[INFO] Validator initialized")
 
 	repositories := persistence.NewRepositories(
 		persistence.PostgresDriver, cfg.DBDNS(),
 	)
-	// if err != nil {
-	// 	log.Fatalf("[ERROR] Failed to initialize persistence: %v", err)
-	// }
+	log.Println("[INFO] Repositories initialized successfully")
 
 	jwtProvider := security.NewJWTProvider([]byte(cfg.JWTSecret()))
+	log.Println("[INFO] JWT provider initialized")
 
-	credentialsFile := cfg.CredentialsFile()
-	// if err != nil {
-	// 	log.Fatalf("[ERROR] Failed to load credentials file: %v", err)
-	// }
-
-	credentialsRepo := security.NewCredentialsRepository(credentialsFile)
-	// if err != nil {
-	// 	log.Fatalf("[ERROR] Failed to initialize credentials repository: %v", err)
-	// }
+	credentialsRepo := security.NewCredentialsRepository(cfg.CredentialsFile())
+	log.Println("[INFO] Credentials repository initialized")
 
 	httpDeps := bootstrap.NewDependencies(
 		validator,

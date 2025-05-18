@@ -33,7 +33,7 @@ func (s *Server) setupServices() {
 	reservation.RegisterService(s.server, s.deps)
 }
 
-func (s *Server) Run() {
+func (s *Server) Run() error {
 	validator, err := protovalidator.New()
 	if err != nil {
 		panic("failed to create protovalidate validator")
@@ -57,14 +57,17 @@ func (s *Server) Run() {
 
 	listener, err := net.Listen("tcp", s.addr)
 	if err != nil {
-		log.Fatalf("[ERROR] Failed to listen: %v", err)
+		log.Printf("[ERROR] Failed to listen: %v\n", err)
+		return err
 	}
 
 	log.Printf("[INFO] gRPC server is running on port: %s\n", s.addr)
 	log.Printf("[INFO] Pandora Core is fully initialized and ready to accept requests.\n\n")
 	if err := s.server.Serve(listener); err != nil {
-		log.Fatalf("[ERROR] Failed to serve: %v", err)
+		log.Printf("[ERROR] Failed to serve: %v\n", err)
+		return err
 	}
+	return nil
 }
 
 func NewServer(addr string, deps *bootstrap.Dependencies) *Server {

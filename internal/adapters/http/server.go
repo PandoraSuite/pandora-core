@@ -44,7 +44,7 @@ type Server struct {
 	deps *bootstrap.Dependencies
 }
 
-func (s *Server) Run() {
+func (s *Server) Run() error {
 	gin.SetMode(gin.ReleaseMode)
 
 	engine := gin.Default()
@@ -97,11 +97,14 @@ func (s *Server) Run() {
 		Handler: engine,
 	}
 
-	log.Printf("[INFO] API is running on port: %s\n", s.addr)
+	log.Printf("[INFO] HTTP API is running on port: %s\n", s.addr)
 	log.Printf("[INFO] Pandora Core is fully initialized and ready to accept requests.\n\n")
 	if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("[ERROR] Failed to start server: %v", err)
+		log.Printf("[ERROR] Failed to start server: %v\n", err)
+		return err
 	}
+
+	return nil
 }
 
 func NewServer(
