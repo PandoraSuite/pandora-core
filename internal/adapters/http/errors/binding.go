@@ -14,9 +14,9 @@ func BindingToHTTPError(structType any, err error) *HTTPError {
 	case validator.ValidationErrors:
 		errs := make([]*HTTPError, len(e))
 		for i, ve := range e {
-			errs[i] = NewValidationFailed(
-				"body", getFieldName(structType, ve.Field()), ve.Error(),
-			)
+			fieldName := getFieldName(structType, ve.Field())
+			message := getMessage(ve.Error(), ve.Tag(), fieldName)
+			errs[i] = NewValidationFailed("body", fieldName, message)
 		}
 
 		if len(errs) == 1 {
@@ -78,4 +78,13 @@ func getFieldName(strcutType any, fieldName string) string {
 	}
 
 	return jsonFieldName
+}
+
+func getMessage(message, tag, fieldName string) string {
+	switch tag {
+	case "required":
+		return fmt.Sprintf("Field %s is required", fieldName)
+	default:
+		return message
+	}
 }
