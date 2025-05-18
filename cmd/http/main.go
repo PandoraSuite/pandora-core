@@ -5,11 +5,11 @@ import (
 	"log"
 	"time"
 
-	"github.com/MAD-py/pandora-core/cmd/http/config"
 	"github.com/MAD-py/pandora-core/internal/adapters/http"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/bootstrap"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
 	"github.com/MAD-py/pandora-core/internal/adapters/security"
+	"github.com/MAD-py/pandora-core/internal/config"
 	"github.com/MAD-py/pandora-core/internal/validator"
 )
 
@@ -18,10 +18,10 @@ func main() {
 
 	log.Println("[INFO] Starting Pandora Core (API RESTful)...")
 
-	cfg, err := config.LoadConfig()
-	if err != nil {
-		log.Fatalf("[ERROR] Error loading configuration: %v", err)
-	}
+	cfg := config.LoadHTTPConfig()
+	// if err != nil {
+	// 	log.Fatalf("[ERROR] Error loading configuration: %v", err)
+	// }
 
 	log.Println("[INFO] Configuration loaded successfully from environment variables and configuration files.")
 
@@ -34,10 +34,10 @@ func main() {
 
 	jwtProvider := security.NewJWTProvider([]byte(cfg.JWTSecret()))
 
-	credentialsFile, err := cfg.CredentialsFile()
-	if err != nil {
-		log.Fatalf("[ERROR] Failed to load credentials file: %v", err)
-	}
+	credentialsFile := cfg.CredentialsFile()
+	// if err != nil {
+	// 	log.Fatalf("[ERROR] Failed to load credentials file: %v", err)
+	// }
 
 	credentialsRepo := security.NewCredentialsRepository(credentialsFile)
 	// if err != nil {
@@ -52,7 +52,7 @@ func main() {
 	)
 
 	srv := http.NewServer(
-		fmt.Sprintf(":%s", cfg.HTTPPort()),
+		fmt.Sprintf(":%s", cfg.Port()),
 		cfg.ExposeVersion(),
 		httpDeps,
 	)

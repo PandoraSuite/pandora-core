@@ -47,7 +47,7 @@ func (p *jwtProvider) Validate(
 ) (string, errors.Error) {
 	if token.TokenType != "Bearer" {
 		return "", errors.NewUnauthorized(
-			"invalid access token type, expected 'Bearer'", nil,
+			"Invalid access token type, expected 'Bearer'", nil,
 		)
 	}
 
@@ -59,13 +59,13 @@ func (p *jwtProvider) Validate(
 	)
 
 	if err != nil || !t.Valid {
-		return "", errors.NewUnauthorized("invalid access token", err)
+		return "", errors.NewUnauthorized("Invalid access token", err)
 	}
 
 	if claims, ok := t.Claims.(jwt.MapClaims); ok {
 		return claims["sub"].(string), nil
 	}
-	return "", errors.NewUnauthorized("invalid access token claims", nil)
+	return "", errors.NewUnauthorized("Invalid access token claims", nil)
 }
 
 func NewJWTProvider(secret []byte) ports.TokenProvider {
