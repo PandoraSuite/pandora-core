@@ -18,12 +18,15 @@ func main() {
 	log.Println("[INFO] Starting Pandora Core (gRPC)...")
 
 	cfg := config.LoadGRPCConfig()
+	log.Printf("[INFO] gRPC config loaded")
 
 	validator := validator.NewValidator()
+	log.Println("[INFO] Validator initialized")
 
 	repositories := persistence.NewRepositories(
 		persistence.PostgresDriver, cfg.DBDNS(),
 	)
+	log.Println("[INFO] Repositories initialized successfully")
 
 	gRPCDeps := bootstrap.NewDependencies(validator, repositories)
 

@@ -48,7 +48,7 @@ func getGRPCPort() string {
 	if value, exists := os.LookupEnv("PANDORA_GRPC_PORT"); exists {
 		return value
 	}
-	return "80"
+	return "50051"
 }
 
 func getExposeVersion() bool {
