@@ -42,6 +42,24 @@ func (e AggregateError) Unwrap() error {
 	return e
 }
 
+func (e AggregateError) PriorityCode() ErrorCode {
+	if len(e) == 0 {
+		return CodeAggregate
+	}
+
+	best := e[0].Code()
+	bestPriority := ErrorCodePriority[best]
+
+	for _, err := range e[1:] {
+		if priority, ok := ErrorCodePriority[err.Code()]; ok && priority < bestPriority {
+			best = err.Code()
+			bestPriority = priority
+		}
+	}
+
+	return best
+}
+
 func NewAggregateError(errs ...Error) Error {
 	if len(errs) == 0 {
 		return nil

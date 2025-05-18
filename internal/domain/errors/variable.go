@@ -19,6 +19,10 @@ func (e *VariableError) Error() string {
 	)
 }
 
+func (e *VariableError) Name() string {
+	return e.name
+}
+
 func NewVariableValidationFailed(name, message string, err error) Error {
 	return &VariableError{
 		BaseError: BaseError{

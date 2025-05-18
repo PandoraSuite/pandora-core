@@ -24,6 +24,10 @@ func (e *BaseError) Unwrap() error {
 	return e.err
 }
 
+func (e *BaseError) Message() string {
+	return e.message
+}
+
 func NewNotFound(message string, err error) Error {
 	return &BaseError{
 		err:     err,

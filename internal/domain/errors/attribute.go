@@ -27,6 +27,14 @@ func (e *AttributeError) Error() string {
 	)
 }
 
+func (e *AttributeError) Entity() string {
+	return e.entity
+}
+
+func (e *AttributeError) Loc() string {
+	return e.loc
+}
+
 func (e *AttributeError) PrefixLoc(prefix string) {
 	if e.loc != "" {
 		e.loc = fmt.Sprintf("%s.%s", prefix, e.loc)

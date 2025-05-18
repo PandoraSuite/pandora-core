@@ -44,6 +44,14 @@ func (e *EntityError) Error() string {
 	)
 }
 
+func (e *EntityError) Entity() string {
+	return e.entity
+}
+
+func (e *EntityError) Identifiers() map[string]any {
+	return e.identifiers
+}
+
 func NewEntityNotFound(
 	entity, message string, identifiers map[string]any, err error,
 ) *EntityError {
