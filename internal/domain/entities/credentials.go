@@ -28,7 +28,7 @@ func (c *Credentials) VerifyPassword(password string) errors.Error {
 	)
 
 	if err != nil {
-		return errors.NewUnauthorized("invalid username or password", err)
+		return errors.NewUnauthorized("Invalid username or password", err)
 	}
 	return nil
 }

@@ -63,7 +63,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -115,7 +115,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -157,7 +157,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -202,7 +202,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -250,7 +250,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -293,7 +293,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -336,7 +336,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -383,7 +383,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -429,7 +429,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -474,7 +474,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -517,7 +517,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -567,7 +567,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -613,7 +613,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -665,7 +665,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -712,7 +712,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -769,7 +769,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -816,7 +816,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -850,7 +850,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -893,7 +893,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -936,7 +936,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -986,7 +986,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -1032,7 +1032,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -1084,7 +1084,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -1128,7 +1128,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -1185,7 +1185,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -1244,7 +1244,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -1293,7 +1293,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -1336,7 +1336,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -1373,7 +1373,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -1425,7 +1425,7 @@ const docTemplate = `{
                     "default": {
                         "description": "Default error response for all failures",
                         "schema": {
-                            "$ref": "#/definitions/utils.ErrorResponse"
+                            "$ref": "#/definitions/errors.HTTPError"
                         }
                     }
                 }
@@ -1947,10 +1947,52 @@ const docTemplate = `{
                 "ProjectDeactivated"
             ]
         },
-        "utils.ErrorResponse": {
+        "errors.ErrorCode": {
+            "type": "string",
+            "enum": [
+                "NOT_FOUND",
+                "INTERNAL",
+                "FORBIDDEN",
+                "UNAUTHORIZED",
+                "ALREADY_EXISTS",
+                "VALIDATION_FAILED",
+                "AGGREGATE_ERRORS"
+            ],
+            "x-enum-varnames": [
+                "CodeNotFound",
+                "CodeInternal",
+                "CodeForbidden",
+                "CodeUnauthorized",
+                "CodeAlreadyExists",
+                "CodeValidationFailed",
+                "CodeAggregate"
+            ]
+        },
+        "errors.HTTPError": {
             "type": "object",
             "properties": {
-                "error": {}
+                "code": {
+                    "$ref": "#/definitions/errors.ErrorCode"
+                },
+                "entity": {
+                    "type": "string"
+                },
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/errors.HTTPError"
+                    }
+                },
+                "identifiers": {
+                    "type": "object",
+                    "additionalProperties": {}
+                },
+                "loc": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                }
             }
         }
     },

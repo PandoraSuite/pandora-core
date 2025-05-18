@@ -345,9 +345,41 @@ definitions:
     - ProjectInProduction
     - ProjectInDevelopment
     - ProjectDeactivated
-  utils.ErrorResponse:
+  errors.ErrorCode:
+    enum:
+    - NOT_FOUND
+    - INTERNAL
+    - FORBIDDEN
+    - UNAUTHORIZED
+    - ALREADY_EXISTS
+    - VALIDATION_FAILED
+    - AGGREGATE_ERRORS
+    type: string
+    x-enum-varnames:
+    - CodeNotFound
+    - CodeInternal
+    - CodeForbidden
+    - CodeUnauthorized
+    - CodeAlreadyExists
+    - CodeValidationFailed
+    - CodeAggregate
+  errors.HTTPError:
     properties:
-      error: {}
+      code:
+        $ref: '#/definitions/errors.ErrorCode'
+      entity:
+        type: string
+      errors:
+        items:
+          $ref: '#/definitions/errors.HTTPError'
+        type: array
+      identifiers:
+        additionalProperties: {}
+        type: object
+      loc:
+        type: string
+      message:
+        type: string
     type: object
 info:
   contact:
@@ -384,7 +416,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Creates a new API Key
@@ -417,7 +449,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Updates an API key
@@ -443,7 +475,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Change password
@@ -475,7 +507,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       summary: Authenticate user
       tags:
       - Authentication
@@ -503,7 +535,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Retrieves all clients with optional filtering by type
@@ -530,7 +562,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Creates a new client
@@ -557,7 +589,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Retrieves a client by ID
@@ -587,7 +619,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Updates an existing client
@@ -616,7 +648,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Retrieves all projects for a specific client
@@ -644,7 +676,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Creates a new environment
@@ -671,7 +703,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Retrieves an environment by ID
@@ -703,7 +735,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Updates an environment
@@ -732,7 +764,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Retrieves all API Keys for an environment
@@ -765,7 +797,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Assigns a service to an environment
@@ -795,7 +827,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Removes a service from an environment
@@ -832,7 +864,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Updates a service assigned to an environment
@@ -863,7 +895,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Resets request quota for a service in an environment
@@ -884,7 +916,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Retrieves all projects
@@ -911,7 +943,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Creates a new project
@@ -938,7 +970,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Retrieves a project by ID
@@ -970,7 +1002,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Updates a project
@@ -999,7 +1031,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Retrieves all environments for a specific project
@@ -1032,7 +1064,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Assigns a service to a project
@@ -1060,7 +1092,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Removes a service from a project
@@ -1097,7 +1129,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Updates a service assigned to a project
@@ -1135,7 +1167,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Resets available requests for a service in a project
@@ -1166,7 +1198,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Retrieves all services
@@ -1193,7 +1225,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Creates a new service
@@ -1216,7 +1248,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Deletes a service
@@ -1249,7 +1281,7 @@ paths:
         default:
           description: Default error response for all failures
           schema:
-            $ref: '#/definitions/utils.ErrorResponse'
+            $ref: '#/definitions/errors.HTTPError'
       security:
       - OAuth2Password: []
       summary: Updates the status of a service

@@ -30,7 +30,7 @@ func (uc *useCase) Execute(
 	if err != nil {
 		if err.Code() == errors.CodeNotFound {
 			return nil, errors.NewUnauthorized(
-				"invalid username or password",
+				"Invalid username or password",
 				err,
 			)
 		}
