@@ -61,45 +61,45 @@ func (d *Driver) errorMapper(err error, tableName string) domainErr.Error {
 	if errors.As(err, &pgErr) {
 		switch pgErr.Code {
 		case "23505": // UNIQUE_VIOLATION
-			return domainErr.NewAttributeValidationFailed(
+			return domainErr.NewEntityAlreadyExists(
 				d.entityMapper(pgErr.TableName),
-				pgErr.ColumnName,
-				pgErr.Message,
+				pgErr.Detail,
+				map[string]any{},
 				pgErr,
 			)
 		case "23503": // FOREIGN_KEY_VIOLATION
 			return domainErr.NewAttributeNotFound(
 				d.entityMapper(pgErr.TableName),
 				pgErr.ColumnName,
-				pgErr.Message,
+				pgErr.Detail,
 				pgErr,
 			)
 		case "23502": // NOT_NULL_VIOLATION
 			return domainErr.NewAttributeValidationFailed(
 				d.entityMapper(pgErr.TableName),
 				pgErr.ColumnName,
-				pgErr.Message,
+				pgErr.Detail,
 				pgErr,
 			)
 		case "23514": // CHECK_VIOLATION
 			return domainErr.NewAttributeValidationFailed(
 				d.entityMapper(pgErr.TableName),
 				pgErr.ColumnName,
-				pgErr.Message,
+				pgErr.Detail,
 				pgErr,
 			)
 		case "42P01": // UNDEFINED_TABLE
 			return domainErr.NewInternal(
-				pgErr.Message,
+				pgErr.Detail,
 				pgErr,
 			)
 		case "08001", // SQLCLIENT_UNABLE_TO_ESTABLISH_SQLCONNECTION
 			"08006", // CONNECTION_FAILURE
 			"08003", // CONNECTION_DOES_NOT_EXIST
 			"57P01": // ADMIN_SHUTDOWN
-			return domainErr.NewInternal(pgErr.Message, pgErr)
+			return domainErr.NewInternal(pgErr.Detail, pgErr)
 		default:
-			return domainErr.NewInternal(pgErr.Message, pgErr)
+			return domainErr.NewInternal(pgErr.Detail, pgErr)
 		}
 	}
 
