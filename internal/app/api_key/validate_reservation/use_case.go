@@ -211,7 +211,7 @@ func (uc *useCase) serviceEnable(
 	ctx context.Context, req *dto.APIKeyValidate, apiKey *entities.APIKey,
 ) (*entities.Service, *dto.APIKeyValidateResponse, *entities.RequestLog, errors.Error) {
 	// Service in that version must be exist in the service entity
-	service, err := uc.serviceRepo.GetByNameVersion(
+	service, err := uc.serviceRepo.GetByNameAndVersion(
 		ctx, req.Service, req.ServiceVersion,
 	)
 	if err != nil {

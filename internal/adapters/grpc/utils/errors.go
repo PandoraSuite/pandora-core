@@ -5,15 +5,15 @@ import (
 	"google.golang.org/grpc/codes"
 )
 
-func GetDomainErrorStatusCode(err *domainErr.Error) codes.Code {
-	switch err.Code {
+func GetDomainErrorStatusCode(err domainErr.Error) codes.Code {
+	switch err.Code() {
 	case domainErr.CodeNotFound:
 		return codes.NotFound
 	case domainErr.CodeUnauthorized:
 		return codes.PermissionDenied
-	case domainErr.CodeInternalError:
+	case domainErr.CodeInternal:
 		return codes.Internal
-	case domainErr.CodeValidationError:
+	case domainErr.CodeValidationFailed:
 		return codes.FailedPrecondition
 	default:
 		return codes.Unknown

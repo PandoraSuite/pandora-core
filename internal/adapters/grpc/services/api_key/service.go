@@ -1,4 +1,4 @@
-package api_key
+package apikey
 
 import (
 	"context"
@@ -6,32 +6,35 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 
-	pb "github.com/MAD-py/pandora-core/internal/adapters/grpc/api_key/v1"
+	"github.com/MAD-py/pandora-core/internal/adapters/grpc/bootstrap"
+	pb "github.com/MAD-py/pandora-core/internal/adapters/grpc/services/api_key/v1"
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc/utils"
+	apikey "github.com/MAD-py/pandora-core/internal/app/api_key"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
-	"github.com/MAD-py/pandora-core/internal/ports/inbound"
 )
 
 type service struct {
 	pb.APIKeyServiceServer
 
-	apiKeyService inbound.APIKeyGRPCPort
+	validateReserveUC    apikey.ValidateReserveUseCase
+	validateAndConsumeUC apikey.ValidateConsumeUseCase
+	validateAndReserveUC apikey.ValidateReservationUseCase
 }
 
 func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndConsumeRequest) (*pb.ValidateAndConsumeResponse, error) {
 	params := req.GetParams()
 	reqValidate := dto.APIKeyValidate{
-		Key:            params.Key,
+		APIKey:         params.Key,
 		Service:        params.Service,
 		Environment:    params.Environment,
 		ServiceVersion: params.ServiceVersion,
 		RequestTime:    params.RequestTime.AsTime(),
 	}
-	response, err := s.apiKeyService.ValidateAndConsume(ctx, &reqValidate)
+	response, err := s.validateAndConsumeUC.Execute(ctx, &reqValidate)
 	if err != nil {
 		return nil, status.Error(
 			utils.GetDomainErrorStatusCode(err),
-			err.Message,
+			err.Error(),
 		)
 	}
 	if response.Valid {
@@ -60,17 +63,17 @@ func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndCon
 func (s *service) ValidateAndReserve(ctx context.Context, req *pb.ValidateAndReserveRequest) (*pb.ValidateAndReserveResponse, error) {
 	params := req.GetParams()
 	reqValidate := dto.APIKeyValidate{
-		Key:            params.Key,
+		APIKey:         params.Key,
 		Service:        params.Service,
 		Environment:    params.Environment,
 		ServiceVersion: params.ServiceVersion,
 		RequestTime:    params.RequestTime.AsTime(),
 	}
-	response, err := s.apiKeyService.ValidateAndReserve(ctx, &reqValidate)
+	response, err := s.validateAndReserveUC.Execute(ctx, &reqValidate)
 	if err != nil {
 		return nil, status.Error(
 			utils.GetDomainErrorStatusCode(err),
-			err.Message,
+			err.Error(),
 		)
 	}
 	if response.Valid {
@@ -101,7 +104,7 @@ func (s *service) ValidateWithReservation(ctx context.Context, req *pb.ValidateW
 	params := req.GetParams()
 	reqValidate := dto.APIKeyValidateReserve{
 		APIKeyValidate: dto.APIKeyValidate{
-			Key:            params.Key,
+			APIKey:         params.Key,
 			Service:        params.Service,
 			Environment:    params.Environment,
 			RequestTime:    params.RequestTime.AsTime(),
@@ -109,11 +112,11 @@ func (s *service) ValidateWithReservation(ctx context.Context, req *pb.ValidateW
 		},
 		ReservationID: req.ReservationId,
 	}
-	response, err := s.apiKeyService.ValidateWithReservation(ctx, &reqValidate)
+	response, err := s.validateReserveUC.Execute(ctx, &reqValidate)
 	if err != nil {
 		return nil, status.Error(
 			utils.GetDomainErrorStatusCode(err),
-			err.Message,
+			err.Error(),
 		)
 	}
 	if response.Valid {
@@ -138,7 +141,29 @@ func (s *service) ValidateWithReservation(ctx context.Context, req *pb.ValidateW
 	}
 }
 
-func RegisterService(server *grpc.Server, apiKeyService inbound.APIKeyGRPCPort) {
-	service := &service{apiKeyService: apiKeyService}
-	pb.RegisterAPIKeyServiceServer(server, service)
+func RegisterService(s *grpc.Server, deps *bootstrap.Dependencies) {
+	service := service{
+		validateReserveUC: apikey.NewValidateReserveUseCase(
+			deps.Validator,
+			deps.Repositories.Request(),
+			deps.Repositories.Reservation(),
+		),
+		validateAndConsumeUC: apikey.NewValidateConsumeUseCase(
+			deps.Validator,
+			deps.Repositories.APIKey(),
+			deps.Repositories.Request(),
+			deps.Repositories.Service(),
+			deps.Repositories.Reservation(),
+			deps.Repositories.Environment(),
+		),
+		validateAndReserveUC: apikey.NewValidateReservationUseCase(
+			deps.Validator,
+			deps.Repositories.APIKey(),
+			deps.Repositories.Request(),
+			deps.Repositories.Service(),
+			deps.Repositories.Reservation(),
+			deps.Repositories.Environment(),
+		),
+	}
+	pb.RegisterAPIKeyServiceServer(s, &service)
 }

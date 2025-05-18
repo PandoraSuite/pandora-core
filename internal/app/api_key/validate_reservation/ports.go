@@ -20,7 +20,7 @@ type EnvironmentRepository interface {
 }
 
 type ServiceRepository interface {
-	GetByNameVersion(ctx context.Context, name, version string) (*entities.Service, errors.Error)
+	GetByNameAndVersion(ctx context.Context, name, version string) (*entities.Service, errors.Error)
 }
 
 type RequestRepository interface {

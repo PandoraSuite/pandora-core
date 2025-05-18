@@ -6,39 +6,28 @@ import (
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc"
+	"github.com/MAD-py/pandora-core/internal/adapters/grpc/bootstrap"
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence"
-	"github.com/MAD-py/pandora-core/internal/adapters/persistence/repository"
-	"github.com/MAD-py/pandora-core/internal/app"
+	"github.com/MAD-py/pandora-core/internal/validator"
 )
 
 func main() {
 	time.Local = time.UTC
 
 	log.Println("[INFO] Starting Pandora Core (gRPC)...")
-	db, err := persistence.NewPersistence("postgresql://postgres:postgres@localhost:5436/pandora")
-	if err != nil {
-		log.Fatalf("[ERROR] Failed to initialize persistence: %v", err)
-	}
-	pool := db.Pool()
-	errHandler := db.HandlerErr()
 
-	apiKeyRepo := repository.NewAPIKeyRepository(pool, errHandler)
-	serviceRepo := repository.NewServiceRepository(pool, errHandler)
-	requestLogRepo := repository.NewRequestLogRepository(pool, errHandler)
-	environmentRepo := repository.NewEnvironmentRepository(pool, errHandler)
-	reservationRepo := repository.NewReservationRepository(pool, errHandler)
+	validator := validator.NewValidator()
 
-	apiKeyUseCase := app.NewAPIKeyUseCase(
-		apiKeyRepo, requestLogRepo, serviceRepo, environmentRepo, reservationRepo,
+	repositories := persistence.NewRepositories(
+		persistence.PostgresDriver,
+		"postgresql://postgres:postgres@localhost:5436/pandora",
 	)
-	requestLogUseCase := app.NewRequestLogUseCase(requestLogRepo)
-	reservationUseCase := app.NewReservationUseCase(reservationRepo, environmentRepo)
+
+	gRPCDeps := bootstrap.NewDependencies(validator, repositories)
 
 	srv := grpc.NewServer(
 		fmt.Sprintf(":%s", "50051"),
-		apiKeyUseCase,
-		requestLogUseCase,
-		reservationUseCase,
+		gRPCDeps,
 	)
 
 	srv.Run()

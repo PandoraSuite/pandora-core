@@ -13,10 +13,10 @@ import (
 
 	"google.golang.org/grpc"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/grpc/api_key"
-	"github.com/MAD-py/pandora-core/internal/adapters/grpc/request"
-	"github.com/MAD-py/pandora-core/internal/adapters/grpc/reservation"
-	"github.com/MAD-py/pandora-core/internal/ports/inbound"
+	"github.com/MAD-py/pandora-core/internal/adapters/grpc/bootstrap"
+	apikey "github.com/MAD-py/pandora-core/internal/adapters/grpc/services/api_key"
+	"github.com/MAD-py/pandora-core/internal/adapters/grpc/services/request"
+	"github.com/MAD-py/pandora-core/internal/adapters/grpc/services/reservation"
 )
 
 type Server struct {
@@ -24,15 +24,13 @@ type Server struct {
 
 	server *grpc.Server
 
-	apiKeyService      inbound.APIKeyGRPCPort
-	requestLogService  inbound.RequestLogGRPCPort
-	reservationService inbound.ReservationGRPCPort
+	deps *bootstrap.Dependencies
 }
 
 func (s *Server) setupServices() {
-	api_key.RegisterService(s.server, s.apiKeyService)
-	request.RegisterService(s.server, s.requestLogService)
-	reservation.RegisterService(s.server, s.reservationService)
+	apikey.RegisterService(s.server, s.deps)
+	request.RegisterService(s.server, s.deps)
+	reservation.RegisterService(s.server, s.deps)
 }
 
 func (s *Server) Run() {
@@ -69,18 +67,8 @@ func (s *Server) Run() {
 	}
 }
 
-func NewServer(
-	addr string,
-	apiKeyService inbound.APIKeyGRPCPort,
-	requestLogService inbound.RequestLogGRPCPort,
-	reservationService inbound.ReservationGRPCPort,
-) *Server {
-	return &Server{
-		addr:               addr,
-		apiKeyService:      apiKeyService,
-		requestLogService:  requestLogService,
-		reservationService: reservationService,
-	}
+func NewServer(addr string, deps *bootstrap.Dependencies) *Server {
+	return &Server{addr: addr, deps: deps}
 }
 
 func interceptorLogger() logging.Logger {
