@@ -9,17 +9,17 @@ import (
 // ... Requests ...
 
 type ClientFilter struct {
-	Type enums.ClientType `name:"type" validate:"omitempty,enums=developer,organization"`
+	Type enums.ClientType `name:"type" validate:"omitempty,enums=developer organization"`
 }
 
 type ClientCreate struct {
-	Type  enums.ClientType `name:"type" validate:"required,enums=developer,organization"`
+	Type  enums.ClientType `name:"type" validate:"required,enums=developer organization"`
 	Name  string           `name:"name" validate:"required"`
 	Email string           `name:"email" validate:"required,email"`
 }
 
 type ClientUpdate struct {
-	Type  enums.ClientType `name:"type" validate:"omitempty,enums=developer,organization"`
+	Type  enums.ClientType `name:"type" validate:"omitempty,enums=developer organization"`
 	Name  string           `name:"name" validate:"omitempty"`
 	Email string           `name:"email" validate:"omitempty,email"`
 }

@@ -11,12 +11,12 @@ import (
 type ProjectService struct {
 	ID             int                                `name:"id" validate:"required,gt=0"`
 	MaxRequest     int                                `name:"max_request" validate:"omitempty,gte=-1"`
-	ResetFrequency enums.ProjectServiceResetFrequency `name:"reset_frequency" validate:"omitempty,enums=,daily,weekly,biweekly,monthly"`
+	ResetFrequency enums.ProjectServiceResetFrequency `name:"reset_frequency" validate:"omitempty,enums=daily weekly biweekly monthly"`
 }
 
 type ProjectCreate struct {
 	Name     string              `name:"name" validate:"required"`
-	Status   enums.ProjectStatus `name:"status" validate:"required,enums=in_production,in_development,deactivated"`
+	Status   enums.ProjectStatus `name:"status" validate:"required,enums=in_production in_development deactivated"`
 	ClientID int                 `name:"client_id" validate:"required,gt=0"`
 
 	Services []*ProjectService `name:"services" validate:"required,dive"`
@@ -29,7 +29,7 @@ type ProjectUpdate struct {
 type ProjectServiceUpdate struct {
 	NextReset      time.Time                          `name:"next_reset" validate:"omitempty,utc"`
 	MaxRequest     int                                `name:"max_request" validate:"required,gte=-1"`
-	ResetFrequency enums.ProjectServiceResetFrequency `name:"reset_frequency" validate:"omitempty,enums=,daily,weekly,biweekly,monthly"`
+	ResetFrequency enums.ProjectServiceResetFrequency `name:"reset_frequency" validate:"omitempty,enums=daily weekly biweekly monthly"`
 }
 
 // ... Responses ...
