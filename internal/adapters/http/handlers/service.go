@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/http/dto"
-	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
+	"github.com/MAD-py/pandora-core/internal/adapters/http/errors"
 	"github.com/MAD-py/pandora-core/internal/app/service"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
@@ -21,15 +21,16 @@ import (
 // @Produce json
 // @Param query query dto.ServiceFilter false "Query parameters"
 // @Success 200 {array} dto.ServiceResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/services [get]
 func ServiceList(useCase service.ListUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		status, paramErr := enums.ParseServiceStatus(c.Query("status"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				utils.ErrorResponse{Error: paramErr},
+			c.Error(
+				errors.NewValidationFailed(
+					"query", "type", "Invalid service status",
+				),
 			)
 			return
 		}
@@ -37,10 +38,7 @@ func ServiceList(useCase service.ListUseCase) gin.HandlerFunc {
 		req := dto.ServiceFilter{Status: status}
 		services, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -61,26 +59,19 @@ func ServiceList(useCase service.ListUseCase) gin.HandlerFunc {
 // @Produce json
 // @Param request body dto.ServiceCreate true "Service creation data"
 // @Success 201 {object} dto.ServiceResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/services [post]
 func ServiceCreate(useCase service.CreateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ServiceCreate
-
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToDomainError(err))
 			return
 		}
 
 		service, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -96,24 +87,22 @@ func ServiceCreate(useCase service.CreateUseCase) gin.HandlerFunc {
 // @Produce json
 // @Param id path int true "Service ID"
 // @Success 204
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/services/{id} [delete]
 func ServiceDelete(useCase service.DeleteUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		serviceID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid Service ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid service id",
+				),
 			)
 			return
 		}
 
 		if err := useCase.Execute(c.Request.Context(), serviceID); err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -131,25 +120,23 @@ func ServiceDelete(useCase service.DeleteUseCase) gin.HandlerFunc {
 // @Param id path int true "Service ID"
 // @Param request body dto.ServiceStatusUpdate true "New service status"
 // @Success 200 {object} dto.ServiceResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/services/{id}/status [patch]
 func ServiceUpdateStatus(useCase service.UpdateStatusUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		serviceID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid Service ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid service id",
+				),
 			)
 			return
 		}
 
 		var req dto.ServiceStatusUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToDomainError(err))
 			return
 		}
 
@@ -157,10 +144,7 @@ func ServiceUpdateStatus(useCase service.UpdateStatusUseCase) gin.HandlerFunc {
 			c.Request.Context(), serviceID, req.Status,
 		)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 

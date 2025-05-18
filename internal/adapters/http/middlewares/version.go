@@ -10,7 +10,7 @@ import (
 
 func VersionHeader() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Header("Server", fmt.Sprintf("pandora/%s", version.Version))
 		c.Next()
+		c.Header("Server", fmt.Sprintf("pandora/%s", version.Version))
 	}
 }

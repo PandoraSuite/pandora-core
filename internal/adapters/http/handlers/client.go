@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/http/dto"
-	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
+	"github.com/MAD-py/pandora-core/internal/adapters/http/errors"
 	"github.com/MAD-py/pandora-core/internal/app/client"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
@@ -21,15 +21,16 @@ import (
 // @Produce json
 // @Param query query dto.ClientFilter false "Query parameters"
 // @Success 200 {array} dto.ClientResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/clients [get]
 func ClientList(useCase client.ListUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		t, paramErr := enums.ParseClientType(c.Query("type"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				utils.ErrorResponse{Error: paramErr},
+			c.Error(
+				errors.NewValidationFailed(
+					"query", "type", "Invalid client type",
+				),
 			)
 			return
 		}
@@ -37,10 +38,7 @@ func ClientList(useCase client.ListUseCase) gin.HandlerFunc {
 		req := dto.ClientFilter{Type: t}
 		clients, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -61,26 +59,19 @@ func ClientList(useCase client.ListUseCase) gin.HandlerFunc {
 // @Produce json
 // @Param request body dto.ClientCreate true "Client creation data"
 // @Success 201 {object} dto.ClientResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/clients [post]
 func ClientCreate(useCase client.CreateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ClientCreate
-
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToDomainError(err))
 			return
 		}
 
 		client, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -97,25 +88,23 @@ func ClientCreate(useCase client.CreateUseCase) gin.HandlerFunc {
 // @Produce json
 // @Param id path int true "Client ID"
 // @Success 200 {object} dto.ClientResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/clients/{id} [get]
 func ClientGet(useCase client.GetUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid client ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid client id",
+				),
 			)
 			return
 		}
 
 		client, err := useCase.Execute(c.Request.Context(), clientID)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -132,25 +121,23 @@ func ClientGet(useCase client.GetUseCase) gin.HandlerFunc {
 // @Param id path int true "Client ID"
 // @Param request body dto.ClientUpdate true "Updated client data"
 // @Success 200 {object} dto.ClientResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/clients/{id} [patch]
 func ClientUpdate(useCase client.UpdateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid client ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid client id",
+				),
 			)
 			return
 		}
 
 		var req dto.ClientUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToDomainError(err))
 			return
 		}
 
@@ -158,10 +145,7 @@ func ClientUpdate(useCase client.UpdateUseCase) gin.HandlerFunc {
 			c.Request.Context(), clientID, req.ToDomain(),
 		)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -178,25 +162,23 @@ func ClientUpdate(useCase client.UpdateUseCase) gin.HandlerFunc {
 // @Produce json
 // @Param id path int true "Client ID"
 // @Success 200 {array} dto.ProjectResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/clients/{id}/projects [get]
 func ClientListProjects(useCase client.ListProjectsUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid client ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid client id",
+				),
 			)
 			return
 		}
 
 		projects, err := useCase.Execute(c.Request.Context(), clientID)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 

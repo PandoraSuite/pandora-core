@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/http/dto"
-	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
+	"github.com/MAD-py/pandora-core/internal/adapters/http/errors"
 	"github.com/MAD-py/pandora-core/internal/app/environment"
 )
 
@@ -20,26 +20,19 @@ import (
 // @Produce json
 // @Param request body dto.EnvironmentCreate true "Environment creation data"
 // @Success 201 {object} dto.EnvironmentResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/environments [post]
 func EnvironmentCreate(useCase environment.CreateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.EnvironmentCreate
-
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToDomainError(err))
 			return
 		}
 
 		environment, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -56,25 +49,23 @@ func EnvironmentCreate(useCase environment.CreateUseCase) gin.HandlerFunc {
 // @Produce json
 // @Param id path int true "Environment ID"
 // @Success 200 {object} dto.EnvironmentResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/environments/{id} [get]
 func EnvironmentGet(useCase environment.GetUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "invalid environment ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid environment id",
+				),
 			)
 			return
 		}
 
 		environment, err := useCase.Execute(c.Request.Context(), environmentID)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -92,25 +83,23 @@ func EnvironmentGet(useCase environment.GetUseCase) gin.HandlerFunc {
 // @Param id path int true "Environment ID"
 // @Param request body dto.EnvironmentUpdate true "Updated environment data"
 // @Success 200 {object} dto.EnvironmentResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/environments/{id} [patch]
 func EnvironmentUpdate(useCase environment.UpdateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid Environment ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid environment id",
+				),
 			)
 			return
 		}
 
 		var req dto.EnvironmentUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToDomainError(err))
 			return
 		}
 
@@ -118,10 +107,7 @@ func EnvironmentUpdate(useCase environment.UpdateUseCase) gin.HandlerFunc {
 			c.Request.Context(), environmentID, req.ToDomain(),
 		)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -138,25 +124,23 @@ func EnvironmentUpdate(useCase environment.UpdateUseCase) gin.HandlerFunc {
 // @Produce json
 // @Param id path int true "Environment ID"
 // @Success 200 {array} dto.APIKeyResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/environments/{id}/api-keys [get]
 func EnvironmentListAPIKeys(useCase environment.ListAPIKeyUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "invalid environment ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid environment id",
+				),
 			)
 			return
 		}
 
 		apiKeys, err := useCase.Execute(c.Request.Context(), environmentID)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -178,25 +162,23 @@ func EnvironmentListAPIKeys(useCase environment.ListAPIKeyUseCase) gin.HandlerFu
 // @Param id path int true "Environment ID"
 // @Param request body dto.EnvironmentService true "Service data"
 // @Success 200 {object} dto.EnvironmentServiceResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/environments/{id}/services [post]
 func EnvironmentAssignService(useCase environment.AssignServiceUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid environment ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid environment id",
+				),
 			)
 			return
 		}
 
 		var req dto.EnvironmentService
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToDomainError(err))
 			return
 		}
 
@@ -204,10 +186,7 @@ func EnvironmentAssignService(useCase environment.AssignServiceUseCase) gin.Hand
 			c.Request.Context(), environmentID, req.ToDomain(),
 		)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -225,24 +204,26 @@ func EnvironmentAssignService(useCase environment.AssignServiceUseCase) gin.Hand
 // @Param id path int true "Environment ID"
 // @Param service_id path int true "Service ID"
 // @Success 204
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/environments/{id}/services/{service_id} [delete]
 func EnvironmentRemoveService(useCase environment.RemoveServiceUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid environment ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid environment id",
+				),
 			)
 			return
 		}
 
 		serviceID, paramErr := strconv.Atoi(c.Param("service_id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid service ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "service_id", "Invalid service id",
+				),
 			)
 			return
 		}
@@ -251,10 +232,7 @@ func EnvironmentRemoveService(useCase environment.RemoveServiceUseCase) gin.Hand
 			c.Request.Context(), environmentID, serviceID,
 		)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -273,34 +251,33 @@ func EnvironmentRemoveService(useCase environment.RemoveServiceUseCase) gin.Hand
 // @Param service_id path int true "Service ID"
 // @Param request body dto.EnvironmentServiceUpdate true "Updated service configuration"
 // @Success 200 {object} dto.EnvironmentServiceResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/environments/{id}/services/{service_id} [patch]
 func EnvironmentUpdateService(useCase environment.UpdateServiceUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid Environment ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid environment id",
+				),
 			)
 			return
 		}
 
 		serviceID, paramErr := strconv.Atoi(c.Param("service_id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid Service ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "service_id", "Invalid service id",
+				),
 			)
 			return
 		}
 
 		var req dto.EnvironmentServiceUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToDomainError(err))
 			return
 		}
 
@@ -308,10 +285,7 @@ func EnvironmentUpdateService(useCase environment.UpdateServiceUseCase) gin.Hand
 			c.Request.Context(), environmentID, serviceID, req.ToDomain(),
 		)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -328,24 +302,26 @@ func EnvironmentUpdateService(useCase environment.UpdateServiceUseCase) gin.Hand
 // @Param id path int true "Environment ID"
 // @Param service_id path int true "Service ID"
 // @Success 200 {object} dto.EnvironmentServiceResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/environments/{id}/services/{service_id}/reset-requests [patch]
 func EnvironmentResetRequest(useCase environment.ResetRequestUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid environment ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid environment id",
+				),
 			)
 			return
 		}
 
 		serviceID, paramErr := strconv.Atoi(c.Param("service_id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid service ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "service_id", "Invalid service id",
+				),
 			)
 			return
 		}
@@ -354,10 +330,7 @@ func EnvironmentResetRequest(useCase environment.ResetRequestUseCase) gin.Handle
 			c.Request.Context(), environmentID, serviceID,
 		)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 

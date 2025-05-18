@@ -49,11 +49,13 @@ func (s *Server) Run() {
 
 	engine := gin.Default()
 
+	setupSwagger(engine)
+
 	if s.exposeVersion {
 		engine.Use(middlewares.VersionHeader())
 	}
 
-	setupSwagger(engine)
+	engine.Use(middlewares.ErrorHandler())
 
 	v1 := engine.Group("/api/v1")
 

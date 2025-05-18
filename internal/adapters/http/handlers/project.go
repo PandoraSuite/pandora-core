@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/http/dto"
-	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers/utils"
+	"github.com/MAD-py/pandora-core/internal/adapters/http/errors"
 	"github.com/MAD-py/pandora-core/internal/app/project"
 )
 
@@ -18,16 +18,13 @@ import (
 // @Security OAuth2Password
 // @Produce json
 // @Success 200 {array} dto.ProjectResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/projects [get]
 func ProjectList(useCase project.ListUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projects, err := useCase.Execute(c.Request.Context())
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -49,26 +46,19 @@ func ProjectList(useCase project.ListUseCase) gin.HandlerFunc {
 // @Produce json
 // @Param request body dto.ProjectCreate true "Project creation data"
 // @Success 201 {object} dto.ProjectResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/projects [post]
 func ProjectCreate(useCase project.CreateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ProjectCreate
-
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToDomainError(err))
 			return
 		}
 
 		project, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -85,25 +75,23 @@ func ProjectCreate(useCase project.CreateUseCase) gin.HandlerFunc {
 // @Produce json
 // @Param id path int true "Project ID"
 // @Success 200 {object} dto.ProjectResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/projects/{id} [get]
 func ProjectGet(useCase project.GetUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid project ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid project id",
+				),
 			)
 			return
 		}
 
 		project, err := useCase.Execute(c.Request.Context(), projectID)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -121,25 +109,23 @@ func ProjectGet(useCase project.GetUseCase) gin.HandlerFunc {
 // @Param id path int true "Project ID"
 // @Param request body dto.ProjectUpdate true "Updated project data"
 // @Success 200 {object} dto.ProjectResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/projects/{id} [patch]
 func ProjectUpdate(useCase project.UpdateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid Project ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid project id",
+				),
 			)
 			return
 		}
 
 		var req dto.ProjectUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToDomainError(err))
 			return
 		}
 
@@ -147,10 +133,7 @@ func ProjectUpdate(useCase project.UpdateUseCase) gin.HandlerFunc {
 			c.Request.Context(), projectID, req.ToDomain(),
 		)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -167,25 +150,23 @@ func ProjectUpdate(useCase project.UpdateUseCase) gin.HandlerFunc {
 // @Produce json
 // @Param id path int true "Project ID"
 // @Success 200 {array} dto.EnvironmentResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/projects/{id}/environments [get]
 func ProjectListEnvironments(useCase project.ListEnvironmentsUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid project ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid project id",
+				),
 			)
 			return
 		}
 
 		environments, err := useCase.Execute(c.Request.Context(), projectID)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -208,25 +189,23 @@ func ProjectListEnvironments(useCase project.ListEnvironmentsUseCase) gin.Handle
 // @Param id path int true "Project ID"
 // @Param request body dto.ProjectService true "Service assignment data"
 // @Success 200 {object} dto.ProjectServiceResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/projects/{id}/services [post]
 func ProjectAssignService(useCase project.AssignServiceUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid project ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid project id",
+				),
 			)
 			return
 		}
 
 		var req dto.ProjectService
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToDomainError(err))
 			return
 		}
 
@@ -234,10 +213,7 @@ func ProjectAssignService(useCase project.AssignServiceUseCase) gin.HandlerFunc 
 			c.Request.Context(), projectID, req.ToDomain(),
 		)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -254,34 +230,33 @@ func ProjectAssignService(useCase project.AssignServiceUseCase) gin.HandlerFunc 
 // @Param id path int true "Project ID"
 // @Param service_id path int true "Service ID"
 // @Success 204
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/projects/{id}/services/{service_id} [delete]
 func ProjectRemoveService(useCase project.RemoveServiceUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid project ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid project id",
+				),
 			)
 			return
 		}
 
 		serviceID, paramErr := strconv.Atoi(c.Param("service_id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid service ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "service_id", "Invalid service id",
+				),
 			)
 			return
 		}
 
 		err := useCase.Execute(c.Request.Context(), projectID, serviceID)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -300,34 +275,33 @@ func ProjectRemoveService(useCase project.RemoveServiceUseCase) gin.HandlerFunc 
 // @Param service_id path int true "Service ID"
 // @Param request body dto.ProjectServiceUpdate true "Updated service configuration"
 // @Success 200 {object} dto.ProjectServiceResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/projects/{id}/services/{service_id} [patch]
 func ProjectUpdateService(useCase project.UpdateServiceUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid Project ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid project id",
+				),
 			)
 			return
 		}
 
 		serviceID, paramErr := strconv.Atoi(c.Param("service_id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid Service ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "service_id", "Invalid service id",
+				),
 			)
 			return
 		}
 
 		var req dto.ProjectServiceUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToDomainError(err))
 			return
 		}
 
@@ -335,10 +309,7 @@ func ProjectUpdateService(useCase project.UpdateServiceUseCase) gin.HandlerFunc 
 			c.Request.Context(), projectID, serviceID, req.ToDomain(),
 		)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
@@ -357,34 +328,33 @@ func ProjectUpdateService(useCase project.UpdateServiceUseCase) gin.HandlerFunc 
 // @Param service_id path int true "Service ID"
 // @Param request body dto.ProjectResetRequest true "Reset configuration"
 // @Success 200 {object} dto.ProjectResetRequestResponse
-// @Failure default {object} utils.ErrorResponse "Default error response for all failures"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/projects/{id}/services/{service_id}/reset-requests [post]
 func ProjectResetRequest(useCase project.ResetRequestUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		projectID, paramErr := strconv.Atoi(c.Param("id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid Project ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid project id",
+				),
 			)
 			return
 		}
 
 		serviceID, paramErr := strconv.Atoi(c.Param("service_id"))
 		if paramErr != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": "Invalid Service ID"},
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "service_id", "Invalid service id",
+				),
 			)
 			return
 		}
 
 		var req dto.ProjectResetRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.AbortWithStatusJSON(
-				http.StatusBadRequest,
-				gin.H{"error": err.Error()},
-			)
+			c.Error(errors.BindingToDomainError(err))
 			return
 		}
 
@@ -392,10 +362,7 @@ func ProjectResetRequest(useCase project.ResetRequestUseCase) gin.HandlerFunc {
 			c.Request.Context(), projectID, serviceID, req.RecalculateNextReset,
 		)
 		if err != nil {
-			c.AbortWithStatusJSON(
-				utils.GetDomainErrorStatusCode(err),
-				gin.H{"error": err.Error()},
-			)
+			c.Error(err)
 			return
 		}
 
