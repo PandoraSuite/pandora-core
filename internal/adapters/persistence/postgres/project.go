@@ -90,8 +90,7 @@ func (r *ProjectRepository) resetAvailableRequestsForEnvsService(
 			UPDATE environment_service es
 			SET available_request = max_request
 			FROM project p
-				JOIN environment e
-					ON e.project_id = p.id
+				JOIN environment e ON e.project_id = p.id
 			WHERE es.environment_id = e.id AND p.id = $1 AND es.service_id = $2
 			RETURNING e.id, e.name, e.status, es.max_request,
 				es.available_request, es.created_at, es.service_id
@@ -105,8 +104,7 @@ func (r *ProjectRepository) resetAvailableRequestsForEnvsService(
 			'assigned_at', u.created_at
 		)
 		FROM updated u
-			JOIN service s
-				ON s.id = u.service_id;
+			JOIN service s ON s.id = u.service_id;
 	`
 
 	var err error
@@ -195,8 +193,7 @@ func (r *ProjectRepository) UpdateService(
 			u.reset_frequency, COALESCE(u.next_reset, '0001-01-01 00:00:00.0+00'),
 			u.created_at
 		FROM updated u
-			JOIN service s
-				ON s.id = u.service_id;
+			JOIN service s ON s.id = u.service_id;
 	`
 
 	var resetFrequency any
@@ -681,14 +678,17 @@ func (r *ProjectRepository) createProjectServices(
 	query := fmt.Sprintf(
 		`
 			WITH inserted AS (
-				INSERT INTO project_service (project_id, service_id, max_request, reset_frequency, next_reset)
+				INSERT INTO project_service (
+					project_id, service_id, max_request, reset_frequency, next_reset
+				)
 				VALUES %s
 				RETURNING *
 			)
-			SELECT s.id, s.name, s.version, COALESCE(i.max_request, -1), i.reset_frequency, COALESCE(i.next_reset, '0001-01-01 00:00:00.0+00'), i.created_at
+			SELECT s.id, s.name, s.version, i.created_at, i.reset_frequency,
+				COALESCE(i.max_request, -1),
+				COALESCE(i.next_reset, '0001-01-01 00:00:00.0+00')
 			FROM inserted i
-				JOIN service s
-					ON i.service_id = s.id;
+				JOIN service s ON i.service_id = s.id;
 		`,
 		strings.Join(values, ", "),
 	)
@@ -708,10 +708,10 @@ func (r *ProjectRepository) createProjectServices(
 			&service.ID,
 			&service.Name,
 			&service.Version,
-			&service.MaxRequest,
 			&service.ResetFrequency,
-			&service.NextReset,
 			&service.AssignedAt,
+			&service.MaxRequest,
+			&service.NextReset,
 		)
 		if err != nil {
 			return nil, r.errorMapper(err, r.auxServiceTableName)

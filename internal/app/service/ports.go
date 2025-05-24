@@ -15,7 +15,6 @@ type ServiceCreateRepository = create.ServiceRepository
 
 type ServiceDeleteRepository = delete.ServiceRepository
 type ProjectServiceVerifier = delete.ProjectRepository
-type RequestLogCleanupRepository = delete.RequestLogRepository
 
 // ... List Use Case ...
 

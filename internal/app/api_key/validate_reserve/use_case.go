@@ -24,23 +24,23 @@ type useCase struct {
 func (uc *useCase) Execute(
 	ctx context.Context, req *dto.APIKeyValidateReserve,
 ) (*dto.APIKeyValidateReservationResponse, errors.Error) {
-	validate, requestLog, err := uc.validateWithReservation(ctx, req)
+	validate, request, err := uc.validateWithReservation(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 	// Create a request_log, then start_point is the start_request_id of reservation active
-	if err := uc.requestRepo.Create(ctx, requestLog); err != nil {
+	if err := uc.requestRepo.Create(ctx, request); err != nil {
 		return nil, err
 	}
 	// Return request created
-	validate.RequestID = requestLog.ID
+	validate.RequestID = request.ID
 
 	return validate, nil
 }
 
 func (uc *useCase) validateWithReservation(
 	ctx context.Context, req *dto.APIKeyValidateReserve,
-) (*dto.APIKeyValidateReservationResponse, *entities.RequestLog, errors.Error) {
+) (*dto.APIKeyValidateReservationResponse, *entities.Request, errors.Error) {
 	reservationFlow, err := uc.reservationRepo.GetByIDWithDetails(ctx, req.ReservationID)
 	if err != nil {
 		if err.Code() == errors.CodeNotFound {
@@ -49,11 +49,10 @@ func (uc *useCase) validateWithReservation(
 					Valid:   false,
 					Message: message,
 					Code:    enums.ReservationExecutionStatusNotFound,
-				}, &entities.RequestLog{
+				}, &entities.Request{
 					APIKey:          req.APIKey,
 					RequestTime:     req.RequestTime,
-					ExecutionStatus: enums.RequestLogFailed,
-					Message:         message,
+					ExecutionStatus: enums.RequestExecutionStatusQuotaExceeded,
 				}, nil
 		}
 		return nil, nil, err
@@ -65,14 +64,13 @@ func (uc *useCase) validateWithReservation(
 				Message: message,
 				Code:    enums.ValidateStatusInvalidKey,
 			},
-			&entities.RequestLog{
+			&entities.Request{
 				APIKey:          req.APIKey,
 				ServiceID:       reservationFlow.ServiceID,
 				RequestTime:     req.RequestTime,
 				EnvironmentID:   reservationFlow.EnvironmentID,
 				StartPoint:      reservationFlow.StartRequestID,
-				ExecutionStatus: enums.RequestLogFailed,
-				Message:         message,
+				ExecutionStatus: enums.RequestExecutionStatusQuotaExceeded,
 			}, nil
 	}
 	if req.Service != reservationFlow.ServiceName {
@@ -82,14 +80,13 @@ func (uc *useCase) validateWithReservation(
 				Message: message,
 				Code:    enums.ReservationExecutionStatusInvalidService,
 			},
-			&entities.RequestLog{
+			&entities.Request{
 				APIKey:          reservationFlow.APIKey,
 				ServiceID:       reservationFlow.ServiceID,
 				RequestTime:     req.RequestTime,
 				EnvironmentID:   reservationFlow.EnvironmentID,
 				StartPoint:      reservationFlow.StartRequestID,
-				ExecutionStatus: enums.RequestLogFailed,
-				Message:         message,
+				ExecutionStatus: enums.RequestExecutionStatusQuotaExceeded,
 			}, nil
 	}
 
@@ -99,14 +96,13 @@ func (uc *useCase) validateWithReservation(
 				Valid:   false,
 				Message: message,
 				Code:    enums.ReservationExecutionStatusInvalidServiceVersion,
-			}, &entities.RequestLog{
+			}, &entities.Request{
 				APIKey:          reservationFlow.APIKey,
 				ServiceID:       reservationFlow.ServiceID,
 				RequestTime:     req.RequestTime,
 				EnvironmentID:   reservationFlow.EnvironmentID,
 				StartPoint:      reservationFlow.StartRequestID,
-				ExecutionStatus: enums.RequestLogFailed,
-				Message:         message,
+				ExecutionStatus: enums.RequestExecutionStatusQuotaExceeded,
 			}, nil
 	}
 
@@ -116,14 +112,13 @@ func (uc *useCase) validateWithReservation(
 				Valid:   false,
 				Message: message,
 				Code:    enums.ReservationExecutionStatusServiceNotActive,
-			}, &entities.RequestLog{
+			}, &entities.Request{
 				APIKey:          reservationFlow.APIKey,
 				ServiceID:       reservationFlow.ServiceID,
 				RequestTime:     req.RequestTime,
 				EnvironmentID:   reservationFlow.EnvironmentID,
 				StartPoint:      reservationFlow.StartRequestID,
-				ExecutionStatus: enums.RequestLogFailed,
-				Message:         message,
+				ExecutionStatus: enums.RequestExecutionStatusQuotaExceeded,
 			}, nil
 	}
 
@@ -133,14 +128,13 @@ func (uc *useCase) validateWithReservation(
 				Valid:   false,
 				Message: message,
 				Code:    enums.ReservationExecutionStatusInvalidEnvironment,
-			}, &entities.RequestLog{
+			}, &entities.Request{
 				APIKey:          reservationFlow.APIKey,
 				ServiceID:       reservationFlow.ServiceID,
 				RequestTime:     req.RequestTime,
 				EnvironmentID:   reservationFlow.EnvironmentID,
 				StartPoint:      reservationFlow.StartRequestID,
-				ExecutionStatus: enums.RequestLogFailed,
-				Message:         message,
+				ExecutionStatus: enums.RequestExecutionStatusQuotaExceeded,
 			}, nil
 	}
 
@@ -150,26 +144,25 @@ func (uc *useCase) validateWithReservation(
 				Valid:   false,
 				Message: message,
 				Code:    enums.ReservationExecutionStatusEnvironmentNotActive,
-			}, &entities.RequestLog{
+			}, &entities.Request{
 				APIKey:          reservationFlow.APIKey,
 				ServiceID:       reservationFlow.ServiceID,
 				RequestTime:     req.RequestTime,
 				EnvironmentID:   reservationFlow.EnvironmentID,
 				StartPoint:      reservationFlow.StartRequestID,
-				ExecutionStatus: enums.RequestLogFailed,
-				Message:         message,
+				ExecutionStatus: enums.RequestExecutionStatusQuotaExceeded,
 			}, nil
 	}
 
 	return &dto.APIKeyValidateReservationResponse{
 			Valid: true,
-		}, &entities.RequestLog{
+		}, &entities.Request{
 			APIKey:          reservationFlow.APIKey,
 			ServiceID:       reservationFlow.ServiceID,
 			RequestTime:     req.RequestTime,
 			EnvironmentID:   reservationFlow.EnvironmentID,
 			StartPoint:      reservationFlow.StartRequestID,
-			ExecutionStatus: enums.RequestLogPending,
+			ExecutionStatus: enums.RequestExecutionStatusForwarded,
 		}, nil
 }
 

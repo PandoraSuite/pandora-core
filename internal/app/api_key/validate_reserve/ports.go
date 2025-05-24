@@ -9,7 +9,7 @@ import (
 )
 
 type RequestRepository interface {
-	Create(ctx context.Context, request *entities.RequestLog) errors.Error
+	Create(ctx context.Context, request *entities.Request) errors.Error
 }
 
 type ReservationRepository interface {

@@ -9,7 +9,7 @@ import (
 )
 
 type UseCase interface {
-	Execute(ctx context.Context, id string, executionStatus enums.RequestLogExecutionStatus) errors.Error
+	Execute(ctx context.Context, id string, executionStatus enums.RequestExecutionStatus) errors.Error
 }
 
 type useCase struct {
@@ -21,7 +21,7 @@ type useCase struct {
 func (uc *useCase) Execute(
 	ctx context.Context,
 	id string,
-	executionStatus enums.RequestLogExecutionStatus,
+	executionStatus enums.RequestExecutionStatus,
 ) errors.Error {
 	if err := uc.validateInput(id, executionStatus); err != nil {
 		return err
@@ -32,7 +32,7 @@ func (uc *useCase) Execute(
 
 func (uc *useCase) validateInput(
 	id string,
-	executionStatus enums.RequestLogExecutionStatus,
+	executionStatus enums.RequestExecutionStatus,
 ) errors.Error {
 	var err errors.Error
 
@@ -59,7 +59,7 @@ func (uc *useCase) validateID(id string) errors.Error {
 	)
 }
 
-func (uc *useCase) validateExecutionStatus(executionStatus enums.RequestLogExecutionStatus) errors.Error {
+func (uc *useCase) validateExecutionStatus(executionStatus enums.RequestExecutionStatus) errors.Error {
 	return uc.validator.ValidateVariable(
 		executionStatus,
 		"executionStatus",

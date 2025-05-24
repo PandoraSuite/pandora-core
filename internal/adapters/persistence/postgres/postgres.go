@@ -40,7 +40,7 @@ func (d *Driver) entityMapper(table string) string {
 	case "environment_service":
 		return "EnvironmentService"
 	case "request_log":
-		return "RequestLog"
+		return "Request"
 	case "reservation":
 		return "Reservation"
 	default:

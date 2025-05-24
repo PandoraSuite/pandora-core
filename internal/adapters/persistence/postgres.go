@@ -49,7 +49,7 @@ func (r *postgresRepositories) Service() ports.ServiceRepository {
 
 func (r *postgresRepositories) Request() ports.RequestRepository {
 	if r.requestRepo == nil {
-		r.requestRepo = postgres.NewRequestLogRepository(r.driver)
+		r.requestRepo = postgres.NewRequestRepository(r.driver)
 	}
 	return r.requestRepo
 }

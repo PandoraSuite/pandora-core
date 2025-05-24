@@ -27,9 +27,8 @@ func NewDeleteUseCase(
 	validator validator.Validator,
 	serviceRepo ServiceDeleteRepository,
 	projectRepo ProjectServiceVerifier,
-	requestLogRepo RequestLogCleanupRepository,
 ) DeleteUseCase {
-	return delete.NewUseCase(validator, serviceRepo, projectRepo, requestLogRepo)
+	return delete.NewUseCase(validator, serviceRepo, projectRepo)
 }
 
 // ... List Use Case ...

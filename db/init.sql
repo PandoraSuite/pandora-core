@@ -84,8 +84,6 @@ CREATE TABLE IF NOT EXISTS api_key(
 );
 
 CREATE TABLE IF NOT EXISTS project_service(
-    id SERIAL PRIMARY KEY,
-
     project_id INTEGER NOT NULL,
     CONSTRAINT project_service_project_id_fk
         FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
@@ -106,8 +104,6 @@ CREATE TABLE IF NOT EXISTS project_service(
 );
 
 CREATE TABLE IF NOT EXISTS environment_service(
-    id SERIAL PRIMARY KEY,
-
     environment_id INTEGER NOT NULL,
     CONSTRAINT environment_service_environment_id_fk
         FOREIGN KEY (environment_id) REFERENCES environment(id) ON DELETE CASCADE,
@@ -165,11 +161,6 @@ CREATE TABLE IF NOT EXISTS request(
     CONSTRAINT request_service_id_fk
         FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE,
 
-    -- Environment Service
-    environment_service_id INTEGER,
-    CONSTRAINT request_environment_service_id_fk
-        FOREIGN KEY (environment_service_id) REFERENCES environment_service(id) ON DELETE SET NULL,
-
     status_code INTEGER,
     execution_status TEXT NOT NULL,
     CONSTRAINT request_execution_status_check
@@ -189,15 +180,27 @@ CREATE TABLE IF NOT EXISTS request(
             OR status_code IS NOT NULL
         ),
 
-    message TEXT,
     request_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     path TEXT NOT NULL,
     method TEXT,
     ip_address INET NOT NULL,
-    body JSONB,
-    headers JSONB,
-    query_params JSONB,
+    headers TEXT,
+    query_params TEXT,
+    body TEXT,
+    body_content_type TEXT,
+    CONSTRAINT request_body_content_type_check
+        CHECK (
+            body_content_type IN (
+                'application/json',
+                'application/xml',
+                'text/plain',
+                'text/html',
+                'application/x-www-form-urlencoded',
+                'multipart/form-data',
+                'application/octet-stream'
+            )
+        ),
 
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

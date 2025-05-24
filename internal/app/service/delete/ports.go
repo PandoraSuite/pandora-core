@@ -13,7 +13,3 @@ type ServiceRepository interface {
 type ProjectRepository interface {
 	ExistsServiceIn(ctx context.Context, serviceID int) (bool, errors.Error)
 }
-
-type RequestLogRepository interface {
-	DeleteByService(ctx context.Context, serviceID int) errors.Error
-}

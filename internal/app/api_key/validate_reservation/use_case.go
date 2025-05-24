@@ -29,20 +29,20 @@ type useCase struct {
 func (uc *useCase) Execute(
 	ctx context.Context, req *dto.APIKeyValidate,
 ) (*dto.APIKeyValidateResponse, errors.Error) {
-	validate, requestLog, reservation, err := uc.validateAndReserve(ctx, req)
+	validate, request, reservation, err := uc.validateAndReserve(ctx, req)
 	if err != nil {
 		return nil, err
 	}
 	// Create a request_log as a initial point, then start_point is the register id
-	if err := uc.requestRepo.CreateAsInitialPoint(ctx, requestLog); err != nil {
+	if err := uc.requestRepo.CreateAsInitialPoint(ctx, request); err != nil {
 		return nil, err
 	}
 	// Return request created
-	validate.RequestID = requestLog.ID
+	validate.RequestID = request.ID
 
 	// When process was valid then create an active reservation up to twelve hours later
 	if reservation != nil {
-		reservation.StartRequestID = requestLog.ID
+		reservation.StartRequestID = request.ID
 		if err := uc.reservationRepo.Create(ctx, reservation); err != nil {
 			return nil, err
 		}
@@ -54,7 +54,7 @@ func (uc *useCase) Execute(
 
 func (uc *useCase) validateAndReserve(
 	ctx context.Context, req *dto.APIKeyValidate,
-) (*dto.APIKeyValidateResponse, *entities.RequestLog, *entities.Reservation, errors.Error) {
+) (*dto.APIKeyValidateResponse, *entities.Request, *entities.Reservation, errors.Error) {
 	// API Key must be valid, active and not expirated.
 	apiKey,
 		validate, request_log, err := uc.apiKeyEnable(ctx, req)
@@ -97,12 +97,12 @@ func (uc *useCase) validateAndReserve(
 	return &dto.APIKeyValidateResponse{
 			AvailableRequest: availableRequest.AvailableRequest,
 			Valid:            true,
-		}, &entities.RequestLog{
+		}, &entities.Request{
 			APIKey:          apiKey.Key,
 			ServiceID:       service.ID,
 			RequestTime:     req.RequestTime,
 			EnvironmentID:   environment.ID,
-			ExecutionStatus: enums.RequestLogPending,
+			ExecutionStatus: enums.RequestExecutionStatusForwarded,
 		}, &entities.Reservation{
 			APIKey:        apiKey.Key,
 			ServiceID:     service.ID,
@@ -114,7 +114,7 @@ func (uc *useCase) validateAndReserve(
 
 func (uc *useCase) apiKeyEnable(
 	ctx context.Context, req *dto.APIKeyValidate,
-) (*entities.APIKey, *dto.APIKeyValidateResponse, *entities.RequestLog, errors.Error) {
+) (*entities.APIKey, *dto.APIKeyValidateResponse, *entities.Request, errors.Error) {
 	apiKey, err := uc.apiKeyRepo.GetByKey(ctx, req.APIKey)
 	if err != nil {
 		if err.Code() == errors.CodeNotFound {
@@ -124,11 +124,10 @@ func (uc *useCase) apiKeyEnable(
 					Message: message,
 					Code:    enums.ValidateStatusKeyNotFound,
 				},
-				&entities.RequestLog{
+				&entities.Request{
 					APIKey:          req.APIKey,
 					RequestTime:     req.RequestTime,
-					ExecutionStatus: enums.RequestLogUnauthorized,
-					Message:         message,
+					ExecutionStatus: enums.RequestExecutionStatusUnauthorized,
 				}, nil
 		}
 		return nil, nil, nil, err
@@ -141,12 +140,11 @@ func (uc *useCase) apiKeyEnable(
 				Valid:   false,
 				Message: message,
 				Code:    enums.ValidateStatusDeactivatedKey,
-			}, &entities.RequestLog{
+			}, &entities.Request{
 				APIKey:          apiKey.Key,
 				RequestTime:     req.RequestTime,
 				EnvironmentID:   apiKey.EnvironmentID,
-				ExecutionStatus: enums.RequestLogUnauthorized,
-				Message:         message,
+				ExecutionStatus: enums.RequestExecutionStatusUnauthorized,
 			}, nil
 	}
 
@@ -158,12 +156,11 @@ func (uc *useCase) apiKeyEnable(
 				Message: message,
 				Code:    enums.ValidateStatusExpiredKey,
 			},
-			&entities.RequestLog{
+			&entities.Request{
 				APIKey:          apiKey.Key,
 				RequestTime:     req.RequestTime,
 				EnvironmentID:   apiKey.EnvironmentID,
-				ExecutionStatus: enums.RequestLogUnauthorized,
-				Message:         message,
+				ExecutionStatus: enums.RequestExecutionStatusUnauthorized,
 			}, nil
 	}
 	return apiKey, nil, nil, nil
@@ -171,7 +168,7 @@ func (uc *useCase) apiKeyEnable(
 
 func (uc *useCase) environmentEnable(
 	ctx context.Context, req *dto.APIKeyValidate, apiKey *entities.APIKey,
-) (*entities.Environment, *dto.APIKeyValidateResponse, *entities.RequestLog, errors.Error) {
+) (*entities.Environment, *dto.APIKeyValidateResponse, *entities.Request, errors.Error) {
 	environment, err := uc.environmentRepo.GetByID(
 		ctx, apiKey.EnvironmentID)
 	if err != nil {
@@ -183,12 +180,11 @@ func (uc *useCase) environmentEnable(
 				Valid:   false,
 				Message: message,
 				Code:    enums.ValidateStatusInvalidEnvironmentKey,
-			}, &entities.RequestLog{
+			}, &entities.Request{
 				APIKey:          apiKey.Key,
 				RequestTime:     req.RequestTime,
 				EnvironmentID:   environment.ID,
-				ExecutionStatus: enums.RequestLogUnauthorized,
-				Message:         message,
+				ExecutionStatus: enums.RequestExecutionStatusUnauthorized,
 			}, nil
 	}
 	if !environment.IsActive() {
@@ -197,19 +193,18 @@ func (uc *useCase) environmentEnable(
 				Valid:   false,
 				Message: message,
 				Code:    enums.ValidateStatusDeactivatedEnvironment,
-			}, &entities.RequestLog{
+			}, &entities.Request{
 				APIKey:          apiKey.Key,
 				RequestTime:     req.RequestTime,
 				EnvironmentID:   environment.ID,
-				ExecutionStatus: enums.RequestLogUnauthorized,
-				Message:         message,
+				ExecutionStatus: enums.RequestExecutionStatusUnauthorized,
 			}, nil
 	}
 	return environment, nil, nil, nil
 }
 func (uc *useCase) serviceEnable(
 	ctx context.Context, req *dto.APIKeyValidate, apiKey *entities.APIKey,
-) (*entities.Service, *dto.APIKeyValidateResponse, *entities.RequestLog, errors.Error) {
+) (*entities.Service, *dto.APIKeyValidateResponse, *entities.Request, errors.Error) {
 	// Service in that version must be exist in the service entity
 	service, err := uc.serviceRepo.GetByNameAndVersion(
 		ctx, req.Service, req.ServiceVersion,
@@ -222,12 +217,11 @@ func (uc *useCase) serviceEnable(
 					Message: message,
 					Code:    enums.ValidateStatusServiceNotFound,
 				},
-				&entities.RequestLog{
+				&entities.Request{
 					APIKey:          apiKey.Key,
 					RequestTime:     req.RequestTime,
 					EnvironmentID:   apiKey.EnvironmentID,
-					ExecutionStatus: enums.RequestLogUnauthorized,
-					Message:         message,
+					ExecutionStatus: enums.RequestExecutionStatusUnauthorized,
 				}, nil
 		}
 		return nil, nil, nil, err
@@ -241,13 +235,12 @@ func (uc *useCase) serviceEnable(
 				Message: message,
 				Code:    enums.ReservationExecutionStatusServiceNotActive,
 			},
-			&entities.RequestLog{
+			&entities.Request{
 				APIKey:          apiKey.Key,
 				ServiceID:       service.ID,
 				RequestTime:     req.RequestTime,
 				EnvironmentID:   apiKey.EnvironmentID,
-				ExecutionStatus: enums.RequestLogUnauthorized,
-				Message:         message,
+				ExecutionStatus: enums.RequestExecutionStatusUnauthorized,
 			}, nil
 	}
 	return service, nil, nil, nil
@@ -259,7 +252,7 @@ func (uc *useCase) handlerErrorNotQuotes(
 	apiKey *entities.APIKey,
 	environment_id int,
 	service_id int,
-) (*dto.APIKeyValidateResponse, *entities.RequestLog, errors.Error) {
+) (*dto.APIKeyValidateResponse, *entities.Request, errors.Error) {
 	environment_service_found, has_available_requests,
 		err := uc.environmentRepo.MissingResourceDiagnosis(
 		ctx, environment_id, service_id)
@@ -273,12 +266,11 @@ func (uc *useCase) handlerErrorNotQuotes(
 				Message: message,
 				Code:    enums.ValidateStatusEnvironmentServiceInvalid,
 			},
-			&entities.RequestLog{
+			&entities.Request{
 				APIKey:          apiKey.Key,
 				ServiceID:       service_id,
 				RequestTime:     req.RequestTime,
-				ExecutionStatus: enums.RequestLogUnauthorized,
-				Message:         message,
+				ExecutionStatus: enums.RequestExecutionStatusUnauthorized,
 			}, nil
 	}
 	if !has_available_requests {
@@ -300,13 +292,12 @@ func (uc *useCase) handlerErrorNotQuotes(
 					Message: message,
 					Code:    enums.ValidateStatusExceededRequests,
 				},
-				&entities.RequestLog{
+				&entities.Request{
 					APIKey:          apiKey.Key,
 					ServiceID:       service_id,
 					RequestTime:     req.RequestTime,
 					EnvironmentID:   apiKey.EnvironmentID,
-					ExecutionStatus: enums.RequestLogFailed,
-					Message:         message,
+					ExecutionStatus: enums.RequestExecutionStatusQuotaExceeded,
 				}, nil
 		}
 
@@ -317,13 +308,12 @@ func (uc *useCase) handlerErrorNotQuotes(
 					Message: message,
 					Code:    enums.ValidateStatusActiveReservations,
 				},
-				&entities.RequestLog{
+				&entities.Request{
 					APIKey:          apiKey.Key,
 					ServiceID:       service_id,
 					RequestTime:     req.RequestTime,
 					EnvironmentID:   apiKey.EnvironmentID,
-					ExecutionStatus: enums.RequestLogFailed,
-					Message:         message,
+					ExecutionStatus: enums.RequestExecutionStatusQuotaExceeded,
 				}, nil
 		}
 	}
