@@ -1,200 +1,227 @@
 CREATE DATABASE pandora;
 
 \c pandora;
-
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-CREATE TABLE IF NOT EXISTS service (
+CREATE TABLE IF NOT EXISTS service(
     id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
-    version VARCHAR(11) NOT NULL,
-    status TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
-    CONSTRAINT service_status_check CHECK (status IN ('active', 'deactivated', 'deprecated')),
-    CONSTRAINT service_name_version_unique UNIQUE (name, version)
+    name TEXT NOT NULL,
+    version VARCHAR(16) NOT NULL,
+    CONSTRAINT service_name_version_unique UNIQUE (name, version),
+
+    status TEXT NOT NULL,
+    CONSTRAINT service_status_check
+        CHECK (status IN ('enabled', 'disabled', 'deprecated')),
+
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS client (
+CREATE TABLE IF NOT EXISTS client(
     id SERIAL PRIMARY KEY,
-    type TEXT NOT NULL,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
-    CONSTRAINT client_type_check CHECK (type IN ('organization', 'developer')),
+    name TEXT NOT NULL,
     CONSTRAINT client_name_unique UNIQUE (name),
-    CONSTRAINT client_email_unique UNIQUE (email)
+
+    email TEXT NOT NULL,
+    CONSTRAINT client_email_unique UNIQUE (email),
+
+    type TEXT NOT NULL,
+    CONSTRAINT client_type_check CHECK (type IN ('organization', 'developer')),
+
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS project (
+CREATE TABLE IF NOT EXISTS project(
     id SERIAL PRIMARY KEY,
+
+    name TEXT NOT NULL,
     client_id INTEGER NOT NULL,
-    name TEXT NOT NULL,
+    CONSTRAINT project_client_id_fk
+        FOREIGN KEY (client_id) REFERENCES client(id) ON DELETE CASCADE,
+    CONSTRAINT project_name_client_id_unique UNIQUE (name, client_id),
+
     status TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CONSTRAINT project_status_check
+        CHECK (status IN ('enabled', 'disabled')),
 
-    CONSTRAINT project_client_id_fk FOREIGN KEY (client_id)
-        REFERENCES client(id) ON DELETE CASCADE,
-
-    CONSTRAINT project_status_check CHECK (status IN ('in_production', 'in_development', 'deactivated')),
-    CONSTRAINT project_name_client_id_unique UNIQUE (name, client_id)
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS environment (
+CREATE TABLE IF NOT EXISTS environment(
     id SERIAL PRIMARY KEY,
+
+    name TEXT NOT NULL,
     project_id INTEGER NOT NULL,
-    name TEXT NOT NULL,
+    CONSTRAINT environment_project_id_fk
+        FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
+    CONSTRAINT environment_name_project_id_unique UNIQUE (name, project_id),
+    
     status TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CONSTRAINT environment_status_check CHECK (status IN ('enabled', 'disabled')),
 
-    CONSTRAINT environment_project_id_fk FOREIGN KEY (project_id)
-        REFERENCES project(id) ON DELETE CASCADE,
-
-    CONSTRAINT environment_status_check CHECK (status IN ('active', 'deactivated')),
-    CONSTRAINT environment_name_project_id_unique UNIQUE (name, project_id)
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS api_key (
+CREATE TABLE IF NOT EXISTS api_key(
     id SERIAL PRIMARY KEY,
+
     environment_id INTEGER NOT NULL,
+    CONSTRAINT api_key_environment_id_fk
+        FOREIGN KEY (environment_id) REFERENCES environment(id) ON DELETE CASCADE,
+
     key TEXT NOT NULL,
-    expires_at TIMESTAMP WITH TIME ZONE NULL,
-    last_used TIMESTAMP WITH TIME ZONE NULL,
+    CONSTRAINT api_key_key_unique UNIQUE (key),
+
     status TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), 
+    CONSTRAINT api_key_status_check
+        CHECK (status IN ('enabled', 'disabled')),
 
-    CONSTRAINT api_key_environment_id_fk FOREIGN KEY (environment_id)
-        REFERENCES environment(id) ON DELETE CASCADE,
+    expires_at TIMESTAMPTZ,
+    last_used TIMESTAMPTZ,
 
-    CONSTRAINT api_key_status_check CHECK (status IN ('active', 'deactivated')),
-    CONSTRAINT api_key_key_unique UNIQUE (key)
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS project_service (
+CREATE TABLE IF NOT EXISTS project_service(
     project_id INTEGER NOT NULL,
+    CONSTRAINT project_service_project_id_fk
+        FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE CASCADE,
+
+
     service_id INTEGER NOT NULL,
-    max_request INTEGER NULL,
-    reset_frequency TEXT NULL,
-    next_reset TIMESTAMP WITH TIME ZONE NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), 
+    CONSTRAINT project_service_service_id_fk
+        FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE,
 
-    PRIMARY KEY (project_id, service_id),
-    
-    CONSTRAINT project_service_project_id_fk FOREIGN KEY (project_id)
-        REFERENCES project(id) ON DELETE CASCADE,
-    CONSTRAINT project_service_service_id_fk FOREIGN KEY (service_id)
-        REFERENCES service(id) ON DELETE CASCADE,
+    reset_frequency TEXT,
+    CONSTRAINT project_service_reset_frequency_check
+        CHECK (reset_frequency IN ('daily', 'weekly', 'biweekly', 'monthly')),
 
-    CONSTRAINT project_service_reset_frequency_check CHECK (reset_frequency IN ('daily', 'weekly', 'biweekly', 'monthly'))
+    max_request INTEGER,
+    next_reset TIMESTAMPTZ,
+
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS environment_service (
+CREATE TABLE IF NOT EXISTS environment_service(
     environment_id INTEGER NOT NULL,
+    CONSTRAINT environment_service_environment_id_fk
+        FOREIGN KEY (environment_id) REFERENCES environment(id) ON DELETE CASCADE,
+
     service_id INTEGER NOT NULL,
-    max_request INTEGER NULL,
-    available_request INTEGER NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    CONSTRAINT environment_service_service_id_fk
+        FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE,
 
-    PRIMARY KEY (environment_id, service_id),
+    CONSTRAINT environment_service_unique UNIQUE (environment_id, service_id),
 
-    CONSTRAINT environment_service_environment_id_fk FOREIGN KEY (environment_id)
-        REFERENCES environment(id) ON DELETE CASCADE,
-    CONSTRAINT environment_service_service_id_fk FOREIGN KEY (service_id)
-        REFERENCES service(id) ON DELETE CASCADE,
+    max_request INTEGER,
+    available_request INTEGER,
+    CONSTRAINT check_available_less_than_or_equal_max
+        CHECK (available_request <= max_request),
+    CONSTRAINT check_max_and_available_present_together
+        CHECK (
+            (max_request IS NOT NULL AND available_request IS NOT NULL)
+            OR
+            (max_request IS NULL AND available_request IS NULL)
+        ),
 
-	CONSTRAINT check_max_request_and_available_request CHECK (
-    (max_request IS NOT NULL AND available_request IS NOT NULL) OR
-    (max_request IS NULL AND available_request IS NULL)),
-    CONSTRAINT check_available_request_less_than_max_request_ CHECK 
-    (available_request <= max_request)
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS request_log (
+CREATE TABLE IF NOT EXISTS request(
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    environment_id INTEGER NULL,
-    service_id INTEGER NULL,
+
+    -- Request chaining
+    start_point UUID,
+    CONSTRAINT request_start_point_fk
+        FOREIGN KEY (start_point) REFERENCES request(id) ON DELETE CASCADE,
+
+    -- API Key
     api_key TEXT NOT NULL,
-    start_point UUID NULL,
-    request_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    message TEXT NULL,
-    execution_status TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    
-    CONSTRAINT request_log_environment_service_fk FOREIGN KEY (environment_id, service_id) 
-	    REFERENCES environment_service(environment_id, service_id) ON DELETE CASCADE,
-    CONSTRAINT request_log_start_point_fk FOREIGN KEY (start_point)
-        REFERENCES request_log(id) ON DELETE CASCADE,
+    api_key_id INTEGER,
+    CONSTRAINT request_api_key_id_fk
+        FOREIGN KEY (api_key_id) REFERENCES api_key(id) ON DELETE SET NULL,
 
-    CONSTRAINT request_log_execution_status_check CHECK (execution_status IN ('success', 'failed', 'pending', 'unauthorized', 'server error'))
+    -- Project
+    project_name TEXT NOT NULL,
+    project_id INTEGER,
+    CONSTRAINT request_project_id_fk
+        FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE SET NULL,
+
+    -- Environment
+    environment_name TEXT NOT NULL,
+    environment_id INTEGER,
+    CONSTRAINT request_environment_id_fk
+        FOREIGN KEY (environment_id) REFERENCES environment(id) ON DELETE SET NULL,
+
+    -- Service
+    service_name TEXT NOT NULL,
+    service_version VARCHAR(16) NOT NULL,
+    service_id INTEGER NOT NULL,
+    CONSTRAINT request_service_id_fk
+        FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE,
+
+    status_code INTEGER,
+    execution_status TEXT NOT NULL,
+    CONSTRAINT request_execution_status_check
+        CHECK (
+            execution_status IN (
+                'success',
+                'forwarded',
+                'unauthorized',
+                'client_error',
+                'service_error',
+                'quota_exceeded'
+            )
+        ),
+    CONSTRAINT request_status_code_required_check
+        CHECK (
+            execution_status NOT IN ('success', 'client_error', 'service_error')
+            OR status_code IS NOT NULL
+        ),
+
+    request_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    path TEXT NOT NULL,
+    method TEXT,
+    ip_address INET NOT NULL,
+    headers TEXT,
+    query_params TEXT,
+    body TEXT,
+    body_content_type TEXT,
+    CONSTRAINT request_body_content_type_check
+        CHECK (
+            body_content_type IN (
+                'application/json',
+                'application/xml',
+                'text/plain',
+                'text/html',
+                'application/x-www-form-urlencoded',
+                'multipart/form-data',
+                'application/octet-stream'
+            )
+        ),
+
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS reservation (
+CREATE TABLE IF NOT EXISTS reservation(
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    environment_id INTEGER NOT NULL,
-    service_id INTEGER NOT NULL,
+
+    environment_service_id INTEGER NOT NULL,
+    CONSTRAINT reservation_environment_service_id_fk
+        FOREIGN KEY (environment_service_id) REFERENCES environment_service(id) ON DELETE CASCADE,
+
     api_key TEXT NOT NULL,
     start_request_id UUID NOT NULL,
-    request_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    expires_at TIMESTAMP WITH TIME ZONE,
-
-    CONSTRAINT reservation_environment_service_fk FOREIGN KEY (environment_id, service_id) 
-	    REFERENCES environment_service(environment_id, service_id) ON DELETE CASCADE
+    request_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expires_at TIMESTAMPTZ
 );
 
-
-CREATE INDEX IF NOT EXISTS idx_key ON api_key (key);
-CREATE INDEX IF NOT EXISTS idx_request_log_api_key ON request_log (api_key);
-CREATE INDEX IF NOT EXISTS idx_reservation_api_key ON reservation (api_key);
-CREATE INDEX IF NOT EXISTS idx_start_point ON request_log (start_point);
-
-
-CREATE FUNCTION set_updated_at()
-RETURNS TRIGGER AS $$
-BEGIN
-        NEW.updated_at = NOW();
-        RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER on_update_set_updated_at
-    BEFORE UPDATE ON service
-    FOR EACH ROW
-    EXECUTE FUNCTION set_updated_at();
-
-CREATE TRIGGER on_update_set_updated_at
-    BEFORE UPDATE ON client
-    FOR EACH ROW
-    EXECUTE FUNCTION set_updated_at();
-
-CREATE TRIGGER on_update_set_updated_at
-    BEFORE UPDATE ON project
-    FOR EACH ROW
-    EXECUTE FUNCTION set_updated_at();
-
-CREATE TRIGGER on_update_set_updated_at
-    BEFORE UPDATE ON environment
-    FOR EACH ROW
-    EXECUTE FUNCTION set_updated_at();
-
-CREATE TRIGGER on_update_set_updated_at
-    BEFORE UPDATE ON api_key
-    FOR EACH ROW
-    EXECUTE FUNCTION set_updated_at();
-
-CREATE TRIGGER on_update_set_updated_at
-    BEFORE UPDATE ON project_service
-    FOR EACH ROW
-    EXECUTE FUNCTION set_updated_at();
-
-CREATE TRIGGER on_update_set_updated_at
-    BEFORE UPDATE ON environment_service
-    FOR EACH ROW
-    EXECUTE FUNCTION set_updated_at();
+CREATE INDEX IF NOT EXISTS idx_key ON api_key(key);
+CREATE INDEX IF NOT EXISTS idx_start_point ON request(start_point);
+CREATE INDEX IF NOT EXISTS idx_request_api_key ON request(api_key);
+CREATE INDEX IF NOT EXISTS idx_request_project_id ON request(project_id);
+CREATE INDEX IF NOT EXISTS idx_request_service_id ON request(service_id);
+CREATE INDEX IF NOT EXISTS idx_reservation_api_key ON reservation(api_key);
+CREATE INDEX IF NOT EXISTS idx_request_environment_id ON request(environment_id);

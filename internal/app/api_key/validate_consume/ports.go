@@ -24,7 +24,7 @@ type ServiceRepository interface {
 }
 
 type RequestRepository interface {
-	CreateAsInitialPoint(ctx context.Context, request *entities.RequestLog) errors.Error
+	CreateAsInitialPoint(ctx context.Context, request *entities.Request) errors.Error
 }
 
 type ReservationRepository interface {

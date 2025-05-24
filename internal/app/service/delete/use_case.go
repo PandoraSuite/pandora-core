@@ -14,9 +14,8 @@ type UseCase interface {
 type useCase struct {
 	validator validator.Validator
 
-	serviceRepo    ServiceRepository
-	projectRepo    ProjectRepository
-	requestLogRepo RequestLogRepository
+	serviceRepo ServiceRepository
+	projectRepo ProjectRepository
 }
 
 func (uc *useCase) Execute(ctx context.Context, id int) errors.Error {
@@ -42,10 +41,6 @@ func (uc *useCase) Execute(ctx context.Context, id int) errors.Error {
 		return err
 	}
 
-	if err := uc.requestLogRepo.DeleteByService(ctx, id); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -65,12 +60,10 @@ func NewUseCase(
 	validator validator.Validator,
 	serviceRepo ServiceRepository,
 	projectRepo ProjectRepository,
-	requestLogRepo RequestLogRepository,
 ) UseCase {
 	return &useCase{
-		validator:      validator,
-		serviceRepo:    serviceRepo,
-		projectRepo:    projectRepo,
-		requestLogRepo: requestLogRepo,
+		validator:   validator,
+		serviceRepo: serviceRepo,
+		projectRepo: projectRepo,
 	}
 }

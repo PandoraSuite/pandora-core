@@ -18,7 +18,6 @@ func RegisterServiceRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
 		deps.Validator,
 		deps.Repositories.Service(),
 		deps.Repositories.Project(),
-		deps.Repositories.Request(),
 	)
 	updateStatusUC := service.NewUpdateStatusUseCase(
 		deps.Validator, deps.Repositories.Service(),

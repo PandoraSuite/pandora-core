@@ -111,11 +111,11 @@ type ProjectRepository interface {
 
 type RequestRepository interface {
 	// ... Create ...
-	Create(ctx context.Context, requestLog *entities.RequestLog) errors.Error
-	CreateAsInitialPoint(ctx context.Context, requestLog *entities.RequestLog) errors.Error
+	Create(ctx context.Context, request *entities.Request) errors.Error
+	CreateAsInitialPoint(ctx context.Context, request *entities.Request) errors.Error
 
 	// ... Update ...
-	UpdateExecutionStatus(ctx context.Context, id string, executionStatus enums.RequestLogExecutionStatus) errors.Error
+	UpdateExecutionStatus(ctx context.Context, id string, executionStatus enums.RequestExecutionStatus) errors.Error
 
 	// ... Delete ...
 	DeleteByService(ctx context.Context, serviceID int) errors.Error

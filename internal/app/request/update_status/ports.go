@@ -8,5 +8,5 @@ import (
 )
 
 type RequestRepository interface {
-	UpdateExecutionStatus(ctx context.Context, id string, executionStatus enums.RequestLogExecutionStatus) errors.Error
+	UpdateExecutionStatus(ctx context.Context, id string, executionStatus enums.RequestExecutionStatus) errors.Error
 }

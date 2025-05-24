@@ -22,7 +22,7 @@ type service struct {
 
 func (s *service) SetRequestStatus(ctx context.Context, req *pb.SetRequestStatusRequest) (*emptypb.Empty, error) {
 	err := s.updateStatusUC.Execute(
-		ctx, req.GetId(), enums.RequestLogExecutionStatus(req.GetStatus()),
+		ctx, req.GetId(), enums.RequestExecutionStatus(req.GetStatus()),
 	)
 	if err != nil {
 		return nil, status.Error(
