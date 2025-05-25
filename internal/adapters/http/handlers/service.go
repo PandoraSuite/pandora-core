@@ -110,6 +110,50 @@ func ServiceDelete(useCase service.DeleteUseCase) gin.HandlerFunc {
 	}
 }
 
+// ServiceListRequests godoc
+// @Summary Retrieves all requests for a service
+// @Description Fetches a list of all requests associated with a specific service
+// @Tags Services
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "Service ID"
+// @Param query query dto.RequestFilter false "Query parameters"
+// @Success 200 {array} dto.RequestResponse
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
+// @Router /api/v1/services/{id}/requests [get]
+func ServiceListRequests(useCase service.ListRequestsUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		serviceID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid service id",
+				),
+			)
+			return
+		}
+
+		var req dto.RequestFilter
+		if err := c.ShouldBindQuery(&req); err != nil {
+			c.Error(errors.BindingToHTTPError(req, err))
+			return
+		}
+
+		requests, err := useCase.Execute(c.Request.Context(), serviceID, req.ToDomain())
+		if err != nil {
+			c.Error(err)
+			return
+		}
+
+		resp := make([]*dto.RequestResponse, len(requests))
+		for i, request := range requests {
+			resp[i] = dto.RequestResponseFromDomain(request)
+		}
+		c.JSON(http.StatusOK, resp)
+	}
+}
+
 // ServiceUpdateStatus godoc
 // @Summary Updates the status of a service
 // @Description Changes the current status of a specific service by ID

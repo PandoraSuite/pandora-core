@@ -9,7 +9,7 @@ import (
 )
 
 type UseCase interface {
-	Execute(ctx context.Context, filter *dto.ClientFilter) ([]*dto.ClientResponse, errors.Error)
+	Execute(ctx context.Context, req *dto.ClientFilter) ([]*dto.ClientResponse, errors.Error)
 }
 
 type useCase struct {

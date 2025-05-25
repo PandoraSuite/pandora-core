@@ -11,8 +11,39 @@ import (
 const utcTag = "utc"
 
 func validateUTC(fl govalidator.FieldLevel) bool {
-	field := fl.Field()
+	t := convertToTime(fl.Field())
+	return t.IsZero() || t.Location() == time.UTC
+}
 
+const gteTimeTag = "gtetime"
+
+func validateGteTime(fl govalidator.FieldLevel) bool {
+	t := convertToTime(fl.Field())
+
+	if t.IsZero() {
+		return true
+	}
+
+	otherFieldName := fl.Param()
+	if otherFieldName == "" {
+		panic(
+			fmt.Sprintf(
+				"invalid usage of '%s' validation tag without a field name",
+				gteTimeTag,
+			),
+		)
+	}
+
+	otherT := convertToTime(fl.Parent().FieldByName(otherFieldName))
+
+	if otherT.IsZero() {
+		return false
+	}
+
+	return t.After(otherT) || t.Equal(otherT)
+}
+
+func convertToTime(field reflect.Value) time.Time {
 	var t time.Time
 	isTime := false
 
@@ -24,9 +55,6 @@ func validateUTC(fl govalidator.FieldLevel) bool {
 		}
 	case reflect.Ptr:
 		if field.Type().Elem() == reflect.TypeOf(time.Time{}) {
-			if field.IsNil() {
-				return true
-			}
 			t = field.Elem().Interface().(time.Time)
 			isTime = true
 		}
@@ -40,6 +68,5 @@ func validateUTC(fl govalidator.FieldLevel) bool {
 			),
 		)
 	}
-
-	return t.IsZero() || t.Location() == time.UTC
+	return t
 }

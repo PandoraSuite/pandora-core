@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -53,7 +54,7 @@ func (r *RequestRepository) UpdateExecutionStatus(
 }
 
 func (r *RequestRepository) ListByService(
-	ctx context.Context, serviceID int,
+	ctx context.Context, serviceID int, filter *dto.RequestFilter,
 ) ([]*dto.RequestResponse, errors.Error) {
 	query := `
 		SELECT id, start_point, api_key, api_key_id, project_name, project_id,
@@ -61,11 +62,39 @@ func (r *RequestRepository) ListByService(
 			service_id, status_code, execution_status, request_time, path,
 			method, ip_address, created_at
 		FROM request
-		WHERE service_id = $1
-		ORDER BY created_at DESC;
 	`
 
-	rows, err := r.pool.Query(ctx, query, serviceID)
+	args := []any{serviceID}
+	if filter != nil {
+		var where []string
+		argIndex := 2
+
+		if !filter.RequestTimeTo.IsZero() {
+			where = append(where, fmt.Sprintf("request_time <= $%d", argIndex))
+			args = append(args, filter.RequestTimeTo)
+			argIndex++
+		}
+
+		if !filter.RequestTimeFrom.IsZero() {
+			where = append(where, fmt.Sprintf("request_time >= $%d", argIndex))
+			args = append(args, filter.RequestTimeFrom)
+			argIndex++
+		}
+
+		if filter.ExecutionStatus != enums.RequestExecutionStatusNull {
+			where = append(where, fmt.Sprintf("execution_status = $%d", argIndex))
+			args = append(args, filter.ExecutionStatus)
+			argIndex++
+		}
+
+		if len(where) > 0 {
+			query = fmt.Sprintf("%s WHERE service_id = $1 %s", query, where)
+		}
+	}
+
+	query += " ORDER BY request_time DESC;"
+
+	rows, err := r.pool.Query(ctx, query, args...)
 	if err != nil {
 		return nil, r.errorMapper(err, r.tableName)
 	}

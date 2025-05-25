@@ -8,6 +8,12 @@ import (
 
 // ... Requests ...
 
+type RequestFilter struct {
+	RequestTimeTo   time.Time                    `name:"request_time_to" validate:"omitempty,gtetime=RequestTimeTo"`
+	RequestTimeFrom time.Time                    `name:"request_time_from" validate:"omitempty"`
+	ExecutionStatus enums.RequestExecutionStatus `name:"execution_status" validate:"omitempty,enums=success forwarded client_error service_error unauthorized quota_exceeded"`
+}
+
 type RequestCreate struct {
 	StartPoint      string                       `name:"start_point"`
 	APIKey          string                       `name:"api_key"`

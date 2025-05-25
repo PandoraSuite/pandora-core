@@ -4,6 +4,7 @@ import (
 	"github.com/MAD-py/pandora-core/internal/app/service/create"
 	"github.com/MAD-py/pandora-core/internal/app/service/delete"
 	"github.com/MAD-py/pandora-core/internal/app/service/list"
+	listrequest "github.com/MAD-py/pandora-core/internal/app/service/list_request"
 	updatestatus "github.com/MAD-py/pandora-core/internal/app/service/update_status"
 	"github.com/MAD-py/pandora-core/internal/validator"
 )
@@ -40,6 +41,17 @@ func NewListUseCase(
 	serviceRepo ServiceListRepository,
 ) ListUseCase {
 	return list.NewUseCase(validator, serviceRepo)
+}
+
+// ... List Requests Use Case ...
+type ListRequestsUseCase = listrequest.UseCase
+
+func NewListRequestsUseCase(
+	validator validator.Validator,
+	serviceRepo ServiceListRequestsRepository,
+	requestRepo RequestListByServiceRepository,
+) ListRequestsUseCase {
+	return listrequest.NewUseCase(validator, serviceRepo, requestRepo)
 }
 
 // ... Update Status Use Case ...

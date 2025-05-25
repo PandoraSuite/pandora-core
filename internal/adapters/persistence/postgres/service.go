@@ -17,6 +17,26 @@ type ServiceRepository struct {
 	tableName string
 }
 
+func (r *ServiceRepository) Exists(
+	ctx context.Context, id int,
+) (bool, errors.Error) {
+	query := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM service
+			WHERE id = $1
+		);
+	`
+
+	var exists bool
+	err := r.pool.QueryRow(ctx, query, id).Scan(&exists)
+	if err != nil {
+		return false, r.errorMapper(err, r.tableName)
+	}
+
+	return exists, nil
+}
+
 func (r *ServiceRepository) Delete(
 	ctx context.Context, id int,
 ) errors.Error {
