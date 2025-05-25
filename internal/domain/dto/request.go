@@ -9,8 +9,8 @@ import (
 // ... Requests ...
 
 type RequestFilter struct {
-	RequestTimeTo   time.Time                    `name:"request_time_to" validate:"omitempty"`
-	RequestTimeFrom time.Time                    `name:"request_time_from" validate:"omitempty,gtetime=RequestTimeTo"`
+	RequestTimeTo   time.Time                    `name:"request_time_to" validate:"omitempty,gtetime=RequestTimeTo"`
+	RequestTimeFrom time.Time                    `name:"request_time_from" validate:"omitempty"`
 	ExecutionStatus enums.RequestExecutionStatus `name:"execution_status" validate:"omitempty,enums=success forwarded client_error service_error unauthorized quota_exceeded"`
 }
 
