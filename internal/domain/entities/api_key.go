@@ -36,6 +36,6 @@ func (a *APIKey) IsExpired() bool {
 	return !a.ExpiresAt.IsZero() && a.ExpiresAt.Before(time.Now())
 }
 
-func (a *APIKey) IsActive() bool {
-	return a.Status == enums.APIKeyActive
+func (a *APIKey) IsEnabled() bool {
+	return a.Status == enums.APIKeyStatusEnabled
 }

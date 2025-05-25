@@ -9,7 +9,7 @@ import (
 // ... Requests ...
 
 type ServiceFilter struct {
-	Status enums.ServiceStatus `name:"status" validate:"omitempty,enums=active deactivated deprecated"`
+	Status enums.ServiceStatus `name:"status" validate:"omitempty,enums=enabled disabled deprecated"`
 }
 
 type ServiceCreate struct {

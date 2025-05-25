@@ -25,8 +25,8 @@ import (
 // @Router /api/v1/clients [get]
 func ClientList(useCase client.ListUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		t, paramErr := enums.ParseClientType(c.Query("type"))
-		if paramErr != nil {
+		t, parseOk := enums.ParseClientType(c.Query("type"))
+		if !parseOk {
 			c.Error(
 				errors.NewValidationFailed(
 					"query", "type", "Invalid client type",

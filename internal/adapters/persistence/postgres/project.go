@@ -197,8 +197,8 @@ func (r *ProjectRepository) UpdateService(
 	`
 
 	var resetFrequency any
-	if s := update.ResetFrequency.String(); s != "" {
-		resetFrequency = s
+	if update.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
+		resetFrequency = update.ResetFrequency
 	}
 
 	var maxRequest any
@@ -556,8 +556,8 @@ func (r *ProjectRepository) AddService(
 	`
 
 	var resetFrequency any
-	if s := service.ResetFrequency.String(); s != "" {
-		resetFrequency = s
+	if service.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
+		resetFrequency = service.ResetFrequency
 	}
 
 	var maxRequest any
@@ -650,8 +650,8 @@ func (r *ProjectRepository) createProjectServices(
 		)
 
 		var resetFrequency any
-		if s := service.ResetFrequency.String(); s != "" {
-			resetFrequency = s
+		if service.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
+			resetFrequency = service.ResetFrequency
 		}
 
 		var maxRequest any

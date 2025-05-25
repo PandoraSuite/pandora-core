@@ -229,10 +229,16 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "enum": [
+                            "",
                             "developer",
                             "organization"
                         ],
                         "type": "string",
+                        "x-enum-varnames": [
+                            "ClientTypeNull",
+                            "ClientTypeDeveloper",
+                            "ClientTypeOrganization"
+                        ],
                         "name": "type",
                         "in": "query"
                     }
@@ -1271,11 +1277,18 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "enum": [
-                            "active",
-                            "deactivated",
+                            "",
+                            "enabled",
+                            "disabled",
                             "deprecated"
                         ],
                         "type": "string",
+                        "x-enum-varnames": [
+                            "ServiceStatusNull",
+                            "ServiceStatusEnabled",
+                            "ServiceStatusDisabled",
+                            "ServiceStatusDeprecated"
+                        ],
                         "name": "status",
                         "in": "query"
                     }
@@ -1379,6 +1392,85 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/services/{id}/requests": {
+            "get": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Fetches a list of all requests associated with a specific service",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Services"
+                ],
+                "summary": "Retrieves all requests for a service",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Service ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "enum": [
+                            "",
+                            "success",
+                            "forwarded",
+                            "client_error",
+                            "service_error",
+                            "unauthorized",
+                            "quota_exceeded"
+                        ],
+                        "type": "string",
+                        "x-enum-varnames": [
+                            "RequestExecutionStatusNull",
+                            "RequestExecutionStatusSuccess",
+                            "RequestExecutionStatusForwarded",
+                            "RequestExecutionStatusClientError",
+                            "RequestExecutionStatusServiceError",
+                            "RequestExecutionStatusUnauthorized",
+                            "RequestExecutionStatusQuotaExceeded"
+                        ],
+                        "name": "execution_status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "request_time_from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "request_time_to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.RequestResponse"
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/errors.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/services/{id}/status": {
             "patch": {
                 "security": [
@@ -1469,10 +1561,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "string",
                     "enum": [
-                        "active",
-                        "deactivated"
+                        "enabled",
+                        "disabled"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/enums.APIKeyStatus"
+                        }
                     ]
                 }
             }
@@ -1536,10 +1632,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "type": "string",
                     "enum": [
                         "developer",
                         "organization"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/enums.ClientType"
+                        }
                     ]
                 }
             }
@@ -1560,10 +1660,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "type": "string",
                     "enum": [
                         "developer",
                         "organization"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/enums.ClientType"
+                        }
                     ]
                 }
             }
@@ -1578,10 +1682,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
-                    "type": "string",
                     "enum": [
                         "developer",
                         "organization"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/enums.ClientType"
+                        }
                     ]
                 }
             }
@@ -1708,8 +1816,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "client_id",
-                "name",
-                "status"
+                "name"
             ],
             "properties": {
                 "client_id": {
@@ -1723,9 +1830,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/dto.ProjectService"
                     }
-                },
-                "status": {
-                    "$ref": "#/definitions/enums.ProjectStatus"
                 }
             }
         },
@@ -1849,6 +1953,77 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.RequestResponse": {
+            "type": "object",
+            "properties": {
+                "api_key": {
+                    "type": "string"
+                },
+                "api_key_id": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "environment_id": {
+                    "type": "integer"
+                },
+                "environment_name": {
+                    "type": "string"
+                },
+                "execution_status": {
+                    "enum": [
+                        "success",
+                        "forwarded",
+                        "client_error",
+                        "service_error",
+                        "unauthorized",
+                        "quota_exceeded"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/enums.RequestExecutionStatus"
+                        }
+                    ]
+                },
+                "id": {
+                    "type": "string"
+                },
+                "ip_address": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "project_id": {
+                    "type": "integer"
+                },
+                "project_name": {
+                    "type": "string"
+                },
+                "request_time": {
+                    "type": "string"
+                },
+                "service_id": {
+                    "type": "integer"
+                },
+                "service_name": {
+                    "type": "string"
+                },
+                "service_version": {
+                    "type": "string"
+                },
+                "start_point": {
+                    "type": "string"
+                },
+                "status_code": {
+                    "type": "integer"
+                }
+            }
+        },
         "dto.ServiceCreate": {
             "type": "object",
             "required": [
@@ -1877,11 +2052,15 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
-                    "type": "string",
                     "enum": [
-                        "active",
-                        "deactivated",
+                        "enabled",
+                        "disabled",
                         "deprecated"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/enums.ServiceStatus"
+                        }
                     ]
                 },
                 "version": {
@@ -1893,58 +2072,122 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "status": {
-                    "type": "string",
                     "enum": [
-                        "active",
-                        "deactivated",
+                        "enabled",
+                        "disabled",
                         "deprecated"
+                    ],
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/enums.ServiceStatus"
+                        }
                     ]
                 }
             }
         },
-        "enums.EnvironmentStatus": {
-            "type": "integer",
+        "enums.APIKeyStatus": {
+            "type": "string",
             "enum": [
-                0,
-                1,
-                2
+                "",
+                "enabled",
+                "disabled"
+            ],
+            "x-enum-varnames": [
+                "APIKeyStatusNull",
+                "APIKeyStatusEnabled",
+                "APIKeyStatusDisabled"
+            ]
+        },
+        "enums.ClientType": {
+            "type": "string",
+            "enum": [
+                "",
+                "developer",
+                "organization"
+            ],
+            "x-enum-varnames": [
+                "ClientTypeNull",
+                "ClientTypeDeveloper",
+                "ClientTypeOrganization"
+            ]
+        },
+        "enums.EnvironmentStatus": {
+            "type": "string",
+            "enum": [
+                "",
+                "enabled",
+                "disabled"
             ],
             "x-enum-varnames": [
                 "EnvironmentStatusNull",
-                "EnvironmentActive",
-                "EnvironmentDeactivated"
+                "EnvironmentStatusEnabled",
+                "EnvironmentStatusDisabled"
             ]
         },
         "enums.ProjectServiceResetFrequency": {
-            "type": "integer",
+            "type": "string",
             "enum": [
-                0,
-                1,
-                2,
-                3,
-                4
+                "",
+                "daily",
+                "weekly",
+                "biweekly",
+                "monthly"
             ],
             "x-enum-varnames": [
-                "ProjectServiceNull",
-                "ProjectServiceDaily",
-                "ProjectServiceWeekly",
-                "ProjectServiceBiweekly",
-                "ProjectServiceMonthly"
+                "ProjectServiceResetFrequencyNull",
+                "ProjectServiceResetFrequencyDaily",
+                "ProjectServiceResetFrequencyWeekly",
+                "ProjectServiceResetFrequencyBiweekly",
+                "ProjectServiceResetFrequencyMonthly"
             ]
         },
         "enums.ProjectStatus": {
-            "type": "integer",
+            "type": "string",
             "enum": [
-                0,
-                1,
-                2,
-                3
+                "",
+                "enabled",
+                "disabled"
             ],
             "x-enum-varnames": [
                 "ProjectStatusNull",
-                "ProjectInProduction",
-                "ProjectInDevelopment",
-                "ProjectDeactivated"
+                "ProjectStatusEnabled",
+                "ProjectStatusDisabled"
+            ]
+        },
+        "enums.RequestExecutionStatus": {
+            "type": "string",
+            "enum": [
+                "",
+                "success",
+                "forwarded",
+                "client_error",
+                "service_error",
+                "unauthorized",
+                "quota_exceeded"
+            ],
+            "x-enum-varnames": [
+                "RequestExecutionStatusNull",
+                "RequestExecutionStatusSuccess",
+                "RequestExecutionStatusForwarded",
+                "RequestExecutionStatusClientError",
+                "RequestExecutionStatusServiceError",
+                "RequestExecutionStatusUnauthorized",
+                "RequestExecutionStatusQuotaExceeded"
+            ]
+        },
+        "enums.ServiceStatus": {
+            "type": "string",
+            "enum": [
+                "",
+                "enabled",
+                "disabled",
+                "deprecated"
+            ],
+            "x-enum-varnames": [
+                "ServiceStatusNull",
+                "ServiceStatusEnabled",
+                "ServiceStatusDisabled",
+                "ServiceStatusDeprecated"
             ]
         },
         "errors.ErrorCode": {

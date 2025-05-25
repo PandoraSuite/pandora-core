@@ -33,8 +33,8 @@ type Environment struct {
 	CreatedAt time.Time
 }
 
-func (e *Environment) IsActive() bool {
-	return e.Status == enums.EnvironmentActive
+func (e *Environment) IsEnabled() bool {
+	return e.Status == enums.EnvironmentStatusEnabled
 }
 
 func (e *Environment) Is(name string) bool {

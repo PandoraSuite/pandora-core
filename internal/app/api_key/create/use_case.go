@@ -28,7 +28,7 @@ func (uc *useCase) Execute(
 	}
 
 	apiKey := &entities.APIKey{
-		Status:        enums.APIKeyActive,
+		Status:        enums.APIKeyStatusEnabled,
 		ExpiresAt:     req.ExpiresAt,
 		EnvironmentID: req.EnvironmentID,
 	}

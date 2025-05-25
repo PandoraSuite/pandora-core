@@ -25,8 +25,8 @@ import (
 // @Router /api/v1/services [get]
 func ServiceList(useCase service.ListUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		status, paramErr := enums.ParseServiceStatus(c.Query("status"))
-		if paramErr != nil {
+		status, parseOk := enums.ParseServiceStatus(c.Query("status"))
+		if !parseOk {
 			c.Error(
 				errors.NewValidationFailed(
 					"query", "type", "Invalid service status",

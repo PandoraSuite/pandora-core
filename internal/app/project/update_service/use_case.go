@@ -170,7 +170,7 @@ func (uc *useCase) validateReq(req *dto.ProjectServiceUpdate) errors.Error {
 		err = errors.Aggregate(err, validationErr)
 	}
 
-	if req.MaxRequest == -1 && req.ResetFrequency != enums.ProjectServiceNull {
+	if req.MaxRequest == -1 && req.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
 		err = errors.Aggregate(
 			err,
 			errors.NewAttributeValidationFailed(
@@ -182,7 +182,7 @@ func (uc *useCase) validateReq(req *dto.ProjectServiceUpdate) errors.Error {
 		)
 	}
 
-	if req.MaxRequest > -1 && req.ResetFrequency == enums.ProjectServiceNull {
+	if req.MaxRequest > -1 && req.ResetFrequency == enums.ProjectServiceResetFrequencyNull {
 		err = errors.Aggregate(
 			err,
 			errors.NewAttributeValidationFailed(

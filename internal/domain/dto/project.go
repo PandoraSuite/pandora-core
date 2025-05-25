@@ -15,9 +15,8 @@ type ProjectService struct {
 }
 
 type ProjectCreate struct {
-	Name     string              `name:"name" validate:"required"`
-	Status   enums.ProjectStatus `name:"status" validate:"required,enums=in_production in_development deactivated"`
-	ClientID int                 `name:"client_id" validate:"required,gt=0"`
+	Name     string `name:"name" validate:"required"`
+	ClientID int    `name:"client_id" validate:"required,gt=0"`
 
 	Services []*ProjectService `name:"services" validate:"required,dive"`
 }

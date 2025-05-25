@@ -50,7 +50,7 @@ type ClientRepository interface {
 type EnvironmentRepository interface {
 	// ... Exists ...
 	Exists(ctx context.Context, id int) (bool, errors.Error)
-	IsActive(ctx context.Context, id int) (bool, errors.Error)
+	IsEnabled(ctx context.Context, id int) (bool, errors.Error)
 	ExistsServiceIn(ctx context.Context, id, serviceID int) (bool, errors.Error)
 	MissingResourceDiagnosis(ctx context.Context, id int, serviceID int) (bool, bool, errors.Error)
 	ExistsServiceWithInfiniteMaxRequest(ctx context.Context, projectID, serviceID int) (bool, errors.Error)

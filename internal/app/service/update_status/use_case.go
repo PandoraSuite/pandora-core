@@ -78,9 +78,9 @@ func (uc *useCase) validateStatus(status enums.ServiceStatus) errors.Error {
 	return uc.validator.ValidateVariable(
 		status,
 		"status",
-		"required,enums=active deactivated deprecated",
+		"required,enums=enabled disabled deprecated",
 		map[string]string{
-			"enums":    "status must be one of the following: active, deactivated, deprecated",
+			"enums":    "status must be one of the following: enabled, disabled, deprecated",
 			"required": "status is required",
 		},
 	)
