@@ -26,7 +26,7 @@ func main() {
 	repositories := persistence.NewRepositories(
 		persistence.PostgresDriver, cfg.DBDNS(),
 	)
-	log.Println("[INFO] Repositories initialized successfully")
+	log.Println("[INFO] Repositories initialized")
 
 	gRPCDeps := bootstrap.NewDependencies(validator, repositories)
 
