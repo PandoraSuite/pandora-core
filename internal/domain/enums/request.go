@@ -12,6 +12,21 @@ const (
 	RequestExecutionStatusQuotaExceeded RequestExecutionStatus = "quota_exceeded"
 )
 
+func ParseRequestExecutionStatus(status string) (RequestExecutionStatus, bool) {
+	switch s := RequestExecutionStatus(status); s {
+	case RequestExecutionStatusNull,
+		RequestExecutionStatusSuccess,
+		RequestExecutionStatusForwarded,
+		RequestExecutionStatusClientError,
+		RequestExecutionStatusServiceError,
+		RequestExecutionStatusUnauthorized,
+		RequestExecutionStatusQuotaExceeded:
+		return s, true
+	default:
+		return RequestExecutionStatusNull, false
+	}
+}
+
 type RequestBodyContentType string
 
 const (
@@ -24,3 +39,19 @@ const (
 	RequestBodyContentTypeFormURL     RequestBodyContentType = "application/x-www-form-urlencoded"
 	RequestBodyContentTypeOctetStream RequestBodyContentType = "application/octet-stream"
 )
+
+func ParseRequestBodyContentType(status string) (RequestBodyContentType, bool) {
+	switch t := RequestBodyContentType(status); t {
+	case RequestBodyContentTypeNull,
+		RequestBodyContentTypeXML,
+		RequestBodyContentTypeJSON,
+		RequestBodyContentTypeText,
+		RequestBodyContentTypeHTML,
+		RequestBodyContentTypeForm,
+		RequestBodyContentTypeFormURL,
+		RequestBodyContentTypeOctetStream:
+		return t, true
+	default:
+		return RequestBodyContentTypeNull, false
+	}
+}
