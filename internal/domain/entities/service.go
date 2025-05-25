@@ -17,6 +17,6 @@ type Service struct {
 	UpdatedAt time.Time
 }
 
-func (a *Service) IsActive() bool {
-	return a.Status == enums.ServiceActive
+func (a *Service) IsEnabled() bool {
+	return a.Status == enums.ServiceStatusEnabled
 }

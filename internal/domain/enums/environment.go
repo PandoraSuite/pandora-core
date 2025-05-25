@@ -3,7 +3,7 @@ package enums
 type EnvironmentStatus string
 
 const (
-	EnvironmentStatusNull EnvironmentStatus = ""
-	EnvironmentEnabled    EnvironmentStatus = "enabled"
-	EnvironmentDisabled   EnvironmentStatus = "disabled"
+	EnvironmentStatusNull     EnvironmentStatus = ""
+	EnvironmentStatusEnabled  EnvironmentStatus = "enabled"
+	EnvironmentStatusDisabled EnvironmentStatus = "disabled"
 )

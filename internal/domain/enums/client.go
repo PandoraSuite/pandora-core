@@ -3,7 +3,7 @@ package enums
 type ClientType string
 
 const (
-	ClientTypeNull     ClientType = ""
-	ClientDeveloper    ClientType = "developer"
-	ClientOrganization ClientType = "organization"
+	ClientTypeNull         ClientType = ""
+	ClientTypeDeveloper    ClientType = "developer"
+	ClientTypeOrganization ClientType = "organization"
 )

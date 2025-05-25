@@ -23,13 +23,13 @@ func (p *ProjectService) CalculateNextReset() {
 	today := utils.TruncateToDay(time.Now())
 
 	switch p.ResetFrequency {
-	case enums.ProjectServiceDaily:
+	case enums.ProjectServiceResetFrequencyDaily:
 		p.NextReset = today.AddDate(0, 0, 1)
-	case enums.ProjectServiceWeekly:
+	case enums.ProjectServiceResetFrequencyWeekly:
 		p.NextReset = today.AddDate(0, 0, 7)
-	case enums.ProjectServiceBiweekly:
+	case enums.ProjectServiceResetFrequencyBiweekly:
 		p.NextReset = today.AddDate(0, 0, 14)
-	case enums.ProjectServiceMonthly:
+	case enums.ProjectServiceResetFrequencyMonthly:
 		p.NextReset = today.AddDate(0, 1, 0)
 	}
 }
