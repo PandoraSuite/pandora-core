@@ -110,6 +110,9 @@ type ProjectRepository interface {
 }
 
 type RequestRepository interface {
+	// ... List ...
+	ListByService(ctx context.Context, serviceID int, filter *dto.RequestFilter) ([]*dto.RequestResponse, errors.Error)
+
 	// ... Create ...
 	Create(ctx context.Context, request *entities.Request) errors.Error
 	CreateAsInitialPoint(ctx context.Context, request *entities.Request) errors.Error
@@ -135,6 +138,9 @@ type ReservationRepository interface {
 }
 
 type ServiceRepository interface {
+	// ... Exists ...
+	Exists(ctx context.Context, id int) (bool, errors.Error)
+
 	// ... Get ...
 	GetByNameAndVersion(ctx context.Context, name, version string) (*entities.Service, errors.Error)
 

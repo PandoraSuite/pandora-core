@@ -11,6 +11,11 @@ func RegisterServiceRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
 	listUC := service.NewListUseCase(
 		deps.Validator, deps.Repositories.Service(),
 	)
+	listRequestUC := service.NewListRequestsUseCase(
+		deps.Validator,
+		deps.Repositories.Service(),
+		deps.Repositories.Request(),
+	)
 	createUC := service.NewCreateUseCase(
 		deps.Validator, deps.Repositories.Service(),
 	)
@@ -28,6 +33,10 @@ func RegisterServiceRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
 		services.GET("", handlers.ServiceList(listUC))
 		services.POST("", handlers.ServiceCreate(createUC))
 		services.DELETE("/:id", handlers.ServiceDelete(deleteUC))
+		services.GET(
+			"/:id/requests",
+			handlers.ServiceListRequests(listRequestUC),
+		)
 		services.PATCH(
 			"/:id/status",
 			handlers.ServiceUpdateStatus(updateStatusUC),
