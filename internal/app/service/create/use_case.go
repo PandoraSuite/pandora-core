@@ -29,7 +29,7 @@ func (uc *useCase) Execute(
 
 	service := entities.Service{
 		Name:    req.Name,
-		Status:  enums.ServiceActive,
+		Status:  enums.ServiceStatusEnabled,
 		Version: req.Version,
 	}
 

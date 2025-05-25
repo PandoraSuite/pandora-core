@@ -103,7 +103,7 @@ func (uc *useCase) Execute(
 
 	environment := entities.Environment{
 		Name:      req.Name,
-		Status:    enums.EnvironmentActive,
+		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: req.ProjectID,
 		Services:  services,
 	}

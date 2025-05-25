@@ -106,7 +106,7 @@ func (uc *useCase) validateWithReservation(
 			}, nil
 	}
 
-	if reservationFlow.ServiceStatus != enums.ServiceActive {
+	if reservationFlow.ServiceStatus != enums.ServiceStatusEnabled {
 		message := "Service is not active"
 		return &dto.APIKeyValidateReservationResponse{
 				Valid:   false,
@@ -138,7 +138,7 @@ func (uc *useCase) validateWithReservation(
 			}, nil
 	}
 
-	if reservationFlow.EnvironmentStatus != enums.EnvironmentActive {
+	if reservationFlow.EnvironmentStatus != enums.EnvironmentStatusEnabled {
 		message := "Environment is not active"
 		return &dto.APIKeyValidateReservationResponse{
 				Valid:   false,
