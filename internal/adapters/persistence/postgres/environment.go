@@ -248,7 +248,7 @@ func (r *EnvironmentRepository) Exists(
 	return exists, nil
 }
 
-func (r *EnvironmentRepository) IsActive(
+func (r *EnvironmentRepository) IsEnabled(
 	ctx context.Context, id int,
 ) (bool, errors.Error) {
 	query := `
@@ -260,7 +260,7 @@ func (r *EnvironmentRepository) IsActive(
 	`
 
 	var exists bool
-	err := r.pool.QueryRow(ctx, query, id, enums.EnvironmentActive).Scan(&exists)
+	err := r.pool.QueryRow(ctx, query, id, enums.EnvironmentStatusEnabled).Scan(&exists)
 	if err != nil {
 		return false, r.errorMapper(err, r.tableName)
 	}

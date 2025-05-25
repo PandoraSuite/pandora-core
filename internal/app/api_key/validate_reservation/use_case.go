@@ -134,8 +134,8 @@ func (uc *useCase) apiKeyEnable(
 	}
 
 	// Key must be active
-	if !apiKey.IsActive() {
-		message := "API Key is not active"
+	if !apiKey.IsEnabled() {
+		message := "API Key is not enabled"
 		return nil, &dto.APIKeyValidateResponse{
 				Valid:   false,
 				Message: message,
@@ -187,8 +187,8 @@ func (uc *useCase) environmentEnable(
 				ExecutionStatus: enums.RequestExecutionStatusUnauthorized,
 			}, nil
 	}
-	if !environment.IsActive() {
-		message := "Environment is not active"
+	if !environment.IsEnabled() {
+		message := "Environment is not enabled"
 		return nil, &dto.APIKeyValidateResponse{
 				Valid:   false,
 				Message: message,
@@ -228,8 +228,8 @@ func (uc *useCase) serviceEnable(
 	}
 
 	// Service must be active
-	if !service.IsActive() {
-		message := "Service is not active"
+	if !service.IsEnabled() {
+		message := "Service is not enabled"
 		return nil, &dto.APIKeyValidateResponse{
 				Valid:   false,
 				Message: message,
