@@ -50,7 +50,7 @@ func (uc *useCase) Execute(
 
 	project := entities.Project{
 		Name:     req.Name,
-		Status:   req.Status,
+		Status:   enums.ProjectStatusEnabled,
 		ClientID: req.ClientID,
 		Services: services,
 	}

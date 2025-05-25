@@ -24,9 +24,8 @@ func (p *ProjectService) ToDomain() *dto.ProjectService {
 }
 
 type ProjectCreate struct {
-	Name     string              `json:"name" binding:"required"`
-	Status   enums.ProjectStatus `json:"status" binding:"required"`
-	ClientID int                 `json:"client_id" binding:"required"`
+	Name     string `json:"name" binding:"required"`
+	ClientID int    `json:"client_id" binding:"required"`
 
 	Services []*ProjectService `json:"services"`
 }
@@ -39,7 +38,6 @@ func (p *ProjectCreate) ToDomain() *dto.ProjectCreate {
 
 	return &dto.ProjectCreate{
 		Name:     p.Name,
-		Status:   p.Status,
 		ClientID: p.ClientID,
 		Services: services,
 	}
