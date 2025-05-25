@@ -208,10 +208,11 @@ CREATE TABLE IF NOT EXISTS request(
 CREATE TABLE IF NOT EXISTS reservation(
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
-    environment_service_id INTEGER NOT NULL,
-    CONSTRAINT reservation_environment_service_id_fk
-        FOREIGN KEY (environment_service_id) REFERENCES environment_service(id) ON DELETE CASCADE,
-
+    environment_id INTEGER NOT NULL,
+    service_id INTEGER NOT NULL,
+    CONSTRAINT reservation_environment_service_fk 
+        FOREIGN KEY (environment_id, service_id) REFERENCES environment_service(environment_id, service_id) ON DELETE CASCADE
+    
     api_key TEXT NOT NULL,
     start_request_id UUID NOT NULL,
     request_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
