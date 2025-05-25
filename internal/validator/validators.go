@@ -136,6 +136,11 @@ func NewValidator() Validator {
 		panic(err)
 	}
 
+	err = v.RegisterValidation(gteTimeTag, validateGteTime)
+	if err != nil {
+		panic(err)
+	}
+
 	err = v.RegisterValidation(enumsTag, validateEnums)
 	if err != nil {
 		panic(err)
