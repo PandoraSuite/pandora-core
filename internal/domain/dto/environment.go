@@ -21,7 +21,7 @@ type EnvironmentCreate struct {
 }
 
 type EnvironmentUpdate struct {
-	Name string `name:"name,omitempty"`
+	Name string `name:"name" validate:"omitempty"`
 }
 
 type EnvironmentServiceUpdateInput struct {
