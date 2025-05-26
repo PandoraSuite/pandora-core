@@ -2081,7 +2081,8 @@ const docTemplate = `{
                         {
                             "$ref": "#/definitions/enums.ServiceStatus"
                         }
-                    ]
+                    ],
+                    "example": "enabled"
                 }
             }
         },

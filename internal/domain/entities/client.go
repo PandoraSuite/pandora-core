@@ -14,5 +14,4 @@ type Client struct {
 	Email string
 
 	CreatedAt time.Time
-	UpdatedAt time.Time
 }

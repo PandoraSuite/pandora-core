@@ -14,7 +14,6 @@ type Service struct {
 	Version string
 
 	CreatedAt time.Time
-	UpdatedAt time.Time
 }
 
 func (a *Service) IsEnabled() bool {

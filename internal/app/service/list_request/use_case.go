@@ -33,8 +33,8 @@ func (uc *useCase) Execute(
 
 	if !exists {
 		return nil, errors.NewEntityNotFound(
-			"Project",
-			"project not found",
+			"Service",
+			"service not found",
 			map[string]any{"id": id},
 			nil,
 		)

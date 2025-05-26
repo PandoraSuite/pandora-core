@@ -31,7 +31,7 @@ func ChangePassword(useCase auth.PasswordChangeUseCase) gin.HandlerFunc {
 
 		var req dto.ChangePassword
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToHTTPError(req, err))
+			c.Error(errors.BindJSONToHTTPError(req, err))
 			return
 		}
 
@@ -61,7 +61,7 @@ func Authenticate(useCase auth.AutenticateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.Authenticate
 		if err := c.ShouldBind(&req); err != nil {
-			c.Error(errors.BindingToHTTPError(req, err))
+			c.Error(errors.BindJSONToHTTPError(req, err))
 			return
 		}
 

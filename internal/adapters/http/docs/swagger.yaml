@@ -358,6 +358,7 @@ definitions:
         - enabled
         - disabled
         - deprecated
+        example: enabled
     type: object
   enums.APIKeyStatus:
     enum:

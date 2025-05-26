@@ -9,7 +9,27 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func BindingToHTTPError(structType any, err error) *HTTPError {
+func BindQueryToHTTPError(structType any, err error) *HTTPError {
+	switch e := err.(type) {
+	case validator.ValidationErrors:
+		errs := make([]*HTTPError, len(e))
+		for i, ve := range e {
+			fieldName := getFieldName(structType, ve.Field())
+			message := getMessage(ve.Error(), ve.Tag(), fieldName)
+			errs[i] = NewValidationFailed("query", fieldName, message)
+		}
+
+		if len(errs) == 1 {
+			return errs[0]
+		}
+
+		return NewMultipleErrors(errs)
+	default:
+		return NewValidationFailed("query", "", "Invalid query parameters")
+	}
+}
+
+func BindJSONToHTTPError(structType any, err error) *HTTPError {
 	switch e := err.(type) {
 	case validator.ValidationErrors:
 		errs := make([]*HTTPError, len(e))
@@ -24,7 +44,6 @@ func BindingToHTTPError(structType any, err error) *HTTPError {
 		}
 
 		return NewMultipleErrors(errs)
-
 	case *json.UnmarshalTypeError:
 		return NewValidationFailed(
 			"body",
@@ -43,7 +62,7 @@ func BindingToHTTPError(structType any, err error) *HTTPError {
 			),
 		)
 	default:
-		return NewValidationFailed("body", "", "Invalid request payload")
+		return NewValidationFailed("body", "", "Invalid body")
 	}
 }
 

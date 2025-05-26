@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -62,6 +63,7 @@ func (r *RequestRepository) ListByService(
 			service_id, status_code, execution_status, request_time, path,
 			method, ip_address, created_at
 		FROM request
+		WHERE service_id = $1
 	`
 
 	args := []any{serviceID}
@@ -88,7 +90,7 @@ func (r *RequestRepository) ListByService(
 		}
 
 		if len(where) > 0 {
-			query = fmt.Sprintf("%s WHERE service_id = $1 %s", query, where)
+			query = fmt.Sprintf("%s AND %s", query, strings.Join(where, " AND "))
 		}
 	}
 
