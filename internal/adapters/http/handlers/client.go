@@ -9,7 +9,6 @@ import (
 	"github.com/MAD-py/pandora-core/internal/adapters/http/dto"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/errors"
 	"github.com/MAD-py/pandora-core/internal/app/client"
-	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
 // ClientList godoc
@@ -25,17 +24,7 @@ import (
 // @Router /api/v1/clients [get]
 func ClientList(useCase client.ListUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		t, parseOk := enums.ParseClientType(c.Query("type"))
-		if !parseOk {
-			c.Error(
-				errors.NewValidationFailed(
-					"query", "type", "Invalid client type",
-				),
-			)
-			return
-		}
-
-		req := dto.ClientFilter{Type: t}
+		req := dto.ClientFilter{Type: c.Query("type")}
 		clients, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
 			c.Error(err)

@@ -25,17 +25,7 @@ import (
 // @Router /api/v1/services [get]
 func ServiceList(useCase service.ListUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		status, parseOk := enums.ParseServiceStatus(c.Query("status"))
-		if !parseOk {
-			c.Error(
-				errors.NewValidationFailed(
-					"query", "type", "Invalid service status",
-				),
-			)
-			return
-		}
-
-		req := dto.ServiceFilter{Status: status}
+		req := dto.ServiceFilter{Status: c.Query("status")}
 		services, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
 			c.Error(err)
@@ -185,7 +175,7 @@ func ServiceUpdateStatus(useCase service.UpdateStatusUseCase) gin.HandlerFunc {
 		}
 
 		service, err := useCase.Execute(
-			c.Request.Context(), serviceID, req.Status,
+			c.Request.Context(), serviceID, enums.ServiceStatus(req.Status),
 		)
 		if err != nil {
 			c.Error(err)
