@@ -33,7 +33,7 @@ func main() {
 	repositories := persistence.NewRepositories(
 		persistence.PostgresDriver, cfg.DBDNS(),
 	)
-	log.Println("[INFO] Repositories initialized successfully")
+	log.Println("[INFO] Repositories initialized")
 
 	jwtProvider := security.NewJWTProvider([]byte(cfg.HTTPConfig().JWTSecret()))
 	log.Println("[INFO] JWT provider initialized")

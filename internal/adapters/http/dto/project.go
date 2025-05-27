@@ -10,16 +10,16 @@ import (
 // ... Requests ...
 
 type ProjectService struct {
-	ID             int                                `json:"id" binding:"required"`
-	MaxRequest     int                                `json:"max_requests" binding:"required"`
-	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency"`
+	ID             int    `json:"id" binding:"required"`
+	MaxRequest     int    `json:"max_requests" binding:"required"`
+	ResetFrequency string `json:"reset_frequency" enums:",daily,weekly,biweekly,monthly"`
 }
 
 func (p *ProjectService) ToDomain() *dto.ProjectService {
 	return &dto.ProjectService{
 		ID:             p.ID,
 		MaxRequest:     p.MaxRequest,
-		ResetFrequency: p.ResetFrequency,
+		ResetFrequency: enums.ProjectServiceResetFrequency(p.ResetFrequency),
 	}
 }
 
@@ -58,29 +58,29 @@ func (p *ProjectUpdate) ToDomain() *dto.ProjectUpdate {
 }
 
 type ProjectServiceUpdate struct {
-	NextReset      time.Time                          `json:"next_reset" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	MaxRequest     int                                `json:"max_requests"`
-	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency"`
+	NextReset      time.Time `json:"next_reset" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	MaxRequest     int       `json:"max_requests"`
+	ResetFrequency string    `json:"reset_frequency" enums:"daily,weekly,biweekly,monthly"`
 }
 
 func (p *ProjectServiceUpdate) ToDomain() *dto.ProjectServiceUpdate {
 	return &dto.ProjectServiceUpdate{
 		NextReset:      p.NextReset,
 		MaxRequest:     p.MaxRequest,
-		ResetFrequency: p.ResetFrequency,
+		ResetFrequency: enums.ProjectServiceResetFrequency(p.ResetFrequency),
 	}
 }
 
 // ... Reponses ...
 
 type ProjectServiceResponse struct {
-	ID             int                                `json:"id"`
-	Name           string                             `json:"name"`
-	Version        string                             `json:"version"`
-	NextReset      time.Time                          `json:"next_reset"`
-	MaxRequest     int                                `json:"max_request"`
-	ResetFrequency enums.ProjectServiceResetFrequency `json:"reset_frequency"`
-	AssignedAt     time.Time                          `json:"assigned_at"`
+	ID             int       `json:"id"`
+	Name           string    `json:"name"`
+	Version        string    `json:"version"`
+	NextReset      time.Time `json:"next_reset"`
+	MaxRequest     int       `json:"max_request"`
+	ResetFrequency string    `json:"reset_frequency" enums:"daily,weekly,biweekly,monthly"`
+	AssignedAt     time.Time `json:"assigned_at"`
 }
 
 func ProjectServiceResponseFromDomain(service *dto.ProjectServiceResponse) *ProjectServiceResponse {
@@ -90,17 +90,17 @@ func ProjectServiceResponseFromDomain(service *dto.ProjectServiceResponse) *Proj
 		Version:        service.Version,
 		NextReset:      service.NextReset,
 		MaxRequest:     service.MaxRequest,
-		ResetFrequency: service.ResetFrequency,
+		ResetFrequency: string(service.ResetFrequency),
 		AssignedAt:     service.AssignedAt,
 	}
 }
 
 type ProjectResponse struct {
-	ID        int                 `json:"id"`
-	Name      string              `json:"name"`
-	Status    enums.ProjectStatus `json:"status"`
-	ClientID  int                 `json:"client_id"`
-	CreatedAt time.Time           `json:"created_at"`
+	ID        int       `json:"id"`
+	Name      string    `json:"name"`
+	Status    string    `json:"status" enums:"enabled,disabled"`
+	ClientID  int       `json:"client_id"`
+	CreatedAt time.Time `json:"created_at"`
 
 	Services []*ProjectServiceResponse `json:"services"`
 }
@@ -114,7 +114,7 @@ func ProjectResponseFromDomain(project *dto.ProjectResponse) *ProjectResponse {
 	return &ProjectResponse{
 		ID:        project.ID,
 		Name:      project.Name,
-		Status:    project.Status,
+		Status:    string(project.Status),
 		ClientID:  project.ClientID,
 		CreatedAt: project.CreatedAt,
 		Services:  services,

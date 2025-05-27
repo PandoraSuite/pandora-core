@@ -23,11 +23,11 @@ definitions:
       last_used:
         type: string
       status:
-        allOf:
-        - $ref: '#/definitions/enums.APIKeyStatus'
         enum:
         - enabled
         - disabled
+        - deprecated
+        type: string
     type: object
   dto.APIKeyUpdate:
     properties:
@@ -65,11 +65,10 @@ definitions:
       name:
         type: string
       type:
-        allOf:
-        - $ref: '#/definitions/enums.ClientType'
         enum:
         - developer
         - organization
+        type: string
     required:
     - email
     - name
@@ -86,11 +85,10 @@ definitions:
       name:
         type: string
       type:
-        allOf:
-        - $ref: '#/definitions/enums.ClientType'
         enum:
         - developer
         - organization
+        type: string
     type: object
   dto.ClientUpdate:
     properties:
@@ -99,11 +97,11 @@ definitions:
       name:
         type: string
       type:
-        allOf:
-        - $ref: '#/definitions/enums.ClientType'
         enum:
+        - ""
         - developer
         - organization
+        type: string
     type: object
   dto.EnvironmentCreate:
     properties:
@@ -134,7 +132,11 @@ definitions:
           $ref: '#/definitions/dto.EnvironmentServiceResponse'
         type: array
       status:
-        $ref: '#/definitions/enums.EnvironmentStatus'
+        enum:
+        - enabled
+        - disabled
+        - deprecated
+        type: string
     type: object
   dto.EnvironmentService:
     properties:
@@ -155,7 +157,11 @@ definitions:
       service:
         $ref: '#/definitions/dto.EnvironmentServiceResponse'
       status:
-        $ref: '#/definitions/enums.EnvironmentStatus'
+        enum:
+        - enabled
+        - disabled
+        - deprecated
+        type: string
     type: object
   dto.EnvironmentServiceResponse:
     properties:
@@ -229,7 +235,10 @@ definitions:
           $ref: '#/definitions/dto.ProjectServiceResponse'
         type: array
       status:
-        $ref: '#/definitions/enums.ProjectStatus'
+        enum:
+        - enabled
+        - disabled
+        type: string
     type: object
   dto.ProjectService:
     properties:
@@ -238,7 +247,13 @@ definitions:
       max_requests:
         type: integer
       reset_frequency:
-        $ref: '#/definitions/enums.ProjectServiceResetFrequency'
+        enum:
+        - ""
+        - daily
+        - weekly
+        - biweekly
+        - monthly
+        type: string
     required:
     - id
     - max_requests
@@ -256,7 +271,12 @@ definitions:
       next_reset:
         type: string
       reset_frequency:
-        $ref: '#/definitions/enums.ProjectServiceResetFrequency'
+        enum:
+        - daily
+        - weekly
+        - biweekly
+        - monthly
+        type: string
       version:
         type: string
     type: object
@@ -267,7 +287,12 @@ definitions:
       next_reset:
         type: string
       reset_frequency:
-        $ref: '#/definitions/enums.ProjectServiceResetFrequency'
+        enum:
+        - daily
+        - weekly
+        - biweekly
+        - monthly
+        type: string
     type: object
   dto.ProjectUpdate:
     properties:
@@ -287,8 +312,6 @@ definitions:
       environment_name:
         type: string
       execution_status:
-        allOf:
-        - $ref: '#/definitions/enums.RequestExecutionStatus'
         enum:
         - success
         - forwarded
@@ -296,6 +319,7 @@ definitions:
         - service_error
         - unauthorized
         - quota_exceeded
+        type: string
       id:
         type: string
       ip_address:
@@ -340,109 +364,24 @@ definitions:
       name:
         type: string
       status:
-        allOf:
-        - $ref: '#/definitions/enums.ServiceStatus'
         enum:
         - enabled
         - disabled
         - deprecated
+        type: string
       version:
         type: string
     type: object
   dto.ServiceStatusUpdate:
     properties:
       status:
-        allOf:
-        - $ref: '#/definitions/enums.ServiceStatus'
         enum:
+        - ""
         - enabled
         - disabled
         - deprecated
+        type: string
     type: object
-  enums.APIKeyStatus:
-    enum:
-    - ""
-    - enabled
-    - disabled
-    type: string
-    x-enum-varnames:
-    - APIKeyStatusNull
-    - APIKeyStatusEnabled
-    - APIKeyStatusDisabled
-  enums.ClientType:
-    enum:
-    - ""
-    - developer
-    - organization
-    type: string
-    x-enum-varnames:
-    - ClientTypeNull
-    - ClientTypeDeveloper
-    - ClientTypeOrganization
-  enums.EnvironmentStatus:
-    enum:
-    - ""
-    - enabled
-    - disabled
-    type: string
-    x-enum-varnames:
-    - EnvironmentStatusNull
-    - EnvironmentStatusEnabled
-    - EnvironmentStatusDisabled
-  enums.ProjectServiceResetFrequency:
-    enum:
-    - ""
-    - daily
-    - weekly
-    - biweekly
-    - monthly
-    type: string
-    x-enum-varnames:
-    - ProjectServiceResetFrequencyNull
-    - ProjectServiceResetFrequencyDaily
-    - ProjectServiceResetFrequencyWeekly
-    - ProjectServiceResetFrequencyBiweekly
-    - ProjectServiceResetFrequencyMonthly
-  enums.ProjectStatus:
-    enum:
-    - ""
-    - enabled
-    - disabled
-    type: string
-    x-enum-varnames:
-    - ProjectStatusNull
-    - ProjectStatusEnabled
-    - ProjectStatusDisabled
-  enums.RequestExecutionStatus:
-    enum:
-    - ""
-    - success
-    - forwarded
-    - client_error
-    - service_error
-    - unauthorized
-    - quota_exceeded
-    type: string
-    x-enum-varnames:
-    - RequestExecutionStatusNull
-    - RequestExecutionStatusSuccess
-    - RequestExecutionStatusForwarded
-    - RequestExecutionStatusClientError
-    - RequestExecutionStatusServiceError
-    - RequestExecutionStatusUnauthorized
-    - RequestExecutionStatusQuotaExceeded
-  enums.ServiceStatus:
-    enum:
-    - ""
-    - enabled
-    - disabled
-    - deprecated
-    type: string
-    x-enum-varnames:
-    - ServiceStatusNull
-    - ServiceStatusEnabled
-    - ServiceStatusDisabled
-    - ServiceStatusDeprecated
   errors.ErrorCode:
     enum:
     - NOT_FOUND
@@ -622,10 +561,6 @@ paths:
         in: query
         name: type
         type: string
-        x-enum-varnames:
-        - ClientTypeNull
-        - ClientTypeDeveloper
-        - ClientTypeOrganization
       produces:
       - application/json
       responses:
@@ -1290,11 +1225,6 @@ paths:
         in: query
         name: status
         type: string
-        x-enum-varnames:
-        - ServiceStatusNull
-        - ServiceStatusEnabled
-        - ServiceStatusDisabled
-        - ServiceStatusDeprecated
       produces:
       - application/json
       responses:
@@ -1385,14 +1315,6 @@ paths:
         in: query
         name: execution_status
         type: string
-        x-enum-varnames:
-        - RequestExecutionStatusNull
-        - RequestExecutionStatusSuccess
-        - RequestExecutionStatusForwarded
-        - RequestExecutionStatusClientError
-        - RequestExecutionStatusServiceError
-        - RequestExecutionStatusUnauthorized
-        - RequestExecutionStatusQuotaExceeded
       - in: query
         name: request_time_from
         type: string

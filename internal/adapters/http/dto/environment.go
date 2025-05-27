@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
-	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
 // ... Requests ...
@@ -88,7 +87,7 @@ func EnvironmentServiceResponseFromDomain(
 type EnvironmentResponse struct {
 	ID        int                           `json:"id"`
 	Name      string                        `json:"name"`
-	Status    enums.EnvironmentStatus       `json:"status"`
+	Status    string                        `json:"status" enums:"enabled,disabled,deprecated"`
 	ProjectID int                           `json:"project_id"`
 	CreatedAt time.Time                     `json:"created_at"`
 	Services  []*EnvironmentServiceResponse `json:"services"`
@@ -105,7 +104,7 @@ func EnvironmentResponseFromDomain(
 	return &EnvironmentResponse{
 		ID:        env.ID,
 		Name:      env.Name,
-		Status:    env.Status,
+		Status:    string(env.Status),
 		ProjectID: env.ProjectID,
 		CreatedAt: env.CreatedAt,
 		Services:  services,
@@ -115,7 +114,7 @@ func EnvironmentResponseFromDomain(
 type EnvironmentServiceReset struct {
 	ID      int                         `json:"id"`
 	Name    string                      `json:"name"`
-	Status  enums.EnvironmentStatus     `json:"status"`
+	Status  string                      `json:"status" enums:"enabled,disabled,deprecated"`
 	Service *EnvironmentServiceResponse `json:"service"`
 }
 
@@ -125,7 +124,7 @@ func EnvironmentServiceResetFromDomain(
 	return &EnvironmentServiceReset{
 		ID:      service.ID,
 		Name:    service.Name,
-		Status:  service.Status,
+		Status:  string(service.Status),
 		Service: EnvironmentServiceResponseFromDomain(service.Service),
 	}
 }

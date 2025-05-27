@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
-	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
 // ... Requests ...
@@ -34,20 +33,20 @@ func (a *APIKeyUpdate) ToDomain() *dto.APIKeyUpdate {
 // ... Responses ...
 
 type APIKeyResponse struct {
-	ID            int                `json:"id"`
-	Key           string             `json:"key"`
-	Status        enums.APIKeyStatus `json:"status" enums:"enabled,disabled"`
-	LastUsed      time.Time          `json:"last_used" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	ExpiresAt     time.Time          `json:"expires_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	EnvironmentID int                `json:"environment_id"`
-	CreatedAt     time.Time          `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	ID            int       `json:"id"`
+	Key           string    `json:"key"`
+	Status        string    `json:"status" enums:"enabled,disabled,deprecated"`
+	LastUsed      time.Time `json:"last_used" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	ExpiresAt     time.Time `json:"expires_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	EnvironmentID int       `json:"environment_id"`
+	CreatedAt     time.Time `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
 }
 
 func APIKeyResponseFromDomain(apiKey *dto.APIKeyResponse) *APIKeyResponse {
 	return &APIKeyResponse{
 		ID:            apiKey.ID,
 		Key:           apiKey.Key,
-		Status:        apiKey.Status,
+		Status:        string(apiKey.Status),
 		LastUsed:      apiKey.LastUsed,
 		ExpiresAt:     apiKey.ExpiresAt,
 		EnvironmentID: apiKey.EnvironmentID,

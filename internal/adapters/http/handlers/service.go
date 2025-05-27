@@ -25,17 +25,7 @@ import (
 // @Router /api/v1/services [get]
 func ServiceList(useCase service.ListUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		status, parseOk := enums.ParseServiceStatus(c.Query("status"))
-		if !parseOk {
-			c.Error(
-				errors.NewValidationFailed(
-					"query", "type", "Invalid service status",
-				),
-			)
-			return
-		}
-
-		req := dto.ServiceFilter{Status: status}
+		req := dto.ServiceFilter{Status: c.Query("status")}
 		services, err := useCase.Execute(c.Request.Context(), req.ToDomain())
 		if err != nil {
 			c.Error(err)
@@ -65,7 +55,7 @@ func ServiceCreate(useCase service.CreateUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req dto.ServiceCreate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToHTTPError(req, err))
+			c.Error(errors.BindJSONToHTTPError(req, err))
 			return
 		}
 
@@ -136,7 +126,7 @@ func ServiceListRequests(useCase service.ListRequestsUseCase) gin.HandlerFunc {
 
 		var req dto.RequestFilter
 		if err := c.ShouldBindQuery(&req); err != nil {
-			c.Error(errors.BindingToHTTPError(req, err))
+			c.Error(errors.BindQueryToHTTPError(req, err))
 			return
 		}
 
@@ -180,12 +170,12 @@ func ServiceUpdateStatus(useCase service.UpdateStatusUseCase) gin.HandlerFunc {
 
 		var req dto.ServiceStatusUpdate
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.Error(errors.BindingToHTTPError(req, err))
+			c.Error(errors.BindJSONToHTTPError(req, err))
 			return
 		}
 
 		service, err := useCase.Execute(
-			c.Request.Context(), serviceID, req.Status,
+			c.Request.Context(), serviceID, enums.ServiceStatus(req.Status),
 		)
 		if err != nil {
 			c.Error(err)

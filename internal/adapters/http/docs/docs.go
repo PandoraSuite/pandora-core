@@ -234,11 +234,6 @@ const docTemplate = `{
                             "organization"
                         ],
                         "type": "string",
-                        "x-enum-varnames": [
-                            "ClientTypeNull",
-                            "ClientTypeDeveloper",
-                            "ClientTypeOrganization"
-                        ],
                         "name": "type",
                         "in": "query"
                     }
@@ -1283,12 +1278,6 @@ const docTemplate = `{
                             "deprecated"
                         ],
                         "type": "string",
-                        "x-enum-varnames": [
-                            "ServiceStatusNull",
-                            "ServiceStatusEnabled",
-                            "ServiceStatusDisabled",
-                            "ServiceStatusDeprecated"
-                        ],
                         "name": "status",
                         "in": "query"
                     }
@@ -1429,15 +1418,6 @@ const docTemplate = `{
                             "quota_exceeded"
                         ],
                         "type": "string",
-                        "x-enum-varnames": [
-                            "RequestExecutionStatusNull",
-                            "RequestExecutionStatusSuccess",
-                            "RequestExecutionStatusForwarded",
-                            "RequestExecutionStatusClientError",
-                            "RequestExecutionStatusServiceError",
-                            "RequestExecutionStatusUnauthorized",
-                            "RequestExecutionStatusQuotaExceeded"
-                        ],
                         "name": "execution_status",
                         "in": "query"
                     },
@@ -1561,14 +1541,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "string",
                     "enum": [
                         "enabled",
-                        "disabled"
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/enums.APIKeyStatus"
-                        }
+                        "disabled",
+                        "deprecated"
                     ]
                 }
             }
@@ -1632,14 +1609,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
+                    "type": "string",
                     "enum": [
                         "developer",
                         "organization"
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/enums.ClientType"
-                        }
                     ]
                 }
             }
@@ -1660,14 +1633,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
+                    "type": "string",
                     "enum": [
                         "developer",
                         "organization"
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/enums.ClientType"
-                        }
                     ]
                 }
             }
@@ -1682,14 +1651,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "type": {
+                    "type": "string",
                     "enum": [
+                        "",
                         "developer",
                         "organization"
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/enums.ClientType"
-                        }
                     ]
                 }
             }
@@ -1737,7 +1703,12 @@ const docTemplate = `{
                     }
                 },
                 "status": {
-                    "$ref": "#/definitions/enums.EnvironmentStatus"
+                    "type": "string",
+                    "enum": [
+                        "enabled",
+                        "disabled",
+                        "deprecated"
+                    ]
                 }
             }
         },
@@ -1769,7 +1740,12 @@ const docTemplate = `{
                     "$ref": "#/definitions/dto.EnvironmentServiceResponse"
                 },
                 "status": {
-                    "$ref": "#/definitions/enums.EnvironmentStatus"
+                    "type": "string",
+                    "enum": [
+                        "enabled",
+                        "disabled",
+                        "deprecated"
+                    ]
                 }
             }
         },
@@ -1883,7 +1859,11 @@ const docTemplate = `{
                     }
                 },
                 "status": {
-                    "$ref": "#/definitions/enums.ProjectStatus"
+                    "type": "string",
+                    "enum": [
+                        "enabled",
+                        "disabled"
+                    ]
                 }
             }
         },
@@ -1901,7 +1881,14 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "reset_frequency": {
-                    "$ref": "#/definitions/enums.ProjectServiceResetFrequency"
+                    "type": "string",
+                    "enum": [
+                        "",
+                        "daily",
+                        "weekly",
+                        "biweekly",
+                        "monthly"
+                    ]
                 }
             }
         },
@@ -1924,7 +1911,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "reset_frequency": {
-                    "$ref": "#/definitions/enums.ProjectServiceResetFrequency"
+                    "type": "string",
+                    "enum": [
+                        "daily",
+                        "weekly",
+                        "biweekly",
+                        "monthly"
+                    ]
                 },
                 "version": {
                     "type": "string"
@@ -1941,7 +1934,13 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "reset_frequency": {
-                    "$ref": "#/definitions/enums.ProjectServiceResetFrequency"
+                    "type": "string",
+                    "enum": [
+                        "daily",
+                        "weekly",
+                        "biweekly",
+                        "monthly"
+                    ]
                 }
             }
         },
@@ -1972,6 +1971,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "execution_status": {
+                    "type": "string",
                     "enum": [
                         "success",
                         "forwarded",
@@ -1979,11 +1979,6 @@ const docTemplate = `{
                         "service_error",
                         "unauthorized",
                         "quota_exceeded"
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/enums.RequestExecutionStatus"
-                        }
                     ]
                 },
                 "id": {
@@ -2052,15 +2047,11 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "status": {
+                    "type": "string",
                     "enum": [
                         "enabled",
                         "disabled",
                         "deprecated"
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/enums.ServiceStatus"
-                        }
                     ]
                 },
                 "version": {
@@ -2072,123 +2063,15 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "status": {
+                    "type": "string",
                     "enum": [
+                        "",
                         "enabled",
                         "disabled",
                         "deprecated"
-                    ],
-                    "allOf": [
-                        {
-                            "$ref": "#/definitions/enums.ServiceStatus"
-                        }
                     ]
                 }
             }
-        },
-        "enums.APIKeyStatus": {
-            "type": "string",
-            "enum": [
-                "",
-                "enabled",
-                "disabled"
-            ],
-            "x-enum-varnames": [
-                "APIKeyStatusNull",
-                "APIKeyStatusEnabled",
-                "APIKeyStatusDisabled"
-            ]
-        },
-        "enums.ClientType": {
-            "type": "string",
-            "enum": [
-                "",
-                "developer",
-                "organization"
-            ],
-            "x-enum-varnames": [
-                "ClientTypeNull",
-                "ClientTypeDeveloper",
-                "ClientTypeOrganization"
-            ]
-        },
-        "enums.EnvironmentStatus": {
-            "type": "string",
-            "enum": [
-                "",
-                "enabled",
-                "disabled"
-            ],
-            "x-enum-varnames": [
-                "EnvironmentStatusNull",
-                "EnvironmentStatusEnabled",
-                "EnvironmentStatusDisabled"
-            ]
-        },
-        "enums.ProjectServiceResetFrequency": {
-            "type": "string",
-            "enum": [
-                "",
-                "daily",
-                "weekly",
-                "biweekly",
-                "monthly"
-            ],
-            "x-enum-varnames": [
-                "ProjectServiceResetFrequencyNull",
-                "ProjectServiceResetFrequencyDaily",
-                "ProjectServiceResetFrequencyWeekly",
-                "ProjectServiceResetFrequencyBiweekly",
-                "ProjectServiceResetFrequencyMonthly"
-            ]
-        },
-        "enums.ProjectStatus": {
-            "type": "string",
-            "enum": [
-                "",
-                "enabled",
-                "disabled"
-            ],
-            "x-enum-varnames": [
-                "ProjectStatusNull",
-                "ProjectStatusEnabled",
-                "ProjectStatusDisabled"
-            ]
-        },
-        "enums.RequestExecutionStatus": {
-            "type": "string",
-            "enum": [
-                "",
-                "success",
-                "forwarded",
-                "client_error",
-                "service_error",
-                "unauthorized",
-                "quota_exceeded"
-            ],
-            "x-enum-varnames": [
-                "RequestExecutionStatusNull",
-                "RequestExecutionStatusSuccess",
-                "RequestExecutionStatusForwarded",
-                "RequestExecutionStatusClientError",
-                "RequestExecutionStatusServiceError",
-                "RequestExecutionStatusUnauthorized",
-                "RequestExecutionStatusQuotaExceeded"
-            ]
-        },
-        "enums.ServiceStatus": {
-            "type": "string",
-            "enum": [
-                "",
-                "enabled",
-                "disabled",
-                "deprecated"
-            ],
-            "x-enum-varnames": [
-                "ServiceStatusNull",
-                "ServiceStatusEnabled",
-                "ServiceStatusDisabled",
-                "ServiceStatusDeprecated"
-            ]
         },
         "errors.ErrorCode": {
             "type": "string",
