@@ -6,6 +6,13 @@ import (
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
+type RequestMetadata struct {
+	Body            string
+	BodyContentType enums.RequestBodyContentType
+	Headers         string
+	QueryParams     string
+}
+
 type Request struct {
 	ID string
 
@@ -25,10 +32,7 @@ type Request struct {
 	Path            string
 	Method          string
 	IPAddress       string
-	Body            string
-	BodyContentType enums.RequestBodyContentType
-	Headers         string
-	QueryParams     string
+	Metadata        *RequestMetadata
 
 	CreatedAt time.Time
 }
