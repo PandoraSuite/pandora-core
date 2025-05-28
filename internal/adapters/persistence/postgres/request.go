@@ -264,7 +264,12 @@ func (r *RequestRepository) CreateAsInitialPoint(
 		method = request.Method
 	}
 
-	metadata := make(map[string]any)
+	metadata := map[string]any{
+		"body":            "",
+		"headers":         "",
+		"queryParams":     "",
+		"bodyContentType": enums.RequestBodyContentTypeNull,
+	}
 	if request.Metadata != nil {
 		metadata["body"] = request.Metadata.Body
 		metadata["headers"] = request.Metadata.Headers

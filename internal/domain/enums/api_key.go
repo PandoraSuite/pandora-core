@@ -16,3 +16,34 @@ func ParseAPIKeyStatus(status string) (APIKeyStatus, bool) {
 		return APIKeyStatusNull, false
 	}
 }
+
+type APIKeyValidationFailureCode string
+
+const (
+	APIKeyValidationFailureCodeAPIKeyInvalid       APIKeyValidationFailureCode = "API_KEY_INVALID"
+	APIKeyValidationFailureCodeQuotaExceeded       APIKeyValidationFailureCode = "QUOTA_EXCEEDED"
+	APIKeyValidationFailureCodeAPIKeyExpired       APIKeyValidationFailureCode = "API_KEY_EXPIRED"
+	APIKeyValidationFailureCodeAPIKeyDisabled      APIKeyValidationFailureCode = "API_KEY_DISABLED"
+	APIKeyValidationFailureCodeServiceMismatch     APIKeyValidationFailureCode = "SERVICE_MISMATCH"
+	APIKeyValidationFailureCodeServiceDisabled     APIKeyValidationFailureCode = "SERVICE_DISABLED"
+	APIKeyValidationFailureCodeServiceDeprecated   APIKeyValidationFailureCode = "SERVICE_DEPRECATED"
+	APIKeyValidationFailureCodeServiceNotAssigned  APIKeyValidationFailureCode = "SERVICE_NOT_ASSIGNED"
+	APIKeyValidationFailureCodeEnvironmentMismatch APIKeyValidationFailureCode = "ENVIRONMENT_MISMATCH"
+	APIKeyValidationFailureCodeEnvironmentDisabled APIKeyValidationFailureCode = "ENVIRONMENT_DISABLED"
+)
+
+func ParseAPIKeyValidationFailureCode(code string) (APIKeyValidationFailureCode, bool) {
+	switch c := APIKeyValidationFailureCode(code); c {
+	case APIKeyValidationFailureCodeAPIKeyInvalid,
+		APIKeyValidationFailureCodeQuotaExceeded,
+		APIKeyValidationFailureCodeAPIKeyExpired,
+		APIKeyValidationFailureCodeAPIKeyDisabled,
+		APIKeyValidationFailureCodeServiceMismatch,
+		APIKeyValidationFailureCodeServiceNotAssigned,
+		APIKeyValidationFailureCodeEnvironmentMismatch,
+		APIKeyValidationFailureCodeEnvironmentDisabled:
+		return c, true
+	default:
+		return "", false
+	}
+}

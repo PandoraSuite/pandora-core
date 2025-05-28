@@ -16,6 +16,14 @@ type Service struct {
 	CreatedAt time.Time
 }
 
-func (a *Service) IsEnabled() bool {
-	return a.Status == enums.ServiceStatusEnabled
+func (s *Service) IsEnabled() bool {
+	return s.Status == enums.ServiceStatusEnabled
+}
+
+func (s *Service) IsDisabled() bool {
+	return s.Status == enums.ServiceStatusDisabled
+}
+
+func (s *Service) IsDeprecated() bool {
+	return s.Status == enums.ServiceStatusDeprecated
 }

@@ -196,9 +196,24 @@ CREATE TABLE IF NOT EXISTS request(
 
     request_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    path TEXT NOT NULL,
-    method TEXT,
     ip_address INET NOT NULL,
+    path TEXT NOT NULL,
+    method TEXT NOT NULL,
+    CONSTRAINT request_method_check
+        CHECK (
+            method IN (
+                'GET',
+                'HEAD',
+                'POST',
+                'PUT',
+                'PATCH',
+                'DELETE',
+                'CONNECT',
+                'OPTIONS',
+                'TRACE'
+            )
+        ),
+    
     metadata JSONB, 
 
     created_at TIMESTAMPTZ DEFAULT NOW()

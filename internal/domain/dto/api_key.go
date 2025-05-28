@@ -9,11 +9,11 @@ import (
 // ... Requests ...
 
 type APIKeyValidate struct {
-	APIKey         string    `name:"api_key" validate:"required"`
-	Service        string    `name:"service" validate:"required"`
-	Environment    string    `name:"environment" validate:"required"`
-	RequestTime    time.Time `name:"request_time" validate:"required,utc" time_format:"2006-01-02T15:04:05Z" time_utc:"1"`
-	ServiceVersion string    `name:"service_version" validate:"required"`
+	APIKey          string         `name:"api_key" validate:"required"`
+	Request         *RequestCreate `name:"request" validate:"required"`
+	ServiceName     string         `name:"service" validate:"required"`
+	ServiceVersion  string         `name:"service_version" validate:"required"`
+	EnvironmentName string         `name:"environment" validate:"required"`
 }
 
 type APIKeyValidateReserve struct {
@@ -33,6 +33,13 @@ type APIKeyUpdate struct {
 // ... Responses ...
 
 type APIKeyValidateResponse struct {
+	Valid        bool                              `name:"valid"`
+	RequestID    string                            `name:"request_id"`
+	FailureCode  enums.APIKeyValidationFailureCode `name:"failure_code"`
+	ConsumerInfo *ProjectContextResponse           `name:"consumer_info"`
+}
+
+type APIKeyValidateResponse2 struct {
 	Valid     bool   `name:"valid"`
 	RequestID string `name:"request_id"`
 
@@ -46,7 +53,7 @@ type APIKeyValidateResponse struct {
 }
 
 type APIKeyValidateConsumeResponse struct {
-	APIKeyValidateResponse `name:",inline"`
+	APIKeyValidateResponse2 `name:",inline"`
 
 	AvailableRequest string `name:"available_request"`
 }

@@ -58,3 +58,10 @@ type ProjectResetRequestResponse struct {
 	ProjectService      *ProjectServiceResponse    `name:"project_service"`
 	EnvironmentServices []*EnvironmentServiceReset `name:"environment_services"`
 }
+
+type ProjectContextResponse struct {
+	ID         int    `name:"id"`
+	Name       string `name:"name"`
+	ClientID   int    `name:"client_id"`
+	ClientName string `name:"client_name"`
+}
