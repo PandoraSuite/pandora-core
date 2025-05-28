@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/MAD-py/pandora-core/internal/app/api_key/shared"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
@@ -23,6 +24,8 @@ type useCase struct {
 	serviceRepo     ServiceRepository
 	requestRepo     RequestRepository
 	environmentRepo EnvironmentRepository
+
+	validateDeps *shared.ValidateDependencies
 }
 
 func (uc *useCase) Execute(
@@ -56,7 +59,9 @@ func (uc *useCase) Execute(
 		EnvironmentName: req.EnvironmentName,
 	}
 
-	err := uc.validate(ctx, req, &request, &validateResponse)
+	err := shared.ValidateAPIKey(
+		ctx, uc.validateDeps, req, &request, &validateResponse,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -75,135 +80,10 @@ func (uc *useCase) Execute(
 
 	if validateResponse.Valid {
 		if err := uc.apiKeyRepo.UpdateLastUsed(ctx, req.APIKey); err != nil {
-			log.Printf("Failed to update last_used for API Key %s: %v", req.APIKey, err)
+			log.Printf("[WARN] Failed to update last_used for API Key %s: %v", req.APIKey, err)
 		}
 	}
 	return &validateResponse, nil
-}
-
-func (uc *useCase) validate(
-	ctx context.Context,
-	req *dto.APIKeyValidate,
-	request *entities.Request,
-	validateResponse *dto.APIKeyValidateResponse,
-) errors.Error {
-	service, err := uc.serviceRepo.GetByNameAndVersion(
-		ctx, req.ServiceName, req.ServiceVersion,
-	)
-	if err != nil {
-		if err.Code() != errors.CodeNotFound {
-			return err
-		}
-		uc.setFailureIfEmpty(
-			validateResponse,
-			enums.APIKeyValidationFailureCodeServiceMismatch,
-		)
-	} else {
-		request.ServiceID = service.ID
-
-		if service.IsDisabled() {
-			uc.setFailureIfEmpty(
-				validateResponse,
-				enums.APIKeyValidationFailureCodeServiceDisabled,
-			)
-		}
-
-		if service.IsDeprecated() {
-			uc.setFailureIfEmpty(
-				validateResponse,
-				enums.APIKeyValidationFailureCodeServiceDeprecated,
-			)
-		}
-	}
-
-	apiKey, err := uc.apiKeyRepo.GetByKey(ctx, req.APIKey)
-	if err != nil {
-		if err.Code() == errors.CodeNotFound {
-			uc.setFailureIfEmpty(
-				validateResponse,
-				enums.APIKeyValidationFailureCodeAPIKeyInvalid,
-			)
-			return nil
-		}
-		return err
-	}
-
-	request.APIKeyID = apiKey.ID
-
-	if !apiKey.IsEnabled() {
-		uc.setFailureIfEmpty(
-			validateResponse,
-			enums.APIKeyValidationFailureCodeAPIKeyDisabled,
-		)
-	}
-
-	if apiKey.IsExpired() {
-		uc.setFailureIfEmpty(
-			validateResponse,
-			enums.APIKeyValidationFailureCodeAPIKeyExpired,
-		)
-	}
-
-	environment, err := uc.environmentRepo.GetByID(ctx, apiKey.EnvironmentID)
-	if err != nil {
-		return err
-	}
-
-	if !environment.Is(req.EnvironmentName) {
-		uc.setFailureIfEmpty(
-			validateResponse,
-			enums.APIKeyValidationFailureCodeEnvironmentMismatch,
-		)
-		return nil
-	}
-
-	request.EnvironmentID = environment.ID
-
-	if !environment.IsEnabled() {
-		uc.setFailureIfEmpty(
-			validateResponse,
-			enums.APIKeyValidationFailureCodeEnvironmentDisabled,
-		)
-	}
-
-	consumer, err := uc.projectRepo.GetProjectContextByID(
-		ctx, environment.ProjectID,
-	)
-	if err != nil {
-		return err
-	}
-
-	request.ProjectID = consumer.ID
-	request.ProjectName = consumer.Name
-	validateResponse.ConsumerInfo = consumer
-
-	if service != nil {
-		exists, err := uc.environmentRepo.ExistsServiceIn(
-			ctx, environment.ID, service.ID,
-		)
-		if err != nil {
-			return err
-		}
-
-		if !exists {
-			uc.setFailureIfEmpty(
-				validateResponse,
-				enums.APIKeyValidationFailureCodeServiceNotAssigned,
-			)
-		}
-	}
-
-	validateResponse.Valid = validateResponse.FailureCode == ""
-	return nil
-}
-
-func (uc *useCase) setFailureIfEmpty(
-	validateResponse *dto.APIKeyValidateResponse,
-	failureCode enums.APIKeyValidationFailureCode,
-) {
-	if validateResponse.FailureCode == "" {
-		validateResponse.FailureCode = failureCode
-	}
 }
 
 func (uc *useCase) validateReq(req *dto.APIKeyValidate) errors.Error {
@@ -243,5 +123,12 @@ func NewUseCase(
 		serviceRepo:     serviceRepo,
 		requestRepo:     requestRepo,
 		environmentRepo: environmentRepo,
+
+		validateDeps: shared.NewValidationDependencies(
+			apiKeyRepo,
+			serviceRepo,
+			projectRepo,
+			environmentRepo,
+		),
 	}
 }

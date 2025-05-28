@@ -3,27 +3,26 @@ package validateonly
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/domain/dto"
+	"github.com/MAD-py/pandora-core/internal/app/api_key/shared"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
 
 type APIKeyRepository interface {
-	GetByKey(ctx context.Context, key string) (*entities.APIKey, errors.Error)
+	shared.ValidateAPIKeyRepository
 	UpdateLastUsed(ctx context.Context, key string) errors.Error
 }
 
 type EnvironmentRepository interface {
-	GetByID(ctx context.Context, id int) (*entities.Environment, errors.Error)
-	ExistsServiceIn(ctx context.Context, id, serviceID int) (bool, errors.Error)
+	shared.ValidateEnvironmentRepository
 }
 
 type ProjectRepository interface {
-	GetProjectContextByID(ctx context.Context, id int) (*dto.ProjectContextResponse, errors.Error)
+	shared.ValidateProjectRepository
 }
 
 type ServiceRepository interface {
-	GetByNameAndVersion(ctx context.Context, name, version string) (*entities.Service, errors.Error)
+	shared.ValidateServiceRepository
 }
 
 type RequestRepository interface {
