@@ -39,12 +39,12 @@ func (s *UseCaseSuite) SetupTest() {
 	s.serviceRepo = mock.NewMockValidateServiceRepository(s.ctrl)
 	s.environmentRepo = mock.NewMockValidateEnvironmentRepository(s.ctrl)
 
-	s.deps = &ValidateDependencies{
-		apiKeyRepo:      s.apiKeyRepo,
-		serviceRepo:     s.serviceRepo,
-		projectRepo:     s.projectRepo,
-		environmentRepo: s.environmentRepo,
-	}
+	s.deps = NewValidationDependencies(
+		s.apiKeyRepo,
+		s.serviceRepo,
+		s.projectRepo,
+		s.environmentRepo,
+	)
 
 	s.ctx = context.Background()
 }
