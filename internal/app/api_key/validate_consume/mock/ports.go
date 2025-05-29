@@ -126,20 +126,43 @@ func (mr *MockEnvironmentRepositoryMockRecorder) GetByID(ctx, id any) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByID", reflect.TypeOf((*MockEnvironmentRepository)(nil).GetByID), ctx, id)
 }
 
-// MissingResourceDiagnosis mocks base method.
-func (m *MockEnvironmentRepository) MissingResourceDiagnosis(ctx context.Context, id, serviceID int) (bool, bool, errors.Error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "MissingResourceDiagnosis", ctx, id, serviceID)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(bool)
-	ret2, _ := ret[2].(errors.Error)
-	return ret0, ret1, ret2
+// MockProjectRepository is a mock of ProjectRepository interface.
+type MockProjectRepository struct {
+	ctrl     *gomock.Controller
+	recorder *MockProjectRepositoryMockRecorder
+	isgomock struct{}
 }
 
-// MissingResourceDiagnosis indicates an expected call of MissingResourceDiagnosis.
-func (mr *MockEnvironmentRepositoryMockRecorder) MissingResourceDiagnosis(ctx, id, serviceID any) *gomock.Call {
+// MockProjectRepositoryMockRecorder is the mock recorder for MockProjectRepository.
+type MockProjectRepositoryMockRecorder struct {
+	mock *MockProjectRepository
+}
+
+// NewMockProjectRepository creates a new mock instance.
+func NewMockProjectRepository(ctrl *gomock.Controller) *MockProjectRepository {
+	mock := &MockProjectRepository{ctrl: ctrl}
+	mock.recorder = &MockProjectRepositoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockProjectRepository) EXPECT() *MockProjectRepositoryMockRecorder {
+	return m.recorder
+}
+
+// GetProjectContextByID mocks base method.
+func (m *MockProjectRepository) GetProjectContextByID(ctx context.Context, id int) (*dto.ProjectContextResponse, errors.Error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetProjectContextByID", ctx, id)
+	ret0, _ := ret[0].(*dto.ProjectContextResponse)
+	ret1, _ := ret[1].(errors.Error)
+	return ret0, ret1
+}
+
+// GetProjectContextByID indicates an expected call of GetProjectContextByID.
+func (mr *MockProjectRepositoryMockRecorder) GetProjectContextByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MissingResourceDiagnosis", reflect.TypeOf((*MockEnvironmentRepository)(nil).MissingResourceDiagnosis), ctx, id, serviceID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectContextByID", reflect.TypeOf((*MockProjectRepository)(nil).GetProjectContextByID), ctx, id)
 }
 
 // MockServiceRepository is a mock of ServiceRepository interface.
@@ -205,55 +228,16 @@ func (m *MockRequestRepository) EXPECT() *MockRequestRepositoryMockRecorder {
 	return m.recorder
 }
 
-// CreateAsInitialPoint mocks base method.
-func (m *MockRequestRepository) CreateAsInitialPoint(ctx context.Context, request *entities.Request) errors.Error {
+// Create mocks base method.
+func (m *MockRequestRepository) Create(ctx context.Context, request *entities.Request) errors.Error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateAsInitialPoint", ctx, request)
+	ret := m.ctrl.Call(m, "Create", ctx, request)
 	ret0, _ := ret[0].(errors.Error)
 	return ret0
 }
 
-// CreateAsInitialPoint indicates an expected call of CreateAsInitialPoint.
-func (mr *MockRequestRepositoryMockRecorder) CreateAsInitialPoint(ctx, request any) *gomock.Call {
+// Create indicates an expected call of Create.
+func (mr *MockRequestRepositoryMockRecorder) Create(ctx, request any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAsInitialPoint", reflect.TypeOf((*MockRequestRepository)(nil).CreateAsInitialPoint), ctx, request)
-}
-
-// MockReservationRepository is a mock of ReservationRepository interface.
-type MockReservationRepository struct {
-	ctrl     *gomock.Controller
-	recorder *MockReservationRepositoryMockRecorder
-	isgomock struct{}
-}
-
-// MockReservationRepositoryMockRecorder is the mock recorder for MockReservationRepository.
-type MockReservationRepositoryMockRecorder struct {
-	mock *MockReservationRepository
-}
-
-// NewMockReservationRepository creates a new mock instance.
-func NewMockReservationRepository(ctrl *gomock.Controller) *MockReservationRepository {
-	mock := &MockReservationRepository{ctrl: ctrl}
-	mock.recorder = &MockReservationRepositoryMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockReservationRepository) EXPECT() *MockReservationRepositoryMockRecorder {
-	return m.recorder
-}
-
-// CountByEnvironmentAndService mocks base method.
-func (m *MockReservationRepository) CountByEnvironmentAndService(ctx context.Context, environmentID, serviceID int) (int, errors.Error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CountByEnvironmentAndService", ctx, environmentID, serviceID)
-	ret0, _ := ret[0].(int)
-	ret1, _ := ret[1].(errors.Error)
-	return ret0, ret1
-}
-
-// CountByEnvironmentAndService indicates an expected call of CountByEnvironmentAndService.
-func (mr *MockReservationRepositoryMockRecorder) CountByEnvironmentAndService(ctx, environmentID, serviceID any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CountByEnvironmentAndService", reflect.TypeOf((*MockReservationRepository)(nil).CountByEnvironmentAndService), ctx, environmentID, serviceID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockRequestRepository)(nil).Create), ctx, request)
 }

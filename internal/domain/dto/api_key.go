@@ -38,6 +38,11 @@ type APIKeyValidateResponse struct {
 	ConsumerInfo *ProjectContextResponse           `name:"consumer_info"`
 }
 
+type APIKeyValidateConsumeResponse struct {
+	APIKeyValidateResponse
+	AvailableRequest int `name:"available_request"`
+}
+
 type APIKeyValidateResponse2 struct {
 	Valid     bool   `name:"valid"`
 	RequestID string `name:"request_id"`
@@ -49,12 +54,6 @@ type APIKeyValidateResponse2 struct {
 	// Only when valid is false
 	Code    enums.ValidateStatusCode `name:"code"`
 	Message string                   `name:"message"`
-}
-
-type APIKeyValidateConsumeResponse struct {
-	APIKeyValidateResponse2 `name:",inline"`
-
-	AvailableRequest string `name:"available_request"`
 }
 
 type APIKeyValidateReservationResponse struct {

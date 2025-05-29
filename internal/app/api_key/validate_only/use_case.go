@@ -92,7 +92,6 @@ func (uc *useCase) validateReq(req *dto.APIKeyValidate) errors.Error {
 			"api_key.required":         "api_key is required",
 			"request.required":         "request is required",
 			"service.required":         "service is required",
-			"environment.required":     "environment is required",
 			"service_version.required": "service_version is required",
 
 			"request.path.required":         "request.path is required",
