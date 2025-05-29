@@ -20,16 +20,16 @@ type APIKeyUpdateRepository = update.APIKeyRepository
 
 type APIKeyValidateConsumeRepository = validateconsume.APIKeyRepository
 type RequestValidateConsumeRepository = validateconsume.RequestRepository
-type EnvironmentValidateConsumeRepository = validateconsume.EnvironmentRepository
 type ServiceValidateConsumeRepository = validateconsume.ServiceRepository
-type ReservationValidateConsumeRepository = validateconsume.ReservationRepository
+type ProjectValidateConsumeRepository = validateconsume.ProjectRepository
+type EnvironmentValidateConsumeRepository = validateconsume.EnvironmentRepository
 
 // ... Validate And Reservation Use Case ...
 
 type APIKeyValidateReservationRepository = validatereservation.APIKeyRepository
 type RequestValidateReservationRepository = validatereservation.RequestRepository
-type EnvironmentValidateReservationRepository = validatereservation.EnvironmentRepository
 type ServiceValidateReservationRepository = validatereservation.ServiceRepository
+type EnvironmentValidateReservationRepository = validatereservation.EnvironmentRepository
 type ReservationValidateReservationRepository = validatereservation.ReservationRepository
 
 // ... Validate Reserve Use Case ...

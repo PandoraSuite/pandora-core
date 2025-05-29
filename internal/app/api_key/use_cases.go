@@ -36,17 +36,17 @@ type ValidateConsumeUseCase = validateconsume.UseCase
 func NewValidateConsumeUseCase(
 	validator validator.Validator,
 	apiKeyRepo APIKeyValidateConsumeRepository,
+	projectRepo ProjectValidateConsumeRepository,
 	requestRepo RequestValidateConsumeRepository,
 	serviceRepo ServiceValidateConsumeRepository,
-	reservationRepo ReservationValidateConsumeRepository,
 	environmentRepo EnvironmentValidateConsumeRepository,
 ) ValidateConsumeUseCase {
 	return validateconsume.NewUseCase(
 		validator,
 		apiKeyRepo,
+		projectRepo,
 		serviceRepo,
 		requestRepo,
-		reservationRepo,
 		environmentRepo,
 	)
 }
