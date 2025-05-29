@@ -11,62 +11,119 @@ import (
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc/utils"
 	apikey "github.com/MAD-py/pandora-core/internal/app/api_key"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
 type service struct {
 	pb.APIKeyServiceServer
 
+	validateUC        apikey.ValidateUseCase
 	validateConsumeUC apikey.ValidateConsumeUseCase
 }
 
-func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndConsumeRequest) (*pb.ValidateAndConsumeResponse, error) {
-	params := req.GetParams()
+func (s *service) Validate(
+	ctx context.Context, req *pb.ValidateRequest,
+) (*pb.ValidateResponse, error) {
 	reqValidate := dto.APIKeyValidate{
-		APIKey:         params.Key,
-		Service:        params.Service,
-		Environment:    params.Environment,
-		ServiceVersion: params.ServiceVersion,
-		RequestTime:    params.RequestTime.AsTime(),
+		APIKey: req.ApiKey,
+		Request: &dto.RequestCreate{
+			Path:   req.Request.Path,
+			Method: req.Request.Method,
+			Metadata: &dto.RequestMetadata{
+				Body:            req.Request.Metadata.Body,
+				Headers:         req.Request.Metadata.Headers,
+				QueryParams:     req.Request.Metadata.QueryParams,
+				BodyContentType: enums.RequestBodyContentType(req.Request.Metadata.BodyContentType),
+			},
+			IPAddress:   req.Request.IpAddress,
+			RequestTime: req.Request.RequestTime.AsTime(),
+		},
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
-	response, err := s.validateAndConsumeUC.Execute(ctx, &reqValidate)
+
+	response, err := s.validateUC.Execute(ctx, &reqValidate)
 	if err != nil {
 		return nil, status.Error(
 			utils.GetDomainErrorStatusCode(err),
 			err.Error(),
 		)
 	}
-	if response.Valid {
-		return &pb.ValidateAndConsumeResponse{
-			Valid: true,
-			Result: &pb.ValidateAndConsumeResponse_Successful_{
-				Successful: &pb.ValidateAndConsumeResponse_Successful{
-					RequestId:        response.RequestID,
-					AvailableRequest: int64(response.AvailableRequest),
-				},
+
+	return &pb.ValidateResponse{
+		Valid:       response.Valid,
+		RequestId:   response.RequestID,
+		FailureCode: string(response.FailureCode),
+		ConsumerInfo: &pb.ConsumerInfo{
+			ProjectId:   int64(response.ConsumerInfo.ProjectID),
+			ProjectName: response.ConsumerInfo.ProjectName,
+			ClientId:    int64(response.ConsumerInfo.ClientID),
+			ClientName:  response.ConsumerInfo.ClientName,
+		},
+	}, nil
+}
+
+func (s *service) ValidateConsume(
+	ctx context.Context, req *pb.ValidateRequest,
+) (*pb.ValidateConsumeResponse, error) {
+	reqValidate := dto.APIKeyValidate{
+		APIKey: req.ApiKey,
+		Request: &dto.RequestCreate{
+			Path:   req.Request.Path,
+			Method: req.Request.Method,
+			Metadata: &dto.RequestMetadata{
+				Body:            req.Request.Metadata.Body,
+				Headers:         req.Request.Metadata.Headers,
+				QueryParams:     req.Request.Metadata.QueryParams,
+				BodyContentType: enums.RequestBodyContentType(req.Request.Metadata.BodyContentType),
 			},
-		}, nil
-	} else {
-		return &pb.ValidateAndConsumeResponse{
-			Valid: false,
-			Result: &pb.ValidateAndConsumeResponse_Failed_{
-				Failed: &pb.ValidateAndConsumeResponse_Failed{
-					Code:    response.Code.String(),
-					Message: response.Message,
-				},
-			},
-		}, nil
+			IPAddress:   req.Request.IpAddress,
+			RequestTime: req.Request.RequestTime.AsTime(),
+		},
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
+
+	response, err := s.validateConsumeUC.Execute(ctx, &reqValidate)
+	if err != nil {
+		return nil, status.Error(
+			utils.GetDomainErrorStatusCode(err),
+			err.Error(),
+		)
+	}
+
+	return &pb.ValidateConsumeResponse{
+		BaseResponse: &pb.ValidateResponse{
+			Valid:       response.Valid,
+			RequestId:   response.RequestID,
+			FailureCode: string(response.FailureCode),
+			ConsumerInfo: &pb.ConsumerInfo{
+				ProjectId:   int64(response.ConsumerInfo.ProjectID),
+				ProjectName: response.ConsumerInfo.ProjectName,
+				ClientId:    int64(response.ConsumerInfo.ClientID),
+				ClientName:  response.ConsumerInfo.ClientName,
+			},
+		},
+		AvailableRequest: int64(response.AvailableRequest),
+	}, nil
 }
 
 func RegisterService(s *grpc.Server, deps *bootstrap.Dependencies) {
 	service := service{
-
-		validateAndConsumeUC: apikey.NewValidateConsumeUseCase(
+		validateUC: apikey.NewValidateUseCase(
 			deps.Validator,
 			deps.Repositories.APIKey(),
+			deps.Repositories.Project(),
+			deps.Repositories.Service(),
+			deps.Repositories.Request(),
+			deps.Repositories.Environment(),
+		),
+		validateConsumeUC: apikey.NewValidateConsumeUseCase(
+			deps.Validator,
+			deps.Repositories.APIKey(),
+			deps.Repositories.Project(),
 			deps.Repositories.Request(),
 			deps.Repositories.Service(),
-			deps.Repositories.Reservation(),
 			deps.Repositories.Environment(),
 		),
 	}
