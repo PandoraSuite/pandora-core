@@ -133,8 +133,8 @@ func ValidateAPIKey(
 		return err
 	}
 
-	request.ProjectID = consumer.ID
-	request.ProjectName = consumer.Name
+	request.ProjectID = consumer.ProjectID
+	request.ProjectName = consumer.ProjectName
 	validateResponse.ConsumerInfo = consumer
 
 	if service != nil && validateResponse.FailureCode == "" {

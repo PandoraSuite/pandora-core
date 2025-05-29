@@ -95,7 +95,12 @@ func (s *UseCaseSuite) TestSuccess() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
+	projectCtx := &dto.ProjectContextResponse{
+		ProjectID:   1000,
+		ProjectName: "TestProject",
+		ClientID:    2000,
+		ClientName:  "TestClient",
+	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -140,8 +145,8 @@ func (s *UseCaseSuite) TestSuccess() {
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ID, request.ProjectID)
-	s.Equal(projectCtx.Name, request.ProjectName)
+	s.Equal(projectCtx.ProjectID, request.ProjectID)
+	s.Equal(projectCtx.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestAPIKeyNotFound() {
@@ -241,7 +246,12 @@ func (s *UseCaseSuite) TestServiceMismatch() {
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
 	}
-	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
+	projectCtx := &dto.ProjectContextResponse{
+		ProjectID:   1000,
+		ProjectName: "TestProject",
+		ClientID:    2000,
+		ClientName:  "TestClient",
+	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -294,8 +304,8 @@ func (s *UseCaseSuite) TestServiceMismatch() {
 	s.Zero(request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ID, request.ProjectID)
-	s.Equal(projectCtx.Name, request.ProjectName)
+	s.Equal(projectCtx.ProjectID, request.ProjectID)
+	s.Equal(projectCtx.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestServiceRepoInternalError() {
@@ -632,7 +642,12 @@ func (s *UseCaseSuite) TestEnvironmentDisabled() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
+	projectCtx := &dto.ProjectContextResponse{
+		ProjectID:   1000,
+		ProjectName: "TestProject",
+		ClientID:    2000,
+		ClientName:  "TestClient",
+	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -677,8 +692,8 @@ func (s *UseCaseSuite) TestEnvironmentDisabled() {
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ID, request.ProjectID)
-	s.Equal(projectCtx.Name, request.ProjectName)
+	s.Equal(projectCtx.ProjectID, request.ProjectID)
+	s.Equal(projectCtx.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
@@ -723,7 +738,12 @@ func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
+	projectCtx := &dto.ProjectContextResponse{
+		ProjectID:   1000,
+		ProjectName: "TestProject",
+		ClientID:    2000,
+		ClientName:  "TestClient",
+	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -768,8 +788,8 @@ func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ID, request.ProjectID)
-	s.Equal(projectCtx.Name, request.ProjectName)
+	s.Equal(projectCtx.ProjectID, request.ProjectID)
+	s.Equal(projectCtx.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestServiceDisabled() {
@@ -814,7 +834,12 @@ func (s *UseCaseSuite) TestServiceDisabled() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
+	projectCtx := &dto.ProjectContextResponse{
+		ProjectID:   1000,
+		ProjectName: "TestProject",
+		ClientID:    2000,
+		ClientName:  "TestClient",
+	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -859,8 +884,8 @@ func (s *UseCaseSuite) TestServiceDisabled() {
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ID, request.ProjectID)
-	s.Equal(projectCtx.Name, request.ProjectName)
+	s.Equal(projectCtx.ProjectID, request.ProjectID)
+	s.Equal(projectCtx.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestServiceDeprecated() {
@@ -905,7 +930,12 @@ func (s *UseCaseSuite) TestServiceDeprecated() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
+	projectCtx := &dto.ProjectContextResponse{
+		ProjectID:   1000,
+		ProjectName: "TestProject",
+		ClientID:    2000,
+		ClientName:  "TestClient",
+	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -950,8 +980,8 @@ func (s *UseCaseSuite) TestServiceDeprecated() {
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ID, request.ProjectID)
-	s.Equal(projectCtx.Name, request.ProjectName)
+	s.Equal(projectCtx.ProjectID, request.ProjectID)
+	s.Equal(projectCtx.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestAPIKeyExpired() {
@@ -998,7 +1028,12 @@ func (s *UseCaseSuite) TestAPIKeyExpired() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
+	projectCtx := &dto.ProjectContextResponse{
+		ProjectID:   1000,
+		ProjectName: "TestProject",
+		ClientID:    2000,
+		ClientName:  "TestClient",
+	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -1043,8 +1078,8 @@ func (s *UseCaseSuite) TestAPIKeyExpired() {
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ID, request.ProjectID)
-	s.Equal(projectCtx.Name, request.ProjectName)
+	s.Equal(projectCtx.ProjectID, request.ProjectID)
+	s.Equal(projectCtx.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestAPIKeyDisabled() {
@@ -1091,7 +1126,12 @@ func (s *UseCaseSuite) TestAPIKeyDisabled() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
+	projectCtx := &dto.ProjectContextResponse{
+		ProjectID:   1000,
+		ProjectName: "TestProject",
+		ClientID:    2000,
+		ClientName:  "TestClient",
+	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -1136,8 +1176,8 @@ func (s *UseCaseSuite) TestAPIKeyDisabled() {
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ID, request.ProjectID)
-	s.Equal(projectCtx.Name, request.ProjectName)
+	s.Equal(projectCtx.ProjectID, request.ProjectID)
+	s.Equal(projectCtx.ProjectName, request.ProjectName)
 }
 
 func TestValidateOnlySuite(t *testing.T) {

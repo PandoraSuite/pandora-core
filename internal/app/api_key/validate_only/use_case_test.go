@@ -110,7 +110,12 @@ func (s *UseCaseSuite) TestSuccess() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
+	projectCtx := &dto.ProjectContextResponse{
+		ProjectID:   1000,
+		ProjectName: "TestProject",
+		ClientID:    2000,
+		ClientName:  "TestClient",
+	}
 
 	s.validator.EXPECT().
 		ValidateStruct(req, gomock.Any()).
@@ -144,7 +149,7 @@ func (s *UseCaseSuite) TestSuccess() {
 			s.Require().Equal(service.ID, r.ServiceID)
 			s.Require().Equal(apiKey.ID, r.APIKeyID)
 			s.Require().Equal(environment.ID, r.EnvironmentID)
-			s.Require().Equal(projectCtx.ID, r.ProjectID)
+			s.Require().Equal(projectCtx.ProjectID, r.ProjectID)
 			r.ID = wantRequestID
 			return nil
 		}).
@@ -210,7 +215,12 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
+	projectCtx := &dto.ProjectContextResponse{
+		ProjectID:   1000,
+		ProjectName: "TestProject",
+		ClientID:    2000,
+		ClientName:  "TestClient",
+	}
 
 	s.validator.EXPECT().
 		ValidateStruct(req, gomock.Any()).
@@ -244,7 +254,7 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 			s.Require().Equal(service.ID, r.ServiceID)
 			s.Require().Equal(apiKey.ID, r.APIKeyID)
 			s.Require().Equal(environment.ID, r.EnvironmentID)
-			s.Require().Equal(projectCtx.ID, r.ProjectID)
+			s.Require().Equal(projectCtx.ProjectID, r.ProjectID)
 			r.ID = wantRequestID
 			return nil
 		}).
@@ -361,7 +371,12 @@ func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
+	projectCtx := &dto.ProjectContextResponse{
+		ProjectID:   1000,
+		ProjectName: "TestProject",
+		ClientID:    2000,
+		ClientName:  "TestClient",
+	}
 
 	s.validator.EXPECT().
 		ValidateStruct(req, gomock.Any()).
@@ -395,7 +410,7 @@ func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
 			s.Require().Equal(service.ID, r.ServiceID)
 			s.Require().Equal(apiKey.ID, r.APIKeyID)
 			s.Require().Equal(environment.ID, r.EnvironmentID)
-			s.Require().Equal(projectCtx.ID, r.ProjectID)
+			s.Require().Equal(projectCtx.ProjectID, r.ProjectID)
 			r.ID = wantRequestID
 			return nil
 		}).
@@ -477,7 +492,12 @@ func (s *UseCaseSuite) TestRequestCreationError() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
+	projectCtx := &dto.ProjectContextResponse{
+		ProjectID:   1000,
+		ProjectName: "TestProject",
+		ClientID:    2000,
+		ClientName:  "TestClient",
+	}
 
 	repoErr := errors.NewInternal("database error", nil)
 

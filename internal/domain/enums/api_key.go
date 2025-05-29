@@ -28,7 +28,6 @@ const (
 	APIKeyValidationFailureCodeServiceDisabled     APIKeyValidationFailureCode = "SERVICE_DISABLED"
 	APIKeyValidationFailureCodeServiceDeprecated   APIKeyValidationFailureCode = "SERVICE_DEPRECATED"
 	APIKeyValidationFailureCodeServiceNotAssigned  APIKeyValidationFailureCode = "SERVICE_NOT_ASSIGNED"
-	APIKeyValidationFailureCodeEnvironmentMismatch APIKeyValidationFailureCode = "ENVIRONMENT_MISMATCH"
 	APIKeyValidationFailureCodeEnvironmentDisabled APIKeyValidationFailureCode = "ENVIRONMENT_DISABLED"
 )
 
@@ -40,7 +39,6 @@ func ParseAPIKeyValidationFailureCode(code string) (APIKeyValidationFailureCode,
 		APIKeyValidationFailureCodeAPIKeyDisabled,
 		APIKeyValidationFailureCodeServiceMismatch,
 		APIKeyValidationFailureCodeServiceNotAssigned,
-		APIKeyValidationFailureCodeEnvironmentMismatch,
 		APIKeyValidationFailureCodeEnvironmentDisabled:
 		return c, true
 	default:
