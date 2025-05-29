@@ -7,8 +7,8 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc/bootstrap"
+	"github.com/MAD-py/pandora-core/internal/adapters/grpc/errors"
 	pb "github.com/MAD-py/pandora-core/internal/adapters/grpc/services/api_key/v1"
-	"github.com/MAD-py/pandora-core/internal/adapters/grpc/utils"
 	apikey "github.com/MAD-py/pandora-core/internal/app/api_key"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
@@ -45,7 +45,7 @@ func (s *service) Validate(
 	response, err := s.validateUC.Execute(ctx, &reqValidate)
 	if err != nil {
 		return nil, status.Error(
-			utils.GetDomainErrorStatusCode(err),
+			errors.CodeToGRPCCode(err.Code()),
 			err.Error(),
 		)
 	}
@@ -87,7 +87,7 @@ func (s *service) ValidateConsume(
 	response, err := s.validateConsumeUC.Execute(ctx, &reqValidate)
 	if err != nil {
 		return nil, status.Error(
-			utils.GetDomainErrorStatusCode(err),
+			errors.CodeToGRPCCode(err.Code()),
 			err.Error(),
 		)
 	}

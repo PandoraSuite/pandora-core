@@ -8,8 +8,8 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc/bootstrap"
+	"github.com/MAD-py/pandora-core/internal/adapters/grpc/errors"
 	pb "github.com/MAD-py/pandora-core/internal/adapters/grpc/services/reservation/v1"
-	"github.com/MAD-py/pandora-core/internal/adapters/grpc/utils"
 	"github.com/MAD-py/pandora-core/internal/app/reservation"
 )
 
@@ -24,7 +24,7 @@ func (s *service) Commit(ctx context.Context, req *pb.CommitRequest) (*emptypb.E
 	err := s.commitUC.Execute(ctx, req.GetParams().Id)
 	if err != nil {
 		return nil, status.Error(
-			utils.GetDomainErrorStatusCode(err),
+			errors.CodeToGRPCCode(err.Code()),
 			err.Error(),
 		)
 	}
@@ -36,7 +36,7 @@ func (s *service) Rollback(ctx context.Context, req *pb.RollbackRequest) (*empty
 	err := s.rollbackUC.Execute(ctx, req.GetParams().Id)
 	if err != nil {
 		return nil, status.Error(
-			utils.GetDomainErrorStatusCode(err),
+			errors.CodeToGRPCCode(err.Code()),
 			err.Error(),
 		)
 	}

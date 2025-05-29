@@ -8,8 +8,8 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc/bootstrap"
+	"github.com/MAD-py/pandora-core/internal/adapters/grpc/errors"
 	pb "github.com/MAD-py/pandora-core/internal/adapters/grpc/services/request/v1"
-	"github.com/MAD-py/pandora-core/internal/adapters/grpc/utils"
 	"github.com/MAD-py/pandora-core/internal/app/request"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
@@ -26,7 +26,7 @@ func (s *service) SetRequestStatus(ctx context.Context, req *pb.SetRequestStatus
 	)
 	if err != nil {
 		return nil, status.Error(
-			utils.GetDomainErrorStatusCode(err),
+			errors.CodeToGRPCCode(err.Code()),
 			err.Error(),
 		)
 	}
