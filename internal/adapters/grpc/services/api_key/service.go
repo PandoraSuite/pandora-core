@@ -7,161 +7,123 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc/bootstrap"
+	"github.com/MAD-py/pandora-core/internal/adapters/grpc/errors"
 	pb "github.com/MAD-py/pandora-core/internal/adapters/grpc/services/api_key/v1"
-	"github.com/MAD-py/pandora-core/internal/adapters/grpc/utils"
 	apikey "github.com/MAD-py/pandora-core/internal/app/api_key"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
 type service struct {
 	pb.APIKeyServiceServer
 
-	validateReserveUC    apikey.ValidateReserveUseCase
-	validateAndConsumeUC apikey.ValidateConsumeUseCase
-	validateAndReserveUC apikey.ValidateReservationUseCase
+	validateUC        apikey.ValidateUseCase
+	validateConsumeUC apikey.ValidateConsumeUseCase
 }
 
-func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndConsumeRequest) (*pb.ValidateAndConsumeResponse, error) {
-	params := req.GetParams()
+func (s *service) Validate(
+	ctx context.Context, req *pb.ValidateRequest,
+) (*pb.ValidateResponse, error) {
 	reqValidate := dto.APIKeyValidate{
-		APIKey:         params.Key,
-		Service:        params.Service,
-		Environment:    params.Environment,
-		ServiceVersion: params.ServiceVersion,
-		RequestTime:    params.RequestTime.AsTime(),
-	}
-	response, err := s.validateAndConsumeUC.Execute(ctx, &reqValidate)
-	if err != nil {
-		return nil, status.Error(
-			utils.GetDomainErrorStatusCode(err),
-			err.Error(),
-		)
-	}
-	if response.Valid {
-		return &pb.ValidateAndConsumeResponse{
-			Valid: true,
-			Result: &pb.ValidateAndConsumeResponse_Successful_{
-				Successful: &pb.ValidateAndConsumeResponse_Successful{
-					RequestId:        response.RequestID,
-					AvailableRequest: int64(response.AvailableRequest),
-				},
+		APIKey: req.ApiKey,
+		Request: &dto.RequestIncoming{
+			Path:   req.Request.Path,
+			Method: req.Request.Method,
+			Metadata: &dto.RequestIncomingMetadata{
+				Body:            req.Request.Metadata.Body,
+				Headers:         req.Request.Metadata.Headers,
+				QueryParams:     req.Request.Metadata.QueryParams,
+				BodyContentType: enums.RequestBodyContentType(req.Request.Metadata.BodyContentType),
 			},
-		}, nil
-	} else {
-		return &pb.ValidateAndConsumeResponse{
-			Valid: false,
-			Result: &pb.ValidateAndConsumeResponse_Failed_{
-				Failed: &pb.ValidateAndConsumeResponse_Failed{
-					Code:    response.Code.String(),
-					Message: response.Message,
-				},
-			},
-		}, nil
-	}
-}
-
-func (s *service) ValidateAndReserve(ctx context.Context, req *pb.ValidateAndReserveRequest) (*pb.ValidateAndReserveResponse, error) {
-	params := req.GetParams()
-	reqValidate := dto.APIKeyValidate{
-		APIKey:         params.Key,
-		Service:        params.Service,
-		Environment:    params.Environment,
-		ServiceVersion: params.ServiceVersion,
-		RequestTime:    params.RequestTime.AsTime(),
-	}
-	response, err := s.validateAndReserveUC.Execute(ctx, &reqValidate)
-	if err != nil {
-		return nil, status.Error(
-			utils.GetDomainErrorStatusCode(err),
-			err.Error(),
-		)
-	}
-	if response.Valid {
-		return &pb.ValidateAndReserveResponse{
-			Valid: true,
-			Result: &pb.ValidateAndReserveResponse_Successful_{
-				Successful: &pb.ValidateAndReserveResponse_Successful{
-					RequestId:        response.RequestID,
-					ReservationId:    response.ReservationID,
-					AvailableRequest: int64(response.AvailableRequest),
-				},
-			},
-		}, nil
-	} else {
-		return &pb.ValidateAndReserveResponse{
-			Valid: false,
-			Result: &pb.ValidateAndReserveResponse_Failed_{
-				Failed: &pb.ValidateAndReserveResponse_Failed{
-					Code:    response.Code.String(),
-					Message: response.Message,
-				},
-			},
-		}, nil
-	}
-}
-
-func (s *service) ValidateWithReservation(ctx context.Context, req *pb.ValidateWithReservationRequest) (*pb.ValidateWithReservationResponse, error) {
-	params := req.GetParams()
-	reqValidate := dto.APIKeyValidateReserve{
-		APIKeyValidate: dto.APIKeyValidate{
-			APIKey:         params.Key,
-			Service:        params.Service,
-			Environment:    params.Environment,
-			RequestTime:    params.RequestTime.AsTime(),
-			ServiceVersion: params.ServiceVersion,
+			IPAddress:   req.Request.IpAddress,
+			RequestTime: req.Request.RequestTime.AsTime(),
 		},
-		ReservationID: req.ReservationId,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
-	response, err := s.validateReserveUC.Execute(ctx, &reqValidate)
+
+	response, err := s.validateUC.Execute(ctx, &reqValidate)
 	if err != nil {
 		return nil, status.Error(
-			utils.GetDomainErrorStatusCode(err),
+			errors.CodeToGRPCCode(err.Code()),
 			err.Error(),
 		)
 	}
-	if response.Valid {
-		return &pb.ValidateWithReservationResponse{
-			Valid: true,
-			Result: &pb.ValidateWithReservationResponse_Successful_{
-				Successful: &pb.ValidateWithReservationResponse_Successful{
-					RequestId: response.RequestID,
-				},
+
+	return &pb.ValidateResponse{
+		Valid:       response.Valid,
+		RequestId:   response.RequestID,
+		FailureCode: string(response.FailureCode),
+		ConsumerInfo: &pb.ConsumerInfo{
+			ProjectId:   int64(response.ConsumerInfo.ProjectID),
+			ProjectName: response.ConsumerInfo.ProjectName,
+			ClientId:    int64(response.ConsumerInfo.ClientID),
+			ClientName:  response.ConsumerInfo.ClientName,
+		},
+	}, nil
+}
+
+func (s *service) ValidateConsume(
+	ctx context.Context, req *pb.ValidateRequest,
+) (*pb.ValidateConsumeResponse, error) {
+	reqValidate := dto.APIKeyValidate{
+		APIKey: req.ApiKey,
+		Request: &dto.RequestIncoming{
+			Path:   req.Request.Path,
+			Method: req.Request.Method,
+			Metadata: &dto.RequestIncomingMetadata{
+				Body:            req.Request.Metadata.Body,
+				Headers:         req.Request.Metadata.Headers,
+				QueryParams:     req.Request.Metadata.QueryParams,
+				BodyContentType: enums.RequestBodyContentType(req.Request.Metadata.BodyContentType),
 			},
-		}, nil
-	} else {
-		return &pb.ValidateWithReservationResponse{
-			Valid: false,
-			Result: &pb.ValidateWithReservationResponse_Failed_{
-				Failed: &pb.ValidateWithReservationResponse_Failed{
-					Code:    response.Code.String(),
-					Message: response.Message,
-				},
-			},
-		}, nil
+			IPAddress:   req.Request.IpAddress,
+			RequestTime: req.Request.RequestTime.AsTime(),
+		},
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
+
+	response, err := s.validateConsumeUC.Execute(ctx, &reqValidate)
+	if err != nil {
+		return nil, status.Error(
+			errors.CodeToGRPCCode(err.Code()),
+			err.Error(),
+		)
+	}
+
+	return &pb.ValidateConsumeResponse{
+		BaseResponse: &pb.ValidateResponse{
+			Valid:       response.Valid,
+			RequestId:   response.RequestID,
+			FailureCode: string(response.FailureCode),
+			ConsumerInfo: &pb.ConsumerInfo{
+				ProjectId:   int64(response.ConsumerInfo.ProjectID),
+				ProjectName: response.ConsumerInfo.ProjectName,
+				ClientId:    int64(response.ConsumerInfo.ClientID),
+				ClientName:  response.ConsumerInfo.ClientName,
+			},
+		},
+		AvailableRequest: int64(response.AvailableRequest),
+	}, nil
 }
 
 func RegisterService(s *grpc.Server, deps *bootstrap.Dependencies) {
 	service := service{
-		validateReserveUC: apikey.NewValidateReserveUseCase(
-			deps.Validator,
-			deps.Repositories.Request(),
-			deps.Repositories.Reservation(),
-		),
-		validateAndConsumeUC: apikey.NewValidateConsumeUseCase(
+		validateUC: apikey.NewValidateUseCase(
 			deps.Validator,
 			deps.Repositories.APIKey(),
-			deps.Repositories.Request(),
+			deps.Repositories.Project(),
 			deps.Repositories.Service(),
-			deps.Repositories.Reservation(),
+			deps.Repositories.Request(),
 			deps.Repositories.Environment(),
 		),
-		validateAndReserveUC: apikey.NewValidateReservationUseCase(
+		validateConsumeUC: apikey.NewValidateConsumeUseCase(
 			deps.Validator,
 			deps.Repositories.APIKey(),
+			deps.Repositories.Project(),
 			deps.Repositories.Request(),
 			deps.Repositories.Service(),
-			deps.Repositories.Reservation(),
 			deps.Repositories.Environment(),
 		),
 	}

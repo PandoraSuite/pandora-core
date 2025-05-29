@@ -70,6 +70,7 @@ func (s *Suite) TestSuccess() {
 	resp, err := s.useCase.Execute(s.ctx, &req)
 
 	s.Require().NoError(err)
+	s.Require().NotNil(resp)
 
 	s.Equal(42, resp.ID)
 	s.Equal(req.Name, resp.Name)
@@ -111,9 +112,10 @@ func (s *Suite) TestAlreadyExists() {
 func (s *Suite) TestValidationError() {
 	req := dto.ServiceCreate{Name: "", Version: ""}
 
+	validationErr := errors.NewValidationFailed("Validation Error", nil)
 	s.validator.EXPECT().
 		ValidateStruct(&req, gomock.Any()).
-		Return(errors.NewValidationFailed("Validation Error", nil)).
+		Return(validationErr).
 		Times(1)
 
 	s.serviceRepo.EXPECT().
@@ -126,6 +128,7 @@ func (s *Suite) TestValidationError() {
 	s.Require().Error(err)
 
 	s.Equal(errors.CodeValidationFailed, err.Code())
+	s.Equal(validationErr, err)
 }
 
 func (s *Suite) TestRepositoryError() {

@@ -9,16 +9,10 @@ import (
 // ... Requests ...
 
 type APIKeyValidate struct {
-	APIKey         string    `name:"api_key" validate:"required"`
-	Service        string    `name:"service" validate:"required"`
-	Environment    string    `name:"environment" validate:"required"`
-	RequestTime    time.Time `name:"request_time" validate:"required,utc" time_format:"2006-01-02T15:04:05Z" time_utc:"1"`
-	ServiceVersion string    `name:"service_version" validate:"required"`
-}
-
-type APIKeyValidateReserve struct {
-	APIKeyValidate `validate:"required"`
-	ReservationID  string `name:"reservation_id" validate:"required"`
+	APIKey         string           `name:"api_key" validate:"required"`
+	Request        *RequestIncoming `name:"request" validate:"required"`
+	ServiceName    string           `name:"service" validate:"required"`
+	ServiceVersion string           `name:"service_version" validate:"required"`
 }
 
 type APIKeyCreate struct {
@@ -32,30 +26,25 @@ type APIKeyUpdate struct {
 
 // ... Responses ...
 
+type ConsumerInfo struct {
+	ClientID        int    `name:"client_id"`
+	ClientName      string `name:"client_name"`
+	ProjectID       int    `name:"project_id"`
+	ProjectName     string `name:"project_name"`
+	EnvironmentID   int    `name:"environment_id"`
+	EnvironmentName string `name:"environment_name"`
+}
+
 type APIKeyValidateResponse struct {
-	Valid     bool   `name:"valid"`
-	RequestID string `name:"request_id"`
-
-	// Only when valid is true
-	ReservationID    string `name:"reservation_id"` // Only for reservations
-	AvailableRequest int    `name:"available_request"`
-
-	// Only when valid is false
-	Code    enums.ValidateStatusCode `name:"code"`
-	Message string                   `name:"message"`
+	Valid        bool                              `name:"valid"`
+	RequestID    string                            `name:"request_id"`
+	FailureCode  enums.APIKeyValidationFailureCode `name:"failure_code"`
+	ConsumerInfo *ConsumerInfo                     `name:"consumer_info"`
 }
 
 type APIKeyValidateConsumeResponse struct {
-	APIKeyValidateResponse `name:",inline"`
-
-	AvailableRequest string `name:"available_request"`
-}
-
-type APIKeyValidateReservationResponse struct {
-	RequestID string                   `name:"request_id"`
-	Valid     bool                     `name:"valid"`
-	Message   string                   `name:"message"`
-	Code      enums.ValidateStatusCode `name:"code"`
+	APIKeyValidateResponse
+	AvailableRequest int `name:"available_request"`
 }
 
 type APIKeyResponse struct {
@@ -66,11 +55,4 @@ type APIKeyResponse struct {
 	ExpiresAt     time.Time          `name:"expires_at"`
 	EnvironmentID int                `name:"environment_id"`
 	CreatedAt     time.Time          `name:"created_at"`
-}
-
-// ... Internal ...
-
-type APIKeyEnabled struct {
-	Code    enums.ValidateStatusCode
-	Message string
 }

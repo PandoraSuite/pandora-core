@@ -148,12 +148,12 @@ func (r *RequestRepository) Create(
 			start_point, api_key, api_key_id, project_name, project_id,
 			environment_name, environment_id, service_name, service_version,
 			service_id, status_code, execution_status, request_time, path,
-			method, ip_address, body, body_content_type, headers, query_params
+			method, ip_address, metadata
 		)
 		VALUES (
 			$1, $2, $3, $4, $5, $6, $7, $8, $9,
 			$10, $11, $12, $13, $14, $15, $16,
-			$17, $18, $19, $20
+			$17
 		) RETURNING id, created_at;
 	`
 
@@ -187,24 +187,12 @@ func (r *RequestRepository) Create(
 		method = request.Method
 	}
 
-	var headers any
-	if request.Headers != "" {
-		headers = request.Headers
-	}
-
-	var queryParams any
-	if request.QueryParams != "" {
-		queryParams = request.QueryParams
-	}
-
-	var body any
-	if request.Body != "" {
-		body = request.Body
-	}
-
-	var bodyContentType any
-	if request.BodyContentType != enums.RequestBodyContentTypeNull {
-		bodyContentType = request.BodyContentType
+	metadata := make(map[string]any)
+	if request.Metadata != nil {
+		metadata["body"] = request.Metadata.Body
+		metadata["headers"] = request.Metadata.Headers
+		metadata["queryParams"] = request.Metadata.QueryParams
+		metadata["bodyContentType"] = request.Metadata.BodyContentType
 	}
 
 	err := r.pool.QueryRow(
@@ -226,10 +214,7 @@ func (r *RequestRepository) Create(
 		request.Path,
 		method,
 		request.IPAddress,
-		body,
-		bodyContentType,
-		headers,
-		queryParams,
+		metadata,
 	).Scan(&request.ID, &request.CreatedAt)
 
 	return r.errorMapper(err, r.tableName)
@@ -246,11 +231,10 @@ func (r *RequestRepository) CreateAsInitialPoint(
 			id, start_point, api_key, api_key_id, project_name, project_id,
 			environment_name, environment_id, service_name, service_version,
 			service_id, status_code, execution_status, request_time, path,
-			method, ip_address, body, body_content_type, headers, query_params
+			method, ip_address, metadata
 		)
 		SELECT uuid, uuid, $1, $2, $3, $4, $5, $6, $7, $8, $9,
-			$10, $11, $12, $13, $14, $15, $16,
-			$17, $18, $19
+			$10, $11, $12, $13, $14, $15, $16
 		) RETURNING id, created_at;
 		FROM temp_table RETURNING id;
 	`
@@ -280,24 +264,17 @@ func (r *RequestRepository) CreateAsInitialPoint(
 		method = request.Method
 	}
 
-	var headers any
-	if request.Headers != "" {
-		headers = request.Headers
+	metadata := map[string]any{
+		"body":            "",
+		"headers":         "",
+		"queryParams":     "",
+		"bodyContentType": enums.RequestBodyContentTypeNull,
 	}
-
-	var queryParams any
-	if request.QueryParams != "" {
-		queryParams = request.QueryParams
-	}
-
-	var body any
-	if request.Body != "" {
-		body = request.Body
-	}
-
-	var bodyContentType any
-	if request.BodyContentType != enums.RequestBodyContentTypeNull {
-		bodyContentType = request.BodyContentType
+	if request.Metadata != nil {
+		metadata["body"] = request.Metadata.Body
+		metadata["headers"] = request.Metadata.Headers
+		metadata["queryParams"] = request.Metadata.QueryParams
+		metadata["bodyContentType"] = request.Metadata.BodyContentType
 	}
 
 	err := r.pool.QueryRow(
@@ -318,10 +295,7 @@ func (r *RequestRepository) CreateAsInitialPoint(
 		request.Path,
 		method,
 		request.IPAddress,
-		body,
-		bodyContentType,
-		headers,
-		queryParams,
+		metadata,
 	).Scan(&request.ID, &request.CreatedAt)
 
 	return r.errorMapper(err, r.tableName)

@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS request(
     -- Service
     service_name TEXT NOT NULL,
     service_version VARCHAR(16) NOT NULL,
-    service_id INTEGER NOT NULL,
+    service_id INTEGER,
     CONSTRAINT request_service_id_fk
         FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE,
 
@@ -180,27 +180,41 @@ CREATE TABLE IF NOT EXISTS request(
             OR status_code IS NOT NULL
         ),
 
-    request_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
-    path TEXT NOT NULL,
-    method TEXT,
-    ip_address INET NOT NULL,
-    headers TEXT,
-    query_params TEXT,
-    body TEXT,
-    body_content_type TEXT,
-    CONSTRAINT request_body_content_type_check
+    failure_code TEXT,
+    CONSTRAINT request_failure_code_check
         CHECK (
-            body_content_type IN (
-                'application/json',
-                'application/xml',
-                'text/plain',
-                'text/html',
-                'application/x-www-form-urlencoded',
-                'multipart/form-data',
-                'application/octet-stream'
+            failure_code IN (
+                'API_KEY_INVALID',
+                'QUOTA_EXCEEDED',
+                'API_KEY_EXPIRED',
+                'API_KEY_DISABLED',
+                'SERVICE_MISMATCH',
+                'ENVIRONMENT_MISMATCH',
+                'ENVIRONMENT_DISABLED'
             )
         ),
+
+    request_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    ip_address INET NOT NULL,
+    path TEXT NOT NULL,
+    method TEXT NOT NULL,
+    CONSTRAINT request_method_check
+        CHECK (
+            method IN (
+                'GET',
+                'HEAD',
+                'POST',
+                'PUT',
+                'PATCH',
+                'DELETE',
+                'CONNECT',
+                'OPTIONS',
+                'TRACE'
+            )
+        ),
+    
+    metadata JSONB, 
 
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

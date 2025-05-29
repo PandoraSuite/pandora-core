@@ -1,4 +1,4 @@
-package validateconsume
+package validateonly
 
 import (
 	"context"
@@ -13,7 +13,7 @@ import (
 )
 
 type UseCase interface {
-	Execute(ctx context.Context, req *dto.APIKeyValidate) (*dto.APIKeyValidateConsumeResponse, errors.Error)
+	Execute(ctx context.Context, req *dto.APIKeyValidate) (*dto.APIKeyValidateResponse, errors.Error)
 }
 
 type useCase struct {
@@ -30,7 +30,7 @@ type useCase struct {
 
 func (uc *useCase) Execute(
 	ctx context.Context, req *dto.APIKeyValidate,
-) (*dto.APIKeyValidateConsumeResponse, errors.Error) {
+) (*dto.APIKeyValidateResponse, errors.Error) {
 	if err := uc.validateReq(req); err != nil {
 		return nil, err
 	}
@@ -71,19 +71,6 @@ func (uc *useCase) Execute(
 		request.ExecutionStatus = enums.RequestExecutionStatusUnauthorized
 	}
 
-	availableRequest, err := uc.environmentRepo.DecrementAvailableRequest(
-		ctx, request.EnvironmentID, request.ServiceID,
-	)
-
-	if err != nil {
-		return nil, err
-	}
-
-	response := dto.APIKeyValidateConsumeResponse{
-		AvailableRequest:       availableRequest.AvailableRequest,
-		APIKeyValidateResponse: validateResponse,
-	}
-
 	if err := uc.requestRepo.Create(ctx, &request); err != nil {
 		return nil, err
 	}
@@ -95,7 +82,7 @@ func (uc *useCase) Execute(
 			log.Printf("[WARN] Failed to update last_used for API Key %s: %v", req.APIKey, err)
 		}
 	}
-	return &response, nil
+	return &validateResponse, nil
 }
 
 func (uc *useCase) validateReq(req *dto.APIKeyValidate) errors.Error {

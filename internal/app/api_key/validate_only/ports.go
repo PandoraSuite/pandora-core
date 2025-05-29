@@ -1,10 +1,9 @@
-package validateconsume
+package validateonly
 
 import (
 	"context"
 
 	"github.com/MAD-py/pandora-core/internal/app/api_key/shared"
-	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 )
@@ -16,7 +15,6 @@ type APIKeyRepository interface {
 
 type EnvironmentRepository interface {
 	shared.ValidateEnvironmentRepository
-	DecrementAvailableRequest(ctx context.Context, id, serviceID int) (*dto.DecrementAvailableRequest, errors.Error)
 }
 
 type ProjectRepository interface {
