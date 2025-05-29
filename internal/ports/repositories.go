@@ -88,7 +88,7 @@ type ProjectRepository interface {
 	// ... Get ...
 	GetByID(ctx context.Context, id int) (*entities.Project, errors.Error)
 	GetServiceByID(ctx context.Context, id, serviceID int) (*entities.ProjectService, errors.Error)
-	GetProjectContextByID(ctx context.Context, id int) (*dto.ProjectContextResponse, errors.Error)
+	GetProjectClientInfoByID(ctx context.Context, id int) (*dto.ProjectClientInfoResponse, errors.Error)
 	GetProjectServiceQuotaUsage(ctx context.Context, id, serviceID int) (*dto.QuotaUsage, errors.Error)
 
 	// ... List ...

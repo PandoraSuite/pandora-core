@@ -21,9 +21,9 @@ type ProjectRepository struct {
 	auxServiceTableName string
 }
 
-func (r *ProjectRepository) GetProjectContextByID(
+func (r *ProjectRepository) GetProjectClientInfoByID(
 	ctx context.Context, id int,
-) (*dto.ProjectContextResponse, errors.Error) {
+) (*dto.ProjectClientInfoResponse, errors.Error) {
 	query := `
 		SELECT p.id, p.name, c.id, c.name
 		FROM project p
@@ -31,7 +31,7 @@ func (r *ProjectRepository) GetProjectContextByID(
 		WHERE p.id = $1;
 	`
 
-	projectCxt := new(dto.ProjectContextResponse)
+	projectCxt := new(dto.ProjectClientInfoResponse)
 	err := r.pool.QueryRow(ctx, query, id, id).Scan(
 		&projectCxt.ProjectID,
 		&projectCxt.ProjectName,

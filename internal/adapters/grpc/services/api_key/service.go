@@ -26,10 +26,10 @@ func (s *service) Validate(
 ) (*pb.ValidateResponse, error) {
 	reqValidate := dto.APIKeyValidate{
 		APIKey: req.ApiKey,
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:   req.Request.Path,
 			Method: req.Request.Method,
-			Metadata: &dto.RequestMetadata{
+			Metadata: &dto.RequestIncomingMetadata{
 				Body:            req.Request.Metadata.Body,
 				Headers:         req.Request.Metadata.Headers,
 				QueryParams:     req.Request.Metadata.QueryParams,
@@ -68,10 +68,10 @@ func (s *service) ValidateConsume(
 ) (*pb.ValidateConsumeResponse, error) {
 	reqValidate := dto.APIKeyValidate{
 		APIKey: req.ApiKey,
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:   req.Request.Path,
 			Method: req.Request.Method,
-			Metadata: &dto.RequestMetadata{
+			Metadata: &dto.RequestIncomingMetadata{
 				Body:            req.Request.Metadata.Body,
 				Headers:         req.Request.Metadata.Headers,
 				QueryParams:     req.Request.Metadata.QueryParams,

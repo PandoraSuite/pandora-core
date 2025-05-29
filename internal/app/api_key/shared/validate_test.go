@@ -59,7 +59,7 @@ func (s *UseCaseSuite) TestSuccess() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -95,11 +95,19 @@ func (s *UseCaseSuite) TestSuccess() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{
+	projectClient := &dto.ProjectClientInfoResponse{
 		ProjectID:   1000,
 		ProjectName: "TestProject",
 		ClientID:    2000,
 		ClientName:  "TestClient",
+	}
+	consumerInfo := &dto.ConsumerInfo{
+		ClientID:        projectClient.ClientID,
+		ClientName:      projectClient.ClientName,
+		ProjectID:       projectClient.ProjectID,
+		ProjectName:     projectClient.ProjectName,
+		EnvironmentID:   environment.ID,
+		EnvironmentName: environment.Name,
 	}
 
 	s.serviceRepo.EXPECT().
@@ -118,8 +126,8 @@ func (s *UseCaseSuite) TestSuccess() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(projectCtx, nil).
+		GetProjectClientInfoByID(s.ctx, environment.ProjectID).
+		Return(projectClient, nil).
 		Times(1)
 
 	validateResponse := dto.APIKeyValidateResponse{}
@@ -140,13 +148,13 @@ func (s *UseCaseSuite) TestSuccess() {
 
 	s.True(validateResponse.Valid)
 	s.Empty(validateResponse.FailureCode)
-	s.Equal(projectCtx, validateResponse.ConsumerInfo)
+	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ProjectID, request.ProjectID)
-	s.Equal(projectCtx.ProjectName, request.ProjectName)
+	s.Equal(consumerInfo.ProjectID, request.ProjectID)
+	s.Equal(consumerInfo.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestAPIKeyNotFound() {
@@ -155,7 +163,7 @@ func (s *UseCaseSuite) TestAPIKeyNotFound() {
 		APIKey:         "invalid-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -190,7 +198,7 @@ func (s *UseCaseSuite) TestAPIKeyNotFound() {
 		Times(0)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, gomock.Any()).
+		GetProjectClientInfoByID(s.ctx, gomock.Any()).
 		Times(0)
 
 	validateResponse := dto.APIKeyValidateResponse{}
@@ -226,7 +234,7 @@ func (s *UseCaseSuite) TestServiceMismatch() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "NonExistentService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -246,11 +254,19 @@ func (s *UseCaseSuite) TestServiceMismatch() {
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
 	}
-	projectCtx := &dto.ProjectContextResponse{
+	projectClient := &dto.ProjectClientInfoResponse{
 		ProjectID:   1000,
 		ProjectName: "TestProject",
 		ClientID:    2000,
 		ClientName:  "TestClient",
+	}
+	consumerInfo := &dto.ConsumerInfo{
+		ClientID:        projectClient.ClientID,
+		ClientName:      projectClient.ClientName,
+		ProjectID:       projectClient.ProjectID,
+		ProjectName:     projectClient.ProjectName,
+		EnvironmentID:   environment.ID,
+		EnvironmentName: environment.Name,
 	}
 
 	s.serviceRepo.EXPECT().
@@ -277,8 +293,8 @@ func (s *UseCaseSuite) TestServiceMismatch() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(projectCtx, nil).
+		GetProjectClientInfoByID(s.ctx, environment.ProjectID).
+		Return(projectClient, nil).
 		Times(1)
 
 	validateResponse := dto.APIKeyValidateResponse{}
@@ -299,13 +315,13 @@ func (s *UseCaseSuite) TestServiceMismatch() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeServiceMismatch, validateResponse.FailureCode)
-	s.Equal(projectCtx, validateResponse.ConsumerInfo)
+	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
 	s.Zero(request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ProjectID, request.ProjectID)
-	s.Equal(projectCtx.ProjectName, request.ProjectName)
+	s.Equal(consumerInfo.ProjectID, request.ProjectID)
+	s.Equal(consumerInfo.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestServiceRepoInternalError() {
@@ -314,7 +330,7 @@ func (s *UseCaseSuite) TestServiceRepoInternalError() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -338,7 +354,7 @@ func (s *UseCaseSuite) TestServiceRepoInternalError() {
 		Times(0)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, gomock.Any()).
+		GetProjectClientInfoByID(s.ctx, gomock.Any()).
 		Times(0)
 
 	validateResponse := dto.APIKeyValidateResponse{}
@@ -374,7 +390,7 @@ func (s *UseCaseSuite) TestAPIKeyRepoInternalError() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -405,7 +421,7 @@ func (s *UseCaseSuite) TestAPIKeyRepoInternalError() {
 		Times(0)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, gomock.Any()).
+		GetProjectClientInfoByID(s.ctx, gomock.Any()).
 		Times(0)
 
 	validateResponse := dto.APIKeyValidateResponse{}
@@ -441,7 +457,7 @@ func (s *UseCaseSuite) TestEnvironmentRepoGetByIDInternalError() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -479,7 +495,7 @@ func (s *UseCaseSuite) TestEnvironmentRepoGetByIDInternalError() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, gomock.Any()).
+		GetProjectClientInfoByID(s.ctx, gomock.Any()).
 		Times(0)
 
 	validateResponse := dto.APIKeyValidateResponse{}
@@ -515,7 +531,7 @@ func (s *UseCaseSuite) TestProjectRepoInternalError() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -569,7 +585,7 @@ func (s *UseCaseSuite) TestProjectRepoInternalError() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
+		GetProjectClientInfoByID(s.ctx, environment.ProjectID).
 		Return(nil, internalErr).
 		Times(1)
 
@@ -606,7 +622,7 @@ func (s *UseCaseSuite) TestEnvironmentDisabled() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -642,11 +658,19 @@ func (s *UseCaseSuite) TestEnvironmentDisabled() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{
+	projectClient := &dto.ProjectClientInfoResponse{
 		ProjectID:   1000,
 		ProjectName: "TestProject",
 		ClientID:    2000,
 		ClientName:  "TestClient",
+	}
+	consumerInfo := &dto.ConsumerInfo{
+		ClientID:        projectClient.ClientID,
+		ClientName:      projectClient.ClientName,
+		ProjectID:       projectClient.ProjectID,
+		ProjectName:     projectClient.ProjectName,
+		EnvironmentID:   environment.ID,
+		EnvironmentName: environment.Name,
 	}
 
 	s.serviceRepo.EXPECT().
@@ -665,8 +689,8 @@ func (s *UseCaseSuite) TestEnvironmentDisabled() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(projectCtx, nil).
+		GetProjectClientInfoByID(s.ctx, environment.ProjectID).
+		Return(projectClient, nil).
 		Times(1)
 
 	validateResponse := dto.APIKeyValidateResponse{}
@@ -687,13 +711,13 @@ func (s *UseCaseSuite) TestEnvironmentDisabled() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeEnvironmentDisabled, validateResponse.FailureCode)
-	s.Equal(projectCtx, validateResponse.ConsumerInfo)
+	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ProjectID, request.ProjectID)
-	s.Equal(projectCtx.ProjectName, request.ProjectName)
+	s.Equal(consumerInfo.ProjectID, request.ProjectID)
+	s.Equal(consumerInfo.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
@@ -702,7 +726,7 @@ func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -738,11 +762,19 @@ func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{
+	projectClient := &dto.ProjectClientInfoResponse{
 		ProjectID:   1000,
 		ProjectName: "TestProject",
 		ClientID:    2000,
 		ClientName:  "TestClient",
+	}
+	consumerInfo := &dto.ConsumerInfo{
+		ClientID:        projectClient.ClientID,
+		ClientName:      projectClient.ClientName,
+		ProjectID:       projectClient.ProjectID,
+		ProjectName:     projectClient.ProjectName,
+		EnvironmentID:   environment.ID,
+		EnvironmentName: environment.Name,
 	}
 
 	s.serviceRepo.EXPECT().
@@ -761,8 +793,8 @@ func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(projectCtx, nil).
+		GetProjectClientInfoByID(s.ctx, environment.ProjectID).
+		Return(projectClient, nil).
 		Times(1)
 
 	validateResponse := dto.APIKeyValidateResponse{}
@@ -783,13 +815,13 @@ func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeServiceNotAssigned, validateResponse.FailureCode)
-	s.Equal(projectCtx, validateResponse.ConsumerInfo)
+	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ProjectID, request.ProjectID)
-	s.Equal(projectCtx.ProjectName, request.ProjectName)
+	s.Equal(consumerInfo.ProjectID, request.ProjectID)
+	s.Equal(consumerInfo.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestServiceDisabled() {
@@ -798,7 +830,7 @@ func (s *UseCaseSuite) TestServiceDisabled() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "DisabledService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -834,11 +866,19 @@ func (s *UseCaseSuite) TestServiceDisabled() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{
+	projectClient := &dto.ProjectClientInfoResponse{
 		ProjectID:   1000,
 		ProjectName: "TestProject",
 		ClientID:    2000,
 		ClientName:  "TestClient",
+	}
+	consumerInfo := &dto.ConsumerInfo{
+		ClientID:        projectClient.ClientID,
+		ClientName:      projectClient.ClientName,
+		ProjectID:       projectClient.ProjectID,
+		ProjectName:     projectClient.ProjectName,
+		EnvironmentID:   environment.ID,
+		EnvironmentName: environment.Name,
 	}
 
 	s.serviceRepo.EXPECT().
@@ -857,8 +897,8 @@ func (s *UseCaseSuite) TestServiceDisabled() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(projectCtx, nil).
+		GetProjectClientInfoByID(s.ctx, environment.ProjectID).
+		Return(projectClient, nil).
 		Times(1)
 
 	validateResponse := dto.APIKeyValidateResponse{}
@@ -879,13 +919,13 @@ func (s *UseCaseSuite) TestServiceDisabled() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeServiceDisabled, validateResponse.FailureCode)
-	s.Equal(projectCtx, validateResponse.ConsumerInfo)
+	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ProjectID, request.ProjectID)
-	s.Equal(projectCtx.ProjectName, request.ProjectName)
+	s.Equal(consumerInfo.ProjectID, request.ProjectID)
+	s.Equal(consumerInfo.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestServiceDeprecated() {
@@ -894,7 +934,7 @@ func (s *UseCaseSuite) TestServiceDeprecated() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "DeprecatedService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -930,11 +970,19 @@ func (s *UseCaseSuite) TestServiceDeprecated() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{
+	projectClient := &dto.ProjectClientInfoResponse{
 		ProjectID:   1000,
 		ProjectName: "TestProject",
 		ClientID:    2000,
 		ClientName:  "TestClient",
+	}
+	consumerInfo := &dto.ConsumerInfo{
+		ClientID:        projectClient.ClientID,
+		ClientName:      projectClient.ClientName,
+		ProjectID:       projectClient.ProjectID,
+		ProjectName:     projectClient.ProjectName,
+		EnvironmentID:   environment.ID,
+		EnvironmentName: environment.Name,
 	}
 
 	s.serviceRepo.EXPECT().
@@ -953,8 +1001,8 @@ func (s *UseCaseSuite) TestServiceDeprecated() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(projectCtx, nil).
+		GetProjectClientInfoByID(s.ctx, environment.ProjectID).
+		Return(projectClient, nil).
 		Times(1)
 
 	validateResponse := dto.APIKeyValidateResponse{}
@@ -975,13 +1023,13 @@ func (s *UseCaseSuite) TestServiceDeprecated() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeServiceDeprecated, validateResponse.FailureCode)
-	s.Equal(projectCtx, validateResponse.ConsumerInfo)
+	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ProjectID, request.ProjectID)
-	s.Equal(projectCtx.ProjectName, request.ProjectName)
+	s.Equal(consumerInfo.ProjectID, request.ProjectID)
+	s.Equal(consumerInfo.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestAPIKeyExpired() {
@@ -991,7 +1039,7 @@ func (s *UseCaseSuite) TestAPIKeyExpired() {
 		APIKey:         "expired-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -1028,11 +1076,19 @@ func (s *UseCaseSuite) TestAPIKeyExpired() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{
+	projectClient := &dto.ProjectClientInfoResponse{
 		ProjectID:   1000,
 		ProjectName: "TestProject",
 		ClientID:    2000,
 		ClientName:  "TestClient",
+	}
+	consumerInfo := &dto.ConsumerInfo{
+		ClientID:        projectClient.ClientID,
+		ClientName:      projectClient.ClientName,
+		ProjectID:       projectClient.ProjectID,
+		ProjectName:     projectClient.ProjectName,
+		EnvironmentID:   environment.ID,
+		EnvironmentName: environment.Name,
 	}
 
 	s.serviceRepo.EXPECT().
@@ -1051,8 +1107,8 @@ func (s *UseCaseSuite) TestAPIKeyExpired() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(projectCtx, nil).
+		GetProjectClientInfoByID(s.ctx, environment.ProjectID).
+		Return(projectClient, nil).
 		Times(1)
 
 	validateResponse := dto.APIKeyValidateResponse{}
@@ -1073,13 +1129,13 @@ func (s *UseCaseSuite) TestAPIKeyExpired() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeAPIKeyExpired, validateResponse.FailureCode)
-	s.Equal(projectCtx, validateResponse.ConsumerInfo)
+	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ProjectID, request.ProjectID)
-	s.Equal(projectCtx.ProjectName, request.ProjectName)
+	s.Equal(consumerInfo.ProjectID, request.ProjectID)
+	s.Equal(consumerInfo.ProjectName, request.ProjectName)
 }
 
 func (s *UseCaseSuite) TestAPIKeyDisabled() {
@@ -1089,7 +1145,7 @@ func (s *UseCaseSuite) TestAPIKeyDisabled() {
 		APIKey:         "disabled-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -1126,11 +1182,19 @@ func (s *UseCaseSuite) TestAPIKeyDisabled() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{
+	projectClient := &dto.ProjectClientInfoResponse{
 		ProjectID:   1000,
 		ProjectName: "TestProject",
 		ClientID:    2000,
 		ClientName:  "TestClient",
+	}
+	consumerInfo := &dto.ConsumerInfo{
+		ClientID:        projectClient.ClientID,
+		ClientName:      projectClient.ClientName,
+		ProjectID:       projectClient.ProjectID,
+		ProjectName:     projectClient.ProjectName,
+		EnvironmentID:   environment.ID,
+		EnvironmentName: environment.Name,
 	}
 
 	s.serviceRepo.EXPECT().
@@ -1149,8 +1213,8 @@ func (s *UseCaseSuite) TestAPIKeyDisabled() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(projectCtx, nil).
+		GetProjectClientInfoByID(s.ctx, environment.ProjectID).
+		Return(projectClient, nil).
 		Times(1)
 
 	validateResponse := dto.APIKeyValidateResponse{}
@@ -1171,13 +1235,13 @@ func (s *UseCaseSuite) TestAPIKeyDisabled() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeAPIKeyDisabled, validateResponse.FailureCode)
-	s.Equal(projectCtx, validateResponse.ConsumerInfo)
+	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
 	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ProjectID, request.ProjectID)
-	s.Equal(projectCtx.ProjectName, request.ProjectName)
+	s.Equal(consumerInfo.ProjectID, request.ProjectID)
+	s.Equal(consumerInfo.ProjectName, request.ProjectName)
 }
 
 func TestValidateOnlySuite(t *testing.T) {

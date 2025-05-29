@@ -66,12 +66,12 @@ func (s *UseCaseSuite) TestSuccess() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
 			RequestTime: reqTime,
-			Metadata: &dto.RequestMetadata{
+			Metadata: &dto.RequestIncomingMetadata{
 				QueryParams:     `{"key": "value"}`,
 				Headers:         `{"key": "value"}`,
 				Body:            `{"key": "value"}`,
@@ -110,11 +110,19 @@ func (s *UseCaseSuite) TestSuccess() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{
+	projectClient := &dto.ProjectClientInfoResponse{
 		ProjectID:   1000,
 		ProjectName: "TestProject",
 		ClientID:    2000,
 		ClientName:  "TestClient",
+	}
+	consumerInfo := &dto.ConsumerInfo{
+		ClientID:        projectClient.ClientID,
+		ClientName:      projectClient.ClientName,
+		ProjectID:       projectClient.ProjectID,
+		ProjectName:     projectClient.ProjectName,
+		EnvironmentID:   environment.ID,
+		EnvironmentName: environment.Name,
 	}
 
 	s.validator.EXPECT().
@@ -138,8 +146,8 @@ func (s *UseCaseSuite) TestSuccess() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(projectCtx, nil).
+		GetProjectClientInfoByID(s.ctx, environment.ProjectID).
+		Return(projectClient, nil).
 		Times(1)
 
 	s.requestRepo.EXPECT().
@@ -149,7 +157,7 @@ func (s *UseCaseSuite) TestSuccess() {
 			s.Require().Equal(service.ID, r.ServiceID)
 			s.Require().Equal(apiKey.ID, r.APIKeyID)
 			s.Require().Equal(environment.ID, r.EnvironmentID)
-			s.Require().Equal(projectCtx.ProjectID, r.ProjectID)
+			s.Require().Equal(projectClient.ProjectID, r.ProjectID)
 			r.ID = wantRequestID
 			return nil
 		}).
@@ -168,7 +176,7 @@ func (s *UseCaseSuite) TestSuccess() {
 	s.True(resp.Valid)
 	s.Empty(resp.FailureCode)
 	s.Equal(wantRequestID, resp.RequestID)
-	s.Equal(projectCtx, resp.ConsumerInfo)
+	s.Equal(consumerInfo, resp.ConsumerInfo)
 }
 
 func (s *UseCaseSuite) TestSuccessUnauthorized() {
@@ -177,7 +185,7 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 		APIKey:         "disabled-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -215,11 +223,19 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{
+	projectClient := &dto.ProjectClientInfoResponse{
 		ProjectID:   1000,
 		ProjectName: "TestProject",
 		ClientID:    2000,
 		ClientName:  "TestClient",
+	}
+	consumerInfo := &dto.ConsumerInfo{
+		ClientID:        projectClient.ClientID,
+		ClientName:      projectClient.ClientName,
+		ProjectID:       projectClient.ProjectID,
+		ProjectName:     projectClient.ProjectName,
+		EnvironmentID:   environment.ID,
+		EnvironmentName: environment.Name,
 	}
 
 	s.validator.EXPECT().
@@ -243,8 +259,8 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(projectCtx, nil).
+		GetProjectClientInfoByID(s.ctx, environment.ProjectID).
+		Return(projectClient, nil).
 		Times(1)
 
 	s.requestRepo.EXPECT().
@@ -254,7 +270,7 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 			s.Require().Equal(service.ID, r.ServiceID)
 			s.Require().Equal(apiKey.ID, r.APIKeyID)
 			s.Require().Equal(environment.ID, r.EnvironmentID)
-			s.Require().Equal(projectCtx.ProjectID, r.ProjectID)
+			s.Require().Equal(projectClient.ProjectID, r.ProjectID)
 			r.ID = wantRequestID
 			return nil
 		}).
@@ -272,7 +288,7 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 	s.False(resp.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeAPIKeyDisabled, resp.FailureCode)
 	s.Equal(wantRequestID, resp.RequestID)
-	s.Equal(projectCtx, resp.ConsumerInfo)
+	s.Equal(consumerInfo, resp.ConsumerInfo)
 }
 
 func (s *UseCaseSuite) TestValidateInternalError() {
@@ -281,7 +297,7 @@ func (s *UseCaseSuite) TestValidateInternalError() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -310,7 +326,7 @@ func (s *UseCaseSuite) TestValidateInternalError() {
 		Times(0)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, gomock.Any()).
+		GetProjectClientInfoByID(s.ctx, gomock.Any()).
 		Times(0)
 
 	s.requestRepo.EXPECT().
@@ -333,7 +349,7 @@ func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -371,11 +387,19 @@ func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{
+	projectClient := &dto.ProjectClientInfoResponse{
 		ProjectID:   1000,
 		ProjectName: "TestProject",
 		ClientID:    2000,
 		ClientName:  "TestClient",
+	}
+	consumerInfo := &dto.ConsumerInfo{
+		ClientID:        projectClient.ClientID,
+		ClientName:      projectClient.ClientName,
+		ProjectID:       projectClient.ProjectID,
+		ProjectName:     projectClient.ProjectName,
+		EnvironmentID:   environment.ID,
+		EnvironmentName: environment.Name,
 	}
 
 	s.validator.EXPECT().
@@ -399,8 +423,8 @@ func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(projectCtx, nil).
+		GetProjectClientInfoByID(s.ctx, environment.ProjectID).
+		Return(projectClient, nil).
 		Times(1)
 
 	s.requestRepo.EXPECT().
@@ -410,7 +434,7 @@ func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
 			s.Require().Equal(service.ID, r.ServiceID)
 			s.Require().Equal(apiKey.ID, r.APIKeyID)
 			s.Require().Equal(environment.ID, r.EnvironmentID)
-			s.Require().Equal(projectCtx.ProjectID, r.ProjectID)
+			s.Require().Equal(projectClient.ProjectID, r.ProjectID)
 			r.ID = wantRequestID
 			return nil
 		}).
@@ -429,7 +453,7 @@ func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
 	s.True(resp.Valid)
 	s.Empty(resp.FailureCode)
 	s.Equal(wantRequestID, resp.RequestID)
-	s.Equal(projectCtx, resp.ConsumerInfo)
+	s.Equal(consumerInfo, resp.ConsumerInfo)
 }
 
 func (s *UseCaseSuite) TestValidationError() {
@@ -456,7 +480,7 @@ func (s *UseCaseSuite) TestRequestCreationError() {
 		APIKey:         "valid-api-key",
 		ServiceName:    "TestService",
 		ServiceVersion: "1.0.0",
-		Request: &dto.RequestCreate{
+		Request: &dto.RequestIncoming{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
@@ -492,7 +516,7 @@ func (s *UseCaseSuite) TestRequestCreationError() {
 			},
 		},
 	}
-	projectCtx := &dto.ProjectContextResponse{
+	projectClient := &dto.ProjectClientInfoResponse{
 		ProjectID:   1000,
 		ProjectName: "TestProject",
 		ClientID:    2000,
@@ -522,8 +546,8 @@ func (s *UseCaseSuite) TestRequestCreationError() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(projectCtx, nil).
+		GetProjectClientInfoByID(s.ctx, environment.ProjectID).
+		Return(projectClient, nil).
 		Times(1)
 
 	s.requestRepo.EXPECT().

@@ -9,10 +9,10 @@ import (
 // ... Requests ...
 
 type APIKeyValidate struct {
-	APIKey         string         `name:"api_key" validate:"required"`
-	Request        *RequestCreate `name:"request" validate:"required"`
-	ServiceName    string         `name:"service" validate:"required"`
-	ServiceVersion string         `name:"service_version" validate:"required"`
+	APIKey         string           `name:"api_key" validate:"required"`
+	Request        *RequestIncoming `name:"request" validate:"required"`
+	ServiceName    string           `name:"service" validate:"required"`
+	ServiceVersion string           `name:"service_version" validate:"required"`
 }
 
 type APIKeyCreate struct {
@@ -26,11 +26,20 @@ type APIKeyUpdate struct {
 
 // ... Responses ...
 
+type ConsumerInfo struct {
+	ClientID        int    `name:"client_id"`
+	ClientName      string `name:"client_name"`
+	ProjectID       int    `name:"project_id"`
+	ProjectName     string `name:"project_name"`
+	EnvironmentID   int    `name:"environment_id"`
+	EnvironmentName string `name:"environment_name"`
+}
+
 type APIKeyValidateResponse struct {
 	Valid        bool                              `name:"valid"`
 	RequestID    string                            `name:"request_id"`
 	FailureCode  enums.APIKeyValidationFailureCode `name:"failure_code"`
-	ConsumerInfo *ProjectContextResponse           `name:"consumer_info"`
+	ConsumerInfo *ConsumerInfo                     `name:"consumer_info"`
 }
 
 type APIKeyValidateConsumeResponse struct {

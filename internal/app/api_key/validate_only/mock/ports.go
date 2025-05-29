@@ -135,19 +135,19 @@ func (m *MockProjectRepository) EXPECT() *MockProjectRepositoryMockRecorder {
 	return m.recorder
 }
 
-// GetProjectContextByID mocks base method.
-func (m *MockProjectRepository) GetProjectContextByID(ctx context.Context, id int) (*dto.ProjectContextResponse, errors.Error) {
+// GetProjectClientInfoByID mocks base method.
+func (m *MockProjectRepository) GetProjectClientInfoByID(ctx context.Context, id int) (*dto.ProjectClientInfoResponse, errors.Error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProjectContextByID", ctx, id)
-	ret0, _ := ret[0].(*dto.ProjectContextResponse)
+	ret := m.ctrl.Call(m, "GetProjectClientInfoByID", ctx, id)
+	ret0, _ := ret[0].(*dto.ProjectClientInfoResponse)
 	ret1, _ := ret[1].(errors.Error)
 	return ret0, ret1
 }
 
-// GetProjectContextByID indicates an expected call of GetProjectContextByID.
-func (mr *MockProjectRepositoryMockRecorder) GetProjectContextByID(ctx, id any) *gomock.Call {
+// GetProjectClientInfoByID indicates an expected call of GetProjectClientInfoByID.
+func (mr *MockProjectRepositoryMockRecorder) GetProjectClientInfoByID(ctx, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectContextByID", reflect.TypeOf((*MockProjectRepository)(nil).GetProjectContextByID), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProjectClientInfoByID", reflect.TypeOf((*MockProjectRepository)(nil).GetProjectClientInfoByID), ctx, id)
 }
 
 // MockServiceRepository is a mock of ServiceRepository interface.

@@ -23,7 +23,7 @@ type ValidateEnvironmentRepository interface {
 }
 
 type ValidateProjectRepository interface {
-	GetProjectContextByID(ctx context.Context, id int) (*dto.ProjectContextResponse, errors.Error)
+	GetProjectClientInfoByID(ctx context.Context, id int) (*dto.ProjectClientInfoResponse, errors.Error)
 }
 
 type ValidateDependencies struct {
@@ -126,16 +126,24 @@ func ValidateAPIKey(
 		)
 	}
 
-	consumer, err := deps.projectRepo.GetProjectContextByID(
+	projectClient, err := deps.projectRepo.GetProjectClientInfoByID(
 		ctx, environment.ProjectID,
 	)
 	if err != nil {
 		return err
 	}
 
-	request.ProjectID = consumer.ProjectID
-	request.ProjectName = consumer.ProjectName
-	validateResponse.ConsumerInfo = consumer
+	request.ProjectID = projectClient.ProjectID
+	request.ProjectName = projectClient.ProjectName
+
+	validateResponse.ConsumerInfo = &dto.ConsumerInfo{
+		ClientID:        projectClient.ClientID,
+		ClientName:      projectClient.ClientName,
+		ProjectID:       projectClient.ProjectID,
+		ProjectName:     projectClient.ProjectName,
+		EnvironmentID:   environment.ID,
+		EnvironmentName: environment.Name,
+	}
 
 	if service != nil && validateResponse.FailureCode == "" {
 		index := slices.IndexFunc(
