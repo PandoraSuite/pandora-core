@@ -2,6 +2,7 @@ package shared
 
 import (
 	"context"
+	"slices"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -19,7 +20,6 @@ type ValidateAPIKeyRepository interface {
 
 type ValidateEnvironmentRepository interface {
 	GetByID(ctx context.Context, id int) (*entities.Environment, errors.Error)
-	ExistsServiceIn(ctx context.Context, environmentID, serviceID int) (bool, errors.Error)
 }
 
 type ValidateProjectRepository interface {
@@ -116,15 +116,8 @@ func ValidateAPIKey(
 		return err
 	}
 
-	if !environment.Is(req.EnvironmentName) {
-		setFailureIfEmpty(
-			validateResponse,
-			enums.APIKeyValidationFailureCodeEnvironmentMismatch,
-		)
-		return nil
-	}
-
 	request.EnvironmentID = environment.ID
+	request.EnvironmentName = environment.Name
 
 	if !environment.IsEnabled() {
 		setFailureIfEmpty(
@@ -145,14 +138,12 @@ func ValidateAPIKey(
 	validateResponse.ConsumerInfo = consumer
 
 	if service != nil && validateResponse.FailureCode == "" {
-		exists, err := deps.environmentRepo.ExistsServiceIn(
-			ctx, environment.ID, service.ID,
+		index := slices.IndexFunc(
+			environment.Services,
+			func(s *entities.EnvironmentService) bool { return s.ID == service.ID },
 		)
-		if err != nil {
-			return err
-		}
 
-		if !exists {
+		if index == -1 {
 			setFailureIfEmpty(
 				validateResponse,
 				enums.APIKeyValidationFailureCodeServiceNotAssigned,

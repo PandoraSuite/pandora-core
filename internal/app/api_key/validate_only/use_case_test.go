@@ -61,17 +61,16 @@ func (s *UseCaseSuite) TearDownTest() {
 }
 
 func (s *UseCaseSuite) TestSuccess() {
-	now := time.Now()
+	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "valid-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
-			RequestTime: now,
+			RequestTime: reqTime,
 			Metadata: &dto.RequestMetadata{
 				QueryParams:     `{"key": "value"}`,
 				Headers:         `{"key": "value"}`,
@@ -97,9 +96,19 @@ func (s *UseCaseSuite) TestSuccess() {
 	}
 	environment := &entities.Environment{
 		ID:        100,
-		Name:      req.EnvironmentName,
+		Name:      "production",
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               service.ID,
+				Name:             service.Name,
+				Version:          service.Version,
+				MaxRequest:       -1,
+				AvailableRequest: -1,
+				AssignedAt:       reqTime,
+			},
+		},
 	}
 	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
 
@@ -121,11 +130,6 @@ func (s *UseCaseSuite) TestSuccess() {
 	s.environmentRepo.EXPECT().
 		GetByID(s.ctx, apiKey.EnvironmentID).
 		Return(environment, nil).
-		Times(1)
-
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, environment.ID, service.ID).
-		Return(true, nil).
 		Times(1)
 
 	s.projectRepo.EXPECT().
@@ -163,17 +167,16 @@ func (s *UseCaseSuite) TestSuccess() {
 }
 
 func (s *UseCaseSuite) TestSuccessUnauthorized() {
-	now := time.Now()
+	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "disabled-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "disabled-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
-			RequestTime: now,
+			RequestTime: reqTime,
 		},
 	}
 
@@ -193,9 +196,19 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 	}
 	environment := &entities.Environment{
 		ID:        100,
-		Name:      req.EnvironmentName,
+		Name:      "production",
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               service.ID,
+				Name:             service.Name,
+				Version:          service.Version,
+				MaxRequest:       -1,
+				AvailableRequest: -1,
+				AssignedAt:       reqTime,
+			},
+		},
 	}
 	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
 
@@ -223,10 +236,6 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 		GetProjectContextByID(s.ctx, environment.ProjectID).
 		Return(projectCtx, nil).
 		Times(1)
-
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
 
 	s.requestRepo.EXPECT().
 		Create(s.ctx, gomock.AssignableToTypeOf(&entities.Request{})).
@@ -259,10 +268,9 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 func (s *UseCaseSuite) TestValidateInternalError() {
 	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "valid-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -295,10 +303,6 @@ func (s *UseCaseSuite) TestValidateInternalError() {
 		GetProjectContextByID(s.ctx, gomock.Any()).
 		Times(0)
 
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
-
 	s.requestRepo.EXPECT().
 		Create(s.ctx, gomock.AssignableToTypeOf(&entities.Request{})).
 		Times(0)
@@ -314,17 +318,16 @@ func (s *UseCaseSuite) TestValidateInternalError() {
 }
 
 func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
-	now := time.Now()
+	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "valid-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
-			RequestTime: now,
+			RequestTime: reqTime,
 		},
 	}
 
@@ -344,9 +347,19 @@ func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
 	}
 	environment := &entities.Environment{
 		ID:        100,
-		Name:      req.EnvironmentName,
+		Name:      "production",
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               service.ID,
+				Name:             service.Name,
+				Version:          service.Version,
+				MaxRequest:       -1,
+				AvailableRequest: -1,
+				AssignedAt:       reqTime,
+			},
+		},
 	}
 	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
 
@@ -368,11 +381,6 @@ func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
 	s.environmentRepo.EXPECT().
 		GetByID(s.ctx, apiKey.EnvironmentID).
 		Return(environment, nil).
-		Times(1)
-
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, environment.ID, service.ID).
-		Return(true, nil).
 		Times(1)
 
 	s.projectRepo.EXPECT().
@@ -430,10 +438,9 @@ func (s *UseCaseSuite) TestValidationError() {
 func (s *UseCaseSuite) TestRequestCreationError() {
 	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "valid-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -456,9 +463,19 @@ func (s *UseCaseSuite) TestRequestCreationError() {
 	}
 	environment := &entities.Environment{
 		ID:        100,
-		Name:      req.EnvironmentName,
+		Name:      "production",
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               service.ID,
+				Name:             service.Name,
+				Version:          service.Version,
+				MaxRequest:       -1,
+				AvailableRequest: -1,
+				AssignedAt:       reqTime,
+			},
+		},
 	}
 	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
 
@@ -487,11 +504,6 @@ func (s *UseCaseSuite) TestRequestCreationError() {
 	s.projectRepo.EXPECT().
 		GetProjectContextByID(s.ctx, environment.ProjectID).
 		Return(projectCtx, nil).
-		Times(1)
-
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, environment.ID, service.ID).
-		Return(true, nil).
 		Times(1)
 
 	s.requestRepo.EXPECT().

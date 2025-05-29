@@ -48,15 +48,14 @@ func (uc *useCase) Execute(
 	}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		Metadata:        &requestMetadata,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		Metadata:       &requestMetadata,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := shared.ValidateAPIKey(

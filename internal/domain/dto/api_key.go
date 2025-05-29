@@ -9,11 +9,10 @@ import (
 // ... Requests ...
 
 type APIKeyValidate struct {
-	APIKey          string         `name:"api_key" validate:"required"`
-	Request         *RequestCreate `name:"request" validate:"required"`
-	ServiceName     string         `name:"service" validate:"required"`
-	ServiceVersion  string         `name:"service_version" validate:"required"`
-	EnvironmentName string         `name:"environment" validate:"required"`
+	APIKey         string         `name:"api_key" validate:"required"`
+	Request        *RequestCreate `name:"request" validate:"required"`
+	ServiceName    string         `name:"service" validate:"required"`
+	ServiceVersion string         `name:"service_version" validate:"required"`
 }
 
 type APIKeyValidateReserve struct {

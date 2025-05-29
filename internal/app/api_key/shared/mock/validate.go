@@ -121,21 +121,6 @@ func (m *MockValidateEnvironmentRepository) EXPECT() *MockValidateEnvironmentRep
 	return m.recorder
 }
 
-// ExistsServiceIn mocks base method.
-func (m *MockValidateEnvironmentRepository) ExistsServiceIn(ctx context.Context, environmentID, serviceID int) (bool, errors.Error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExistsServiceIn", ctx, environmentID, serviceID)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(errors.Error)
-	return ret0, ret1
-}
-
-// ExistsServiceIn indicates an expected call of ExistsServiceIn.
-func (mr *MockValidateEnvironmentRepositoryMockRecorder) ExistsServiceIn(ctx, environmentID, serviceID any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExistsServiceIn", reflect.TypeOf((*MockValidateEnvironmentRepository)(nil).ExistsServiceIn), ctx, environmentID, serviceID)
-}
-
 // GetByID mocks base method.
 func (m *MockValidateEnvironmentRepository) GetByID(ctx context.Context, id int) (*entities.Environment, errors.Error) {
 	m.ctrl.T.Helper()

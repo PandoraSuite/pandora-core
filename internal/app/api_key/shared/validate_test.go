@@ -54,17 +54,16 @@ func (s *UseCaseSuite) TearDownTest() {
 }
 
 func (s *UseCaseSuite) TestSuccess() {
-	now := time.Now()
+	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "valid-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
 			IPAddress:   "127.0.0.1",
-			RequestTime: now,
+			RequestTime: reqTime,
 		},
 	}
 
@@ -82,9 +81,19 @@ func (s *UseCaseSuite) TestSuccess() {
 	}
 	environment := &entities.Environment{
 		ID:        100,
-		Name:      req.EnvironmentName,
+		Name:      "production",
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               service.ID,
+				Name:             service.Name,
+				Version:          service.Version,
+				MaxRequest:       -1,
+				AvailableRequest: -1,
+				AssignedAt:       reqTime,
+			},
+		},
 	}
 	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
 
@@ -103,11 +112,6 @@ func (s *UseCaseSuite) TestSuccess() {
 		Return(environment, nil).
 		Times(1)
 
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, environment.ID, service.ID).
-		Return(true, nil).
-		Times(1)
-
 	s.projectRepo.EXPECT().
 		GetProjectContextByID(s.ctx, environment.ProjectID).
 		Return(projectCtx, nil).
@@ -116,14 +120,13 @@ func (s *UseCaseSuite) TestSuccess() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -144,10 +147,9 @@ func (s *UseCaseSuite) TestSuccess() {
 func (s *UseCaseSuite) TestAPIKeyNotFound() {
 	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "invalid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "invalid-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -186,21 +188,16 @@ func (s *UseCaseSuite) TestAPIKeyNotFound() {
 		GetProjectContextByID(s.ctx, gomock.Any()).
 		Times(0)
 
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
-
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -221,10 +218,9 @@ func (s *UseCaseSuite) TestAPIKeyNotFound() {
 func (s *UseCaseSuite) TestServiceMismatch() {
 	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "NonExistentService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "valid-api-key",
+		ServiceName:    "NonExistentService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -241,7 +237,7 @@ func (s *UseCaseSuite) TestServiceMismatch() {
 	}
 	environment := &entities.Environment{
 		ID:        100,
-		Name:      req.EnvironmentName,
+		Name:      "production",
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
 	}
@@ -275,21 +271,16 @@ func (s *UseCaseSuite) TestServiceMismatch() {
 		Return(projectCtx, nil).
 		Times(1)
 
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
-
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -310,10 +301,9 @@ func (s *UseCaseSuite) TestServiceMismatch() {
 func (s *UseCaseSuite) TestServiceRepoInternalError() {
 	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "valid-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -341,21 +331,16 @@ func (s *UseCaseSuite) TestServiceRepoInternalError() {
 		GetProjectContextByID(s.ctx, gomock.Any()).
 		Times(0)
 
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
-
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -376,10 +361,9 @@ func (s *UseCaseSuite) TestServiceRepoInternalError() {
 func (s *UseCaseSuite) TestAPIKeyRepoInternalError() {
 	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "valid-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -414,21 +398,16 @@ func (s *UseCaseSuite) TestAPIKeyRepoInternalError() {
 		GetProjectContextByID(s.ctx, gomock.Any()).
 		Times(0)
 
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
-
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -449,10 +428,9 @@ func (s *UseCaseSuite) TestAPIKeyRepoInternalError() {
 func (s *UseCaseSuite) TestEnvironmentRepoGetByIDInternalError() {
 	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "valid-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -494,21 +472,16 @@ func (s *UseCaseSuite) TestEnvironmentRepoGetByIDInternalError() {
 		GetProjectContextByID(s.ctx, gomock.Any()).
 		Times(0)
 
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
-
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -529,186 +502,9 @@ func (s *UseCaseSuite) TestEnvironmentRepoGetByIDInternalError() {
 func (s *UseCaseSuite) TestProjectRepoInternalError() {
 	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
-		Request: &dto.RequestCreate{
-			Path:        "/test",
-			Method:      "GET",
-			IPAddress:   "127.0.0.1",
-			RequestTime: reqTime,
-		},
-	}
-
-	service := &entities.Service{
-		ID:      1,
-		Name:    req.ServiceName,
-		Version: req.ServiceVersion,
-		Status:  enums.ServiceStatusEnabled,
-	}
-	apiKey := &entities.APIKey{
-		ID:            10,
-		Key:           req.APIKey,
-		Status:        enums.APIKeyStatusEnabled,
-		EnvironmentID: 100,
-	}
-	environment := &entities.Environment{
-		ID:        100,
-		Name:      req.EnvironmentName,
-		Status:    enums.EnvironmentStatusEnabled,
-		ProjectID: 1000,
-	}
-	internalErr := errors.NewInternal("project repo error", nil)
-
-	s.serviceRepo.EXPECT().
-		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
-		Return(service, nil).
-		Times(1)
-
-	s.apiKeyRepo.EXPECT().
-		GetByKey(s.ctx, req.APIKey).
-		Return(apiKey, nil).
-		Times(1)
-
-	s.environmentRepo.EXPECT().
-		GetByID(s.ctx, apiKey.EnvironmentID).
-		Return(environment, nil).
-		Times(1)
-
-	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(nil, internalErr).
-		Times(1)
-
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
-
-	validateResponse := dto.APIKeyValidateResponse{}
-
-	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
-	}
-
-	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
-
-	s.Require().ErrorIs(err, internalErr)
-
-	s.False(validateResponse.Valid)
-	s.Empty(validateResponse.FailureCode)
-	s.Nil(validateResponse.ConsumerInfo)
-
-	s.Equal(service.ID, request.ServiceID)
-	s.Equal(apiKey.ID, request.APIKeyID)
-	s.Equal(environment.ID, request.EnvironmentID)
-	s.Zero(request.ProjectID)
-	s.Empty(request.ProjectName)
-}
-
-func (s *UseCaseSuite) TestEnvironmentRepoExistsServiceInInternalError() {
-	reqTime := time.Now()
-	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
-		Request: &dto.RequestCreate{
-			Path:        "/test",
-			Method:      "GET",
-			IPAddress:   "127.0.0.1",
-			RequestTime: reqTime,
-		},
-	}
-
-	service := &entities.Service{
-		ID:      1,
-		Name:    req.ServiceName,
-		Version: req.ServiceVersion,
-		Status:  enums.ServiceStatusEnabled,
-	}
-	apiKey := &entities.APIKey{
-		ID:            10,
-		Key:           req.APIKey,
-		Status:        enums.APIKeyStatusEnabled,
-		EnvironmentID: 100,
-	}
-	environment := &entities.Environment{
-		ID:        100,
-		Name:      req.EnvironmentName,
-		Status:    enums.EnvironmentStatusEnabled,
-		ProjectID: 1000,
-	}
-	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
-	internalErr := errors.NewInternal("environment repo exists service in error", nil)
-
-	s.serviceRepo.EXPECT().
-		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
-		Return(service, nil).
-		Times(1)
-
-	s.apiKeyRepo.EXPECT().
-		GetByKey(s.ctx, req.APIKey).
-		Return(apiKey, nil).
-		Times(1)
-
-	s.environmentRepo.EXPECT().
-		GetByID(s.ctx, apiKey.EnvironmentID).
-		Return(environment, nil).
-		Times(1)
-
-	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, environment.ProjectID).
-		Return(projectCtx, nil).
-		Times(1)
-
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, environment.ID, service.ID).
-		Return(false, internalErr).
-		Times(1)
-
-	validateResponse := dto.APIKeyValidateResponse{}
-
-	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
-	}
-
-	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
-
-	s.Require().ErrorIs(err, internalErr)
-
-	s.False(validateResponse.Valid)
-	s.Empty(validateResponse.FailureCode)
-	s.Equal(projectCtx, validateResponse.ConsumerInfo)
-
-	s.Equal(service.ID, request.ServiceID)
-	s.Equal(apiKey.ID, request.APIKeyID)
-	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(projectCtx.ID, request.ProjectID)
-	s.Equal(projectCtx.Name, request.ProjectName)
-}
-
-func (s *UseCaseSuite) TestEnvironmentMismatch() {
-	reqTime := time.Now()
-	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "staging",
+		APIKey:         "valid-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -734,7 +530,18 @@ func (s *UseCaseSuite) TestEnvironmentMismatch() {
 		Name:      "production",
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               service.ID,
+				Name:             service.Name,
+				Version:          service.Version,
+				MaxRequest:       -1,
+				AvailableRequest: -1,
+				AssignedAt:       reqTime,
+			},
+		},
 	}
+	internalErr := errors.NewInternal("project repo error", nil)
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -752,37 +559,33 @@ func (s *UseCaseSuite) TestEnvironmentMismatch() {
 		Times(1)
 
 	s.projectRepo.EXPECT().
-		GetProjectContextByID(s.ctx, gomock.Any()).
-		Times(0)
-
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
+		GetProjectContextByID(s.ctx, environment.ProjectID).
+		Return(nil, internalErr).
+		Times(1)
 
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
 
-	s.Require().NoError(err)
+	s.Require().ErrorIs(err, internalErr)
 
 	s.False(validateResponse.Valid)
-	s.Equal(enums.APIKeyValidationFailureCodeEnvironmentMismatch, validateResponse.FailureCode)
+	s.Empty(validateResponse.FailureCode)
 	s.Nil(validateResponse.ConsumerInfo)
 
 	s.Equal(service.ID, request.ServiceID)
 	s.Equal(apiKey.ID, request.APIKeyID)
-	s.Zero(request.EnvironmentID)
+	s.Equal(environment.ID, request.EnvironmentID)
 	s.Zero(request.ProjectID)
 	s.Empty(request.ProjectName)
 }
@@ -790,10 +593,9 @@ func (s *UseCaseSuite) TestEnvironmentMismatch() {
 func (s *UseCaseSuite) TestEnvironmentDisabled() {
 	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "valid-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -819,6 +621,16 @@ func (s *UseCaseSuite) TestEnvironmentDisabled() {
 		Name:      "production",
 		Status:    enums.EnvironmentStatusDisabled,
 		ProjectID: 1000,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               service.ID,
+				Name:             service.Name,
+				Version:          service.Version,
+				MaxRequest:       -1,
+				AvailableRequest: -1,
+				AssignedAt:       reqTime,
+			},
+		},
 	}
 	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
 
@@ -842,21 +654,16 @@ func (s *UseCaseSuite) TestEnvironmentDisabled() {
 		Return(projectCtx, nil).
 		Times(1)
 
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
-
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -877,10 +684,9 @@ func (s *UseCaseSuite) TestEnvironmentDisabled() {
 func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "valid-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -903,9 +709,19 @@ func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 	}
 	environment := &entities.Environment{
 		ID:        100,
-		Name:      req.EnvironmentName,
+		Name:      "production",
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               10,
+				Name:             "test",
+				Version:          "1.0.0",
+				MaxRequest:       -1,
+				AvailableRequest: -1,
+				AssignedAt:       reqTime,
+			},
+		},
 	}
 	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
 
@@ -929,22 +745,16 @@ func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 		Return(projectCtx, nil).
 		Times(1)
 
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, environment.ID, service.ID).
-		Return(false, nil).
-		Times(1)
-
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -965,10 +775,9 @@ func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 func (s *UseCaseSuite) TestServiceDisabled() {
 	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "DisabledService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "valid-api-key",
+		ServiceName:    "DisabledService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -991,9 +800,19 @@ func (s *UseCaseSuite) TestServiceDisabled() {
 	}
 	environment := &entities.Environment{
 		ID:        100,
-		Name:      req.EnvironmentName,
+		Name:      "production",
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               service.ID,
+				Name:             service.Name,
+				Version:          service.Version,
+				MaxRequest:       -1,
+				AvailableRequest: -1,
+				AssignedAt:       reqTime,
+			},
+		},
 	}
 	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
 
@@ -1017,21 +836,16 @@ func (s *UseCaseSuite) TestServiceDisabled() {
 		Return(projectCtx, nil).
 		Times(1)
 
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
-
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -1052,10 +866,9 @@ func (s *UseCaseSuite) TestServiceDisabled() {
 func (s *UseCaseSuite) TestServiceDeprecated() {
 	reqTime := time.Now()
 	req := &dto.APIKeyValidate{
-		APIKey:          "valid-api-key",
-		ServiceName:     "DeprecatedService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "valid-api-key",
+		ServiceName:    "DeprecatedService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -1078,9 +891,19 @@ func (s *UseCaseSuite) TestServiceDeprecated() {
 	}
 	environment := &entities.Environment{
 		ID:        100,
-		Name:      req.EnvironmentName,
+		Name:      "production",
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               service.ID,
+				Name:             service.Name,
+				Version:          service.Version,
+				MaxRequest:       -1,
+				AvailableRequest: -1,
+				AssignedAt:       reqTime,
+			},
+		},
 	}
 	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
 
@@ -1104,21 +927,16 @@ func (s *UseCaseSuite) TestServiceDeprecated() {
 		Return(projectCtx, nil).
 		Times(1)
 
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
-
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -1140,10 +958,9 @@ func (s *UseCaseSuite) TestAPIKeyExpired() {
 	reqTime := time.Now()
 	pastTime := time.Now().Add(-24 * time.Hour)
 	req := &dto.APIKeyValidate{
-		APIKey:          "expired-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "expired-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -1167,9 +984,19 @@ func (s *UseCaseSuite) TestAPIKeyExpired() {
 	}
 	environment := &entities.Environment{
 		ID:        100,
-		Name:      req.EnvironmentName,
+		Name:      "production",
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               service.ID,
+				Name:             service.Name,
+				Version:          service.Version,
+				MaxRequest:       -1,
+				AvailableRequest: -1,
+				AssignedAt:       reqTime,
+			},
+		},
 	}
 	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
 
@@ -1193,21 +1020,16 @@ func (s *UseCaseSuite) TestAPIKeyExpired() {
 		Return(projectCtx, nil).
 		Times(1)
 
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
-
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -1229,10 +1051,9 @@ func (s *UseCaseSuite) TestAPIKeyDisabled() {
 	reqTime := time.Now()
 	pastTime := time.Now().Add(-24 * time.Hour)
 	req := &dto.APIKeyValidate{
-		APIKey:          "disabled-api-key",
-		ServiceName:     "TestService",
-		ServiceVersion:  "1.0.0",
-		EnvironmentName: "production",
+		APIKey:         "disabled-api-key",
+		ServiceName:    "TestService",
+		ServiceVersion: "1.0.0",
 		Request: &dto.RequestCreate{
 			Path:        "/test",
 			Method:      "GET",
@@ -1256,9 +1077,19 @@ func (s *UseCaseSuite) TestAPIKeyDisabled() {
 	}
 	environment := &entities.Environment{
 		ID:        100,
-		Name:      req.EnvironmentName,
+		Name:      "production",
 		Status:    enums.EnvironmentStatusEnabled,
 		ProjectID: 1000,
+		Services: []*entities.EnvironmentService{
+			{
+				ID:               service.ID,
+				Name:             service.Name,
+				Version:          service.Version,
+				MaxRequest:       -1,
+				AvailableRequest: -1,
+				AssignedAt:       reqTime,
+			},
+		},
 	}
 	projectCtx := &dto.ProjectContextResponse{ID: 1000, Name: "TestProject"}
 
@@ -1282,21 +1113,16 @@ func (s *UseCaseSuite) TestAPIKeyDisabled() {
 		Return(projectCtx, nil).
 		Times(1)
 
-	s.environmentRepo.EXPECT().
-		ExistsServiceIn(s.ctx, gomock.Any(), gomock.Any()).
-		Times(0)
-
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:            req.Request.Path,
-		Method:          req.Request.Method,
-		IPAddress:       req.Request.IPAddress,
-		RequestTime:     req.Request.RequestTime,
-		APIKey:          req.APIKey,
-		ServiceName:     req.ServiceName,
-		ServiceVersion:  req.ServiceVersion,
-		EnvironmentName: req.EnvironmentName,
+		Path:           req.Request.Path,
+		Method:         req.Request.Method,
+		IPAddress:      req.Request.IPAddress,
+		RequestTime:    req.Request.RequestTime,
+		APIKey:         req.APIKey,
+		ServiceName:    req.ServiceName,
+		ServiceVersion: req.ServiceVersion,
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
