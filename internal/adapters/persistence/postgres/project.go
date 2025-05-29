@@ -21,6 +21,26 @@ type ProjectRepository struct {
 	auxServiceTableName string
 }
 
+func (r *ProjectRepository) GetProjectContextByID(
+	ctx context.Context, id int,
+) (*dto.ProjectContextResponse, errors.Error) {
+	query := `
+		SELECT p.id, p.name, c.id, c.name
+		FROM project p
+			JOIN client c ON c.id = p.client_id
+		WHERE p.id = $1;
+	`
+
+	projectCxt := new(dto.ProjectContextResponse)
+	err := r.pool.QueryRow(ctx, query, id, id).Scan(
+		&projectCxt.ProjectID,
+		&projectCxt.ProjectName,
+		&projectCxt.ClientID,
+		&projectCxt.ClientName,
+	)
+	return projectCxt, r.errorMapper(err, r.auxServiceTableName)
+}
+
 func (r *ProjectRepository) ResetAvailableRequestsForEnvsService(
 	ctx context.Context, id, serviceID int,
 ) ([]*dto.EnvironmentServiceReset, errors.Error) {
