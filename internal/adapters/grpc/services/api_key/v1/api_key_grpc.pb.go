@@ -19,18 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	APIKeyService_ValidateAndConsume_FullMethodName      = "/api_key.v1.APIKeyService/ValidateAndConsume"
-	APIKeyService_ValidateAndReserve_FullMethodName      = "/api_key.v1.APIKeyService/ValidateAndReserve"
-	APIKeyService_ValidateWithReservation_FullMethodName = "/api_key.v1.APIKeyService/ValidateWithReservation"
+	APIKeyService_Validate_FullMethodName        = "/api_key.v1.APIKeyService/Validate"
+	APIKeyService_ValidateConsume_FullMethodName = "/api_key.v1.APIKeyService/ValidateConsume"
 )
 
 // APIKeyServiceClient is the client API for APIKeyService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type APIKeyServiceClient interface {
-	ValidateAndConsume(ctx context.Context, in *ValidateAndConsumeRequest, opts ...grpc.CallOption) (*ValidateAndConsumeResponse, error)
-	ValidateAndReserve(ctx context.Context, in *ValidateAndReserveRequest, opts ...grpc.CallOption) (*ValidateAndReserveResponse, error)
-	ValidateWithReservation(ctx context.Context, in *ValidateWithReservationRequest, opts ...grpc.CallOption) (*ValidateWithReservationResponse, error)
+	Validate(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateResponse, error)
+	ValidateConsume(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateConsumeResponse, error)
 }
 
 type aPIKeyServiceClient struct {
@@ -41,30 +39,20 @@ func NewAPIKeyServiceClient(cc grpc.ClientConnInterface) APIKeyServiceClient {
 	return &aPIKeyServiceClient{cc}
 }
 
-func (c *aPIKeyServiceClient) ValidateAndConsume(ctx context.Context, in *ValidateAndConsumeRequest, opts ...grpc.CallOption) (*ValidateAndConsumeResponse, error) {
+func (c *aPIKeyServiceClient) Validate(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ValidateAndConsumeResponse)
-	err := c.cc.Invoke(ctx, APIKeyService_ValidateAndConsume_FullMethodName, in, out, cOpts...)
+	out := new(ValidateResponse)
+	err := c.cc.Invoke(ctx, APIKeyService_Validate_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *aPIKeyServiceClient) ValidateAndReserve(ctx context.Context, in *ValidateAndReserveRequest, opts ...grpc.CallOption) (*ValidateAndReserveResponse, error) {
+func (c *aPIKeyServiceClient) ValidateConsume(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateConsumeResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ValidateAndReserveResponse)
-	err := c.cc.Invoke(ctx, APIKeyService_ValidateAndReserve_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *aPIKeyServiceClient) ValidateWithReservation(ctx context.Context, in *ValidateWithReservationRequest, opts ...grpc.CallOption) (*ValidateWithReservationResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ValidateWithReservationResponse)
-	err := c.cc.Invoke(ctx, APIKeyService_ValidateWithReservation_FullMethodName, in, out, cOpts...)
+	out := new(ValidateConsumeResponse)
+	err := c.cc.Invoke(ctx, APIKeyService_ValidateConsume_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -75,9 +63,8 @@ func (c *aPIKeyServiceClient) ValidateWithReservation(ctx context.Context, in *V
 // All implementations must embed UnimplementedAPIKeyServiceServer
 // for forward compatibility.
 type APIKeyServiceServer interface {
-	ValidateAndConsume(context.Context, *ValidateAndConsumeRequest) (*ValidateAndConsumeResponse, error)
-	ValidateAndReserve(context.Context, *ValidateAndReserveRequest) (*ValidateAndReserveResponse, error)
-	ValidateWithReservation(context.Context, *ValidateWithReservationRequest) (*ValidateWithReservationResponse, error)
+	Validate(context.Context, *ValidateRequest) (*ValidateResponse, error)
+	ValidateConsume(context.Context, *ValidateRequest) (*ValidateConsumeResponse, error)
 	mustEmbedUnimplementedAPIKeyServiceServer()
 }
 
@@ -88,14 +75,11 @@ type APIKeyServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedAPIKeyServiceServer struct{}
 
-func (UnimplementedAPIKeyServiceServer) ValidateAndConsume(context.Context, *ValidateAndConsumeRequest) (*ValidateAndConsumeResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ValidateAndConsume not implemented")
+func (UnimplementedAPIKeyServiceServer) Validate(context.Context, *ValidateRequest) (*ValidateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Validate not implemented")
 }
-func (UnimplementedAPIKeyServiceServer) ValidateAndReserve(context.Context, *ValidateAndReserveRequest) (*ValidateAndReserveResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ValidateAndReserve not implemented")
-}
-func (UnimplementedAPIKeyServiceServer) ValidateWithReservation(context.Context, *ValidateWithReservationRequest) (*ValidateWithReservationResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ValidateWithReservation not implemented")
+func (UnimplementedAPIKeyServiceServer) ValidateConsume(context.Context, *ValidateRequest) (*ValidateConsumeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateConsume not implemented")
 }
 func (UnimplementedAPIKeyServiceServer) mustEmbedUnimplementedAPIKeyServiceServer() {}
 func (UnimplementedAPIKeyServiceServer) testEmbeddedByValue()                       {}
@@ -118,56 +102,38 @@ func RegisterAPIKeyServiceServer(s grpc.ServiceRegistrar, srv APIKeyServiceServe
 	s.RegisterService(&APIKeyService_ServiceDesc, srv)
 }
 
-func _APIKeyService_ValidateAndConsume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateAndConsumeRequest)
+func _APIKeyService_Validate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(APIKeyServiceServer).ValidateAndConsume(ctx, in)
+		return srv.(APIKeyServiceServer).Validate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: APIKeyService_ValidateAndConsume_FullMethodName,
+		FullMethod: APIKeyService_Validate_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(APIKeyServiceServer).ValidateAndConsume(ctx, req.(*ValidateAndConsumeRequest))
+		return srv.(APIKeyServiceServer).Validate(ctx, req.(*ValidateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _APIKeyService_ValidateAndReserve_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateAndReserveRequest)
+func _APIKeyService_ValidateConsume_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(APIKeyServiceServer).ValidateAndReserve(ctx, in)
+		return srv.(APIKeyServiceServer).ValidateConsume(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: APIKeyService_ValidateAndReserve_FullMethodName,
+		FullMethod: APIKeyService_ValidateConsume_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(APIKeyServiceServer).ValidateAndReserve(ctx, req.(*ValidateAndReserveRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _APIKeyService_ValidateWithReservation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateWithReservationRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(APIKeyServiceServer).ValidateWithReservation(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: APIKeyService_ValidateWithReservation_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(APIKeyServiceServer).ValidateWithReservation(ctx, req.(*ValidateWithReservationRequest))
+		return srv.(APIKeyServiceServer).ValidateConsume(ctx, req.(*ValidateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -180,16 +146,12 @@ var APIKeyService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*APIKeyServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "ValidateAndConsume",
-			Handler:    _APIKeyService_ValidateAndConsume_Handler,
+			MethodName: "Validate",
+			Handler:    _APIKeyService_Validate_Handler,
 		},
 		{
-			MethodName: "ValidateAndReserve",
-			Handler:    _APIKeyService_ValidateAndReserve_Handler,
-		},
-		{
-			MethodName: "ValidateWithReservation",
-			Handler:    _APIKeyService_ValidateWithReservation_Handler,
+			MethodName: "ValidateConsume",
+			Handler:    _APIKeyService_ValidateConsume_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

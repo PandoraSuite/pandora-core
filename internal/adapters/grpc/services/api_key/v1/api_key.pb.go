@@ -7,6 +7,7 @@
 package pb
 
 import (
+	_ "buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go/buf/validate"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -22,31 +23,30 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type BaseValidateParams struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Key            string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
-	Service        string                 `protobuf:"bytes,2,opt,name=service,proto3" json:"service,omitempty"`
-	Environment    string                 `protobuf:"bytes,3,opt,name=environment,proto3" json:"environment,omitempty"`
-	ServiceVersion string                 `protobuf:"bytes,4,opt,name=service_version,json=serviceVersion,proto3" json:"service_version,omitempty"`
-	RequestTime    *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=request_time,json=requestTime,proto3" json:"request_time,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+type RequestMetadata struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Body            string                 `protobuf:"bytes,1,opt,name=body,proto3" json:"body,omitempty"`
+	Headers         string                 `protobuf:"bytes,2,opt,name=headers,proto3" json:"headers,omitempty"`
+	QueryParams     string                 `protobuf:"bytes,3,opt,name=query_params,json=queryParams,proto3" json:"query_params,omitempty"`
+	BodyContentType string                 `protobuf:"bytes,4,opt,name=body_content_type,json=bodyContentType,proto3" json:"body_content_type,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
 }
 
-func (x *BaseValidateParams) Reset() {
-	*x = BaseValidateParams{}
+func (x *RequestMetadata) Reset() {
+	*x = RequestMetadata{}
 	mi := &file_api_key_v1_api_key_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *BaseValidateParams) String() string {
+func (x *RequestMetadata) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*BaseValidateParams) ProtoMessage() {}
+func (*RequestMetadata) ProtoMessage() {}
 
-func (x *BaseValidateParams) ProtoReflect() protoreflect.Message {
+func (x *RequestMetadata) ProtoReflect() protoreflect.Message {
 	mi := &file_api_key_v1_api_key_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -58,111 +58,139 @@ func (x *BaseValidateParams) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use BaseValidateParams.ProtoReflect.Descriptor instead.
-func (*BaseValidateParams) Descriptor() ([]byte, []int) {
+// Deprecated: Use RequestMetadata.ProtoReflect.Descriptor instead.
+func (*RequestMetadata) Descriptor() ([]byte, []int) {
 	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *BaseValidateParams) GetKey() string {
+func (x *RequestMetadata) GetBody() string {
 	if x != nil {
-		return x.Key
+		return x.Body
 	}
 	return ""
 }
 
-func (x *BaseValidateParams) GetService() string {
+func (x *RequestMetadata) GetHeaders() string {
 	if x != nil {
-		return x.Service
+		return x.Headers
 	}
 	return ""
 }
 
-func (x *BaseValidateParams) GetEnvironment() string {
+func (x *RequestMetadata) GetQueryParams() string {
 	if x != nil {
-		return x.Environment
+		return x.QueryParams
 	}
 	return ""
 }
 
-func (x *BaseValidateParams) GetServiceVersion() string {
+func (x *RequestMetadata) GetBodyContentType() string {
 	if x != nil {
-		return x.ServiceVersion
+		return x.BodyContentType
 	}
 	return ""
 }
 
-func (x *BaseValidateParams) GetRequestTime() *timestamppb.Timestamp {
+type Request struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Path          string                 `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
+	Method        string                 `protobuf:"bytes,2,opt,name=method,proto3" json:"method,omitempty"`
+	IpAddress     string                 `protobuf:"bytes,3,opt,name=ip_address,json=ipAddress,proto3" json:"ip_address,omitempty"`
+	Metadata      *RequestMetadata       `protobuf:"bytes,4,opt,name=metadata,proto3" json:"metadata,omitempty"`
+	RequestTime   *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=request_time,json=requestTime,proto3" json:"request_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Request) Reset() {
+	*x = Request{}
+	mi := &file_api_key_v1_api_key_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Request) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Request) ProtoMessage() {}
+
+func (x *Request) ProtoReflect() protoreflect.Message {
+	mi := &file_api_key_v1_api_key_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Request.ProtoReflect.Descriptor instead.
+func (*Request) Descriptor() ([]byte, []int) {
+	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Request) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+func (x *Request) GetMethod() string {
+	if x != nil {
+		return x.Method
+	}
+	return ""
+}
+
+func (x *Request) GetIpAddress() string {
+	if x != nil {
+		return x.IpAddress
+	}
+	return ""
+}
+
+func (x *Request) GetMetadata() *RequestMetadata {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
+}
+
+func (x *Request) GetRequestTime() *timestamppb.Timestamp {
 	if x != nil {
 		return x.RequestTime
 	}
 	return nil
 }
 
-type ValidateAndConsumeRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Params        *BaseValidateParams    `protobuf:"bytes,1,opt,name=params,proto3" json:"params,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+type ValidateRequest struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ApiKey         string                 `protobuf:"bytes,1,opt,name=api_key,json=apiKey,proto3" json:"api_key,omitempty"`
+	Request        *Request               `protobuf:"bytes,2,opt,name=request,proto3" json:"request,omitempty"`
+	ServiceName    string                 `protobuf:"bytes,3,opt,name=service_name,json=serviceName,proto3" json:"service_name,omitempty"`
+	ServiceVersion string                 `protobuf:"bytes,4,opt,name=service_version,json=serviceVersion,proto3" json:"service_version,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
 }
 
-func (x *ValidateAndConsumeRequest) Reset() {
-	*x = ValidateAndConsumeRequest{}
-	mi := &file_api_key_v1_api_key_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidateAndConsumeRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidateAndConsumeRequest) ProtoMessage() {}
-
-func (x *ValidateAndConsumeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_key_v1_api_key_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidateAndConsumeRequest.ProtoReflect.Descriptor instead.
-func (*ValidateAndConsumeRequest) Descriptor() ([]byte, []int) {
-	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *ValidateAndConsumeRequest) GetParams() *BaseValidateParams {
-	if x != nil {
-		return x.Params
-	}
-	return nil
-}
-
-type ValidateAndReserveRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Params        *BaseValidateParams    `protobuf:"bytes,1,opt,name=params,proto3" json:"params,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ValidateAndReserveRequest) Reset() {
-	*x = ValidateAndReserveRequest{}
+func (x *ValidateRequest) Reset() {
+	*x = ValidateRequest{}
 	mi := &file_api_key_v1_api_key_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ValidateAndReserveRequest) String() string {
+func (x *ValidateRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ValidateAndReserveRequest) ProtoMessage() {}
+func (*ValidateRequest) ProtoMessage() {}
 
-func (x *ValidateAndReserveRequest) ProtoReflect() protoreflect.Message {
+func (x *ValidateRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_api_key_v1_api_key_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -174,40 +202,63 @@ func (x *ValidateAndReserveRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ValidateAndReserveRequest.ProtoReflect.Descriptor instead.
-func (*ValidateAndReserveRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ValidateRequest.ProtoReflect.Descriptor instead.
+func (*ValidateRequest) Descriptor() ([]byte, []int) {
 	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *ValidateAndReserveRequest) GetParams() *BaseValidateParams {
+func (x *ValidateRequest) GetApiKey() string {
 	if x != nil {
-		return x.Params
+		return x.ApiKey
+	}
+	return ""
+}
+
+func (x *ValidateRequest) GetRequest() *Request {
+	if x != nil {
+		return x.Request
 	}
 	return nil
 }
 
-type ValidateWithReservationRequest struct {
+func (x *ValidateRequest) GetServiceName() string {
+	if x != nil {
+		return x.ServiceName
+	}
+	return ""
+}
+
+func (x *ValidateRequest) GetServiceVersion() string {
+	if x != nil {
+		return x.ServiceVersion
+	}
+	return ""
+}
+
+type ConsumerInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Params        *BaseValidateParams    `protobuf:"bytes,1,opt,name=params,proto3" json:"params,omitempty"`
-	ReservationId string                 `protobuf:"bytes,2,opt,name=reservation_id,json=reservationId,proto3" json:"reservation_id,omitempty"`
+	ProjectId     int64                  `protobuf:"varint,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
+	ProjectName   string                 `protobuf:"bytes,2,opt,name=project_name,json=projectName,proto3" json:"project_name,omitempty"`
+	ClientId      int64                  `protobuf:"varint,3,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	ClientName    string                 `protobuf:"bytes,4,opt,name=client_name,json=clientName,proto3" json:"client_name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ValidateWithReservationRequest) Reset() {
-	*x = ValidateWithReservationRequest{}
+func (x *ConsumerInfo) Reset() {
+	*x = ConsumerInfo{}
 	mi := &file_api_key_v1_api_key_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ValidateWithReservationRequest) String() string {
+func (x *ConsumerInfo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ValidateWithReservationRequest) ProtoMessage() {}
+func (*ConsumerInfo) ProtoMessage() {}
 
-func (x *ValidateWithReservationRequest) ProtoReflect() protoreflect.Message {
+func (x *ConsumerInfo) ProtoReflect() protoreflect.Message {
 	mi := &file_api_key_v1_api_key_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -219,51 +270,63 @@ func (x *ValidateWithReservationRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ValidateWithReservationRequest.ProtoReflect.Descriptor instead.
-func (*ValidateWithReservationRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ConsumerInfo.ProtoReflect.Descriptor instead.
+func (*ConsumerInfo) Descriptor() ([]byte, []int) {
 	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ValidateWithReservationRequest) GetParams() *BaseValidateParams {
+func (x *ConsumerInfo) GetProjectId() int64 {
 	if x != nil {
-		return x.Params
+		return x.ProjectId
 	}
-	return nil
+	return 0
 }
 
-func (x *ValidateWithReservationRequest) GetReservationId() string {
+func (x *ConsumerInfo) GetProjectName() string {
 	if x != nil {
-		return x.ReservationId
+		return x.ProjectName
 	}
 	return ""
 }
 
-type ValidateAndConsumeResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	Valid bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
-	// Types that are valid to be assigned to Result:
-	//
-	//	*ValidateAndConsumeResponse_Successful_
-	//	*ValidateAndConsumeResponse_Failed_
-	Result        isValidateAndConsumeResponse_Result `protobuf_oneof:"result"`
+func (x *ConsumerInfo) GetClientId() int64 {
+	if x != nil {
+		return x.ClientId
+	}
+	return 0
+}
+
+func (x *ConsumerInfo) GetClientName() string {
+	if x != nil {
+		return x.ClientName
+	}
+	return ""
+}
+
+type ValidateResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Valid         bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
+	RequestId     string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
+	FailureCode   string                 `protobuf:"bytes,3,opt,name=failure_code,json=failureCode,proto3" json:"failure_code,omitempty"`
+	ConsumerInfo  *ConsumerInfo          `protobuf:"bytes,4,opt,name=consumer_info,json=consumerInfo,proto3" json:"consumer_info,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ValidateAndConsumeResponse) Reset() {
-	*x = ValidateAndConsumeResponse{}
+func (x *ValidateResponse) Reset() {
+	*x = ValidateResponse{}
 	mi := &file_api_key_v1_api_key_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ValidateAndConsumeResponse) String() string {
+func (x *ValidateResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ValidateAndConsumeResponse) ProtoMessage() {}
+func (*ValidateResponse) ProtoMessage() {}
 
-func (x *ValidateAndConsumeResponse) ProtoReflect() protoreflect.Message {
+func (x *ValidateResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_api_key_v1_api_key_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -275,85 +338,61 @@ func (x *ValidateAndConsumeResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ValidateAndConsumeResponse.ProtoReflect.Descriptor instead.
-func (*ValidateAndConsumeResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ValidateResponse.ProtoReflect.Descriptor instead.
+func (*ValidateResponse) Descriptor() ([]byte, []int) {
 	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *ValidateAndConsumeResponse) GetValid() bool {
+func (x *ValidateResponse) GetValid() bool {
 	if x != nil {
 		return x.Valid
 	}
 	return false
 }
 
-func (x *ValidateAndConsumeResponse) GetResult() isValidateAndConsumeResponse_Result {
+func (x *ValidateResponse) GetRequestId() string {
 	if x != nil {
-		return x.Result
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *ValidateResponse) GetFailureCode() string {
+	if x != nil {
+		return x.FailureCode
+	}
+	return ""
+}
+
+func (x *ValidateResponse) GetConsumerInfo() *ConsumerInfo {
+	if x != nil {
+		return x.ConsumerInfo
 	}
 	return nil
 }
 
-func (x *ValidateAndConsumeResponse) GetSuccessful() *ValidateAndConsumeResponse_Successful {
-	if x != nil {
-		if x, ok := x.Result.(*ValidateAndConsumeResponse_Successful_); ok {
-			return x.Successful
-		}
-	}
-	return nil
+type ValidateConsumeResponse struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	BaseResponse     *ValidateResponse      `protobuf:"bytes,1,opt,name=base_response,json=baseResponse,proto3" json:"base_response,omitempty"`
+	AvailableRequest int64                  `protobuf:"varint,2,opt,name=available_request,json=availableRequest,proto3" json:"available_request,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
-func (x *ValidateAndConsumeResponse) GetFailed() *ValidateAndConsumeResponse_Failed {
-	if x != nil {
-		if x, ok := x.Result.(*ValidateAndConsumeResponse_Failed_); ok {
-			return x.Failed
-		}
-	}
-	return nil
-}
-
-type isValidateAndConsumeResponse_Result interface {
-	isValidateAndConsumeResponse_Result()
-}
-
-type ValidateAndConsumeResponse_Successful_ struct {
-	Successful *ValidateAndConsumeResponse_Successful `protobuf:"bytes,2,opt,name=successful,proto3,oneof"`
-}
-
-type ValidateAndConsumeResponse_Failed_ struct {
-	Failed *ValidateAndConsumeResponse_Failed `protobuf:"bytes,3,opt,name=failed,proto3,oneof"`
-}
-
-func (*ValidateAndConsumeResponse_Successful_) isValidateAndConsumeResponse_Result() {}
-
-func (*ValidateAndConsumeResponse_Failed_) isValidateAndConsumeResponse_Result() {}
-
-type ValidateAndReserveResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	Valid bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
-	// Types that are valid to be assigned to Result:
-	//
-	//	*ValidateAndReserveResponse_Successful_
-	//	*ValidateAndReserveResponse_Failed_
-	Result        isValidateAndReserveResponse_Result `protobuf_oneof:"result"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ValidateAndReserveResponse) Reset() {
-	*x = ValidateAndReserveResponse{}
+func (x *ValidateConsumeResponse) Reset() {
+	*x = ValidateConsumeResponse{}
 	mi := &file_api_key_v1_api_key_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ValidateAndReserveResponse) String() string {
+func (x *ValidateConsumeResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ValidateAndReserveResponse) ProtoMessage() {}
+func (*ValidateConsumeResponse) ProtoMessage() {}
 
-func (x *ValidateAndReserveResponse) ProtoReflect() protoreflect.Message {
+func (x *ValidateConsumeResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_api_key_v1_api_key_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -365,459 +404,23 @@ func (x *ValidateAndReserveResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ValidateAndReserveResponse.ProtoReflect.Descriptor instead.
-func (*ValidateAndReserveResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ValidateConsumeResponse.ProtoReflect.Descriptor instead.
+func (*ValidateConsumeResponse) Descriptor() ([]byte, []int) {
 	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *ValidateAndReserveResponse) GetValid() bool {
+func (x *ValidateConsumeResponse) GetBaseResponse() *ValidateResponse {
 	if x != nil {
-		return x.Valid
-	}
-	return false
-}
-
-func (x *ValidateAndReserveResponse) GetResult() isValidateAndReserveResponse_Result {
-	if x != nil {
-		return x.Result
+		return x.BaseResponse
 	}
 	return nil
 }
 
-func (x *ValidateAndReserveResponse) GetSuccessful() *ValidateAndReserveResponse_Successful {
-	if x != nil {
-		if x, ok := x.Result.(*ValidateAndReserveResponse_Successful_); ok {
-			return x.Successful
-		}
-	}
-	return nil
-}
-
-func (x *ValidateAndReserveResponse) GetFailed() *ValidateAndReserveResponse_Failed {
-	if x != nil {
-		if x, ok := x.Result.(*ValidateAndReserveResponse_Failed_); ok {
-			return x.Failed
-		}
-	}
-	return nil
-}
-
-type isValidateAndReserveResponse_Result interface {
-	isValidateAndReserveResponse_Result()
-}
-
-type ValidateAndReserveResponse_Successful_ struct {
-	Successful *ValidateAndReserveResponse_Successful `protobuf:"bytes,2,opt,name=successful,proto3,oneof"`
-}
-
-type ValidateAndReserveResponse_Failed_ struct {
-	Failed *ValidateAndReserveResponse_Failed `protobuf:"bytes,3,opt,name=failed,proto3,oneof"`
-}
-
-func (*ValidateAndReserveResponse_Successful_) isValidateAndReserveResponse_Result() {}
-
-func (*ValidateAndReserveResponse_Failed_) isValidateAndReserveResponse_Result() {}
-
-type ValidateWithReservationResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	Valid bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
-	// Types that are valid to be assigned to Result:
-	//
-	//	*ValidateWithReservationResponse_Successful_
-	//	*ValidateWithReservationResponse_Failed_
-	Result        isValidateWithReservationResponse_Result `protobuf_oneof:"result"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ValidateWithReservationResponse) Reset() {
-	*x = ValidateWithReservationResponse{}
-	mi := &file_api_key_v1_api_key_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidateWithReservationResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidateWithReservationResponse) ProtoMessage() {}
-
-func (x *ValidateWithReservationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_key_v1_api_key_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidateWithReservationResponse.ProtoReflect.Descriptor instead.
-func (*ValidateWithReservationResponse) Descriptor() ([]byte, []int) {
-	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *ValidateWithReservationResponse) GetValid() bool {
-	if x != nil {
-		return x.Valid
-	}
-	return false
-}
-
-func (x *ValidateWithReservationResponse) GetResult() isValidateWithReservationResponse_Result {
-	if x != nil {
-		return x.Result
-	}
-	return nil
-}
-
-func (x *ValidateWithReservationResponse) GetSuccessful() *ValidateWithReservationResponse_Successful {
-	if x != nil {
-		if x, ok := x.Result.(*ValidateWithReservationResponse_Successful_); ok {
-			return x.Successful
-		}
-	}
-	return nil
-}
-
-func (x *ValidateWithReservationResponse) GetFailed() *ValidateWithReservationResponse_Failed {
-	if x != nil {
-		if x, ok := x.Result.(*ValidateWithReservationResponse_Failed_); ok {
-			return x.Failed
-		}
-	}
-	return nil
-}
-
-type isValidateWithReservationResponse_Result interface {
-	isValidateWithReservationResponse_Result()
-}
-
-type ValidateWithReservationResponse_Successful_ struct {
-	Successful *ValidateWithReservationResponse_Successful `protobuf:"bytes,2,opt,name=successful,proto3,oneof"`
-}
-
-type ValidateWithReservationResponse_Failed_ struct {
-	Failed *ValidateWithReservationResponse_Failed `protobuf:"bytes,3,opt,name=failed,proto3,oneof"`
-}
-
-func (*ValidateWithReservationResponse_Successful_) isValidateWithReservationResponse_Result() {}
-
-func (*ValidateWithReservationResponse_Failed_) isValidateWithReservationResponse_Result() {}
-
-type ValidateAndConsumeResponse_Successful struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	RequestId        string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-	AvailableRequest int64                  `protobuf:"varint,2,opt,name=available_request,json=availableRequest,proto3" json:"available_request,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *ValidateAndConsumeResponse_Successful) Reset() {
-	*x = ValidateAndConsumeResponse_Successful{}
-	mi := &file_api_key_v1_api_key_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidateAndConsumeResponse_Successful) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidateAndConsumeResponse_Successful) ProtoMessage() {}
-
-func (x *ValidateAndConsumeResponse_Successful) ProtoReflect() protoreflect.Message {
-	mi := &file_api_key_v1_api_key_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidateAndConsumeResponse_Successful.ProtoReflect.Descriptor instead.
-func (*ValidateAndConsumeResponse_Successful) Descriptor() ([]byte, []int) {
-	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{4, 0}
-}
-
-func (x *ValidateAndConsumeResponse_Successful) GetRequestId() string {
-	if x != nil {
-		return x.RequestId
-	}
-	return ""
-}
-
-func (x *ValidateAndConsumeResponse_Successful) GetAvailableRequest() int64 {
+func (x *ValidateConsumeResponse) GetAvailableRequest() int64 {
 	if x != nil {
 		return x.AvailableRequest
 	}
 	return 0
-}
-
-type ValidateAndConsumeResponse_Failed struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ValidateAndConsumeResponse_Failed) Reset() {
-	*x = ValidateAndConsumeResponse_Failed{}
-	mi := &file_api_key_v1_api_key_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidateAndConsumeResponse_Failed) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidateAndConsumeResponse_Failed) ProtoMessage() {}
-
-func (x *ValidateAndConsumeResponse_Failed) ProtoReflect() protoreflect.Message {
-	mi := &file_api_key_v1_api_key_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidateAndConsumeResponse_Failed.ProtoReflect.Descriptor instead.
-func (*ValidateAndConsumeResponse_Failed) Descriptor() ([]byte, []int) {
-	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{4, 1}
-}
-
-func (x *ValidateAndConsumeResponse_Failed) GetCode() string {
-	if x != nil {
-		return x.Code
-	}
-	return ""
-}
-
-func (x *ValidateAndConsumeResponse_Failed) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-type ValidateAndReserveResponse_Successful struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	RequestId        string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-	AvailableRequest int64                  `protobuf:"varint,2,opt,name=available_request,json=availableRequest,proto3" json:"available_request,omitempty"`
-	ReservationId    string                 `protobuf:"bytes,3,opt,name=reservation_id,json=reservationId,proto3" json:"reservation_id,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
-}
-
-func (x *ValidateAndReserveResponse_Successful) Reset() {
-	*x = ValidateAndReserveResponse_Successful{}
-	mi := &file_api_key_v1_api_key_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidateAndReserveResponse_Successful) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidateAndReserveResponse_Successful) ProtoMessage() {}
-
-func (x *ValidateAndReserveResponse_Successful) ProtoReflect() protoreflect.Message {
-	mi := &file_api_key_v1_api_key_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidateAndReserveResponse_Successful.ProtoReflect.Descriptor instead.
-func (*ValidateAndReserveResponse_Successful) Descriptor() ([]byte, []int) {
-	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{5, 0}
-}
-
-func (x *ValidateAndReserveResponse_Successful) GetRequestId() string {
-	if x != nil {
-		return x.RequestId
-	}
-	return ""
-}
-
-func (x *ValidateAndReserveResponse_Successful) GetAvailableRequest() int64 {
-	if x != nil {
-		return x.AvailableRequest
-	}
-	return 0
-}
-
-func (x *ValidateAndReserveResponse_Successful) GetReservationId() string {
-	if x != nil {
-		return x.ReservationId
-	}
-	return ""
-}
-
-type ValidateAndReserveResponse_Failed struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ValidateAndReserveResponse_Failed) Reset() {
-	*x = ValidateAndReserveResponse_Failed{}
-	mi := &file_api_key_v1_api_key_proto_msgTypes[10]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidateAndReserveResponse_Failed) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidateAndReserveResponse_Failed) ProtoMessage() {}
-
-func (x *ValidateAndReserveResponse_Failed) ProtoReflect() protoreflect.Message {
-	mi := &file_api_key_v1_api_key_proto_msgTypes[10]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidateAndReserveResponse_Failed.ProtoReflect.Descriptor instead.
-func (*ValidateAndReserveResponse_Failed) Descriptor() ([]byte, []int) {
-	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{5, 1}
-}
-
-func (x *ValidateAndReserveResponse_Failed) GetCode() string {
-	if x != nil {
-		return x.Code
-	}
-	return ""
-}
-
-func (x *ValidateAndReserveResponse_Failed) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-type ValidateWithReservationResponse_Successful struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	RequestId     string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ValidateWithReservationResponse_Successful) Reset() {
-	*x = ValidateWithReservationResponse_Successful{}
-	mi := &file_api_key_v1_api_key_proto_msgTypes[11]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidateWithReservationResponse_Successful) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidateWithReservationResponse_Successful) ProtoMessage() {}
-
-func (x *ValidateWithReservationResponse_Successful) ProtoReflect() protoreflect.Message {
-	mi := &file_api_key_v1_api_key_proto_msgTypes[11]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidateWithReservationResponse_Successful.ProtoReflect.Descriptor instead.
-func (*ValidateWithReservationResponse_Successful) Descriptor() ([]byte, []int) {
-	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{6, 0}
-}
-
-func (x *ValidateWithReservationResponse_Successful) GetRequestId() string {
-	if x != nil {
-		return x.RequestId
-	}
-	return ""
-}
-
-type ValidateWithReservationResponse_Failed struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ValidateWithReservationResponse_Failed) Reset() {
-	*x = ValidateWithReservationResponse_Failed{}
-	mi := &file_api_key_v1_api_key_proto_msgTypes[12]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ValidateWithReservationResponse_Failed) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ValidateWithReservationResponse_Failed) ProtoMessage() {}
-
-func (x *ValidateWithReservationResponse_Failed) ProtoReflect() protoreflect.Message {
-	mi := &file_api_key_v1_api_key_proto_msgTypes[12]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ValidateWithReservationResponse_Failed.ProtoReflect.Descriptor instead.
-func (*ValidateWithReservationResponse_Failed) Descriptor() ([]byte, []int) {
-	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{6, 1}
-}
-
-func (x *ValidateWithReservationResponse_Failed) GetCode() string {
-	if x != nil {
-		return x.Code
-	}
-	return ""
-}
-
-func (x *ValidateWithReservationResponse_Failed) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
 }
 
 var File_api_key_v1_api_key_proto protoreflect.FileDescriptor
@@ -825,69 +428,44 @@ var File_api_key_v1_api_key_proto protoreflect.FileDescriptor
 const file_api_key_v1_api_key_proto_rawDesc = "" +
 	"\n" +
 	"\x18api_key/v1/api_key.proto\x12\n" +
-	"api_key.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xca\x01\n" +
-	"\x12BaseValidateParams\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x18\n" +
-	"\aservice\x18\x02 \x01(\tR\aservice\x12 \n" +
-	"\venvironment\x18\x03 \x01(\tR\venvironment\x12'\n" +
-	"\x0fservice_version\x18\x04 \x01(\tR\x0eserviceVersion\x12=\n" +
-	"\frequest_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vrequestTime\"S\n" +
-	"\x19ValidateAndConsumeRequest\x126\n" +
-	"\x06params\x18\x01 \x01(\v2\x1e.api_key.v1.BaseValidateParamsR\x06params\"S\n" +
-	"\x19ValidateAndReserveRequest\x126\n" +
-	"\x06params\x18\x01 \x01(\v2\x1e.api_key.v1.BaseValidateParamsR\x06params\"\x7f\n" +
-	"\x1eValidateWithReservationRequest\x126\n" +
-	"\x06params\x18\x01 \x01(\v2\x1e.api_key.v1.BaseValidateParamsR\x06params\x12%\n" +
-	"\x0ereservation_id\x18\x02 \x01(\tR\rreservationId\"\xec\x02\n" +
-	"\x1aValidateAndConsumeResponse\x12\x14\n" +
-	"\x05valid\x18\x01 \x01(\bR\x05valid\x12S\n" +
+	"api_key.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa5\x02\n" +
+	"\x0fRequestMetadata\x12\x12\n" +
+	"\x04body\x18\x01 \x01(\tR\x04body\x12\x18\n" +
+	"\aheaders\x18\x02 \x01(\tR\aheaders\x12!\n" +
+	"\fquery_params\x18\x03 \x01(\tR\vqueryParams\x12\xc0\x01\n" +
+	"\x11body_content_type\x18\x04 \x01(\tB\x93\x01\xbaH\x8f\x01r\x8c\x01R\x0fapplication/xmlR\x10application/jsonR\n" +
+	"text/plainR\ttext/htmlR\x13multipart/form-dataR!application/x-www-form-urlencodedR\x18application/octet-streamR\x0fbodyContentType\"\x91\x02\n" +
+	"\aRequest\x12\x12\n" +
+	"\x04path\x18\x01 \x01(\tR\x04path\x12[\n" +
+	"\x06method\x18\x02 \x01(\tBC\xbaH@r>R\x03GETR\x04HEADR\x04POSTR\x03PUTR\x05PATCHR\x06DELETER\aCONNECTR\aOPTIONSR\x05TRACER\x06method\x12\x1d\n" +
 	"\n" +
-	"successful\x18\x02 \x01(\v21.api_key.v1.ValidateAndConsumeResponse.SuccessfulH\x00R\n" +
-	"successful\x12G\n" +
-	"\x06failed\x18\x03 \x01(\v2-.api_key.v1.ValidateAndConsumeResponse.FailedH\x00R\x06failed\x1aX\n" +
+	"ip_address\x18\x03 \x01(\tR\tipAddress\x127\n" +
+	"\bmetadata\x18\x04 \x01(\v2\x1b.api_key.v1.RequestMetadataR\bmetadata\x12=\n" +
+	"\frequest_time\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\vrequestTime\"\xa5\x01\n" +
+	"\x0fValidateRequest\x12\x17\n" +
+	"\aapi_key\x18\x01 \x01(\tR\x06apiKey\x12-\n" +
+	"\arequest\x18\x02 \x01(\v2\x13.api_key.v1.RequestR\arequest\x12!\n" +
+	"\fservice_name\x18\x03 \x01(\tR\vserviceName\x12'\n" +
+	"\x0fservice_version\x18\x04 \x01(\tR\x0eserviceVersion\"\x8e\x01\n" +
+	"\fConsumerInfo\x12\x1d\n" +
 	"\n" +
-	"Successful\x12\x1d\n" +
+	"project_id\x18\x01 \x01(\x03R\tprojectId\x12!\n" +
+	"\fproject_name\x18\x02 \x01(\tR\vprojectName\x12\x1b\n" +
+	"\tclient_id\x18\x03 \x01(\x03R\bclientId\x12\x1f\n" +
+	"\vclient_name\x18\x04 \x01(\tR\n" +
+	"clientName\"\xdc\x02\n" +
+	"\x10ValidateResponse\x12\x14\n" +
+	"\x05valid\x18\x01 \x01(\bR\x05valid\x12\x1d\n" +
 	"\n" +
-	"request_id\x18\x01 \x01(\tR\trequestId\x12+\n" +
-	"\x11available_request\x18\x02 \x01(\x03R\x10availableRequest\x1a6\n" +
-	"\x06Failed\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessageB\b\n" +
-	"\x06result\"\x93\x03\n" +
-	"\x1aValidateAndReserveResponse\x12\x14\n" +
-	"\x05valid\x18\x01 \x01(\bR\x05valid\x12S\n" +
-	"\n" +
-	"successful\x18\x02 \x01(\v21.api_key.v1.ValidateAndReserveResponse.SuccessfulH\x00R\n" +
-	"successful\x12G\n" +
-	"\x06failed\x18\x03 \x01(\v2-.api_key.v1.ValidateAndReserveResponse.FailedH\x00R\x06failed\x1a\x7f\n" +
-	"\n" +
-	"Successful\x12\x1d\n" +
-	"\n" +
-	"request_id\x18\x01 \x01(\tR\trequestId\x12+\n" +
-	"\x11available_request\x18\x02 \x01(\x03R\x10availableRequest\x12%\n" +
-	"\x0ereservation_id\x18\x03 \x01(\tR\rreservationId\x1a6\n" +
-	"\x06Failed\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessageB\b\n" +
-	"\x06result\"\xce\x02\n" +
-	"\x1fValidateWithReservationResponse\x12\x14\n" +
-	"\x05valid\x18\x01 \x01(\bR\x05valid\x12X\n" +
-	"\n" +
-	"successful\x18\x02 \x01(\v26.api_key.v1.ValidateWithReservationResponse.SuccessfulH\x00R\n" +
-	"successful\x12L\n" +
-	"\x06failed\x18\x03 \x01(\v22.api_key.v1.ValidateWithReservationResponse.FailedH\x00R\x06failed\x1a+\n" +
-	"\n" +
-	"Successful\x12\x1d\n" +
-	"\n" +
-	"request_id\x18\x01 \x01(\tR\trequestId\x1a6\n" +
-	"\x06Failed\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessageB\b\n" +
-	"\x06result2\xcd\x02\n" +
-	"\rAPIKeyService\x12c\n" +
-	"\x12ValidateAndConsume\x12%.api_key.v1.ValidateAndConsumeRequest\x1a&.api_key.v1.ValidateAndConsumeResponse\x12c\n" +
-	"\x12ValidateAndReserve\x12%.api_key.v1.ValidateAndReserveRequest\x1a&.api_key.v1.ValidateAndReserveResponse\x12r\n" +
-	"\x17ValidateWithReservation\x12*.api_key.v1.ValidateWithReservationRequest\x1a+.api_key.v1.ValidateWithReservationResponseB\fZ\n" +
+	"request_id\x18\x02 \x01(\tR\trequestId\x12\xd3\x01\n" +
+	"\ffailure_code\x18\x03 \x01(\tB\xaf\x01\xbaH\xab\x01r\xa8\x01R\x0fAPI_KEY_INVALIDR\x0eQUOTA_EXCEEDEDR\x0fAPI_KEY_EXPIREDR\x10API_KEY_DISABLEDR\x10SERVICE_MISMATCHR\x10SERVICE_DISABLEDR\x12SERVICE_DEPRECATEDR\x14SERVICE_NOT_ASSIGNEDR\x14ENVIRONMENT_DISABLEDR\vfailureCode\x12=\n" +
+	"\rconsumer_info\x18\x04 \x01(\v2\x18.api_key.v1.ConsumerInfoR\fconsumerInfo\"\x89\x01\n" +
+	"\x17ValidateConsumeResponse\x12A\n" +
+	"\rbase_response\x18\x01 \x01(\v2\x1c.api_key.v1.ValidateResponseR\fbaseResponse\x12+\n" +
+	"\x11available_request\x18\x02 \x01(\x03R\x10availableRequest2\xab\x01\n" +
+	"\rAPIKeyService\x12E\n" +
+	"\bValidate\x12\x1b.api_key.v1.ValidateRequest\x1a\x1c.api_key.v1.ValidateResponse\x12S\n" +
+	"\x0fValidateConsume\x12\x1b.api_key.v1.ValidateRequest\x1a#.api_key.v1.ValidateConsumeResponseB\fZ\n" +
 	"api_key/pbb\x06proto3"
 
 var (
@@ -902,45 +480,31 @@ func file_api_key_v1_api_key_proto_rawDescGZIP() []byte {
 	return file_api_key_v1_api_key_proto_rawDescData
 }
 
-var file_api_key_v1_api_key_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_api_key_v1_api_key_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_api_key_v1_api_key_proto_goTypes = []any{
-	(*BaseValidateParams)(nil),                         // 0: api_key.v1.BaseValidateParams
-	(*ValidateAndConsumeRequest)(nil),                  // 1: api_key.v1.ValidateAndConsumeRequest
-	(*ValidateAndReserveRequest)(nil),                  // 2: api_key.v1.ValidateAndReserveRequest
-	(*ValidateWithReservationRequest)(nil),             // 3: api_key.v1.ValidateWithReservationRequest
-	(*ValidateAndConsumeResponse)(nil),                 // 4: api_key.v1.ValidateAndConsumeResponse
-	(*ValidateAndReserveResponse)(nil),                 // 5: api_key.v1.ValidateAndReserveResponse
-	(*ValidateWithReservationResponse)(nil),            // 6: api_key.v1.ValidateWithReservationResponse
-	(*ValidateAndConsumeResponse_Successful)(nil),      // 7: api_key.v1.ValidateAndConsumeResponse.Successful
-	(*ValidateAndConsumeResponse_Failed)(nil),          // 8: api_key.v1.ValidateAndConsumeResponse.Failed
-	(*ValidateAndReserveResponse_Successful)(nil),      // 9: api_key.v1.ValidateAndReserveResponse.Successful
-	(*ValidateAndReserveResponse_Failed)(nil),          // 10: api_key.v1.ValidateAndReserveResponse.Failed
-	(*ValidateWithReservationResponse_Successful)(nil), // 11: api_key.v1.ValidateWithReservationResponse.Successful
-	(*ValidateWithReservationResponse_Failed)(nil),     // 12: api_key.v1.ValidateWithReservationResponse.Failed
-	(*timestamppb.Timestamp)(nil),                      // 13: google.protobuf.Timestamp
+	(*RequestMetadata)(nil),         // 0: api_key.v1.RequestMetadata
+	(*Request)(nil),                 // 1: api_key.v1.Request
+	(*ValidateRequest)(nil),         // 2: api_key.v1.ValidateRequest
+	(*ConsumerInfo)(nil),            // 3: api_key.v1.ConsumerInfo
+	(*ValidateResponse)(nil),        // 4: api_key.v1.ValidateResponse
+	(*ValidateConsumeResponse)(nil), // 5: api_key.v1.ValidateConsumeResponse
+	(*timestamppb.Timestamp)(nil),   // 6: google.protobuf.Timestamp
 }
 var file_api_key_v1_api_key_proto_depIdxs = []int32{
-	13, // 0: api_key.v1.BaseValidateParams.request_time:type_name -> google.protobuf.Timestamp
-	0,  // 1: api_key.v1.ValidateAndConsumeRequest.params:type_name -> api_key.v1.BaseValidateParams
-	0,  // 2: api_key.v1.ValidateAndReserveRequest.params:type_name -> api_key.v1.BaseValidateParams
-	0,  // 3: api_key.v1.ValidateWithReservationRequest.params:type_name -> api_key.v1.BaseValidateParams
-	7,  // 4: api_key.v1.ValidateAndConsumeResponse.successful:type_name -> api_key.v1.ValidateAndConsumeResponse.Successful
-	8,  // 5: api_key.v1.ValidateAndConsumeResponse.failed:type_name -> api_key.v1.ValidateAndConsumeResponse.Failed
-	9,  // 6: api_key.v1.ValidateAndReserveResponse.successful:type_name -> api_key.v1.ValidateAndReserveResponse.Successful
-	10, // 7: api_key.v1.ValidateAndReserveResponse.failed:type_name -> api_key.v1.ValidateAndReserveResponse.Failed
-	11, // 8: api_key.v1.ValidateWithReservationResponse.successful:type_name -> api_key.v1.ValidateWithReservationResponse.Successful
-	12, // 9: api_key.v1.ValidateWithReservationResponse.failed:type_name -> api_key.v1.ValidateWithReservationResponse.Failed
-	1,  // 10: api_key.v1.APIKeyService.ValidateAndConsume:input_type -> api_key.v1.ValidateAndConsumeRequest
-	2,  // 11: api_key.v1.APIKeyService.ValidateAndReserve:input_type -> api_key.v1.ValidateAndReserveRequest
-	3,  // 12: api_key.v1.APIKeyService.ValidateWithReservation:input_type -> api_key.v1.ValidateWithReservationRequest
-	4,  // 13: api_key.v1.APIKeyService.ValidateAndConsume:output_type -> api_key.v1.ValidateAndConsumeResponse
-	5,  // 14: api_key.v1.APIKeyService.ValidateAndReserve:output_type -> api_key.v1.ValidateAndReserveResponse
-	6,  // 15: api_key.v1.APIKeyService.ValidateWithReservation:output_type -> api_key.v1.ValidateWithReservationResponse
-	13, // [13:16] is the sub-list for method output_type
-	10, // [10:13] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	0, // 0: api_key.v1.Request.metadata:type_name -> api_key.v1.RequestMetadata
+	6, // 1: api_key.v1.Request.request_time:type_name -> google.protobuf.Timestamp
+	1, // 2: api_key.v1.ValidateRequest.request:type_name -> api_key.v1.Request
+	3, // 3: api_key.v1.ValidateResponse.consumer_info:type_name -> api_key.v1.ConsumerInfo
+	4, // 4: api_key.v1.ValidateConsumeResponse.base_response:type_name -> api_key.v1.ValidateResponse
+	2, // 5: api_key.v1.APIKeyService.Validate:input_type -> api_key.v1.ValidateRequest
+	2, // 6: api_key.v1.APIKeyService.ValidateConsume:input_type -> api_key.v1.ValidateRequest
+	4, // 7: api_key.v1.APIKeyService.Validate:output_type -> api_key.v1.ValidateResponse
+	5, // 8: api_key.v1.APIKeyService.ValidateConsume:output_type -> api_key.v1.ValidateConsumeResponse
+	7, // [7:9] is the sub-list for method output_type
+	5, // [5:7] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	5, // [5:5] is the sub-list for extension extendee
+	0, // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_api_key_v1_api_key_proto_init() }
@@ -948,25 +512,13 @@ func file_api_key_v1_api_key_proto_init() {
 	if File_api_key_v1_api_key_proto != nil {
 		return
 	}
-	file_api_key_v1_api_key_proto_msgTypes[4].OneofWrappers = []any{
-		(*ValidateAndConsumeResponse_Successful_)(nil),
-		(*ValidateAndConsumeResponse_Failed_)(nil),
-	}
-	file_api_key_v1_api_key_proto_msgTypes[5].OneofWrappers = []any{
-		(*ValidateAndReserveResponse_Successful_)(nil),
-		(*ValidateAndReserveResponse_Failed_)(nil),
-	}
-	file_api_key_v1_api_key_proto_msgTypes[6].OneofWrappers = []any{
-		(*ValidateWithReservationResponse_Successful_)(nil),
-		(*ValidateWithReservationResponse_Failed_)(nil),
-	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_key_v1_api_key_proto_rawDesc), len(file_api_key_v1_api_key_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
