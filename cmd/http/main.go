@@ -62,7 +62,7 @@ func main() {
 		environmentRepo, projectRepo,
 	)
 	apiKeyUseCase := app.NewAPIKeyUseCase(
-		apiKeyRepo, requestLogRepo, serviceRepo, environmentRepo, reservationRepo,
+		apiKeyRepo, requestLogRepo, serviceRepo, projectRepo, environmentRepo, reservationRepo,
 	)
 
 	srv := http.NewServer(

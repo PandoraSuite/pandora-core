@@ -18,6 +18,46 @@ type service struct {
 	apiKeyService inbound.APIKeyGRPCPort
 }
 
+func (s *service) Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.ValidateResponse, error) {
+	params := req.GetParams()
+	reqValidate := dto.APIKeyValidate{
+		Key:            params.Key,
+		Service:        params.Service,
+		Environment:    params.Environment,
+		ServiceVersion: params.ServiceVersion,
+		RequestTime:    params.RequestTime.AsTime(),
+	}
+	response, err := s.apiKeyService.Validate(ctx, &reqValidate)
+	if err != nil {
+		return nil, status.Error(
+			utils.GetDomainErrorStatusCode(err),
+			err.Message,
+		)
+	}
+	if response.Valid {
+		return &pb.ValidateResponse{
+			Valid: true,
+			Result: &pb.ValidateResponse_Successful_{
+				Successful: &pb.ValidateResponse_Successful{
+					RequestId:        response.RequestID,
+					ClientId:         int64(response.ClientID),
+					AvailableRequest: int64(response.AvailableRequest),
+				},
+			},
+		}, nil
+	} else {
+		return &pb.ValidateResponse{
+			Valid: false,
+			Result: &pb.ValidateResponse_Failed_{
+				Failed: &pb.ValidateResponse_Failed{
+					Code:    response.Code.String(),
+					Message: response.Message,
+				},
+			},
+		}, nil
+	}
+}
+
 func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndConsumeRequest) (*pb.ValidateAndConsumeResponse, error) {
 	params := req.GetParams()
 	reqValidate := dto.APIKeyValidate{
@@ -40,6 +80,7 @@ func (s *service) ValidateAndConsume(ctx context.Context, req *pb.ValidateAndCon
 			Result: &pb.ValidateAndConsumeResponse_Successful_{
 				Successful: &pb.ValidateAndConsumeResponse_Successful{
 					RequestId:        response.RequestID,
+					ClientId:         int64(response.ClientID),
 					AvailableRequest: int64(response.AvailableRequest),
 				},
 			},
@@ -80,6 +121,7 @@ func (s *service) ValidateAndReserve(ctx context.Context, req *pb.ValidateAndRes
 				Successful: &pb.ValidateAndReserveResponse_Successful{
 					RequestId:        response.RequestID,
 					ReservationId:    response.ReservationID,
+					ClientId:         int64(response.ClientID),
 					AvailableRequest: int64(response.AvailableRequest),
 				},
 			},

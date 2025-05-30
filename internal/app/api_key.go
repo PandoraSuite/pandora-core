@@ -16,8 +16,74 @@ type APIKeyUseCase struct {
 	apiKeyRepo      outbound.APIKeyPort
 	requestLog      outbound.RequestLogPort
 	serviceRepo     outbound.ServiceFindPort
+	projectRepo     outbound.ProjectPort
 	environmentRepo outbound.EnvironmentPort
 	reservationRepo outbound.ReservationPort
+}
+
+func (u *APIKeyUseCase) Validate(
+	ctx context.Context, req *dto.APIKeyValidate,
+) (*dto.APIKeyValidateResponse, *errors.Error) {
+	validate, requestLog, err := u.validate(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+	// Create a request_log as a initial point, then start_point is the register id
+	if err := u.requestLog.SaveAsInitialPoint(ctx, requestLog); err != nil {
+		return nil, err
+	}
+	// Return request created
+	validate.RequestID = requestLog.ID
+
+	return validate, nil
+}
+
+func (u *APIKeyUseCase) validate(
+	ctx context.Context, req *dto.APIKeyValidate,
+) (*dto.APIKeyValidateResponse, *entities.RequestLog, *errors.Error) {
+
+	// API Key must be valid, active and not expirated.
+	apiKey,
+		validate, request_log, err := u.apiKeyEnable(ctx, req)
+	if apiKey == nil {
+		return validate, request_log, err
+	}
+
+	// Environment must be valid, active and matched with API Key
+	environment,
+		validate, request_log, err := u.environmentEnable(ctx, req, apiKey)
+	if environment == nil {
+		return validate, request_log, err
+	}
+
+	projectCxt, err := u.projectRepo.FindContextByID(
+		ctx, environment.ProjectID,
+	)
+	if err != nil {
+		return validate, request_log, err
+	}
+
+	// Service must be valid and active
+	service,
+		validate, request_log, err := u.serviceEnable(ctx, req, apiKey)
+	if service == nil {
+		return validate, request_log, err
+	}
+
+	// With an successful key use, then update last_used in api_key entity
+	if err := u.apiKeyRepo.UpdateLastUsed(ctx, apiKey.Key); err != nil {
+		return nil, nil, err
+	}
+	return &dto.APIKeyValidateResponse{
+			Valid:    true,
+			ClientID: projectCxt.ClientID,
+		}, &entities.RequestLog{
+			APIKey:          apiKey.Key,
+			ServiceID:       service.ID,
+			RequestTime:     req.RequestTime,
+			EnvironmentID:   environment.ID,
+			ExecutionStatus: enums.RequestLogPending,
+		}, nil
 }
 
 func (u *APIKeyUseCase) ValidateAndConsume(
@@ -53,6 +119,15 @@ func (u *APIKeyUseCase) validateAndConsume(
 	if environment == nil {
 		return validate, request_log, err
 	}
+
+	projectCxt, err := u.projectRepo.FindContextByID(
+		ctx, environment.ProjectID,
+	)
+	if err != nil {
+		return validate, request_log, err
+	}
+
+	validate.ClientID = projectCxt.ClientID
 
 	// Service must be valid and active
 	service,
@@ -133,6 +208,13 @@ func (u *APIKeyUseCase) validateAndReserve(
 		return validate, request_log, nil, err
 	}
 
+	projectCxt, err := u.projectRepo.FindContextByID(
+		ctx, environment.ProjectID,
+	)
+	if err != nil {
+		return validate, request_log, nil, err
+	}
+
 	// Service must be valid and active
 	service,
 		validate, request_log, err := u.serviceEnable(ctx, req, apiKey)
@@ -161,6 +243,7 @@ func (u *APIKeyUseCase) validateAndReserve(
 	return &dto.APIKeyValidateResponse{
 			AvailableRequest: availableRequest.AvailableRequest,
 			Valid:            true,
+			ClientID:         projectCxt.ClientID,
 		}, &entities.RequestLog{
 			APIKey:          apiKey.Key,
 			ServiceID:       service.ID,
@@ -641,6 +724,7 @@ func NewAPIKeyUseCase(
 	apiKeyRepo outbound.APIKeyPort,
 	requestLog outbound.RequestLogPort,
 	serviceRepo outbound.ServiceFindPort,
+	projectRepo outbound.ProjectPort,
 	environmentRepo outbound.EnvironmentPort,
 	reservationRepo outbound.ReservationPort,
 ) *APIKeyUseCase {
@@ -648,6 +732,7 @@ func NewAPIKeyUseCase(
 		apiKeyRepo:      apiKeyRepo,
 		requestLog:      requestLog,
 		serviceRepo:     serviceRepo,
+		projectRepo:     projectRepo,
 		environmentRepo: environmentRepo,
 		reservationRepo: reservationRepo,
 	}

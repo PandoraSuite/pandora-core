@@ -27,6 +27,7 @@ type APIKeyValidateResponse struct {
 	RequestID        string                   `json:"request_id,omitempty"`
 	ReservationID    string                   `json:"reservation_id,omitempty"` // Only for reservations
 	AvailableRequest int                      `json:"available_request,omitempty"`
+	ClientID         int                      `json:"client_id,omitempty"`
 	Valid            bool                     `json:"valid"`
 	Message          string                   `json:"message,omitempty"`
 	Code             enums.ValidateStatusCode `json:"code,omitempty"`

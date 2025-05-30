@@ -42,7 +42,7 @@ func (r *ReservationRepository) FindByID(
 	ctx context.Context, id string,
 ) (*entities.Reservation, *errors.Error) {
 	query := `
-		SELECT *
+		SELECT id, environment_id, service_id, api_key, request_time, expires_at
 		FROM reservation
 		WHERE id = $1;
 	`

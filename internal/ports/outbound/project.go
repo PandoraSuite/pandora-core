@@ -18,6 +18,7 @@ type ProjectPort interface {
 	FindByClient(ctx context.Context, clientID int) ([]*entities.Project, *errors.Error)
 	UpdateService(ctx context.Context, id, serviceID int, update *dto.ProjectServiceUpdate) (*entities.ProjectService, *errors.Error)
 	RemoveService(ctx context.Context, id, serviceID int) (int64, *errors.Error)
+	FindContextByID(ctx context.Context, id int) (*dto.ProjectContext, *errors.Error)
 	FindServiceByID(ctx context.Context, id, serviceID int) (*entities.ProjectService, *errors.Error)
 	ExistsServiceIn(ctx context.Context, serviceID int) (bool, *errors.Error)
 	ResetProjectServiceUsage(ctx context.Context, id, serviceID int, nextReset time.Time) ([]*dto.EnvironmentServiceReset, *errors.Error)

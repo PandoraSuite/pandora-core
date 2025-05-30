@@ -21,6 +21,31 @@ type ProjectRepository struct {
 	handlerErr func(error) *errors.Error
 }
 
+func (r *ProjectRepository) FindContextByID(
+	ctx context.Context, id int,
+) (*dto.ProjectContext, *errors.Error) {
+	query := `
+		SELECT p.id, p.name, c.id
+		FROM project p
+			JOIN client c ON c.id = p.client_id
+		WHERE p.id = $1;
+	`
+
+	projectCtx := new(dto.ProjectContext)
+	err := r.pool.QueryRow(ctx, query, id).Scan(
+		&projectCtx.ID,
+		&projectCtx.Name,
+		&projectCtx.ClientID,
+	)
+
+	if err != nil {
+		return nil, r.handlerErr(err)
+	}
+
+	return projectCtx, nil
+
+}
+
 func (r *ProjectRepository) ResetAvailableRequestsForEnvsService(
 	ctx context.Context, id, serviceID int,
 ) ([]*dto.EnvironmentServiceReset, *errors.Error) {
