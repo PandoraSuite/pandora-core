@@ -66,7 +66,7 @@ type RequestResponse struct {
 	Path               string                            `name:"path"`
 	Method             string                            `name:"method"`
 	IPAddress          string                            `name:"ip_address"`
-	CreateAt           time.Time                         `name:"created_at"`
+	CreatedAt          time.Time                         `name:"created_at"`
 }
 
 type RequestDetailsReponse struct {
