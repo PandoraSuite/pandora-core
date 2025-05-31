@@ -18,6 +18,14 @@ type RequestAPIKey struct {
 	Key string
 }
 
+func (r *RequestAPIKey) KeySummary() string {
+	if len(r.Key) == 0 {
+		return ""
+	}
+
+	return r.Key[:4] + "..." + r.Key[len(r.Key)-4:]
+}
+
 type RequestService struct {
 	ID      int
 	Name    string
