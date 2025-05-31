@@ -53,20 +53,20 @@ type RequestProjectResponse struct {
 }
 
 type RequestResponse struct {
-	ID                    string                            `name:"id"`
-	StartPoint            string                            `name:"start_point"`
-	APIKey                *RequestAPIKeyResponse            `name:"api_key"`
-	Project               *RequestProjectResponse           `name:"project"`
-	Environment           *RequestEnvironmentResponse       `name:"environment"`
-	Service               *RequestServiceResponse           `name:"service"`
-	StatusCode            int                               `name:"status_code"`
-	ExecutionStatus       enums.RequestExecutionStatus      `name:"execution_status"`
-	ValidationFailureCode enums.APIKeyValidationFailureCode `name:"validation_failure_code"`
-	RequestTime           time.Time                         `name:"request_time"`
-	Path                  string                            `name:"path"`
-	Method                string                            `name:"method"`
-	IPAddress             string                            `name:"ip_address"`
-	CreateAt              time.Time                         `name:"created_at"`
+	ID                 string                            `name:"id"`
+	StartPoint         string                            `name:"start_point"`
+	APIKey             *RequestAPIKeyResponse            `name:"api_key"`
+	Project            *RequestProjectResponse           `name:"project"`
+	Environment        *RequestEnvironmentResponse       `name:"environment"`
+	Service            *RequestServiceResponse           `name:"service"`
+	StatusCode         int                               `name:"status_code"`
+	ExecutionStatus    enums.RequestExecutionStatus      `name:"execution_status"`
+	UnauthorizedReason enums.APIKeyValidationFailureCode `name:"unauthorized_reason"`
+	RequestTime        time.Time                         `name:"request_time"`
+	Path               string                            `name:"path"`
+	Method             string                            `name:"method"`
+	IPAddress          string                            `name:"ip_address"`
+	CreateAt           time.Time                         `name:"created_at"`
 }
 
 type RequestDetailsReponse struct {

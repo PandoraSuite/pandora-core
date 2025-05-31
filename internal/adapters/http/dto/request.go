@@ -47,19 +47,20 @@ type RequestProjectResponse struct {
 }
 
 type RequestResponse struct {
-	ID              string                      `json:"id"`
-	StartPoint      string                      `json:"start_point"`
-	APIKey          *RequestAPIKeyResponse      `json:"api_key"`
-	Project         *RequestProjectResponse     `json:"project"`
-	Environment     *RequestEnvironmentResponse `json:"environment"`
-	Service         *RequestServiceResponse     `json:"service"`
-	StatusCode      int                         `json:"status_code"`
-	ExecutionStatus string                      `json:"execution_status" enums:"success,forwarded,client_error,service_error,unauthorized,quota_exceeded"`
-	RequestTime     time.Time                   `json:"request_time"`
-	Path            string                      `json:"path"`
-	Method          string                      `json:"method"`
-	IPAddress       string                      `json:"ip_address"`
-	CreateAt        time.Time                   `json:"created_at"`
+	ID                    string                      `json:"id"`
+	StartPoint            string                      `json:"start_point"`
+	APIKey                *RequestAPIKeyResponse      `json:"api_key"`
+	Project               *RequestProjectResponse     `json:"project"`
+	Environment           *RequestEnvironmentResponse `json:"environment"`
+	Service               *RequestServiceResponse     `json:"service"`
+	StatusCode            int                         `json:"status_code"`
+	ExecutionStatus       string                      `json:"execution_status" enums:"success,forwarded,client_error,service_error,unauthorized,quota_exceeded"`
+	ValidationFailureCode string                      `json:"validation_failure_code" enums:"API_KEY_INVALID,QUOTA_EXCEEDED,API_KEY_EXPIRED,API_KEY_DISABLED,SERVICE_MISMATCH,ENVIRONMENT_MISMATCH,ENVIRONMENT_DISABLED"`
+	RequestTime           time.Time                   `json:"request_time"`
+	Path                  string                      `json:"path"`
+	Method                string                      `json:"method"`
+	IPAddress             string                      `json:"ip_address"`
+	CreateAt              time.Time                   `json:"created_at"`
 }
 
 func RequestResponseFromDomain(request *dto.RequestResponse) *RequestResponse {

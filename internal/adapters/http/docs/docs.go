@@ -2029,6 +2029,18 @@ const docTemplate = `{
                 },
                 "status_code": {
                     "type": "integer"
+                },
+                "validation_failure_code": {
+                    "type": "string",
+                    "enum": [
+                        "API_KEY_INVALID",
+                        "QUOTA_EXCEEDED",
+                        "API_KEY_EXPIRED",
+                        "API_KEY_DISABLED",
+                        "SERVICE_MISMATCH",
+                        "ENVIRONMENT_MISMATCH",
+                        "ENVIRONMENT_DISABLED"
+                    ]
                 }
             }
         },

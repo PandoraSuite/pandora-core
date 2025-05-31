@@ -37,19 +37,19 @@ type RequestProject struct {
 type Request struct {
 	ID string
 
-	StartPoint            string
-	APIKey                *RequestAPIKey
-	Project               *RequestProject
-	Environment           *RequestEnvironment
-	Service               *RequestService
-	StatusCode            int
-	ExecutionStatus       enums.RequestExecutionStatus
-	ValidationFailureCode enums.APIKeyValidationFailureCode
-	RequestTime           time.Time
-	Path                  string
-	Method                string
-	IPAddress             string
-	Metadata              *RequestMetadata
+	StartPoint         string
+	APIKey             *RequestAPIKey
+	Project            *RequestProject
+	Environment        *RequestEnvironment
+	Service            *RequestService
+	StatusCode         int
+	ExecutionStatus    enums.RequestExecutionStatus
+	UnauthorizedReason enums.APIKeyValidationFailureCode
+	RequestTime        time.Time
+	Path               string
+	Method             string
+	IPAddress          string
+	Metadata           *RequestMetadata
 
 	CreatedAt time.Time
 }

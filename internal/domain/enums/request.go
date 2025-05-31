@@ -3,13 +3,12 @@ package enums
 type RequestExecutionStatus string
 
 const (
-	RequestExecutionStatusNull          RequestExecutionStatus = ""
-	RequestExecutionStatusSuccess       RequestExecutionStatus = "success"
-	RequestExecutionStatusForwarded     RequestExecutionStatus = "forwarded"
-	RequestExecutionStatusClientError   RequestExecutionStatus = "client_error"
-	RequestExecutionStatusServiceError  RequestExecutionStatus = "service_error"
-	RequestExecutionStatusUnauthorized  RequestExecutionStatus = "unauthorized"
-	RequestExecutionStatusQuotaExceeded RequestExecutionStatus = "quota_exceeded"
+	RequestExecutionStatusNull         RequestExecutionStatus = ""
+	RequestExecutionStatusSuccess      RequestExecutionStatus = "success"
+	RequestExecutionStatusForwarded    RequestExecutionStatus = "forwarded"
+	RequestExecutionStatusClientError  RequestExecutionStatus = "client_error"
+	RequestExecutionStatusServiceError RequestExecutionStatus = "service_error"
+	RequestExecutionStatusUnauthorized RequestExecutionStatus = "unauthorized"
 )
 
 func ParseRequestExecutionStatus(status string) (RequestExecutionStatus, bool) {
@@ -19,8 +18,7 @@ func ParseRequestExecutionStatus(status string) (RequestExecutionStatus, bool) {
 		RequestExecutionStatusForwarded,
 		RequestExecutionStatusClientError,
 		RequestExecutionStatusServiceError,
-		RequestExecutionStatusUnauthorized,
-		RequestExecutionStatusQuotaExceeded:
+		RequestExecutionStatusUnauthorized:
 		return s, true
 	default:
 		return RequestExecutionStatusNull, false

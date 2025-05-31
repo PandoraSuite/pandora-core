@@ -170,8 +170,7 @@ CREATE TABLE IF NOT EXISTS request(
                 'forwarded',
                 'unauthorized',
                 'client_error',
-                'service_error',
-                'quota_exceeded'
+                'service_error'
             )
         ),
     CONSTRAINT request_status_code_required_check
@@ -180,17 +179,19 @@ CREATE TABLE IF NOT EXISTS request(
             OR status_code IS NOT NULL
         ),
 
-    validation_failure_code TEXT,
-    CONSTRAINT request_validation_failure_code_check
+    unauthorized_reason TEXT,
+    CONSTRAINT request_unauthorized_reason_check
         CHECK (
-            validation_failure_code IN (
-                'API_KEY_INVALID',
-                'QUOTA_EXCEEDED',
-                'API_KEY_EXPIRED',
-                'API_KEY_DISABLED',
-                'SERVICE_MISMATCH',
-                'ENVIRONMENT_MISMATCH',
-                'ENVIRONMENT_DISABLED'
+            unauthorized_reason IN (
+                "API_KEY_INVALID",
+                "QUOTA_EXCEEDED",
+                "API_KEY_EXPIRED",
+                "API_KEY_DISABLED",
+                "SERVICE_MISMATCH",
+                "SERVICE_DISABLED",
+                "SERVICE_DEPRECATED",
+                "SERVICE_NOT_ASSIGNED",
+                "ENVIRONMENT_DISABLED"
             )
         ),
 
