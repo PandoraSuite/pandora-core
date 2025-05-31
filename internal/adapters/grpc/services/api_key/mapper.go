@@ -38,33 +38,43 @@ func validateRequestToDomain(req *pb.ValidateRequest) *dto.APIKeyValidate {
 }
 
 func validateResponseFromDomain(response *dto.APIKeyValidateResponse) *pb.ValidateResponse {
-	return &pb.ValidateResponse{
-		Valid:       response.Valid,
-		RequestId:   response.RequestID,
-		FailureCode: string(response.FailureCode),
-		ConsumerInfo: &pb.ConsumerInfo{
+	var consumer *pb.ConsumerInfo
+	if response.ConsumerInfo != nil {
+		consumer = &pb.ConsumerInfo{
 			ProjectId:   int64(response.ConsumerInfo.ProjectID),
 			ProjectName: response.ConsumerInfo.ProjectName,
 			ClientId:    int64(response.ConsumerInfo.ClientID),
 			ClientName:  response.ConsumerInfo.ClientName,
-		},
+		}
+	}
+
+	return &pb.ValidateResponse{
+		Valid:        response.Valid,
+		RequestId:    response.RequestID,
+		FailureCode:  string(response.FailureCode),
+		ConsumerInfo: consumer,
 	}
 }
 
 func validateConsumeResponseFromDomain(
 	response *dto.APIKeyValidateConsumeResponse,
 ) *pb.ValidateConsumeResponse {
+	var consumer *pb.ConsumerInfo
+	if response.ConsumerInfo != nil {
+		consumer = &pb.ConsumerInfo{
+			ProjectId:   int64(response.ConsumerInfo.ProjectID),
+			ProjectName: response.ConsumerInfo.ProjectName,
+			ClientId:    int64(response.ConsumerInfo.ClientID),
+			ClientName:  response.ConsumerInfo.ClientName,
+		}
+	}
+
 	return &pb.ValidateConsumeResponse{
 		BaseResponse: &pb.ValidateResponse{
-			Valid:       response.Valid,
-			RequestId:   response.RequestID,
-			FailureCode: string(response.FailureCode),
-			ConsumerInfo: &pb.ConsumerInfo{
-				ProjectId:   int64(response.ConsumerInfo.ProjectID),
-				ProjectName: response.ConsumerInfo.ProjectName,
-				ClientId:    int64(response.ConsumerInfo.ClientID),
-				ClientName:  response.ConsumerInfo.ClientName,
-			},
+			Valid:        response.Valid,
+			RequestId:    response.RequestID,
+			FailureCode:  string(response.FailureCode),
+			ConsumerInfo: consumer,
 		},
 		AvailableRequest: int64(response.AvailableRequest),
 	}
