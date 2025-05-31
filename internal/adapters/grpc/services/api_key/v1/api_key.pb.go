@@ -235,30 +235,28 @@ func (x *ValidateRequest) GetServiceVersion() string {
 	return ""
 }
 
-type ConsumerInfo struct {
+type Project struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ProjectId     int64                  `protobuf:"varint,1,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	ProjectName   string                 `protobuf:"bytes,2,opt,name=project_name,json=projectName,proto3" json:"project_name,omitempty"`
-	ClientId      int64                  `protobuf:"varint,3,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
-	ClientName    string                 `protobuf:"bytes,4,opt,name=client_name,json=clientName,proto3" json:"client_name,omitempty"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ConsumerInfo) Reset() {
-	*x = ConsumerInfo{}
+func (x *Project) Reset() {
+	*x = Project{}
 	mi := &file_api_key_v1_api_key_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ConsumerInfo) String() string {
+func (x *Project) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ConsumerInfo) ProtoMessage() {}
+func (*Project) ProtoMessage() {}
 
-func (x *ConsumerInfo) ProtoReflect() protoreflect.Message {
+func (x *Project) ProtoReflect() protoreflect.Message {
 	mi := &file_api_key_v1_api_key_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -270,35 +268,125 @@ func (x *ConsumerInfo) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ConsumerInfo.ProtoReflect.Descriptor instead.
-func (*ConsumerInfo) Descriptor() ([]byte, []int) {
+// Deprecated: Use Project.ProtoReflect.Descriptor instead.
+func (*Project) Descriptor() ([]byte, []int) {
 	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *ConsumerInfo) GetProjectId() int64 {
+func (x *Project) GetId() int64 {
 	if x != nil {
-		return x.ProjectId
+		return x.Id
 	}
 	return 0
 }
 
-func (x *ConsumerInfo) GetProjectName() string {
+func (x *Project) GetName() string {
 	if x != nil {
-		return x.ProjectName
+		return x.Name
 	}
 	return ""
 }
 
-func (x *ConsumerInfo) GetClientId() int64 {
+type Client struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Client) Reset() {
+	*x = Client{}
+	mi := &file_api_key_v1_api_key_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Client) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Client) ProtoMessage() {}
+
+func (x *Client) ProtoReflect() protoreflect.Message {
+	mi := &file_api_key_v1_api_key_proto_msgTypes[4]
 	if x != nil {
-		return x.ClientId
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Client.ProtoReflect.Descriptor instead.
+func (*Client) Descriptor() ([]byte, []int) {
+	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Client) GetId() int64 {
+	if x != nil {
+		return x.Id
 	}
 	return 0
 }
 
-func (x *ConsumerInfo) GetClientName() string {
+func (x *Client) GetName() string {
 	if x != nil {
-		return x.ClientName
+		return x.Name
+	}
+	return ""
+}
+
+type Environment struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Environment) Reset() {
+	*x = Environment{}
+	mi := &file_api_key_v1_api_key_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Environment) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Environment) ProtoMessage() {}
+
+func (x *Environment) ProtoReflect() protoreflect.Message {
+	mi := &file_api_key_v1_api_key_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Environment.ProtoReflect.Descriptor instead.
+func (*Environment) Descriptor() ([]byte, []int) {
+	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *Environment) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Environment) GetName() string {
+	if x != nil {
+		return x.Name
 	}
 	return ""
 }
@@ -308,14 +396,16 @@ type ValidateResponse struct {
 	Valid         bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
 	RequestId     string                 `protobuf:"bytes,2,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`
 	FailureCode   string                 `protobuf:"bytes,3,opt,name=failure_code,json=failureCode,proto3" json:"failure_code,omitempty"`
-	ConsumerInfo  *ConsumerInfo          `protobuf:"bytes,4,opt,name=consumer_info,json=consumerInfo,proto3" json:"consumer_info,omitempty"`
+	Project       *Project               `protobuf:"bytes,4,opt,name=project,proto3" json:"project,omitempty"`
+	Client        *Client                `protobuf:"bytes,5,opt,name=client,proto3" json:"client,omitempty"`
+	Environment   *Environment           `protobuf:"bytes,6,opt,name=environment,proto3" json:"environment,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ValidateResponse) Reset() {
 	*x = ValidateResponse{}
-	mi := &file_api_key_v1_api_key_proto_msgTypes[4]
+	mi := &file_api_key_v1_api_key_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -327,7 +417,7 @@ func (x *ValidateResponse) String() string {
 func (*ValidateResponse) ProtoMessage() {}
 
 func (x *ValidateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_key_v1_api_key_proto_msgTypes[4]
+	mi := &file_api_key_v1_api_key_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -340,7 +430,7 @@ func (x *ValidateResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ValidateResponse.ProtoReflect.Descriptor instead.
 func (*ValidateResponse) Descriptor() ([]byte, []int) {
-	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{4}
+	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ValidateResponse) GetValid() bool {
@@ -364,9 +454,23 @@ func (x *ValidateResponse) GetFailureCode() string {
 	return ""
 }
 
-func (x *ValidateResponse) GetConsumerInfo() *ConsumerInfo {
+func (x *ValidateResponse) GetProject() *Project {
 	if x != nil {
-		return x.ConsumerInfo
+		return x.Project
+	}
+	return nil
+}
+
+func (x *ValidateResponse) GetClient() *Client {
+	if x != nil {
+		return x.Client
+	}
+	return nil
+}
+
+func (x *ValidateResponse) GetEnvironment() *Environment {
+	if x != nil {
+		return x.Environment
 	}
 	return nil
 }
@@ -381,7 +485,7 @@ type ValidateConsumeResponse struct {
 
 func (x *ValidateConsumeResponse) Reset() {
 	*x = ValidateConsumeResponse{}
-	mi := &file_api_key_v1_api_key_proto_msgTypes[5]
+	mi := &file_api_key_v1_api_key_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -393,7 +497,7 @@ func (x *ValidateConsumeResponse) String() string {
 func (*ValidateConsumeResponse) ProtoMessage() {}
 
 func (x *ValidateConsumeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_key_v1_api_key_proto_msgTypes[5]
+	mi := &file_api_key_v1_api_key_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -406,7 +510,7 @@ func (x *ValidateConsumeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ValidateConsumeResponse.ProtoReflect.Descriptor instead.
 func (*ValidateConsumeResponse) Descriptor() ([]byte, []int) {
-	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{5}
+	return file_api_key_v1_api_key_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ValidateConsumeResponse) GetBaseResponse() *ValidateResponse {
@@ -446,20 +550,24 @@ const file_api_key_v1_api_key_proto_rawDesc = "" +
 	"\aapi_key\x18\x01 \x01(\tR\x06apiKey\x12-\n" +
 	"\arequest\x18\x02 \x01(\v2\x13.api_key.v1.RequestR\arequest\x12!\n" +
 	"\fservice_name\x18\x03 \x01(\tR\vserviceName\x12'\n" +
-	"\x0fservice_version\x18\x04 \x01(\tR\x0eserviceVersion\"\x8e\x01\n" +
-	"\fConsumerInfo\x12\x1d\n" +
-	"\n" +
-	"project_id\x18\x01 \x01(\x03R\tprojectId\x12!\n" +
-	"\fproject_name\x18\x02 \x01(\tR\vprojectName\x12\x1b\n" +
-	"\tclient_id\x18\x03 \x01(\x03R\bclientId\x12\x1f\n" +
-	"\vclient_name\x18\x04 \x01(\tR\n" +
-	"clientName\"\xdc\x02\n" +
+	"\x0fservice_version\x18\x04 \x01(\tR\x0eserviceVersion\"-\n" +
+	"\aProject\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\",\n" +
+	"\x06Client\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"1\n" +
+	"\vEnvironment\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\"\xb3\x03\n" +
 	"\x10ValidateResponse\x12\x14\n" +
 	"\x05valid\x18\x01 \x01(\bR\x05valid\x12\x1d\n" +
 	"\n" +
 	"request_id\x18\x02 \x01(\tR\trequestId\x12\xd3\x01\n" +
-	"\ffailure_code\x18\x03 \x01(\tB\xaf\x01\xbaH\xab\x01r\xa8\x01R\x0fAPI_KEY_INVALIDR\x0eQUOTA_EXCEEDEDR\x0fAPI_KEY_EXPIREDR\x10API_KEY_DISABLEDR\x10SERVICE_MISMATCHR\x10SERVICE_DISABLEDR\x12SERVICE_DEPRECATEDR\x14SERVICE_NOT_ASSIGNEDR\x14ENVIRONMENT_DISABLEDR\vfailureCode\x12=\n" +
-	"\rconsumer_info\x18\x04 \x01(\v2\x18.api_key.v1.ConsumerInfoR\fconsumerInfo\"\x89\x01\n" +
+	"\ffailure_code\x18\x03 \x01(\tB\xaf\x01\xbaH\xab\x01r\xa8\x01R\x0fAPI_KEY_INVALIDR\x0eQUOTA_EXCEEDEDR\x0fAPI_KEY_EXPIREDR\x10API_KEY_DISABLEDR\x10SERVICE_MISMATCHR\x10SERVICE_DISABLEDR\x12SERVICE_DEPRECATEDR\x14SERVICE_NOT_ASSIGNEDR\x14ENVIRONMENT_DISABLEDR\vfailureCode\x12-\n" +
+	"\aproject\x18\x04 \x01(\v2\x13.api_key.v1.ProjectR\aproject\x12*\n" +
+	"\x06client\x18\x05 \x01(\v2\x12.api_key.v1.ClientR\x06client\x129\n" +
+	"\venvironment\x18\x06 \x01(\v2\x17.api_key.v1.EnvironmentR\venvironment\"\x89\x01\n" +
 	"\x17ValidateConsumeResponse\x12A\n" +
 	"\rbase_response\x18\x01 \x01(\v2\x1c.api_key.v1.ValidateResponseR\fbaseResponse\x12+\n" +
 	"\x11available_request\x18\x02 \x01(\x03R\x10availableRequest2\xab\x01\n" +
@@ -480,31 +588,35 @@ func file_api_key_v1_api_key_proto_rawDescGZIP() []byte {
 	return file_api_key_v1_api_key_proto_rawDescData
 }
 
-var file_api_key_v1_api_key_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_api_key_v1_api_key_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_api_key_v1_api_key_proto_goTypes = []any{
 	(*RequestMetadata)(nil),         // 0: api_key.v1.RequestMetadata
 	(*Request)(nil),                 // 1: api_key.v1.Request
 	(*ValidateRequest)(nil),         // 2: api_key.v1.ValidateRequest
-	(*ConsumerInfo)(nil),            // 3: api_key.v1.ConsumerInfo
-	(*ValidateResponse)(nil),        // 4: api_key.v1.ValidateResponse
-	(*ValidateConsumeResponse)(nil), // 5: api_key.v1.ValidateConsumeResponse
-	(*timestamppb.Timestamp)(nil),   // 6: google.protobuf.Timestamp
+	(*Project)(nil),                 // 3: api_key.v1.Project
+	(*Client)(nil),                  // 4: api_key.v1.Client
+	(*Environment)(nil),             // 5: api_key.v1.Environment
+	(*ValidateResponse)(nil),        // 6: api_key.v1.ValidateResponse
+	(*ValidateConsumeResponse)(nil), // 7: api_key.v1.ValidateConsumeResponse
+	(*timestamppb.Timestamp)(nil),   // 8: google.protobuf.Timestamp
 }
 var file_api_key_v1_api_key_proto_depIdxs = []int32{
 	0, // 0: api_key.v1.Request.metadata:type_name -> api_key.v1.RequestMetadata
-	6, // 1: api_key.v1.Request.request_time:type_name -> google.protobuf.Timestamp
+	8, // 1: api_key.v1.Request.request_time:type_name -> google.protobuf.Timestamp
 	1, // 2: api_key.v1.ValidateRequest.request:type_name -> api_key.v1.Request
-	3, // 3: api_key.v1.ValidateResponse.consumer_info:type_name -> api_key.v1.ConsumerInfo
-	4, // 4: api_key.v1.ValidateConsumeResponse.base_response:type_name -> api_key.v1.ValidateResponse
-	2, // 5: api_key.v1.APIKeyService.Validate:input_type -> api_key.v1.ValidateRequest
-	2, // 6: api_key.v1.APIKeyService.ValidateConsume:input_type -> api_key.v1.ValidateRequest
-	4, // 7: api_key.v1.APIKeyService.Validate:output_type -> api_key.v1.ValidateResponse
-	5, // 8: api_key.v1.APIKeyService.ValidateConsume:output_type -> api_key.v1.ValidateConsumeResponse
-	7, // [7:9] is the sub-list for method output_type
-	5, // [5:7] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	3, // 3: api_key.v1.ValidateResponse.project:type_name -> api_key.v1.Project
+	4, // 4: api_key.v1.ValidateResponse.client:type_name -> api_key.v1.Client
+	5, // 5: api_key.v1.ValidateResponse.environment:type_name -> api_key.v1.Environment
+	6, // 6: api_key.v1.ValidateConsumeResponse.base_response:type_name -> api_key.v1.ValidateResponse
+	2, // 7: api_key.v1.APIKeyService.Validate:input_type -> api_key.v1.ValidateRequest
+	2, // 8: api_key.v1.APIKeyService.ValidateConsume:input_type -> api_key.v1.ValidateRequest
+	6, // 9: api_key.v1.APIKeyService.Validate:output_type -> api_key.v1.ValidateResponse
+	7, // 10: api_key.v1.APIKeyService.ValidateConsume:output_type -> api_key.v1.ValidateConsumeResponse
+	9, // [9:11] is the sub-list for method output_type
+	7, // [7:9] is the sub-list for method input_type
+	7, // [7:7] is the sub-list for extension type_name
+	7, // [7:7] is the sub-list for extension extendee
+	0, // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_api_key_v1_api_key_proto_init() }
@@ -518,7 +630,7 @@ func file_api_key_v1_api_key_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_key_v1_api_key_proto_rawDesc), len(file_api_key_v1_api_key_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
