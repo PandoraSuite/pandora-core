@@ -183,15 +183,15 @@ CREATE TABLE IF NOT EXISTS request(
     CONSTRAINT request_unauthorized_reason_check
         CHECK (
             unauthorized_reason IN (
-                "API_KEY_INVALID",
-                "QUOTA_EXCEEDED",
-                "API_KEY_EXPIRED",
-                "API_KEY_DISABLED",
-                "SERVICE_MISMATCH",
-                "SERVICE_DISABLED",
-                "SERVICE_DEPRECATED",
-                "SERVICE_NOT_ASSIGNED",
-                "ENVIRONMENT_DISABLED"
+                'API_KEY_INVALID',
+                'QUOTA_EXCEEDED',
+                'API_KEY_EXPIRED',
+                'API_KEY_DISABLED',
+                'SERVICE_MISMATCH',
+                'SERVICE_DISABLED',
+                'SERVICE_DEPRECATED',
+                'SERVICE_NOT_ASSIGNED',
+                'ENVIRONMENT_DISABLED'
             )
         ),
 
