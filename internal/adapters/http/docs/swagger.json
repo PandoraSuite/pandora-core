@@ -1264,7 +1264,6 @@
                 "parameters": [
                     {
                         "enum": [
-                            "",
                             "enabled",
                             "disabled",
                             "deprecated"
@@ -2022,7 +2021,8 @@
                     "type": "string"
                 },
                 "version": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 16
                 }
             }
         },
@@ -2047,7 +2047,8 @@
                     ]
                 },
                 "version": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 16
                 }
             }
         },
@@ -2057,7 +2058,6 @@
                 "status": {
                     "type": "string",
                     "enum": [
-                        "",
                         "enabled",
                         "disabled",
                         "deprecated"

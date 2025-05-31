@@ -10,7 +10,7 @@ import (
 // ... Requests ...
 
 type ServiceFilter struct {
-	Status string `form:"status" enums:",enabled,disabled,deprecated"`
+	Status string `form:"status" enums:"enabled,disabled,deprecated"`
 }
 
 func (s *ServiceFilter) ToDomain() *dto.ServiceFilter {
@@ -21,7 +21,7 @@ func (s *ServiceFilter) ToDomain() *dto.ServiceFilter {
 
 type ServiceCreate struct {
 	Name    string `json:"name" binding:"required"`
-	Version string `json:"version" binding:"required"`
+	Version string `json:"version" binding:"required" maxLength:"16"`
 }
 
 func (s *ServiceCreate) ToDomain() *dto.ServiceCreate {
@@ -32,7 +32,7 @@ func (s *ServiceCreate) ToDomain() *dto.ServiceCreate {
 }
 
 type ServiceStatusUpdate struct {
-	Status string `json:"status" enums:",enabled,disabled,deprecated"`
+	Status string `json:"status" enums:"enabled,disabled,deprecated"`
 }
 
 // ... Responses ...
@@ -41,7 +41,7 @@ type ServiceResponse struct {
 	ID        int       `json:"id"`
 	Name      string    `json:"name"`
 	Status    string    `json:"status" enums:"enabled,disabled,deprecated"`
-	Version   string    `json:"version"`
+	Version   string    `json:"version" maxLength:"16"`
 	CreatedAt time.Time `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
 }
 

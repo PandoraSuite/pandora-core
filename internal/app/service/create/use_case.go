@@ -63,6 +63,7 @@ func (uc *useCase) validateReq(req *dto.ServiceCreate) errors.Error {
 		map[string]string{
 			"name.required":    "name is required",
 			"version.required": "version is required",
+			"version.max":      "version must be at most 16 characters long",
 		},
 	)
 }

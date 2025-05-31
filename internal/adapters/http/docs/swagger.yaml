@@ -350,6 +350,7 @@ definitions:
       name:
         type: string
       version:
+        maxLength: 16
         type: string
     required:
     - name
@@ -370,13 +371,13 @@ definitions:
         - deprecated
         type: string
       version:
+        maxLength: 16
         type: string
     type: object
   dto.ServiceStatusUpdate:
     properties:
       status:
         enum:
-        - ""
         - enabled
         - disabled
         - deprecated
@@ -1218,7 +1219,6 @@ paths:
       description: Fetches a list of all registered services
       parameters:
       - enum:
-        - ""
         - enabled
         - disabled
         - deprecated

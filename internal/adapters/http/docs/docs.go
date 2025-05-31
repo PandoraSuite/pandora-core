@@ -1272,7 +1272,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "enum": [
-                            "",
                             "enabled",
                             "disabled",
                             "deprecated"
@@ -2030,7 +2029,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "version": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 16
                 }
             }
         },
@@ -2055,7 +2055,8 @@ const docTemplate = `{
                     ]
                 },
                 "version": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 16
                 }
             }
         },
@@ -2065,7 +2066,6 @@ const docTemplate = `{
                 "status": {
                     "type": "string",
                     "enum": [
-                        "",
                         "enabled",
                         "disabled",
                         "deprecated"

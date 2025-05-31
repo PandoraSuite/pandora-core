@@ -225,7 +225,7 @@ CREATE TABLE IF NOT EXISTS reservation(
     environment_id INTEGER NOT NULL,
     service_id INTEGER NOT NULL,
     CONSTRAINT reservation_environment_service_fk 
-        FOREIGN KEY (environment_id, service_id) REFERENCES environment_service(environment_id, service_id) ON DELETE CASCADE
+        FOREIGN KEY (environment_id, service_id) REFERENCES environment_service(environment_id, service_id) ON DELETE CASCADE,
     
     api_key TEXT NOT NULL,
     start_request_id UUID NOT NULL,
