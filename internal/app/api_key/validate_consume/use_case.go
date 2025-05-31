@@ -75,6 +75,7 @@ func (uc *useCase) Execute(
 		request.ExecutionStatus = enums.RequestExecutionStatusForwarded
 	} else {
 		request.ExecutionStatus = enums.RequestExecutionStatusUnauthorized
+		request.UnauthorizedReason = validateResponse.FailureCode
 	}
 
 	availableRequest, err := uc.environmentRepo.DecrementAvailableRequest(

@@ -154,6 +154,7 @@ func (s *UseCaseSuite) TestSuccess() {
 		Create(s.ctx, gomock.AssignableToTypeOf(&entities.Request{})).
 		DoAndReturn(func(_ context.Context, r *entities.Request) errors.Error {
 			s.Require().Equal(enums.RequestExecutionStatusForwarded, r.ExecutionStatus)
+			s.Require().Zero(r.UnauthorizedReason)
 			s.Require().Equal(service.ID, r.Service.ID)
 			s.Require().Equal(apiKey.ID, r.APIKey.ID)
 			s.Require().Equal(environment.ID, r.Environment.ID)
@@ -267,6 +268,7 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 		Create(s.ctx, gomock.AssignableToTypeOf(&entities.Request{})).
 		DoAndReturn(func(_ context.Context, r *entities.Request) errors.Error {
 			s.Require().Equal(enums.RequestExecutionStatusUnauthorized, r.ExecutionStatus)
+			s.Require().Equal(enums.APIKeyValidationFailureCodeAPIKeyDisabled, r.UnauthorizedReason)
 			s.Require().Equal(service.ID, r.Service.ID)
 			s.Require().Equal(apiKey.ID, r.APIKey.ID)
 			s.Require().Equal(environment.ID, r.Environment.ID)
@@ -431,6 +433,7 @@ func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
 		Create(s.ctx, gomock.AssignableToTypeOf(&entities.Request{})).
 		DoAndReturn(func(_ context.Context, r *entities.Request) errors.Error {
 			s.Require().Equal(enums.RequestExecutionStatusForwarded, r.ExecutionStatus)
+			s.Require().Zero(r.UnauthorizedReason)
 			s.Require().Equal(service.ID, r.Service.ID)
 			s.Require().Equal(apiKey.ID, r.APIKey.ID)
 			s.Require().Equal(environment.ID, r.Environment.ID)
