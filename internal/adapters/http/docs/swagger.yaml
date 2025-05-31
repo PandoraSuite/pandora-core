@@ -98,7 +98,6 @@ definitions:
         type: string
       type:
         enum:
-        - ""
         - developer
         - organization
         type: string
@@ -248,7 +247,6 @@ definitions:
         type: integer
       reset_frequency:
         enum:
-        - ""
         - daily
         - weekly
         - biweekly
@@ -558,7 +556,6 @@ paths:
       description: Fetches a list of clients, optionally filtered by client type
       parameters:
       - enum:
-        - ""
         - developer
         - organization
         in: query
@@ -1307,7 +1304,6 @@ paths:
         required: true
         type: integer
       - enum:
-        - ""
         - success
         - forwarded
         - client_error

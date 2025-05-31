@@ -229,7 +229,6 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "enum": [
-                            "",
                             "developer",
                             "organization"
                         ],
@@ -1408,7 +1407,6 @@ const docTemplate = `{
                     },
                     {
                         "enum": [
-                            "",
                             "success",
                             "forwarded",
                             "client_error",
@@ -1652,7 +1650,6 @@ const docTemplate = `{
                 "type": {
                     "type": "string",
                     "enum": [
-                        "",
                         "developer",
                         "organization"
                     ]
@@ -1882,7 +1879,6 @@ const docTemplate = `{
                 "reset_frequency": {
                     "type": "string",
                     "enum": [
-                        "",
                         "daily",
                         "weekly",
                         "biweekly",

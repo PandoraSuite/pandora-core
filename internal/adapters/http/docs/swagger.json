@@ -221,7 +221,6 @@
                 "parameters": [
                     {
                         "enum": [
-                            "",
                             "developer",
                             "organization"
                         ],
@@ -1400,7 +1399,6 @@
                     },
                     {
                         "enum": [
-                            "",
                             "success",
                             "forwarded",
                             "client_error",
@@ -1644,7 +1642,6 @@
                 "type": {
                     "type": "string",
                     "enum": [
-                        "",
                         "developer",
                         "organization"
                     ]
@@ -1874,7 +1871,6 @@
                 "reset_frequency": {
                     "type": "string",
                     "enum": [
-                        "",
                         "daily",
                         "weekly",
                         "biweekly",

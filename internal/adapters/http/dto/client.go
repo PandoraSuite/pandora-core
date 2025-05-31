@@ -10,7 +10,7 @@ import (
 // ... Requests ...
 
 type ClientFilter struct {
-	Type string `form:"type" enums:",developer,organization"`
+	Type string `form:"type" enums:"developer,organization"`
 }
 
 func (c *ClientFilter) ToDomain() *dto.ClientFilter {
@@ -34,7 +34,7 @@ func (c *ClientCreate) ToDomain() *dto.ClientCreate {
 }
 
 type ClientUpdate struct {
-	Type  string `json:"type" enums:",developer,organization"`
+	Type  string `json:"type" enums:"developer,organization"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
 }

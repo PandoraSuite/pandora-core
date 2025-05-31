@@ -12,7 +12,7 @@ import (
 type RequestFilter struct {
 	RequestTimeTo   time.Time `form:"request_time_to"`
 	RequestTimeFrom time.Time `form:"request_time_from"`
-	ExecutionStatus string    `form:"execution_status" enums:",success,forwarded,client_error,service_error,unauthorized,quota_exceeded"`
+	ExecutionStatus string    `form:"execution_status" enums:"success,forwarded,client_error,service_error,unauthorized,quota_exceeded"`
 }
 
 func (r *RequestFilter) ToDomain() *dto.RequestFilter {
