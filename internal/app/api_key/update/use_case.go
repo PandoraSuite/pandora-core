@@ -41,7 +41,7 @@ func (uc *useCase) Execute(
 
 	return &dto.APIKeyResponse{
 		ID:            apiKey.ID,
-		Key:           apiKey.Key,
+		Key:           apiKey.KeySummary(),
 		Status:        apiKey.Status,
 		LastUsed:      apiKey.LastUsed,
 		ExpiresAt:     apiKey.ExpiresAt,
