@@ -112,7 +112,7 @@ type ProjectRepository interface {
 
 type RequestRepository interface {
 	// ... List ...
-	ListByService(ctx context.Context, serviceID int, filter *dto.RequestFilter) ([]*dto.RequestResponse, errors.Error)
+	ListByService(ctx context.Context, serviceID int, filter *dto.RequestFilter) ([]*entities.Request, errors.Error)
 
 	// ... Create ...
 	Create(ctx context.Context, request *entities.Request) errors.Error

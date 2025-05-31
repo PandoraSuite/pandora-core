@@ -49,7 +49,7 @@ func (uc *useCase) Execute(
 	for i, apiKey := range apiKeys {
 		apiKeysResponses[i] = &dto.APIKeyResponse{
 			ID:            apiKey.ID,
-			Key:           apiKey.Key,
+			Key:           apiKey.KeySummary(),
 			Status:        apiKey.Status,
 			LastUsed:      apiKey.LastUsed,
 			ExpiresAt:     apiKey.ExpiresAt,

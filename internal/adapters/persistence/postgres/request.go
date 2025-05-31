@@ -56,7 +56,7 @@ func (r *RequestRepository) UpdateExecutionStatus(
 
 func (r *RequestRepository) ListByService(
 	ctx context.Context, serviceID int, filter *dto.RequestFilter,
-) ([]*dto.RequestResponse, errors.Error) {
+) ([]*entities.Request, errors.Error) {
 	query := `
 		SELECT id, COALESCE(start_point::text, ''), api_key, COALESCE(api_key_id, 0),
 			COALESCE(project_name, ''), COALESCE(project_id, 0),
@@ -105,13 +105,13 @@ func (r *RequestRepository) ListByService(
 
 	defer rows.Close()
 
-	var requests []*dto.RequestResponse
+	var requests []*entities.Request
 	for rows.Next() {
-		request := &dto.RequestResponse{
-			APIKey:      &dto.RequestAPIKeyResponse{},
-			Project:     &dto.RequestProjectResponse{},
-			Environment: &dto.RequestEnvironmentResponse{},
-			Service:     &dto.RequestServiceResponse{},
+		request := &entities.Request{
+			APIKey:      &entities.RequestAPIKey{},
+			Project:     &entities.RequestProject{},
+			Environment: &entities.RequestEnvironment{},
+			Service:     &entities.RequestService{},
 		}
 
 		err := rows.Scan(
@@ -133,7 +133,7 @@ func (r *RequestRepository) ListByService(
 			&request.Method,
 			&request.IPAddress,
 			&request.UnauthorizedReason,
-			&request.CreateAt,
+			&request.CreatedAt,
 		)
 		if err != nil {
 			return nil, r.errorMapper(err, r.tableName)
