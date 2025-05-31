@@ -32,6 +32,24 @@ func (p *jwtProvider) GenerateAccessToken(
 	return p.signToken(claims, expTime)
 }
 
+func (p *jwtProvider) GenerateSensitiveToken(
+	ctx context.Context, subject, scope string,
+) (*dto.TokenResponse, errors.Error) {
+	now := time.Now()
+	expTime := now.Add(1 * time.Minute)
+
+	claims := jwt.MapClaims{
+		"iss":   "pandora-core",
+		"sub":   subject,
+		"scope": scope,
+		"exp":   expTime.Unix(),
+		"nbf":   now.Unix(),
+		"iat":   now.Unix(),
+	}
+
+	return p.signToken(claims, expTime)
+}
+
 func (p *jwtProvider) signToken(claims jwt.Claims, exp time.Time) (*dto.TokenResponse, errors.Error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenStr, err := token.SignedString(p.secret)
