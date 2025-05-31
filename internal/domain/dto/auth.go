@@ -4,9 +4,18 @@ import "time"
 
 // ... Requests ...
 
-type Authenticate struct {
+type Credentials struct {
 	Username string `name:"username" validate:"required"`
 	Password string `name:"password" validate:"required"`
+}
+
+type Authenticate struct {
+	*Credentials
+}
+
+type Reauthenticate struct {
+	*Credentials
+	Scope string `name:"scope" validate:"required"`
 }
 
 type ChangePassword struct {
@@ -25,4 +34,8 @@ type TokenResponse struct {
 type AuthenticateResponse struct {
 	*TokenResponse
 	ForcePasswordReset bool `name:"force_password_reset"`
+}
+
+type ReauthenticateResponse struct {
+	*TokenResponse
 }
