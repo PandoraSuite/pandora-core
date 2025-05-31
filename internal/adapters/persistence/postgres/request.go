@@ -155,12 +155,12 @@ func (r *RequestRepository) Create(
 			start_point, api_key, api_key_id, project_name, project_id,
 			environment_name, environment_id, service_name, service_version,
 			service_id, status_code, execution_status, request_time, path,
-			method, ip_address, metadata
+			method, ip_address, metadata, validation_failure_code
 		)
 		VALUES (
 			$1, $2, $3, $4, $5, $6, $7, $8, $9,
 			$10, $11, $12, $13, $14, $15, $16,
-			$17
+			$17, $18
 		) RETURNING id, created_at;
 	`
 
@@ -204,6 +204,11 @@ func (r *RequestRepository) Create(
 		method = request.Method
 	}
 
+	var validationFailureCode any
+	if request.ValidationFailureCode != "" {
+		validationFailureCode = request.ValidationFailureCode
+	}
+
 	metadata := make(map[string]any)
 	if request.Metadata != nil {
 		metadata["body"] = request.Metadata.Body
@@ -232,6 +237,7 @@ func (r *RequestRepository) Create(
 		method,
 		request.IPAddress,
 		metadata,
+		validationFailureCode,
 	).Scan(&request.ID, &request.CreatedAt)
 
 	return r.errorMapper(err, r.tableName)
@@ -251,7 +257,7 @@ func (r *RequestRepository) CreateAsInitialPoint(
 			method, ip_address, metadata
 		)
 		SELECT uuid, uuid, $1, $2, $3, $4, $5, $6, $7, $8, $9,
-			$10, $11, $12, $13, $14, $15, $16
+			$10, $11, $12, $13, $14, $15, $16, $17
 		) RETURNING id, created_at;
 		FROM temp_table RETURNING id;
 	`
@@ -296,6 +302,11 @@ func (r *RequestRepository) CreateAsInitialPoint(
 		method = request.Method
 	}
 
+	var validationFailureCode any
+	if request.ValidationFailureCode != "" {
+		validationFailureCode = request.ValidationFailureCode
+	}
+
 	metadata := map[string]any{
 		"body":            "",
 		"headers":         "",
@@ -329,6 +340,7 @@ func (r *RequestRepository) CreateAsInitialPoint(
 		method,
 		request.IPAddress,
 		metadata,
+		validationFailureCode,
 	).Scan(&request.ID, &request.CreatedAt)
 
 	return r.errorMapper(err, r.tableName)
