@@ -32,7 +32,7 @@ func (r *ProjectRepository) GetProjectClientInfoByID(
 	`
 
 	projectCxt := new(dto.ProjectClientInfoResponse)
-	err := r.pool.QueryRow(ctx, query, id, id).Scan(
+	err := r.pool.QueryRow(ctx, query, id).Scan(
 		&projectCxt.ProjectID,
 		&projectCxt.ProjectName,
 		&projectCxt.ClientID,
