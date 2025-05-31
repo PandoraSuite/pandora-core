@@ -63,7 +63,7 @@ func (r *RequestRepository) ListByService(
 			COALESCE(environment_name, ''), COALESCE(environment_id, 0),
 			service_name, service_version, COALESCE(service_id, 0), COALESCE(status_code, 0),
 			execution_status, request_time, path, method, ip_address,
-			created_at
+			COALESCE(validation_failure_code, ''), created_at
 		FROM request
 		WHERE service_id = $1
 	`
@@ -132,6 +132,7 @@ func (r *RequestRepository) ListByService(
 			&request.Path,
 			&request.Method,
 			&request.IPAddress,
+			&request.ValidationFailureCode,
 			&request.CreateAt,
 		)
 		if err != nil {
