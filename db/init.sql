@@ -180,10 +180,10 @@ CREATE TABLE IF NOT EXISTS request(
             OR status_code IS NOT NULL
         ),
 
-    failure_code TEXT,
-    CONSTRAINT request_failure_code_check
+    validation_failure_code TEXT,
+    CONSTRAINT request_validation_failure_code_check
         CHECK (
-            failure_code IN (
+            validation_failure_code IN (
                 'API_KEY_INVALID',
                 'QUOTA_EXCEEDED',
                 'API_KEY_EXPIRED',
