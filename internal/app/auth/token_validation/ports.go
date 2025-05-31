@@ -7,5 +7,5 @@ import (
 )
 
 type TokenProvider interface {
-	Validate(ctx context.Context, token string) (string, errors.Error)
+	ValidateAccessToken(ctx context.Context, token string) (string, errors.Error)
 }

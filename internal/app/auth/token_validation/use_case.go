@@ -24,7 +24,7 @@ func (uc *useCase) Execute(
 		return "", err
 	}
 
-	subject, err := uc.tokenProvider.Validate(ctx, accessToken)
+	subject, err := uc.tokenProvider.ValidateAccessToken(ctx, accessToken)
 	if err != nil {
 		return "", err
 	}

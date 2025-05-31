@@ -41,17 +41,17 @@ func (m *MockTokenProvider) EXPECT() *MockTokenProviderMockRecorder {
 	return m.recorder
 }
 
-// Validate mocks base method.
-func (m *MockTokenProvider) Validate(ctx context.Context, token string) (string, errors.Error) {
+// ValidateAccessToken mocks base method.
+func (m *MockTokenProvider) ValidateAccessToken(ctx context.Context, token string) (string, errors.Error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Validate", ctx, token)
+	ret := m.ctrl.Call(m, "ValidateAccessToken", ctx, token)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(errors.Error)
 	return ret0, ret1
 }
 
-// Validate indicates an expected call of Validate.
-func (mr *MockTokenProviderMockRecorder) Validate(ctx, token any) *gomock.Call {
+// ValidateAccessToken indicates an expected call of ValidateAccessToken.
+func (mr *MockTokenProviderMockRecorder) ValidateAccessToken(ctx, token any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Validate", reflect.TypeOf((*MockTokenProvider)(nil).Validate), ctx, token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAccessToken", reflect.TypeOf((*MockTokenProvider)(nil).ValidateAccessToken), ctx, token)
 }
