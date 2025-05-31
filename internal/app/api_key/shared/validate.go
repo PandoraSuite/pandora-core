@@ -61,7 +61,7 @@ func ValidateAPIKey(
 		if err.Code() != errors.CodeNotFound {
 			return err
 		}
-		setFailureIfEmpty(
+		setFailureWithPriority(
 			validateResponse,
 			enums.APIKeyValidationFailureCodeServiceMismatch,
 		)
@@ -69,14 +69,14 @@ func ValidateAPIKey(
 		request.Service.ID = service.ID
 
 		if service.IsDisabled() {
-			setFailureIfEmpty(
+			setFailureWithPriority(
 				validateResponse,
 				enums.APIKeyValidationFailureCodeServiceDisabled,
 			)
 		}
 
 		if service.IsDeprecated() {
-			setFailureIfEmpty(
+			setFailureWithPriority(
 				validateResponse,
 				enums.APIKeyValidationFailureCodeServiceDeprecated,
 			)
@@ -86,7 +86,7 @@ func ValidateAPIKey(
 	apiKey, err := deps.apiKeyRepo.GetByKey(ctx, req.APIKey)
 	if err != nil {
 		if err.Code() == errors.CodeNotFound {
-			setFailureIfEmpty(
+			setFailureWithPriority(
 				validateResponse,
 				enums.APIKeyValidationFailureCodeAPIKeyInvalid,
 			)
@@ -98,14 +98,14 @@ func ValidateAPIKey(
 	request.APIKey.ID = apiKey.ID
 
 	if !apiKey.IsEnabled() {
-		setFailureIfEmpty(
+		setFailureWithPriority(
 			validateResponse,
 			enums.APIKeyValidationFailureCodeAPIKeyDisabled,
 		)
 	}
 
 	if apiKey.IsExpired() {
-		setFailureIfEmpty(
+		setFailureWithPriority(
 			validateResponse,
 			enums.APIKeyValidationFailureCodeAPIKeyExpired,
 		)
@@ -120,7 +120,7 @@ func ValidateAPIKey(
 	request.Environment.Name = environment.Name
 
 	if !environment.IsEnabled() {
-		setFailureIfEmpty(
+		setFailureWithPriority(
 			validateResponse,
 			enums.APIKeyValidationFailureCodeEnvironmentDisabled,
 		)
@@ -145,14 +145,14 @@ func ValidateAPIKey(
 		EnvironmentName: environment.Name,
 	}
 
-	if service != nil && validateResponse.FailureCode == "" {
+	if service != nil {
 		index := slices.IndexFunc(
 			environment.Services,
 			func(s *entities.EnvironmentService) bool { return s.ID == service.ID },
 		)
 
 		if index == -1 {
-			setFailureIfEmpty(
+			setFailureWithPriority(
 				validateResponse,
 				enums.APIKeyValidationFailureCodeServiceNotAssigned,
 			)
@@ -163,11 +163,12 @@ func ValidateAPIKey(
 	return nil
 }
 
-func setFailureIfEmpty(
+func setFailureWithPriority(
 	validateResponse *dto.APIKeyValidateResponse,
 	failureCode enums.APIKeyValidationFailureCode,
 ) {
-	if validateResponse.FailureCode == "" {
+	if enums.ValidationFailurePriority[failureCode] >
+		enums.ValidationFailurePriority[validateResponse.FailureCode] {
 		validateResponse.FailureCode = failureCode
 	}
 }

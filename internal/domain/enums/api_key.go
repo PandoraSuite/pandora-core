@@ -45,3 +45,15 @@ func ParseAPIKeyValidationFailureCode(code string) (APIKeyValidationFailureCode,
 		return "", false
 	}
 }
+
+var ValidationFailurePriority = map[APIKeyValidationFailureCode]int{
+	APIKeyValidationFailureCodeAPIKeyInvalid:       9,
+	APIKeyValidationFailureCodeAPIKeyDisabled:      8,
+	APIKeyValidationFailureCodeAPIKeyExpired:       7,
+	APIKeyValidationFailureCodeServiceMismatch:     6,
+	APIKeyValidationFailureCodeServiceDisabled:     5,
+	APIKeyValidationFailureCodeServiceDeprecated:   4,
+	APIKeyValidationFailureCodeServiceNotAssigned:  3,
+	APIKeyValidationFailureCodeEnvironmentDisabled: 2,
+	APIKeyValidationFailureCodeQuotaExceeded:       1,
+}
