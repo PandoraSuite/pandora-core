@@ -91,6 +91,6 @@ func RequestResponseFromDomain(request *dto.RequestResponse) *RequestResponse {
 		Path:               request.Path,
 		Method:             request.Method,
 		IPAddress:          request.IPAddress,
-		CreateAt:           request.CreateAt,
+		CreateAt:           request.CreatedAt,
 	}
 }

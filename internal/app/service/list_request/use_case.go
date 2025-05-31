@@ -45,7 +45,40 @@ func (uc *useCase) Execute(
 		return nil, err
 	}
 
-	return requests, nil
+	requestResponses := make([]*dto.RequestResponse, len(requests))
+	for i, request := range requests {
+		requestResponses[i] = &dto.RequestResponse{
+			ID:                 request.ID,
+			StartPoint:         request.StartPoint,
+			StatusCode:         request.StatusCode,
+			ExecutionStatus:    request.ExecutionStatus,
+			UnauthorizedReason: request.UnauthorizedReason,
+			RequestTime:        req.RequestTimeFrom,
+			Path:               request.Path,
+			Method:             request.Method,
+			IPAddress:          request.IPAddress,
+			CreatedAt:          request.CreatedAt,
+			APIKey: &dto.RequestAPIKeyResponse{
+				ID:  request.APIKey.ID,
+				Key: request.APIKey.KeySummary(),
+			},
+			Project: &dto.RequestProjectResponse{
+				ID:   request.Project.ID,
+				Name: request.Project.Name,
+			},
+			Environment: &dto.RequestEnvironmentResponse{
+				ID:   request.Environment.ID,
+				Name: request.Environment.Name,
+			},
+			Service: &dto.RequestServiceResponse{
+				ID:      request.Service.ID,
+				Name:    request.Service.Name,
+				Version: request.Service.Version,
+			},
+		}
+	}
+
+	return requestResponses, nil
 }
 
 func (uc *useCase) validateInput(id int, req *dto.RequestFilter) errors.Error {
