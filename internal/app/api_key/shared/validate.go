@@ -66,7 +66,7 @@ func ValidateAPIKey(
 			enums.APIKeyValidationFailureCodeServiceMismatch,
 		)
 	} else {
-		request.ServiceID = service.ID
+		request.Service.ID = service.ID
 
 		if service.IsDisabled() {
 			setFailureIfEmpty(
@@ -95,7 +95,7 @@ func ValidateAPIKey(
 		return err
 	}
 
-	request.APIKeyID = apiKey.ID
+	request.APIKey.ID = apiKey.ID
 
 	if !apiKey.IsEnabled() {
 		setFailureIfEmpty(
@@ -116,8 +116,8 @@ func ValidateAPIKey(
 		return err
 	}
 
-	request.EnvironmentID = environment.ID
-	request.EnvironmentName = environment.Name
+	request.Environment.ID = environment.ID
+	request.Environment.Name = environment.Name
 
 	if !environment.IsEnabled() {
 		setFailureIfEmpty(
@@ -133,8 +133,8 @@ func ValidateAPIKey(
 		return err
 	}
 
-	request.ProjectID = projectClient.ProjectID
-	request.ProjectName = projectClient.ProjectName
+	request.Project.ID = projectClient.ProjectID
+	request.Project.Name = projectClient.ProjectName
 
 	validateResponse.ConsumerInfo = &dto.ConsumerInfo{
 		ClientID:        projectClient.ClientID,

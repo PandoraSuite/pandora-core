@@ -154,10 +154,10 @@ func (s *UseCaseSuite) TestSuccess() {
 		Create(s.ctx, gomock.AssignableToTypeOf(&entities.Request{})).
 		DoAndReturn(func(_ context.Context, r *entities.Request) errors.Error {
 			s.Require().Equal(enums.RequestExecutionStatusForwarded, r.ExecutionStatus)
-			s.Require().Equal(service.ID, r.ServiceID)
-			s.Require().Equal(apiKey.ID, r.APIKeyID)
-			s.Require().Equal(environment.ID, r.EnvironmentID)
-			s.Require().Equal(projectClient.ProjectID, r.ProjectID)
+			s.Require().Equal(service.ID, r.Service.ID)
+			s.Require().Equal(apiKey.ID, r.APIKey.ID)
+			s.Require().Equal(environment.ID, r.Environment.ID)
+			s.Require().Equal(projectClient.ProjectID, r.Project.ID)
 			r.ID = wantRequestID
 			return nil
 		}).
@@ -267,10 +267,10 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 		Create(s.ctx, gomock.AssignableToTypeOf(&entities.Request{})).
 		DoAndReturn(func(_ context.Context, r *entities.Request) errors.Error {
 			s.Require().Equal(enums.RequestExecutionStatusUnauthorized, r.ExecutionStatus)
-			s.Require().Equal(service.ID, r.ServiceID)
-			s.Require().Equal(apiKey.ID, r.APIKeyID)
-			s.Require().Equal(environment.ID, r.EnvironmentID)
-			s.Require().Equal(projectClient.ProjectID, r.ProjectID)
+			s.Require().Equal(service.ID, r.Service.ID)
+			s.Require().Equal(apiKey.ID, r.APIKey.ID)
+			s.Require().Equal(environment.ID, r.Environment.ID)
+			s.Require().Equal(projectClient.ProjectID, r.Project.ID)
 			r.ID = wantRequestID
 			return nil
 		}).
@@ -431,10 +431,10 @@ func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
 		Create(s.ctx, gomock.AssignableToTypeOf(&entities.Request{})).
 		DoAndReturn(func(_ context.Context, r *entities.Request) errors.Error {
 			s.Require().Equal(enums.RequestExecutionStatusForwarded, r.ExecutionStatus)
-			s.Require().Equal(service.ID, r.ServiceID)
-			s.Require().Equal(apiKey.ID, r.APIKeyID)
-			s.Require().Equal(environment.ID, r.EnvironmentID)
-			s.Require().Equal(projectClient.ProjectID, r.ProjectID)
+			s.Require().Equal(service.ID, r.Service.ID)
+			s.Require().Equal(apiKey.ID, r.APIKey.ID)
+			s.Require().Equal(environment.ID, r.Environment.ID)
+			s.Require().Equal(projectClient.ProjectID, r.Project.ID)
 			r.ID = wantRequestID
 			return nil
 		}).

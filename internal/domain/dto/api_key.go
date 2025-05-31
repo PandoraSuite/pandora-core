@@ -11,7 +11,7 @@ import (
 type APIKeyValidate struct {
 	APIKey         string           `name:"api_key" validate:"required"`
 	Request        *RequestIncoming `name:"request" validate:"required"`
-	ServiceName    string           `name:"service" validate:"required"`
+	ServiceName    string           `name:"service_name" validate:"required"`
 	ServiceVersion string           `name:"service_version" validate:"required"`
 }
 

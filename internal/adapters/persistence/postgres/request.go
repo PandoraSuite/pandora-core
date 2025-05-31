@@ -58,9 +58,10 @@ func (r *RequestRepository) ListByService(
 	ctx context.Context, serviceID int, filter *dto.RequestFilter,
 ) ([]*dto.RequestResponse, errors.Error) {
 	query := `
-		SELECT id, COALESCE(start_point::text, ''), api_key, api_key_id,
-			project_name, project_id, environment_name, environment_id,
-			service_name, service_version, service_id, COALESCE(status_code, 0),
+		SELECT id, COALESCE(start_point::text, ''), api_key, COALESCE(api_key_id, 0),
+			COALESCE(project_name, ''), COALESCE(project_id, 0),
+			COALESCE(environment_name, ''), COALESCE(environment_id, 0),
+			service_name, service_version, COALESCE(service_id, 0), COALESCE(status_code, 0),
 			execution_status, request_time, path, method, ip_address,
 			created_at
 		FROM request
@@ -106,20 +107,25 @@ func (r *RequestRepository) ListByService(
 
 	var requests []*dto.RequestResponse
 	for rows.Next() {
-		request := new(dto.RequestResponse)
+		request := &dto.RequestResponse{
+			APIKey:      &dto.RequestAPIKeyResponse{},
+			Project:     &dto.RequestProjectResponse{},
+			Environment: &dto.RequestEnvironmentResponse{},
+			Service:     &dto.RequestServiceResponse{},
+		}
 
 		err := rows.Scan(
 			&request.ID,
 			&request.StartPoint,
-			&request.APIKey,
-			&request.APIKeyID,
-			&request.ProjectName,
-			&request.ProjectID,
-			&request.EnvironmentName,
-			&request.EnvironmentID,
-			&request.ServiceName,
-			&request.ServiceVersion,
-			&request.ServiceID,
+			&request.APIKey.Key,
+			&request.APIKey.ID,
+			&request.Project.Name,
+			&request.Project.ID,
+			&request.Environment.Name,
+			&request.Environment.ID,
+			&request.Service.Name,
+			&request.Service.Version,
+			&request.Service.ID,
 			&request.StatusCode,
 			&request.ExecutionStatus,
 			&request.RequestTime,
@@ -164,18 +170,28 @@ func (r *RequestRepository) Create(
 	}
 
 	var apiKeyID any
-	if request.APIKeyID != 0 {
-		apiKeyID = request.APIKeyID
+	if request.APIKey.ID != 0 {
+		apiKeyID = request.APIKey.ID
 	}
 
 	var projectID any
-	if request.ProjectID != 0 {
-		projectID = request.ProjectID
+	if request.Project.ID != 0 {
+		projectID = request.Project.ID
+	}
+
+	var projectName any
+	if request.Project.Name != "" {
+		projectName = request.Project.Name
 	}
 
 	var environmentID any
-	if request.EnvironmentID != 0 {
-		environmentID = request.EnvironmentID
+	if request.Environment.ID != 0 {
+		environmentID = request.Environment.ID
+	}
+
+	var environmentName any
+	if request.Environment.Name != "" {
+		environmentName = request.Environment.Name
 	}
 
 	var statusCode any
@@ -200,15 +216,15 @@ func (r *RequestRepository) Create(
 		ctx,
 		query,
 		startPoint,
-		request.APIKey,
+		request.APIKey.Key,
 		apiKeyID,
-		request.ProjectName,
+		projectName,
 		projectID,
-		request.EnvironmentName,
+		environmentName,
 		environmentID,
-		request.ServiceName,
-		request.ServiceVersion,
-		request.ServiceID,
+		request.Service.Name,
+		request.Service.Version,
+		request.Service.ID,
 		statusCode,
 		request.ExecutionStatus,
 		request.RequestTime,
@@ -240,19 +256,34 @@ func (r *RequestRepository) CreateAsInitialPoint(
 		FROM temp_table RETURNING id;
 	`
 
+	var startPoint any
+	if request.StartPoint != "" {
+		startPoint = request.StartPoint
+	}
+
 	var apiKeyID any
-	if request.APIKeyID != 0 {
-		apiKeyID = request.APIKeyID
+	if request.APIKey.ID != 0 {
+		apiKeyID = request.APIKey.ID
 	}
 
 	var projectID any
-	if request.ProjectID != 0 {
-		projectID = request.ProjectID
+	if request.Project.ID != 0 {
+		projectID = request.Project.ID
+	}
+
+	var projectName any
+	if request.Project.Name != "" {
+		projectName = request.Project.Name
 	}
 
 	var environmentID any
-	if request.EnvironmentID != 0 {
-		environmentID = request.EnvironmentID
+	if request.Environment.ID != 0 {
+		environmentID = request.Environment.ID
+	}
+
+	var environmentName any
+	if request.Environment.Name != "" {
+		environmentName = request.Environment.Name
 	}
 
 	var statusCode any
@@ -281,15 +312,16 @@ func (r *RequestRepository) CreateAsInitialPoint(
 	err := r.pool.QueryRow(
 		ctx,
 		query,
+		startPoint,
 		request.APIKey,
 		apiKeyID,
-		request.ProjectName,
+		projectName,
 		projectID,
-		request.EnvironmentName,
+		environmentName,
 		environmentID,
-		request.ServiceName,
-		request.ServiceVersion,
-		request.ServiceID,
+		request.Service.Name,
+		request.Service.Version,
+		request.Service.ID,
 		statusCode,
 		request.ExecutionStatus,
 		request.RequestTime,

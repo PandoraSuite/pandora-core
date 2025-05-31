@@ -13,19 +13,35 @@ type RequestMetadata struct {
 	QueryParams     string
 }
 
+type RequestAPIKey struct {
+	ID  int
+	Key string
+}
+
+type RequestService struct {
+	ID      int
+	Name    string
+	Version string
+}
+
+type RequestEnvironment struct {
+	ID   int
+	Name string
+}
+
+type RequestProject struct {
+	ID   int
+	Name string
+}
+
 type Request struct {
 	ID string
 
 	StartPoint      string
-	APIKey          string
-	APIKeyID        int
-	ProjectName     string
-	ProjectID       int
-	EnvironmentName string
-	EnvironmentID   int
-	ServiceName     string
-	ServiceVersion  string
-	ServiceID       int
+	APIKey          *RequestAPIKey
+	Project         *RequestProject
+	Environment     *RequestEnvironment
+	Service         *RequestService
 	StatusCode      int
 	ExecutionStatus enums.RequestExecutionStatus
 	RequestTime     time.Time

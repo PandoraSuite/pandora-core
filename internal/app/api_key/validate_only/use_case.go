@@ -48,14 +48,20 @@ func (uc *useCase) Execute(
 	}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		Metadata:       &requestMetadata,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		Metadata:    &requestMetadata,
+		APIKey: &entities.RequestAPIKey{
+			Key: req.APIKey,
+		},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := shared.ValidateAPIKey(
@@ -91,7 +97,7 @@ func (uc *useCase) validateReq(req *dto.APIKeyValidate) errors.Error {
 		map[string]string{
 			"api_key.required":         "api_key is required",
 			"request.required":         "request is required",
-			"service.required":         "service is required",
+			"service_name.required":    "service_name is required",
 			"service_version.required": "service_version is required",
 
 			"request.path.required":         "request.path is required",

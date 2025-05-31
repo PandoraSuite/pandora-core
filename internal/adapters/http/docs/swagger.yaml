@@ -297,18 +297,35 @@ definitions:
       name:
         type: string
     type: object
+  dto.RequestAPIKeyResponse:
+    properties:
+      id:
+        type: integer
+      key:
+        type: string
+    type: object
+  dto.RequestEnvironmentResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  dto.RequestProjectResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   dto.RequestResponse:
     properties:
       api_key:
-        type: string
-      api_key_id:
-        type: integer
+        $ref: '#/definitions/dto.RequestAPIKeyResponse'
       created_at:
         type: string
-      environment_id:
-        type: integer
-      environment_name:
-        type: string
+      environment:
+        $ref: '#/definitions/dto.RequestEnvironmentResponse'
       execution_status:
         enum:
         - success
@@ -326,22 +343,25 @@ definitions:
         type: string
       path:
         type: string
-      project_id:
-        type: integer
-      project_name:
-        type: string
+      project:
+        $ref: '#/definitions/dto.RequestProjectResponse'
       request_time:
         type: string
-      service_id:
-        type: integer
-      service_name:
-        type: string
-      service_version:
-        type: string
+      service:
+        $ref: '#/definitions/dto.RequestServiceResponse'
       start_point:
         type: string
       status_code:
         type: integer
+    type: object
+  dto.RequestServiceResponse:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      version:
+        type: string
     type: object
   dto.ServiceCreate:
     properties:

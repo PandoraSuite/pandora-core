@@ -133,13 +133,17 @@ func (s *UseCaseSuite) TestSuccess() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		APIKey:      &entities.RequestAPIKey{Key: req.APIKey},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -150,11 +154,11 @@ func (s *UseCaseSuite) TestSuccess() {
 	s.Empty(validateResponse.FailureCode)
 	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
-	s.Equal(service.ID, request.ServiceID)
-	s.Equal(apiKey.ID, request.APIKeyID)
-	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(consumerInfo.ProjectID, request.ProjectID)
-	s.Equal(consumerInfo.ProjectName, request.ProjectName)
+	s.Equal(service.ID, request.Service.ID)
+	s.Equal(apiKey.ID, request.APIKey.ID)
+	s.Equal(environment.ID, request.Environment.ID)
+	s.Equal(consumerInfo.ProjectID, request.Project.ID)
+	s.Equal(consumerInfo.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestAPIKeyNotFound() {
@@ -204,13 +208,17 @@ func (s *UseCaseSuite) TestAPIKeyNotFound() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		APIKey:      &entities.RequestAPIKey{Key: req.APIKey},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -221,11 +229,11 @@ func (s *UseCaseSuite) TestAPIKeyNotFound() {
 	s.Equal(enums.APIKeyValidationFailureCodeAPIKeyInvalid, validateResponse.FailureCode)
 	s.Nil(validateResponse.ConsumerInfo)
 
-	s.Equal(service.ID, request.ServiceID)
-	s.Zero(request.APIKeyID)
-	s.Zero(request.EnvironmentID)
-	s.Zero(request.ProjectID)
-	s.Empty(request.ProjectName)
+	s.Equal(service.ID, request.Service.ID)
+	s.Zero(request.APIKey.ID)
+	s.Zero(request.Environment.ID)
+	s.Zero(request.Project.ID)
+	s.Empty(request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestServiceMismatch() {
@@ -300,13 +308,17 @@ func (s *UseCaseSuite) TestServiceMismatch() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		APIKey:      &entities.RequestAPIKey{Key: req.APIKey},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -317,11 +329,11 @@ func (s *UseCaseSuite) TestServiceMismatch() {
 	s.Equal(enums.APIKeyValidationFailureCodeServiceMismatch, validateResponse.FailureCode)
 	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
-	s.Zero(request.ServiceID)
-	s.Equal(apiKey.ID, request.APIKeyID)
-	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(consumerInfo.ProjectID, request.ProjectID)
-	s.Equal(consumerInfo.ProjectName, request.ProjectName)
+	s.Zero(request.Service.ID)
+	s.Equal(apiKey.ID, request.APIKey.ID)
+	s.Equal(environment.ID, request.Environment.ID)
+	s.Equal(consumerInfo.ProjectID, request.Project.ID)
+	s.Equal(consumerInfo.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestServiceRepoInternalError() {
@@ -360,13 +372,17 @@ func (s *UseCaseSuite) TestServiceRepoInternalError() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		APIKey:      &entities.RequestAPIKey{Key: req.APIKey},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -377,11 +393,11 @@ func (s *UseCaseSuite) TestServiceRepoInternalError() {
 	s.Empty(validateResponse.FailureCode)
 	s.Nil(validateResponse.ConsumerInfo)
 
-	s.Zero(request.ServiceID)
-	s.Zero(request.APIKeyID)
-	s.Zero(request.EnvironmentID)
-	s.Zero(request.ProjectID)
-	s.Empty(request.ProjectName)
+	s.Zero(request.Service.ID)
+	s.Zero(request.APIKey.ID)
+	s.Zero(request.Environment.ID)
+	s.Zero(request.Project.ID)
+	s.Empty(request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestAPIKeyRepoInternalError() {
@@ -427,13 +443,17 @@ func (s *UseCaseSuite) TestAPIKeyRepoInternalError() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		APIKey:      &entities.RequestAPIKey{Key: req.APIKey},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -444,11 +464,11 @@ func (s *UseCaseSuite) TestAPIKeyRepoInternalError() {
 	s.Empty(validateResponse.FailureCode)
 	s.Nil(validateResponse.ConsumerInfo)
 
-	s.Equal(service.ID, request.ServiceID)
-	s.Zero(request.APIKeyID)
-	s.Zero(request.EnvironmentID)
-	s.Zero(request.ProjectID)
-	s.Empty(request.ProjectName)
+	s.Equal(service.ID, request.Service.ID)
+	s.Zero(request.APIKey.ID)
+	s.Zero(request.Environment.ID)
+	s.Zero(request.Project.ID)
+	s.Empty(request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestEnvironmentRepoGetByIDInternalError() {
@@ -501,13 +521,17 @@ func (s *UseCaseSuite) TestEnvironmentRepoGetByIDInternalError() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		APIKey:      &entities.RequestAPIKey{Key: req.APIKey},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -518,11 +542,11 @@ func (s *UseCaseSuite) TestEnvironmentRepoGetByIDInternalError() {
 	s.Empty(validateResponse.FailureCode)
 	s.Nil(validateResponse.ConsumerInfo)
 
-	s.Equal(service.ID, request.ServiceID)
-	s.Equal(apiKey.ID, request.APIKeyID)
-	s.Zero(request.EnvironmentID)
-	s.Zero(request.ProjectID)
-	s.Empty(request.ProjectName)
+	s.Equal(service.ID, request.Service.ID)
+	s.Equal(apiKey.ID, request.APIKey.ID)
+	s.Zero(request.Environment.ID)
+	s.Zero(request.Project.ID)
+	s.Empty(request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestProjectRepoInternalError() {
@@ -592,13 +616,17 @@ func (s *UseCaseSuite) TestProjectRepoInternalError() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		APIKey:      &entities.RequestAPIKey{Key: req.APIKey},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -609,11 +637,11 @@ func (s *UseCaseSuite) TestProjectRepoInternalError() {
 	s.Empty(validateResponse.FailureCode)
 	s.Nil(validateResponse.ConsumerInfo)
 
-	s.Equal(service.ID, request.ServiceID)
-	s.Equal(apiKey.ID, request.APIKeyID)
-	s.Equal(environment.ID, request.EnvironmentID)
-	s.Zero(request.ProjectID)
-	s.Empty(request.ProjectName)
+	s.Equal(service.ID, request.Service.ID)
+	s.Equal(apiKey.ID, request.APIKey.ID)
+	s.Equal(environment.ID, request.Environment.ID)
+	s.Zero(request.Project.ID)
+	s.Empty(request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestEnvironmentDisabled() {
@@ -696,13 +724,17 @@ func (s *UseCaseSuite) TestEnvironmentDisabled() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		APIKey:      &entities.RequestAPIKey{Key: req.APIKey},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -713,11 +745,11 @@ func (s *UseCaseSuite) TestEnvironmentDisabled() {
 	s.Equal(enums.APIKeyValidationFailureCodeEnvironmentDisabled, validateResponse.FailureCode)
 	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
-	s.Equal(service.ID, request.ServiceID)
-	s.Equal(apiKey.ID, request.APIKeyID)
-	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(consumerInfo.ProjectID, request.ProjectID)
-	s.Equal(consumerInfo.ProjectName, request.ProjectName)
+	s.Equal(service.ID, request.Service.ID)
+	s.Equal(apiKey.ID, request.APIKey.ID)
+	s.Equal(environment.ID, request.Environment.ID)
+	s.Equal(consumerInfo.ProjectID, request.Project.ID)
+	s.Equal(consumerInfo.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
@@ -800,13 +832,17 @@ func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		APIKey:      &entities.RequestAPIKey{Key: req.APIKey},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -817,11 +853,11 @@ func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 	s.Equal(enums.APIKeyValidationFailureCodeServiceNotAssigned, validateResponse.FailureCode)
 	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
-	s.Equal(service.ID, request.ServiceID)
-	s.Equal(apiKey.ID, request.APIKeyID)
-	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(consumerInfo.ProjectID, request.ProjectID)
-	s.Equal(consumerInfo.ProjectName, request.ProjectName)
+	s.Equal(service.ID, request.Service.ID)
+	s.Equal(apiKey.ID, request.APIKey.ID)
+	s.Equal(environment.ID, request.Environment.ID)
+	s.Equal(consumerInfo.ProjectID, request.Project.ID)
+	s.Equal(consumerInfo.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestServiceDisabled() {
@@ -904,13 +940,17 @@ func (s *UseCaseSuite) TestServiceDisabled() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		APIKey:      &entities.RequestAPIKey{Key: req.APIKey},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -921,11 +961,11 @@ func (s *UseCaseSuite) TestServiceDisabled() {
 	s.Equal(enums.APIKeyValidationFailureCodeServiceDisabled, validateResponse.FailureCode)
 	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
-	s.Equal(service.ID, request.ServiceID)
-	s.Equal(apiKey.ID, request.APIKeyID)
-	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(consumerInfo.ProjectID, request.ProjectID)
-	s.Equal(consumerInfo.ProjectName, request.ProjectName)
+	s.Equal(service.ID, request.Service.ID)
+	s.Equal(apiKey.ID, request.APIKey.ID)
+	s.Equal(environment.ID, request.Environment.ID)
+	s.Equal(consumerInfo.ProjectID, request.Project.ID)
+	s.Equal(consumerInfo.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestServiceDeprecated() {
@@ -1008,13 +1048,17 @@ func (s *UseCaseSuite) TestServiceDeprecated() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		APIKey:      &entities.RequestAPIKey{Key: req.APIKey},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -1025,11 +1069,11 @@ func (s *UseCaseSuite) TestServiceDeprecated() {
 	s.Equal(enums.APIKeyValidationFailureCodeServiceDeprecated, validateResponse.FailureCode)
 	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
-	s.Equal(service.ID, request.ServiceID)
-	s.Equal(apiKey.ID, request.APIKeyID)
-	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(consumerInfo.ProjectID, request.ProjectID)
-	s.Equal(consumerInfo.ProjectName, request.ProjectName)
+	s.Equal(service.ID, request.Service.ID)
+	s.Equal(apiKey.ID, request.APIKey.ID)
+	s.Equal(environment.ID, request.Environment.ID)
+	s.Equal(consumerInfo.ProjectID, request.Project.ID)
+	s.Equal(consumerInfo.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestAPIKeyExpired() {
@@ -1114,13 +1158,17 @@ func (s *UseCaseSuite) TestAPIKeyExpired() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		APIKey:      &entities.RequestAPIKey{Key: req.APIKey},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -1131,11 +1179,11 @@ func (s *UseCaseSuite) TestAPIKeyExpired() {
 	s.Equal(enums.APIKeyValidationFailureCodeAPIKeyExpired, validateResponse.FailureCode)
 	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
-	s.Equal(service.ID, request.ServiceID)
-	s.Equal(apiKey.ID, request.APIKeyID)
-	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(consumerInfo.ProjectID, request.ProjectID)
-	s.Equal(consumerInfo.ProjectName, request.ProjectName)
+	s.Equal(service.ID, request.Service.ID)
+	s.Equal(apiKey.ID, request.APIKey.ID)
+	s.Equal(environment.ID, request.Environment.ID)
+	s.Equal(consumerInfo.ProjectID, request.Project.ID)
+	s.Equal(consumerInfo.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestAPIKeyDisabled() {
@@ -1220,13 +1268,17 @@ func (s *UseCaseSuite) TestAPIKeyDisabled() {
 	validateResponse := dto.APIKeyValidateResponse{}
 
 	request := entities.Request{
-		Path:           req.Request.Path,
-		Method:         req.Request.Method,
-		IPAddress:      req.Request.IPAddress,
-		RequestTime:    req.Request.RequestTime,
-		APIKey:         req.APIKey,
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
+		Path:        req.Request.Path,
+		Method:      req.Request.Method,
+		IPAddress:   req.Request.IPAddress,
+		RequestTime: req.Request.RequestTime,
+		APIKey:      &entities.RequestAPIKey{Key: req.APIKey},
+		Service: &entities.RequestService{
+			Name:    req.ServiceName,
+			Version: req.ServiceVersion,
+		},
+		Environment: &entities.RequestEnvironment{},
+		Project:     &entities.RequestProject{},
 	}
 
 	err := ValidateAPIKey(s.ctx, s.deps, req, &request, &validateResponse)
@@ -1237,11 +1289,11 @@ func (s *UseCaseSuite) TestAPIKeyDisabled() {
 	s.Equal(enums.APIKeyValidationFailureCodeAPIKeyDisabled, validateResponse.FailureCode)
 	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
 
-	s.Equal(service.ID, request.ServiceID)
-	s.Equal(apiKey.ID, request.APIKeyID)
-	s.Equal(environment.ID, request.EnvironmentID)
-	s.Equal(consumerInfo.ProjectID, request.ProjectID)
-	s.Equal(consumerInfo.ProjectName, request.ProjectName)
+	s.Equal(service.ID, request.Service.ID)
+	s.Equal(apiKey.ID, request.APIKey.ID)
+	s.Equal(environment.ID, request.Environment.ID)
+	s.Equal(consumerInfo.ProjectID, request.Project.ID)
+	s.Equal(consumerInfo.ProjectName, request.Project.Name)
 }
 
 func TestValidateOnlySuite(t *testing.T) {

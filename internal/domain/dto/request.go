@@ -31,18 +31,34 @@ type RequestIncoming struct {
 
 // ... Responses ...
 
+type RequestAPIKeyResponse struct {
+	ID  int    `name:"id"`
+	Key string `name:"key"`
+}
+
+type RequestServiceResponse struct {
+	ID      int    `name:"id"`
+	Name    string `name:"name"`
+	Version string `name:"version"`
+}
+
+type RequestEnvironmentResponse struct {
+	ID   int    `name:"id"`
+	Name string `name:"name"`
+}
+
+type RequestProjectResponse struct {
+	ID   int    `name:"id"`
+	Name string `name:"name"`
+}
+
 type RequestResponse struct {
 	ID              string                       `name:"id"`
 	StartPoint      string                       `name:"start_point"`
-	APIKey          string                       `name:"api_key"`
-	APIKeyID        int                          `name:"api_key_id"`
-	ProjectName     string                       `name:"project_name"`
-	ProjectID       int                          `name:"project_id"`
-	EnvironmentName string                       `name:"environment_name"`
-	EnvironmentID   int                          `name:"environment_id"`
-	ServiceName     string                       `name:"service_name"`
-	ServiceVersion  string                       `name:"service_version"`
-	ServiceID       int                          `name:"service_id"`
+	APIKey          *RequestAPIKeyResponse       `name:"api_key"`
+	Project         *RequestProjectResponse      `name:"project"`
+	Environment     *RequestEnvironmentResponse  `name:"environment"`
+	Service         *RequestServiceResponse      `name:"service"`
 	StatusCode      int                          `name:"status_code"`
 	ExecutionStatus enums.RequestExecutionStatus `name:"execution_status"`
 	RequestTime     time.Time                    `name:"request_time"`

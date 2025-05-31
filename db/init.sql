@@ -143,13 +143,13 @@ CREATE TABLE IF NOT EXISTS request(
         FOREIGN KEY (api_key_id) REFERENCES api_key(id) ON DELETE SET NULL,
 
     -- Project
-    project_name TEXT NOT NULL,
+    project_name TEXT,
     project_id INTEGER,
     CONSTRAINT request_project_id_fk
         FOREIGN KEY (project_id) REFERENCES project(id) ON DELETE SET NULL,
 
     -- Environment
-    environment_name TEXT NOT NULL,
+    environment_name TEXT,
     environment_id INTEGER,
     CONSTRAINT request_environment_id_fk
         FOREIGN KEY (environment_id) REFERENCES environment(id) ON DELETE SET NULL,
