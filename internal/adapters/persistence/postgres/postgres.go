@@ -54,7 +54,10 @@ func (d *Driver) errorMapper(err error, tableName string) domainErr.Error {
 	}
 
 	if errors.Is(err, pgx.ErrNoRows) {
-		return domainErr.NewNotFound(d.entityMapper(tableName), err)
+		return domainErr.NewNotFound(
+			fmt.Sprintf("%s not found", d.entityMapper(tableName)),
+			err,
+		)
 	}
 
 	var pgErr *pgconn.PgError
