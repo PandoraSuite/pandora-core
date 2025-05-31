@@ -63,7 +63,7 @@ func (r *RequestRepository) ListByService(
 			COALESCE(environment_name, ''), COALESCE(environment_id, 0),
 			service_name, service_version, COALESCE(service_id, 0), COALESCE(status_code, 0),
 			execution_status, request_time, path, method, ip_address,
-			COALESCE(validation_failure_code, ''), created_at
+			COALESCE(unauthorized_reason, ''), created_at
 		FROM request
 		WHERE service_id = $1
 	`
@@ -132,7 +132,7 @@ func (r *RequestRepository) ListByService(
 			&request.Path,
 			&request.Method,
 			&request.IPAddress,
-			&request.ValidationFailureCode,
+			&request.UnauthorizedReason,
 			&request.CreateAt,
 		)
 		if err != nil {
@@ -156,7 +156,7 @@ func (r *RequestRepository) Create(
 			start_point, api_key, api_key_id, project_name, project_id,
 			environment_name, environment_id, service_name, service_version,
 			service_id, status_code, execution_status, request_time, path,
-			method, ip_address, metadata, validation_failure_code
+			method, ip_address, metadata, unauthorized_reason
 		)
 		VALUES (
 			$1, $2, $3, $4, $5, $6, $7, $8, $9,
@@ -205,9 +205,9 @@ func (r *RequestRepository) Create(
 		method = request.Method
 	}
 
-	var validationFailureCode any
-	if request.ValidationFailureCode != "" {
-		validationFailureCode = request.ValidationFailureCode
+	var UnauthorizedReason any
+	if request.UnauthorizedReason != "" {
+		UnauthorizedReason = request.UnauthorizedReason
 	}
 
 	metadata := make(map[string]any)
@@ -238,7 +238,7 @@ func (r *RequestRepository) Create(
 		method,
 		request.IPAddress,
 		metadata,
-		validationFailureCode,
+		UnauthorizedReason,
 	).Scan(&request.ID, &request.CreatedAt)
 
 	return r.errorMapper(err, r.tableName)
@@ -255,7 +255,7 @@ func (r *RequestRepository) CreateAsInitialPoint(
 			id, start_point, api_key, api_key_id, project_name, project_id,
 			environment_name, environment_id, service_name, service_version,
 			service_id, status_code, execution_status, request_time, path,
-			method, ip_address, metadata
+			method, ip_address, metadata, unauthorized_reason
 		)
 		SELECT uuid, uuid, $1, $2, $3, $4, $5, $6, $7, $8, $9,
 			$10, $11, $12, $13, $14, $15, $16, $17
@@ -303,9 +303,9 @@ func (r *RequestRepository) CreateAsInitialPoint(
 		method = request.Method
 	}
 
-	var validationFailureCode any
-	if request.ValidationFailureCode != "" {
-		validationFailureCode = request.ValidationFailureCode
+	var UnauthorizedReason any
+	if request.UnauthorizedReason != "" {
+		UnauthorizedReason = request.UnauthorizedReason
 	}
 
 	metadata := map[string]any{
@@ -341,7 +341,7 @@ func (r *RequestRepository) CreateAsInitialPoint(
 		method,
 		request.IPAddress,
 		metadata,
-		validationFailureCode,
+		UnauthorizedReason,
 	).Scan(&request.ID, &request.CreatedAt)
 
 	return r.errorMapper(err, r.tableName)
