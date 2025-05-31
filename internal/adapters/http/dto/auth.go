@@ -15,8 +15,10 @@ type Authenticate struct {
 
 func (a *Authenticate) ToDomain() *dto.Authenticate {
 	return &dto.Authenticate{
-		Username: a.Username,
-		Password: a.Password,
+		Credentials: &dto.Credentials{
+			Username: a.Username,
+			Password: a.Password,
+		},
 	}
 }
 
@@ -34,20 +36,44 @@ func (c *ChangePassword) ToDomain() *dto.ChangePassword {
 	}
 }
 
+type Reauthenticate struct {
+	Password string `form:"password" binding:"required"`
+}
+
 // ... Responses ...
 
+type TokenReponse struct {
+	TokenType   string    `json:"token_type"`
+	ExpiresIn   time.Time `json:"expires_in" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	AccessToken string    `json:"access_token"`
+}
+
 type AuthenticateResponse struct {
-	TokenType          string    `json:"token_type"`
-	ExpiresIn          time.Time `json:"expires_in" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	AccessToken        string    `json:"access_token"`
-	ForcePasswordReset bool      `json:"force_password_reset"`
+	*TokenReponse      `json:"-"`
+	ForcePasswordReset bool `json:"force_password_reset"`
 }
 
 func AuthenticateResponseFromDomain(auth *dto.AuthenticateResponse) *AuthenticateResponse {
 	return &AuthenticateResponse{
-		TokenType:          "Bearer",
-		ExpiresIn:          auth.ExpiresIn,
-		AccessToken:        auth.AccessToken,
+		TokenReponse: &TokenReponse{
+			TokenType:   "Bearer",
+			ExpiresIn:   auth.ExpiresIn,
+			AccessToken: auth.AccessToken,
+		},
 		ForcePasswordReset: auth.ForcePasswordReset,
+	}
+}
+
+type ReauthenticateResponse struct {
+	*TokenReponse `json:"-"`
+}
+
+func ReauthenticateResponseFromDomain(auth *dto.ReauthenticateResponse) *ReauthenticateResponse {
+	return &ReauthenticateResponse{
+		TokenReponse: &TokenReponse{
+			TokenType:   "Bearer",
+			ExpiresIn:   auth.ExpiresIn,
+			AccessToken: auth.AccessToken,
+		},
 	}
 }

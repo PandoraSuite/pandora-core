@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/validator"
 )
@@ -38,8 +39,13 @@ func (uc *useCase) Execute(
 		return nil, errors.NewUnauthorized("Invalid password", err.Unwrap())
 	}
 
+	scope, err := uc.actionToScope(req.Action)
+	if err != nil {
+		return nil, err
+	}
+
 	token, err := uc.tokenProvider.ValidateScopedToken(
-		ctx, req.Username, req.Scope,
+		ctx, req.Username, string(scope),
 	)
 	if err != nil {
 		return nil, err
@@ -50,13 +56,24 @@ func (uc *useCase) Execute(
 	}, nil
 }
 
+func (uc *useCase) actionToScope(
+	action enums.SensitiveAction,
+) (enums.Scope, errors.Error) {
+	switch action {
+	case enums.SensitiveActionRevealAPIKey:
+		return enums.ScopeRevealAPIKey, nil
+	default:
+		return enums.ScopeNull, errors.NewInternal("Invalid action", nil)
+	}
+}
+
 func (uc *useCase) validateReq(req *dto.Reauthenticate) errors.Error {
 	return uc.validator.ValidateStruct(
 		req,
 		map[string]string{
 			"username.required": "username is required",
 			"password.required": "password is required",
-			"scope.required":    "scope is required",
+			"action.required":   "action is required",
 		},
 	)
 }

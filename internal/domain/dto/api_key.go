@@ -24,11 +24,6 @@ type APIKeyUpdate struct {
 	ExpiresAt time.Time `name:"expires_at" validate:"omitempty,utc"`
 }
 
-type APIKeyRevealKey struct {
-	ID          int         `name:"id" validate:"required,gt=0"`
-	Credentials Credentials `name:"credentials" validate:"required"`
-}
-
 // ... Responses ...
 
 type APIKeyValidateClientResponse struct {

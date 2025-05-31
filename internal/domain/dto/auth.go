@@ -1,6 +1,10 @@
 package dto
 
-import "time"
+import (
+	"time"
+
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
+)
 
 // ... Requests ...
 
@@ -15,7 +19,7 @@ type Authenticate struct {
 
 type Reauthenticate struct {
 	*Credentials
-	Scope string `name:"scope" validate:"required"`
+	Action enums.SensitiveAction `name:"action" validate:"required,enums=REVEAL_API_KEY"`
 }
 
 type ChangePassword struct {
