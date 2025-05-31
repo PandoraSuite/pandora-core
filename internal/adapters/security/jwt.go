@@ -69,7 +69,7 @@ func (p *jwtProvider) signToken(
 func (p *jwtProvider) ValidateAccessToken(
 	ctx context.Context, token string,
 ) (string, errors.Error) {
-	t, err := p.validate(ctx, token)
+	t, err := p.validate(token)
 	if err != nil {
 		return "", err
 	}
@@ -83,7 +83,7 @@ func (p *jwtProvider) ValidateAccessToken(
 func (p *jwtProvider) ValidateScopedToken(
 	ctx context.Context, token, expectedScope string,
 ) errors.Error {
-	t, err := p.validate(ctx, token)
+	t, err := p.validate(token)
 	if err != nil {
 		return err
 	}
@@ -101,9 +101,7 @@ func (p *jwtProvider) ValidateScopedToken(
 	return nil
 }
 
-func (p *jwtProvider) validate(
-	ctx context.Context, token string,
-) (*jwt.Token, errors.Error) {
+func (p *jwtProvider) validate(token string) (*jwt.Token, errors.Error) {
 	t, err := jwt.Parse(
 		token,
 		func(token *jwt.Token) (any, error) { return p.secret, nil },
