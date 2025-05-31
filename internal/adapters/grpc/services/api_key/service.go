@@ -10,8 +10,6 @@ import (
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc/errors"
 	pb "github.com/MAD-py/pandora-core/internal/adapters/grpc/services/api_key/v1"
 	apikey "github.com/MAD-py/pandora-core/internal/app/api_key"
-	"github.com/MAD-py/pandora-core/internal/domain/dto"
-	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
 type service struct {
@@ -24,25 +22,7 @@ type service struct {
 func (s *service) Validate(
 	ctx context.Context, req *pb.ValidateRequest,
 ) (*pb.ValidateResponse, error) {
-	reqValidate := dto.APIKeyValidate{
-		APIKey: req.ApiKey,
-		Request: &dto.RequestIncoming{
-			Path:   req.Request.Path,
-			Method: req.Request.Method,
-			Metadata: &dto.RequestIncomingMetadata{
-				Body:            req.Request.Metadata.Body,
-				Headers:         req.Request.Metadata.Headers,
-				QueryParams:     req.Request.Metadata.QueryParams,
-				BodyContentType: enums.RequestBodyContentType(req.Request.Metadata.BodyContentType),
-			},
-			IPAddress:   req.Request.IpAddress,
-			RequestTime: req.Request.RequestTime.AsTime(),
-		},
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
-	}
-
-	response, err := s.validateUC.Execute(ctx, &reqValidate)
+	response, err := s.validateUC.Execute(ctx, validateRequestToDomain(req))
 	if err != nil {
 		return nil, status.Error(
 			errors.CodeToGRPCCode(err.Code()),
@@ -66,25 +46,7 @@ func (s *service) Validate(
 func (s *service) ValidateConsume(
 	ctx context.Context, req *pb.ValidateRequest,
 ) (*pb.ValidateConsumeResponse, error) {
-	reqValidate := dto.APIKeyValidate{
-		APIKey: req.ApiKey,
-		Request: &dto.RequestIncoming{
-			Path:   req.Request.Path,
-			Method: req.Request.Method,
-			Metadata: &dto.RequestIncomingMetadata{
-				Body:            req.Request.Metadata.Body,
-				Headers:         req.Request.Metadata.Headers,
-				QueryParams:     req.Request.Metadata.QueryParams,
-				BodyContentType: enums.RequestBodyContentType(req.Request.Metadata.BodyContentType),
-			},
-			IPAddress:   req.Request.IpAddress,
-			RequestTime: req.Request.RequestTime.AsTime(),
-		},
-		ServiceName:    req.ServiceName,
-		ServiceVersion: req.ServiceVersion,
-	}
-
-	response, err := s.validateConsumeUC.Execute(ctx, &reqValidate)
+	response, err := s.validateConsumeUC.Execute(ctx, validateRequestToDomain(req))
 	if err != nil {
 		return nil, status.Error(
 			errors.CodeToGRPCCode(err.Code()),
