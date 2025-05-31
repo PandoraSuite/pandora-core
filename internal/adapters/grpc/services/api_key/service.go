@@ -42,21 +42,7 @@ func (s *service) ValidateConsume(
 			err.Error(),
 		)
 	}
-
-	return &pb.ValidateConsumeResponse{
-		BaseResponse: &pb.ValidateResponse{
-			Valid:       response.Valid,
-			RequestId:   response.RequestID,
-			FailureCode: string(response.FailureCode),
-			ConsumerInfo: &pb.ConsumerInfo{
-				ProjectId:   int64(response.ConsumerInfo.ProjectID),
-				ProjectName: response.ConsumerInfo.ProjectName,
-				ClientId:    int64(response.ConsumerInfo.ClientID),
-				ClientName:  response.ConsumerInfo.ClientName,
-			},
-		},
-		AvailableRequest: int64(response.AvailableRequest),
-	}, nil
+	return validateConsumeResponseFromDomain(response), nil
 }
 
 func RegisterService(s *grpc.Server, deps *bootstrap.Dependencies) {
