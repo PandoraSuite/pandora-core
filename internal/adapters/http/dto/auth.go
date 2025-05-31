@@ -15,8 +15,10 @@ type Authenticate struct {
 
 func (a *Authenticate) ToDomain() *dto.Authenticate {
 	return &dto.Authenticate{
-		Username: a.Username,
-		Password: a.Password,
+		Credentials: &dto.Credentials{
+			Username: a.Username,
+			Password: a.Password,
+		},
 	}
 }
 

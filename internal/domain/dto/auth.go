@@ -4,9 +4,13 @@ import "time"
 
 // ... Requests ...
 
-type Authenticate struct {
+type Credentials struct {
 	Username string `name:"username" validate:"required"`
 	Password string `name:"password" validate:"required"`
+}
+
+type Authenticate struct {
+	*Credentials
 }
 
 type ChangePassword struct {
