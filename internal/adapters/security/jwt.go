@@ -15,7 +15,7 @@ type jwtProvider struct {
 	secret []byte
 }
 
-func (p *jwtProvider) Generate(
+func (p *jwtProvider) GenerateAccessToken(
 	ctx context.Context, subject string,
 ) (*dto.TokenResponse, errors.Error) {
 	now := time.Now()

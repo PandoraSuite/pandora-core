@@ -13,5 +13,5 @@ type CredentialsRepository interface {
 }
 
 type TokenProvider interface {
-	Generate(ctx context.Context, subject string) (*dto.TokenResponse, errors.Error)
+	GenerateAccessToken(ctx context.Context, subject string) (*dto.TokenResponse, errors.Error)
 }

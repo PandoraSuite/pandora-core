@@ -41,7 +41,7 @@ func (uc *useCase) Execute(
 		return nil, err
 	}
 
-	token, err := uc.tokenProvider.Generate(ctx, req.Username)
+	token, err := uc.tokenProvider.GenerateAccessToken(ctx, req.Username)
 	if err != nil {
 		return nil, err
 	}

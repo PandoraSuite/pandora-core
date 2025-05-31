@@ -9,7 +9,7 @@ import (
 
 type TokenProvider interface {
 	// ... Generate ...
-	Generate(ctx context.Context, subject string) (*dto.TokenResponse, errors.Error)
+	GenerateAccessToken(ctx context.Context, subject string) (*dto.TokenResponse, errors.Error)
 
 	// ... Validate ...
 	Validate(ctx context.Context, token *dto.TokenValidation) (string, errors.Error)
