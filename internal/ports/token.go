@@ -10,6 +10,7 @@ import (
 type TokenProvider interface {
 	// ... Generate ...
 	GenerateAccessToken(ctx context.Context, subject string) (*dto.TokenResponse, errors.Error)
+	GenerateSensitiveToken(ctx context.Context, subject, scope string) (*dto.TokenResponse, errors.Error)
 
 	// ... Validate ...
 	Validate(ctx context.Context, token *dto.TokenValidation) (string, errors.Error)
