@@ -29,18 +29,7 @@ func (s *service) Validate(
 			err.Error(),
 		)
 	}
-
-	return &pb.ValidateResponse{
-		Valid:       response.Valid,
-		RequestId:   response.RequestID,
-		FailureCode: string(response.FailureCode),
-		ConsumerInfo: &pb.ConsumerInfo{
-			ProjectId:   int64(response.ConsumerInfo.ProjectID),
-			ProjectName: response.ConsumerInfo.ProjectName,
-			ClientId:    int64(response.ConsumerInfo.ClientID),
-			ClientName:  response.ConsumerInfo.ClientName,
-		},
-	}, nil
+	return validateResponseFromDomain(response), nil
 }
 
 func (s *service) ValidateConsume(

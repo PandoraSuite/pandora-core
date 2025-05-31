@@ -36,3 +36,17 @@ func validateRequestToDomain(req *pb.ValidateRequest) *dto.APIKeyValidate {
 		ServiceVersion: req.ServiceVersion,
 	}
 }
+
+func validateResponseFromDomain(response *dto.APIKeyValidateResponse) *pb.ValidateResponse {
+	return &pb.ValidateResponse{
+		Valid:       response.Valid,
+		RequestId:   response.RequestID,
+		FailureCode: string(response.FailureCode),
+		ConsumerInfo: &pb.ConsumerInfo{
+			ProjectId:   int64(response.ConsumerInfo.ProjectID),
+			ProjectName: response.ConsumerInfo.ProjectName,
+			ClientId:    int64(response.ConsumerInfo.ClientID),
+			ClientName:  response.ConsumerInfo.ClientName,
+		},
+	}
+}
