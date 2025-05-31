@@ -39,3 +39,11 @@ func (a *APIKey) IsExpired() bool {
 func (a *APIKey) IsEnabled() bool {
 	return a.Status == enums.APIKeyStatusEnabled
 }
+
+func (a *APIKey) KeySummary() string {
+	if len(a.Key) == 0 {
+		return ""
+	}
+
+	return a.Key[:4] + "..." + a.Key[len(a.Key)-4:]
+}
