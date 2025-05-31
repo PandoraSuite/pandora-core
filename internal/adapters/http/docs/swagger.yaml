@@ -382,6 +382,8 @@ definitions:
         - disabled
         - deprecated
         type: string
+    required:
+    - status
     type: object
   errors.ErrorCode:
     enum:

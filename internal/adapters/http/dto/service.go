@@ -32,7 +32,7 @@ func (s *ServiceCreate) ToDomain() *dto.ServiceCreate {
 }
 
 type ServiceStatusUpdate struct {
-	Status string `json:"status" enums:"enabled,disabled,deprecated"`
+	Status string `json:"status" binding:"required" enums:"enabled,disabled,deprecated"`
 }
 
 // ... Responses ...

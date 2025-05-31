@@ -2062,6 +2062,9 @@ const docTemplate = `{
         },
         "dto.ServiceStatusUpdate": {
             "type": "object",
+            "required": [
+                "status"
+            ],
             "properties": {
                 "status": {
                     "type": "string",
