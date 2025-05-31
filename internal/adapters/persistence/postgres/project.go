@@ -169,8 +169,10 @@ func (r *ProjectRepository) GetServiceByID(
 	ctx context.Context, id, serviceID int,
 ) (*entities.ProjectService, errors.Error) {
 	query := `
-		SELECT s.id, s.name, s.version, COALESCE(ps.max_request, -1),
-			ps.reset_frequency, COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
+		SELECT s.id, s.name, s.version,
+			COALESCE(ps.max_request, -1),
+			COALESCE(ps.reset_frequency, ''),
+			COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
 			ps.created_at
 		FROM project_service ps
 			JOIN service s
@@ -209,8 +211,10 @@ func (r *ProjectRepository) UpdateService(
 			WHERE project_id = $1 AND service_id = $2
 			RETURNING *
 		)
-		SELECT s.id, s.name, s.version, COALESCE(u.max_request, -1),
-			u.reset_frequency, COALESCE(u.next_reset, '0001-01-01 00:00:00.0+00'),
+		SELECT s.id, s.name, s.version,
+			COALESCE(u.max_request, -1),
+			COALESCE(u.reset_frequency, ''),
+			COALESCE(u.next_reset, '0001-01-01 00:00:00.0+00'),
 			u.created_at
 		FROM updated u
 			JOIN service s ON s.id = u.service_id;
@@ -411,7 +415,7 @@ func (r *ProjectRepository) GetByID(
 						'version', s.version,
 						'nextReset', COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
 						'maxRequest', COALESCE(ps.max_request, -1),
-						'resetFrequency', ps.reset_frequency,
+						'resetFrequency', COALESCE(ps.reset_frequency, ''),
 						'assignedAt', ps.created_at
 					)
 				) FILTER (WHERE s.id IS NOT NULL), '[]'
@@ -452,7 +456,7 @@ func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, erro
 						'version', s.version,
 						'nextReset', COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
 						'maxRequest', COALESCE(ps.max_request, -1),
-						'resetFrequency', ps.reset_frequency,
+						'resetFrequency', COALESCE(ps.reset_frequency, ''),
 						'assignedAt', ps.created_at
 					)
 				) FILTER (WHERE s.id IS NOT NULL), '[]'
@@ -704,7 +708,8 @@ func (r *ProjectRepository) createProjectServices(
 				VALUES %s
 				RETURNING *
 			)
-			SELECT s.id, s.name, s.version, i.created_at, i.reset_frequency,
+			SELECT s.id, s.name, s.version, i.created_at,
+				COALESCE(i.reset_frequency, ''),
 				COALESCE(i.max_request, -1),
 				COALESCE(i.next_reset, '0001-01-01 00:00:00.0+00')
 			FROM inserted i
@@ -728,8 +733,8 @@ func (r *ProjectRepository) createProjectServices(
 			&service.ID,
 			&service.Name,
 			&service.Version,
-			&service.ResetFrequency,
 			&service.AssignedAt,
+			&service.ResetFrequency,
 			&service.MaxRequest,
 			&service.NextReset,
 		)
