@@ -38,43 +38,75 @@ func validateRequestToDomain(req *pb.ValidateRequest) *dto.APIKeyValidate {
 }
 
 func validateResponseFromDomain(response *dto.APIKeyValidateResponse) *pb.ValidateResponse {
-	var consumer *pb.ConsumerInfo
-	if response.ConsumerInfo != nil {
-		consumer = &pb.ConsumerInfo{
-			ProjectId:   int64(response.ConsumerInfo.ProjectID),
-			ProjectName: response.ConsumerInfo.ProjectName,
-			ClientId:    int64(response.ConsumerInfo.ClientID),
-			ClientName:  response.ConsumerInfo.ClientName,
+	var client *pb.Client
+	if response.Client != nil {
+		client = &pb.Client{
+			Id:   int64(response.Client.ID),
+			Name: response.Client.Name,
+		}
+	}
+
+	var project *pb.Project
+	if response.Project != nil {
+		project = &pb.Project{
+			Id:   int64(response.Project.ID),
+			Name: response.Project.Name,
+		}
+	}
+
+	var environment *pb.Environment
+	if response.Environment != nil {
+		environment = &pb.Environment{
+			Id:   int64(response.Environment.ID),
+			Name: response.Environment.Name,
 		}
 	}
 
 	return &pb.ValidateResponse{
-		Valid:        response.Valid,
-		RequestId:    response.RequestID,
-		FailureCode:  string(response.FailureCode),
-		ConsumerInfo: consumer,
+		Valid:       response.Valid,
+		RequestId:   response.RequestID,
+		FailureCode: string(response.FailureCode),
+		Client:      client,
+		Project:     project,
+		Environment: environment,
 	}
 }
 
 func validateConsumeResponseFromDomain(
 	response *dto.APIKeyValidateConsumeResponse,
 ) *pb.ValidateConsumeResponse {
-	var consumer *pb.ConsumerInfo
-	if response.ConsumerInfo != nil {
-		consumer = &pb.ConsumerInfo{
-			ProjectId:   int64(response.ConsumerInfo.ProjectID),
-			ProjectName: response.ConsumerInfo.ProjectName,
-			ClientId:    int64(response.ConsumerInfo.ClientID),
-			ClientName:  response.ConsumerInfo.ClientName,
+	var client *pb.Client
+	if response.Client != nil {
+		client = &pb.Client{
+			Id:   int64(response.Client.ID),
+			Name: response.Client.Name,
+		}
+	}
+
+	var project *pb.Project
+	if response.Project != nil {
+		project = &pb.Project{
+			Id:   int64(response.Project.ID),
+			Name: response.Project.Name,
+		}
+	}
+
+	var environment *pb.Environment
+	if response.Environment != nil {
+		environment = &pb.Environment{
+			Id:   int64(response.Environment.ID),
+			Name: response.Environment.Name,
 		}
 	}
 
 	return &pb.ValidateConsumeResponse{
 		BaseResponse: &pb.ValidateResponse{
-			Valid:        response.Valid,
-			RequestId:    response.RequestID,
-			FailureCode:  string(response.FailureCode),
-			ConsumerInfo: consumer,
+			Valid:       response.Valid,
+			RequestId:   response.RequestID,
+			FailureCode: string(response.FailureCode),
+			Client:      client,
+			Project:     project,
+			Environment: environment,
 		},
 		AvailableRequest: int64(response.AvailableRequest),
 	}

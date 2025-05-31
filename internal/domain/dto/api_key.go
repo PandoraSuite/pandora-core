@@ -26,20 +26,28 @@ type APIKeyUpdate struct {
 
 // ... Responses ...
 
-type ConsumerInfo struct {
-	ClientID        int    `name:"client_id"`
-	ClientName      string `name:"client_name"`
-	ProjectID       int    `name:"project_id"`
-	ProjectName     string `name:"project_name"`
-	EnvironmentID   int    `name:"environment_id"`
-	EnvironmentName string `name:"environment_name"`
+type APIKeyValidateClientResponse struct {
+	ID   int    `name:"id"`
+	Name string `name:"name"`
+}
+
+type APIKeyValidateProjectResponse struct {
+	ID   int    `name:"id"`
+	Name string `name:"name"`
+}
+
+type APIKeyValidateEnvironmentResponse struct {
+	ID   int    `name:"id"`
+	Name string `name:"name"`
 }
 
 type APIKeyValidateResponse struct {
-	Valid        bool                              `name:"valid"`
-	RequestID    string                            `name:"request_id"`
-	FailureCode  enums.APIKeyValidationFailureCode `name:"failure_code"`
-	ConsumerInfo *ConsumerInfo                     `name:"consumer_info"`
+	Valid       bool                               `name:"valid"`
+	RequestID   string                             `name:"request_id"`
+	FailureCode enums.APIKeyValidationFailureCode  `name:"failure_code"`
+	Client      *APIKeyValidateClientResponse      `name:"client"`
+	Project     *APIKeyValidateProjectResponse     `name:"project"`
+	Environment *APIKeyValidateEnvironmentResponse `name:"environment"`
 }
 
 type APIKeyValidateConsumeResponse struct {
