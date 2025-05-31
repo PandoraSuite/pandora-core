@@ -909,7 +909,7 @@ paths:
       tags:
       - Environments
   /api/v1/environments/{id}/services/{service_id}/reset-requests:
-    patch:
+    post:
       description: Resets the available request count for a specific service within
         an environment
       parameters:

@@ -303,7 +303,7 @@ func EnvironmentUpdateService(useCase environment.UpdateServiceUseCase) gin.Hand
 // @Param service_id path int true "Service ID"
 // @Success 200 {object} dto.EnvironmentServiceResponse
 // @Failure default {object} errors.HTTPError "Default error response for all failures"
-// @Router /api/v1/environments/{id}/services/{service_id}/reset-requests [patch]
+// @Router /api/v1/environments/{id}/services/{service_id}/reset-requests [post]
 func EnvironmentResetRequest(useCase environment.ResetRequestUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		environmentID, paramErr := strconv.Atoi(c.Param("id"))

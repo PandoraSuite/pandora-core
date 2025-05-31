@@ -64,7 +64,7 @@ func RegisterEnvironmentRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies
 			"/:id/services/:service_id",
 			handlers.EnvironmentUpdateService(updateServiceUC),
 		)
-		environments.PATCH(
+		environments.POST(
 			"/:id/services/:service_id/reset-requests",
 			handlers.EnvironmentResetRequest(resetRequestUC),
 		)
