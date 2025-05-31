@@ -2030,7 +2030,7 @@ const docTemplate = `{
                 "status_code": {
                     "type": "integer"
                 },
-                "validation_failure_code": {
+                "unauthorized_reason": {
                     "type": "string",
                     "enum": [
                         "API_KEY_INVALID",
