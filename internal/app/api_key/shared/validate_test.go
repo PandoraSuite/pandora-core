@@ -101,14 +101,6 @@ func (s *UseCaseSuite) TestSuccess() {
 		ClientID:    2000,
 		ClientName:  "TestClient",
 	}
-	consumerInfo := &dto.ConsumerInfo{
-		ClientID:        projectClient.ClientID,
-		ClientName:      projectClient.ClientName,
-		ProjectID:       projectClient.ProjectID,
-		ProjectName:     projectClient.ProjectName,
-		EnvironmentID:   environment.ID,
-		EnvironmentName: environment.Name,
-	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -152,13 +144,18 @@ func (s *UseCaseSuite) TestSuccess() {
 
 	s.True(validateResponse.Valid)
 	s.Empty(validateResponse.FailureCode)
-	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
+	s.Equal(projectClient.ProjectID, validateResponse.Project.ID)
+	s.Equal(projectClient.ProjectName, validateResponse.Project.Name)
+	s.Equal(projectClient.ClientID, validateResponse.Client.ID)
+	s.Equal(projectClient.ClientName, validateResponse.Client.Name)
+	s.Equal(environment.ID, validateResponse.Environment.ID)
+	s.Equal(environment.Name, validateResponse.Environment.Name)
 
 	s.Equal(service.ID, request.Service.ID)
 	s.Equal(apiKey.ID, request.APIKey.ID)
 	s.Equal(environment.ID, request.Environment.ID)
-	s.Equal(consumerInfo.ProjectID, request.Project.ID)
-	s.Equal(consumerInfo.ProjectName, request.Project.Name)
+	s.Equal(projectClient.ProjectID, request.Project.ID)
+	s.Equal(projectClient.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestAPIKeyNotFound() {
@@ -227,7 +224,9 @@ func (s *UseCaseSuite) TestAPIKeyNotFound() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeAPIKeyInvalid, validateResponse.FailureCode)
-	s.Nil(validateResponse.ConsumerInfo)
+	s.Nil(validateResponse.Client)
+	s.Nil(validateResponse.Project)
+	s.Nil(validateResponse.Environment)
 
 	s.Equal(service.ID, request.Service.ID)
 	s.Zero(request.APIKey.ID)
@@ -267,14 +266,6 @@ func (s *UseCaseSuite) TestServiceMismatch() {
 		ProjectName: "TestProject",
 		ClientID:    2000,
 		ClientName:  "TestClient",
-	}
-	consumerInfo := &dto.ConsumerInfo{
-		ClientID:        projectClient.ClientID,
-		ClientName:      projectClient.ClientName,
-		ProjectID:       projectClient.ProjectID,
-		ProjectName:     projectClient.ProjectName,
-		EnvironmentID:   environment.ID,
-		EnvironmentName: environment.Name,
 	}
 
 	s.serviceRepo.EXPECT().
@@ -327,13 +318,18 @@ func (s *UseCaseSuite) TestServiceMismatch() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeServiceMismatch, validateResponse.FailureCode)
-	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
+	s.Equal(projectClient.ProjectID, validateResponse.Project.ID)
+	s.Equal(projectClient.ProjectName, validateResponse.Project.Name)
+	s.Equal(projectClient.ClientID, validateResponse.Client.ID)
+	s.Equal(projectClient.ClientName, validateResponse.Client.Name)
+	s.Equal(environment.ID, validateResponse.Environment.ID)
+	s.Equal(environment.Name, validateResponse.Environment.Name)
 
 	s.Zero(request.Service.ID)
 	s.Equal(apiKey.ID, request.APIKey.ID)
 	s.Equal(environment.ID, request.Environment.ID)
-	s.Equal(consumerInfo.ProjectID, request.Project.ID)
-	s.Equal(consumerInfo.ProjectName, request.Project.Name)
+	s.Equal(projectClient.ProjectID, request.Project.ID)
+	s.Equal(projectClient.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestServiceRepoInternalError() {
@@ -391,7 +387,9 @@ func (s *UseCaseSuite) TestServiceRepoInternalError() {
 
 	s.False(validateResponse.Valid)
 	s.Empty(validateResponse.FailureCode)
-	s.Nil(validateResponse.ConsumerInfo)
+	s.Nil(validateResponse.Client)
+	s.Nil(validateResponse.Project)
+	s.Nil(validateResponse.Environment)
 
 	s.Zero(request.Service.ID)
 	s.Zero(request.APIKey.ID)
@@ -462,7 +460,9 @@ func (s *UseCaseSuite) TestAPIKeyRepoInternalError() {
 
 	s.False(validateResponse.Valid)
 	s.Empty(validateResponse.FailureCode)
-	s.Nil(validateResponse.ConsumerInfo)
+	s.Nil(validateResponse.Client)
+	s.Nil(validateResponse.Project)
+	s.Nil(validateResponse.Environment)
 
 	s.Equal(service.ID, request.Service.ID)
 	s.Zero(request.APIKey.ID)
@@ -540,7 +540,9 @@ func (s *UseCaseSuite) TestEnvironmentRepoGetByIDInternalError() {
 
 	s.False(validateResponse.Valid)
 	s.Empty(validateResponse.FailureCode)
-	s.Nil(validateResponse.ConsumerInfo)
+	s.Nil(validateResponse.Client)
+	s.Nil(validateResponse.Project)
+	s.Nil(validateResponse.Environment)
 
 	s.Equal(service.ID, request.Service.ID)
 	s.Equal(apiKey.ID, request.APIKey.ID)
@@ -635,7 +637,10 @@ func (s *UseCaseSuite) TestProjectRepoInternalError() {
 
 	s.False(validateResponse.Valid)
 	s.Empty(validateResponse.FailureCode)
-	s.Nil(validateResponse.ConsumerInfo)
+	s.Nil(validateResponse.Client)
+	s.Nil(validateResponse.Project)
+	s.Equal(environment.ID, validateResponse.Environment.ID)
+	s.Equal(environment.Name, validateResponse.Environment.Name)
 
 	s.Equal(service.ID, request.Service.ID)
 	s.Equal(apiKey.ID, request.APIKey.ID)
@@ -692,14 +697,6 @@ func (s *UseCaseSuite) TestEnvironmentDisabled() {
 		ClientID:    2000,
 		ClientName:  "TestClient",
 	}
-	consumerInfo := &dto.ConsumerInfo{
-		ClientID:        projectClient.ClientID,
-		ClientName:      projectClient.ClientName,
-		ProjectID:       projectClient.ProjectID,
-		ProjectName:     projectClient.ProjectName,
-		EnvironmentID:   environment.ID,
-		EnvironmentName: environment.Name,
-	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -743,13 +740,18 @@ func (s *UseCaseSuite) TestEnvironmentDisabled() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeEnvironmentDisabled, validateResponse.FailureCode)
-	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
+	s.Equal(projectClient.ProjectID, validateResponse.Project.ID)
+	s.Equal(projectClient.ProjectName, validateResponse.Project.Name)
+	s.Equal(projectClient.ClientID, validateResponse.Client.ID)
+	s.Equal(projectClient.ClientName, validateResponse.Client.Name)
+	s.Equal(environment.ID, validateResponse.Environment.ID)
+	s.Equal(environment.Name, validateResponse.Environment.Name)
 
 	s.Equal(service.ID, request.Service.ID)
 	s.Equal(apiKey.ID, request.APIKey.ID)
 	s.Equal(environment.ID, request.Environment.ID)
-	s.Equal(consumerInfo.ProjectID, request.Project.ID)
-	s.Equal(consumerInfo.ProjectName, request.Project.Name)
+	s.Equal(projectClient.ProjectID, request.Project.ID)
+	s.Equal(projectClient.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
@@ -800,14 +802,6 @@ func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 		ClientID:    2000,
 		ClientName:  "TestClient",
 	}
-	consumerInfo := &dto.ConsumerInfo{
-		ClientID:        projectClient.ClientID,
-		ClientName:      projectClient.ClientName,
-		ProjectID:       projectClient.ProjectID,
-		ProjectName:     projectClient.ProjectName,
-		EnvironmentID:   environment.ID,
-		EnvironmentName: environment.Name,
-	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -851,13 +845,18 @@ func (s *UseCaseSuite) TestServiceNotAssignedToEnvironment() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeServiceNotAssigned, validateResponse.FailureCode)
-	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
+	s.Equal(projectClient.ProjectID, validateResponse.Project.ID)
+	s.Equal(projectClient.ProjectName, validateResponse.Project.Name)
+	s.Equal(projectClient.ClientID, validateResponse.Client.ID)
+	s.Equal(projectClient.ClientName, validateResponse.Client.Name)
+	s.Equal(environment.ID, validateResponse.Environment.ID)
+	s.Equal(environment.Name, validateResponse.Environment.Name)
 
 	s.Equal(service.ID, request.Service.ID)
 	s.Equal(apiKey.ID, request.APIKey.ID)
 	s.Equal(environment.ID, request.Environment.ID)
-	s.Equal(consumerInfo.ProjectID, request.Project.ID)
-	s.Equal(consumerInfo.ProjectName, request.Project.Name)
+	s.Equal(projectClient.ProjectID, request.Project.ID)
+	s.Equal(projectClient.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestServiceDisabled() {
@@ -908,14 +907,6 @@ func (s *UseCaseSuite) TestServiceDisabled() {
 		ClientID:    2000,
 		ClientName:  "TestClient",
 	}
-	consumerInfo := &dto.ConsumerInfo{
-		ClientID:        projectClient.ClientID,
-		ClientName:      projectClient.ClientName,
-		ProjectID:       projectClient.ProjectID,
-		ProjectName:     projectClient.ProjectName,
-		EnvironmentID:   environment.ID,
-		EnvironmentName: environment.Name,
-	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -959,13 +950,18 @@ func (s *UseCaseSuite) TestServiceDisabled() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeServiceDisabled, validateResponse.FailureCode)
-	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
+	s.Equal(projectClient.ProjectID, validateResponse.Project.ID)
+	s.Equal(projectClient.ProjectName, validateResponse.Project.Name)
+	s.Equal(projectClient.ClientID, validateResponse.Client.ID)
+	s.Equal(projectClient.ClientName, validateResponse.Client.Name)
+	s.Equal(environment.ID, validateResponse.Environment.ID)
+	s.Equal(environment.Name, validateResponse.Environment.Name)
 
 	s.Equal(service.ID, request.Service.ID)
 	s.Equal(apiKey.ID, request.APIKey.ID)
 	s.Equal(environment.ID, request.Environment.ID)
-	s.Equal(consumerInfo.ProjectID, request.Project.ID)
-	s.Equal(consumerInfo.ProjectName, request.Project.Name)
+	s.Equal(projectClient.ProjectID, request.Project.ID)
+	s.Equal(projectClient.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestServiceDeprecated() {
@@ -1016,14 +1012,6 @@ func (s *UseCaseSuite) TestServiceDeprecated() {
 		ClientID:    2000,
 		ClientName:  "TestClient",
 	}
-	consumerInfo := &dto.ConsumerInfo{
-		ClientID:        projectClient.ClientID,
-		ClientName:      projectClient.ClientName,
-		ProjectID:       projectClient.ProjectID,
-		ProjectName:     projectClient.ProjectName,
-		EnvironmentID:   environment.ID,
-		EnvironmentName: environment.Name,
-	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -1067,13 +1055,18 @@ func (s *UseCaseSuite) TestServiceDeprecated() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeServiceDeprecated, validateResponse.FailureCode)
-	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
+	s.Equal(projectClient.ProjectID, validateResponse.Project.ID)
+	s.Equal(projectClient.ProjectName, validateResponse.Project.Name)
+	s.Equal(projectClient.ClientID, validateResponse.Client.ID)
+	s.Equal(projectClient.ClientName, validateResponse.Client.Name)
+	s.Equal(environment.ID, validateResponse.Environment.ID)
+	s.Equal(environment.Name, validateResponse.Environment.Name)
 
 	s.Equal(service.ID, request.Service.ID)
 	s.Equal(apiKey.ID, request.APIKey.ID)
 	s.Equal(environment.ID, request.Environment.ID)
-	s.Equal(consumerInfo.ProjectID, request.Project.ID)
-	s.Equal(consumerInfo.ProjectName, request.Project.Name)
+	s.Equal(projectClient.ProjectID, request.Project.ID)
+	s.Equal(projectClient.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestAPIKeyExpired() {
@@ -1126,14 +1119,6 @@ func (s *UseCaseSuite) TestAPIKeyExpired() {
 		ClientID:    2000,
 		ClientName:  "TestClient",
 	}
-	consumerInfo := &dto.ConsumerInfo{
-		ClientID:        projectClient.ClientID,
-		ClientName:      projectClient.ClientName,
-		ProjectID:       projectClient.ProjectID,
-		ProjectName:     projectClient.ProjectName,
-		EnvironmentID:   environment.ID,
-		EnvironmentName: environment.Name,
-	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -1177,13 +1162,18 @@ func (s *UseCaseSuite) TestAPIKeyExpired() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeAPIKeyExpired, validateResponse.FailureCode)
-	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
+	s.Equal(projectClient.ProjectID, validateResponse.Project.ID)
+	s.Equal(projectClient.ProjectName, validateResponse.Project.Name)
+	s.Equal(projectClient.ClientID, validateResponse.Client.ID)
+	s.Equal(projectClient.ClientName, validateResponse.Client.Name)
+	s.Equal(environment.ID, validateResponse.Environment.ID)
+	s.Equal(environment.Name, validateResponse.Environment.Name)
 
 	s.Equal(service.ID, request.Service.ID)
 	s.Equal(apiKey.ID, request.APIKey.ID)
 	s.Equal(environment.ID, request.Environment.ID)
-	s.Equal(consumerInfo.ProjectID, request.Project.ID)
-	s.Equal(consumerInfo.ProjectName, request.Project.Name)
+	s.Equal(projectClient.ProjectID, request.Project.ID)
+	s.Equal(projectClient.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestAPIKeyDisabled() {
@@ -1234,14 +1224,6 @@ func (s *UseCaseSuite) TestAPIKeyDisabled() {
 		ClientID:    2000,
 		ClientName:  "TestClient",
 	}
-	consumerInfo := &dto.ConsumerInfo{
-		ClientID:        projectClient.ClientID,
-		ClientName:      projectClient.ClientName,
-		ProjectID:       projectClient.ProjectID,
-		ProjectName:     projectClient.ProjectName,
-		EnvironmentID:   environment.ID,
-		EnvironmentName: environment.Name,
-	}
 
 	s.serviceRepo.EXPECT().
 		GetByNameAndVersion(s.ctx, req.ServiceName, req.ServiceVersion).
@@ -1285,13 +1267,18 @@ func (s *UseCaseSuite) TestAPIKeyDisabled() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeAPIKeyDisabled, validateResponse.FailureCode)
-	s.Equal(consumerInfo, validateResponse.ConsumerInfo)
+	s.Equal(projectClient.ProjectID, validateResponse.Project.ID)
+	s.Equal(projectClient.ProjectName, validateResponse.Project.Name)
+	s.Equal(projectClient.ClientID, validateResponse.Client.ID)
+	s.Equal(projectClient.ClientName, validateResponse.Client.Name)
+	s.Equal(environment.ID, validateResponse.Environment.ID)
+	s.Equal(environment.Name, validateResponse.Environment.Name)
 
 	s.Equal(service.ID, request.Service.ID)
 	s.Equal(apiKey.ID, request.APIKey.ID)
 	s.Equal(environment.ID, request.Environment.ID)
-	s.Equal(consumerInfo.ProjectID, request.Project.ID)
-	s.Equal(consumerInfo.ProjectName, request.Project.Name)
+	s.Equal(projectClient.ProjectID, request.Project.ID)
+	s.Equal(projectClient.ProjectName, request.Project.Name)
 }
 
 func (s *UseCaseSuite) TestFailureCodePriority() {
@@ -1361,7 +1348,9 @@ func (s *UseCaseSuite) TestFailureCodePriority() {
 
 	s.False(validateResponse.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeAPIKeyInvalid, validateResponse.FailureCode)
-	s.Nil(validateResponse.ConsumerInfo)
+	s.Nil(validateResponse.Client)
+	s.Nil(validateResponse.Project)
+	s.Nil(validateResponse.Environment)
 
 	s.Zero(request.Service.ID)
 	s.Zero(request.APIKey.ID)

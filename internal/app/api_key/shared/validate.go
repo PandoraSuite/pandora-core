@@ -119,6 +119,11 @@ func ValidateAPIKey(
 	request.Environment.ID = environment.ID
 	request.Environment.Name = environment.Name
 
+	validateResponse.Environment = &dto.APIKeyValidateEnvironmentResponse{
+		ID:   environment.ID,
+		Name: environment.Name,
+	}
+
 	if !environment.IsEnabled() {
 		setFailureWithPriority(
 			validateResponse,
@@ -136,13 +141,14 @@ func ValidateAPIKey(
 	request.Project.ID = projectClient.ProjectID
 	request.Project.Name = projectClient.ProjectName
 
-	validateResponse.ConsumerInfo = &dto.ConsumerInfo{
-		ClientID:        projectClient.ClientID,
-		ClientName:      projectClient.ClientName,
-		ProjectID:       projectClient.ProjectID,
-		ProjectName:     projectClient.ProjectName,
-		EnvironmentID:   environment.ID,
-		EnvironmentName: environment.Name,
+	validateResponse.Project = &dto.APIKeyValidateProjectResponse{
+		ID:   projectClient.ProjectID,
+		Name: projectClient.ProjectName,
+	}
+
+	validateResponse.Client = &dto.APIKeyValidateClientResponse{
+		ID:   projectClient.ClientID,
+		Name: projectClient.ClientName,
 	}
 
 	if service != nil {
