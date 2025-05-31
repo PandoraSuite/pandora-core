@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/MAD-py/pandora-core/internal/adapters/http/dto"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/errors"
 	"github.com/MAD-py/pandora-core/internal/app/auth"
 )
@@ -21,7 +20,7 @@ func ValidateToken(useCase auth.TokenValidationUseCase) gin.HandlerFunc {
 		}
 
 		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 {
+		if len(parts) != 2 || strings.ToLower(parts[0]) != "bearer" {
 			c.Error(
 				errors.NewUnauthorized("Invalid token type, expected 'Bearer'"),
 			)
@@ -29,12 +28,7 @@ func ValidateToken(useCase auth.TokenValidationUseCase) gin.HandlerFunc {
 			return
 		}
 
-		req := dto.TokenValidation{
-			TokenType:   parts[0],
-			AccessToken: parts[1],
-		}
-
-		username, err := useCase.Execute(c.Request.Context(), req.ToDomain())
+		username, err := useCase.Execute(c.Request.Context(), parts[0])
 		if err != nil {
 			c.Error(err)
 			c.Abort()

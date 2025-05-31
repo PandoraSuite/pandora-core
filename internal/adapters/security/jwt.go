@@ -50,31 +50,28 @@ func (p *jwtProvider) GenerateSensitiveToken(
 	return p.signToken(claims, expTime)
 }
 
-func (p *jwtProvider) signToken(claims jwt.Claims, exp time.Time) (*dto.TokenResponse, errors.Error) {
+func (p *jwtProvider) signToken(
+	claims jwt.Claims, exp time.Time,
+) (*dto.TokenResponse, errors.Error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
 	tokenStr, err := token.SignedString(p.secret)
 	if err != nil {
 		return nil, errors.NewInternal("failed to sign token", err)
 	}
 
 	return &dto.TokenResponse{
-		TokenType:   "Bearer",
 		ExpiresIn:   exp,
 		AccessToken: tokenStr,
 	}, nil
 }
 
 func (p *jwtProvider) Validate(
-	ctx context.Context, token *dto.TokenValidation,
+	ctx context.Context, token string,
 ) (string, errors.Error) {
-	if token.TokenType != "Bearer" {
-		return "", errors.NewUnauthorized(
-			"Invalid access token type, expected 'Bearer'", nil,
-		)
-	}
 
 	t, err := jwt.Parse(
-		token.AccessToken,
+		token,
 		func(token *jwt.Token) (any, error) {
 			return p.secret, nil
 		},

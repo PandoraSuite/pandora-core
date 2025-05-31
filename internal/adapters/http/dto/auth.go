@@ -15,10 +15,8 @@ type Authenticate struct {
 
 func (a *Authenticate) ToDomain() *dto.Authenticate {
 	return &dto.Authenticate{
-		Credentials: &dto.Credentials{
-			Username: a.Username,
-			Password: a.Password,
-		},
+		Username: a.Username,
+		Password: a.Password,
 	}
 }
 
@@ -36,18 +34,6 @@ func (c *ChangePassword) ToDomain() *dto.ChangePassword {
 	}
 }
 
-type TokenValidation struct {
-	TokenType   string
-	AccessToken string
-}
-
-func (t *TokenValidation) ToDomain() *dto.TokenValidation {
-	return &dto.TokenValidation{
-		TokenType:   t.TokenType,
-		AccessToken: t.AccessToken,
-	}
-}
-
 // ... Responses ...
 
 type AuthenticateResponse struct {
@@ -59,7 +45,7 @@ type AuthenticateResponse struct {
 
 func AuthenticateResponseFromDomain(auth *dto.AuthenticateResponse) *AuthenticateResponse {
 	return &AuthenticateResponse{
-		TokenType:          auth.TokenType,
+		TokenType:          "Bearer",
 		ExpiresIn:          auth.ExpiresIn,
 		AccessToken:        auth.AccessToken,
 		ForcePasswordReset: auth.ForcePasswordReset,

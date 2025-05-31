@@ -3,13 +3,12 @@ package tokenvalidation
 import (
 	"context"
 
-	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/validator"
 )
 
 type UseCase interface {
-	Execute(ctx context.Context, token *dto.TokenValidation) (string, errors.Error)
+	Execute(ctx context.Context, accessToken string) (string, errors.Error)
 }
 
 type useCase struct {
@@ -19,13 +18,13 @@ type useCase struct {
 }
 
 func (uc *useCase) Execute(
-	ctx context.Context, req *dto.TokenValidation,
+	ctx context.Context, accessToken string,
 ) (string, errors.Error) {
-	if err := uc.validateReq(req); err != nil {
+	if err := uc.validateAccessToken(accessToken); err != nil {
 		return "", err
 	}
 
-	subject, err := uc.tokenProvider.Validate(ctx, req)
+	subject, err := uc.tokenProvider.Validate(ctx, accessToken)
 	if err != nil {
 		return "", err
 	}
@@ -33,12 +32,13 @@ func (uc *useCase) Execute(
 	return subject, nil
 }
 
-func (uc *useCase) validateReq(req *dto.TokenValidation) errors.Error {
-	return uc.validator.ValidateStruct(
-		req,
+func (uc *useCase) validateAccessToken(accessToken string) errors.Error {
+	return uc.validator.ValidateVariable(
+		accessToken,
+		"access_token",
+		"required,jwt",
 		map[string]string{
 			"access_token.jwt":      "access_token must be a valid JWT",
-			"token_type.required":   "token_type is required",
 			"access_token.required": "access_token is required",
 		},
 	)

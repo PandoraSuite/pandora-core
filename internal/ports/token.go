@@ -13,5 +13,5 @@ type TokenProvider interface {
 	GenerateSensitiveToken(ctx context.Context, subject, scope string) (*dto.TokenResponse, errors.Error)
 
 	// ... Validate ...
-	Validate(ctx context.Context, token *dto.TokenValidation) (string, errors.Error)
+	Validate(ctx context.Context, token string) (string, errors.Error)
 }

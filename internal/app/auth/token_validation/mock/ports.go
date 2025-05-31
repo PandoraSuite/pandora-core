@@ -13,7 +13,6 @@ import (
 	context "context"
 	reflect "reflect"
 
-	dto "github.com/MAD-py/pandora-core/internal/domain/dto"
 	errors "github.com/MAD-py/pandora-core/internal/domain/errors"
 	gomock "go.uber.org/mock/gomock"
 )
@@ -43,7 +42,7 @@ func (m *MockTokenProvider) EXPECT() *MockTokenProviderMockRecorder {
 }
 
 // Validate mocks base method.
-func (m *MockTokenProvider) Validate(ctx context.Context, token *dto.TokenValidation) (string, errors.Error) {
+func (m *MockTokenProvider) Validate(ctx context.Context, token string) (string, errors.Error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Validate", ctx, token)
 	ret0, _ := ret[0].(string)
