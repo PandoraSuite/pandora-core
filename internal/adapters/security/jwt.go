@@ -29,15 +29,19 @@ func (p *jwtProvider) GenerateAccessToken(
 		"iat": now.Unix(),
 	}
 
+	return p.signToken(claims, expTime)
+}
+
+func (p *jwtProvider) signToken(claims jwt.Claims, exp time.Time) (*dto.TokenResponse, errors.Error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenStr, err := token.SignedString(p.secret)
 	if err != nil {
-		return nil, errors.NewInternal("failed to sign access token", err)
+		return nil, errors.NewInternal("failed to sign token", err)
 	}
 
 	return &dto.TokenResponse{
 		TokenType:   "Bearer",
-		ExpiresIn:   expTime,
+		ExpiresIn:   exp,
 		AccessToken: tokenStr,
 	}, nil
 }
