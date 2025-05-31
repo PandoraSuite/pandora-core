@@ -116,14 +116,6 @@ func (s *UseCaseSuite) TestSuccess() {
 		ClientID:    2000,
 		ClientName:  "TestClient",
 	}
-	consumerInfo := &dto.ConsumerInfo{
-		ClientID:        projectClient.ClientID,
-		ClientName:      projectClient.ClientName,
-		ProjectID:       projectClient.ProjectID,
-		ProjectName:     projectClient.ProjectName,
-		EnvironmentID:   environment.ID,
-		EnvironmentName: environment.Name,
-	}
 
 	s.validator.EXPECT().
 		ValidateStruct(req, gomock.Any()).
@@ -177,7 +169,12 @@ func (s *UseCaseSuite) TestSuccess() {
 	s.True(resp.Valid)
 	s.Empty(resp.FailureCode)
 	s.Equal(wantRequestID, resp.RequestID)
-	s.Equal(consumerInfo, resp.ConsumerInfo)
+	s.Equal(projectClient.ProjectID, resp.Project.ID)
+	s.Equal(projectClient.ProjectName, resp.Project.Name)
+	s.Equal(projectClient.ClientID, resp.Client.ID)
+	s.Equal(projectClient.ClientName, resp.Client.Name)
+	s.Equal(environment.ID, resp.Environment.ID)
+	s.Equal(environment.Name, resp.Environment.Name)
 }
 
 func (s *UseCaseSuite) TestSuccessUnauthorized() {
@@ -229,14 +226,6 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 		ProjectName: "TestProject",
 		ClientID:    2000,
 		ClientName:  "TestClient",
-	}
-	consumerInfo := &dto.ConsumerInfo{
-		ClientID:        projectClient.ClientID,
-		ClientName:      projectClient.ClientName,
-		ProjectID:       projectClient.ProjectID,
-		ProjectName:     projectClient.ProjectName,
-		EnvironmentID:   environment.ID,
-		EnvironmentName: environment.Name,
 	}
 
 	s.validator.EXPECT().
@@ -290,7 +279,12 @@ func (s *UseCaseSuite) TestSuccessUnauthorized() {
 	s.False(resp.Valid)
 	s.Equal(enums.APIKeyValidationFailureCodeAPIKeyDisabled, resp.FailureCode)
 	s.Equal(wantRequestID, resp.RequestID)
-	s.Equal(consumerInfo, resp.ConsumerInfo)
+	s.Equal(projectClient.ProjectID, resp.Project.ID)
+	s.Equal(projectClient.ProjectName, resp.Project.Name)
+	s.Equal(projectClient.ClientID, resp.Client.ID)
+	s.Equal(projectClient.ClientName, resp.Client.Name)
+	s.Equal(environment.ID, resp.Environment.ID)
+	s.Equal(environment.Name, resp.Environment.Name)
 }
 
 func (s *UseCaseSuite) TestValidateInternalError() {
@@ -395,14 +389,6 @@ func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
 		ClientID:    2000,
 		ClientName:  "TestClient",
 	}
-	consumerInfo := &dto.ConsumerInfo{
-		ClientID:        projectClient.ClientID,
-		ClientName:      projectClient.ClientName,
-		ProjectID:       projectClient.ProjectID,
-		ProjectName:     projectClient.ProjectName,
-		EnvironmentID:   environment.ID,
-		EnvironmentName: environment.Name,
-	}
 
 	s.validator.EXPECT().
 		ValidateStruct(req, gomock.Any()).
@@ -456,7 +442,12 @@ func (s *UseCaseSuite) TestSuccessWithAPIKeyLastUsedErr() {
 	s.True(resp.Valid)
 	s.Empty(resp.FailureCode)
 	s.Equal(wantRequestID, resp.RequestID)
-	s.Equal(consumerInfo, resp.ConsumerInfo)
+	s.Equal(projectClient.ProjectID, resp.Project.ID)
+	s.Equal(projectClient.ProjectName, resp.Project.Name)
+	s.Equal(projectClient.ClientID, resp.Client.ID)
+	s.Equal(projectClient.ClientName, resp.Client.Name)
+	s.Equal(environment.ID, resp.Environment.ID)
+	s.Equal(environment.Name, resp.Environment.Name)
 }
 
 func (s *UseCaseSuite) TestValidationError() {
