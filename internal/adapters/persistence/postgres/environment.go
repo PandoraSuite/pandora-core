@@ -702,9 +702,9 @@ func (r *EnvironmentRepository) createEnvironmentServices(
 			&service.ID,
 			&service.Name,
 			&service.Version,
+			&service.AssignedAt,
 			&service.MaxRequest,
 			&service.AvailableRequest,
-			&service.AssignedAt,
 		)
 		if err != nil {
 			return nil, r.errorMapper(err, r.auxServiceTableName)
