@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS request(
 
     request_time TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
-    ip_address INET NOT NULL,
+    ip_address TEXT NOT NULL,
     path TEXT NOT NULL,
     method TEXT NOT NULL,
     CONSTRAINT request_method_check

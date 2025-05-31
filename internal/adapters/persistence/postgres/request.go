@@ -58,10 +58,11 @@ func (r *RequestRepository) ListByService(
 	ctx context.Context, serviceID int, filter *dto.RequestFilter,
 ) ([]*dto.RequestResponse, errors.Error) {
 	query := `
-		SELECT id, start_point, api_key, api_key_id, project_name, project_id,
-			environment_name, environment_id, service_name, service_version,
-			service_id, status_code, execution_status, request_time, path,
-			method, ip_address, created_at
+		SELECT id, COALESCE(start_point::text, ''), api_key, api_key_id,
+			project_name, project_id, environment_name, environment_id,
+			service_name, service_version, service_id, COALESCE(status_code, 0),
+			execution_status, request_time, path, method, ip_address,
+			created_at
 		FROM request
 		WHERE service_id = $1
 	`
