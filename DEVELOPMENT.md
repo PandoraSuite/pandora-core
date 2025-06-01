@@ -169,7 +169,7 @@ If you encounter bugs, missing features, or have suggestions, open an issue or p
 
 ## :lock: Security
 
-**Pandora Core** handles authentication and quota validation. If you discover a vulnerability, please refer to [`SECURITY.md`](./SECURITY.md) for secure disclosure instructions.
+If you discover a security vulnerability, **do not open an issue or PR**. Instead, please follow the secure disclosure process described in [`SECURITY.md`](./SECURITY.md).
 
 ## :handshake: Thanks
 
