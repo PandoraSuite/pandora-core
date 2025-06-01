@@ -1,11 +1,11 @@
 package auth
 
 import (
+	accesstokenvalidation "github.com/MAD-py/pandora-core/internal/app/auth/access_token_validation"
 	"github.com/MAD-py/pandora-core/internal/app/auth/authenticate"
 	passwordchange "github.com/MAD-py/pandora-core/internal/app/auth/password_change"
 	"github.com/MAD-py/pandora-core/internal/app/auth/reauthenticate"
 	resetcheck "github.com/MAD-py/pandora-core/internal/app/auth/reset_check"
-	tokenvalidation "github.com/MAD-py/pandora-core/internal/app/auth/token_validation"
 )
 
 // ... Autenticate Use Case ...
@@ -23,7 +23,7 @@ type CredentialsResetPasswordRepository = resetcheck.CredentialsRepository
 
 // ... Token Validation Use Case ...
 
-type TokenValidationProvider = tokenvalidation.TokenProvider
+type TokenValidationProvider = accesstokenvalidation.TokenProvider
 
 // ... Reauthenticate Use Case ...
 

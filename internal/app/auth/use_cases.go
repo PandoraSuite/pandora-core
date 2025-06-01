@@ -1,11 +1,11 @@
 package auth
 
 import (
+	accesstokenvalidation "github.com/MAD-py/pandora-core/internal/app/auth/access_token_validation"
 	"github.com/MAD-py/pandora-core/internal/app/auth/authenticate"
 	passwordchange "github.com/MAD-py/pandora-core/internal/app/auth/password_change"
 	"github.com/MAD-py/pandora-core/internal/app/auth/reauthenticate"
 	resetcheck "github.com/MAD-py/pandora-core/internal/app/auth/reset_check"
-	tokenvalidation "github.com/MAD-py/pandora-core/internal/app/auth/token_validation"
 	"github.com/MAD-py/pandora-core/internal/validator"
 )
 
@@ -45,13 +45,13 @@ func NewResetPasswordUseCase(
 
 // ... Token Validation Use Case ...
 
-type TokenValidationUseCase = tokenvalidation.UseCase
+type TokenValidationUseCase = accesstokenvalidation.UseCase
 
 func NewTokenValidationUseCase(
 	validator validator.Validator,
 	tokenProvider TokenValidationProvider,
 ) TokenValidationUseCase {
-	return tokenvalidation.NewUseCase(validator, tokenProvider)
+	return accesstokenvalidation.NewUseCase(validator, tokenProvider)
 }
 
 // ... Reauthenticate Use Case ...

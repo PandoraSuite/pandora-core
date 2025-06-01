@@ -1,4 +1,4 @@
-package tokenvalidation
+package accesstokenvalidation
 
 import (
 	"context"
