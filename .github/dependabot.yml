@@ -1,0 +1,25 @@
+version: 2
+updates:
+  # Go Modules
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "⬆"
+      include: "scope"
+    security-updates: true
+    labels:
+      - dependencies
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      prefix: "⬆"
+      include: "scope"
+    security-updates: true
+    labels:
+      - dependencies
