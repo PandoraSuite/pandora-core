@@ -12,6 +12,9 @@ updates:
       - MAD-py
     labels:
       - dependencies
+    ignore:
+      - dependency-name: "*"
+    security-updates: true
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -25,3 +28,6 @@ updates:
       - MAD-py
     labels:
       - dependencies
+    ignore:
+      - dependency-name: "*"
+    security-updates: true
