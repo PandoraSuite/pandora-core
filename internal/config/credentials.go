@@ -33,7 +33,8 @@ func createCredentials(credentialsPath string) {
 		panic(err)
 	}
 
-	password, err := calculateHash(base64.URLEncoding.EncodeToString(key))
+	keyStr := base64.URLEncoding.EncodeToString(key)
+	password, err := calculateHash(keyStr)
 	if err != nil {
 		panic(err)
 	}
@@ -60,7 +61,7 @@ func createCredentials(credentialsPath string) {
 
 	log.Println("[INFO] Default admin credentials:")
 	log.Printf("        - Username: Admin\n")
-	log.Printf("        - Password: %s\n", password)
+	log.Printf("        - Password: %s\n", keyStr)
 	log.Println("[SECURITY] It is highly recommended to change the default password immediately.")
 }
 

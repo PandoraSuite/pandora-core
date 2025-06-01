@@ -1,0 +1,20 @@
+FROM golang:1.23.4-alpine
+
+RUN apk update && apk add --no-cache git curl make bash
+
+RUN go install github.com/air-verse/air@v1.61.7
+RUN go install github.com/go-delve/delve/cmd/dlv@v1.24.1
+RUN go install github.com/swaggo/swag/cmd/swag@v1.16.4
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+
+RUN go mod download
+
+ENV PATH="${PATH}:/go/bin"
+
+EXPOSE 80
+EXPOSE 50051
+
+ENTRYPOINT ["air"]

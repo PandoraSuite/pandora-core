@@ -1,13 +1,39 @@
 version: "3.8"
 
 services:
-  pandora-db:
-    image: pandora-db
+  pandora-core:
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile.dev
+    container_name: pandora-core-dev
+    volumes:
+      - ..:/app
+    ports:
+      - "8080:80"
+      - "50051:50051"
+      - "2345:2345"
+    environment:
+      - PANDORA_DB_DNS=postgres://postgres:postgres@postgres:5432/pandora?sslmode=disable&timezone=UTC
+      - PANDORA_JWT_SECRET=your_jwt_secret
+      - PANDORA_EXPOSE_VERSION=true
+    depends_on:
+      - postgres
+    networks:
+      - pandora-net
+
+  postgres:
+    image: pandora-postgres
     build:
       context: ../db
       dockerfile: dockerfile
     ports:
-      - "5436:5432"
+      - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    networks:
+      - pandora-net
+
+networks:
+  pandora-net:
+    driver: bridge

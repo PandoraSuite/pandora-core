@@ -46,7 +46,7 @@ Please read [CONTRIBUTING.md](./CONTRIBUTING.md) to learn how to open issues, su
 
 Found a security vulnerability? We take security seriously.
 
-Please report it privately by following our disclosure guidelines in [SECURITY.md.](./SECURITY.md) Do not open a public GitHub issue or pull request for security concerns.
+Please report it privately by following our disclosure guidelines in [SECURITY.md](./SECURITY.md). Do not open a public GitHub issue or pull request for security concerns.
 
 ## License
 

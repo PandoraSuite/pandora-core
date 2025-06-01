@@ -14,8 +14,8 @@ Before getting started, make sure you have the following tools installed:
 You can install Air and Delve via:
 
 ```bash
-go install github.com/air-verse/air@latest
-go install github.com/go-delve/delve/cmd/dlv@latest
+go install github.com/air-verse/air@v1.61.7
+go install github.com/go-delve/delve/cmd/dlv@v1.24.1
 ```
 
 ## :rocket: Running the Project
@@ -45,7 +45,7 @@ go run ./cmd/main.go
 **Pandora Core** includes an Air template configuration. To use it:
 
 ```bash
-cp .air.toml.template .air.toml
+cp .air.template.toml .air.toml
 ```
 
 Then edit the `.air.toml` file. Update the `cmd` value to match the desired target:
@@ -107,7 +107,7 @@ Press `F5` to attach the debugger.
 **Pandora Core** requires the following environment variables to run properly:
 
 * `PANDORA_DIR` — (optional) (default: `/etc/pandora`)
-* `PANDORA_DSN` — (optional) PostgreSQL connection string (default: `host=localhost port=5432 user=postgres password= dbname=pandora sslmode=disable timezone=UTC`)
+* `PANDORA_DB_DNS` — (optional) PostgreSQL connection string (default: `host=localhost port=5432 user=postgres password= dbname=pandora sslmode=disable timezone=UTC`)
 * `PANDORA_JWT_SECRET` — (optional) Secret key used for signing authentication tokens (default: Randomly generated on startup. Consider setting a fixed value for consistent local development)
 * `PANDORA_HTTP_PORT` — (optional) HTTP server port (default: `80`)
 * `PANDORA_GRPC_PORT` — (optional) gRPC server port (default: `50051`)
