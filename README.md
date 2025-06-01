@@ -13,10 +13,15 @@ Thanks to its architecture and clean design, **Pandora Core** offers an efficien
 
 ## :zap: Features
 * :lock: API Key Validation & Quota Control: Secure your APIs and manage usage effectively.
+
 * :bar_chart: Request Logging and Usage Metrics: Gain insights into APIs consumption.
-* :puzzle_piece: Multi-Project, Multi-Environment Architecture: Designed for versatile deployment and management across various setups.
+
+* :gear: Multi-Project, Multi-Environment Architecture: Designed for versatile deployment and management across various setups.
+
 * :globe_with_meridians: RESTful API for Admin Tasks: Easy administration and configuration via a standard HTTP interface.
-* :high_voltage: High-Performance gRPC Service for Inline Validations: Fast and efficient validation.
+
+* :zap: High-Performance gRPC Service for Inline Validations: Fast and efficient validation.
+
 * :card_file_box: PostgreSQL as Persistent: Reliable and scalable data storage.
 
 ## :rocket: Developer Setup
@@ -27,7 +32,9 @@ Ready to dive in? For a full guide on setting up your development environment, r
 
 ## :compass: Project Status
 
-Pandora Core is under active development. We're continuously working to enhance its capabilities.
+Pandora Core is under active development.
+
+We're continuously working to enhance its capabilities.
 
 ## :handshake: Contributing
 
