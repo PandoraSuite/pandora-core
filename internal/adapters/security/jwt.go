@@ -82,23 +82,23 @@ func (p *jwtProvider) ValidateAccessToken(
 
 func (p *jwtProvider) ValidateScopedToken(
 	ctx context.Context, token, expectedScope string,
-) errors.Error {
+) (string, errors.Error) {
 	t, err := p.validate(token)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	claims, ok := t.Claims.(jwt.MapClaims)
 	if !ok {
-		return errors.NewUnauthorized("Invalid token claims", nil)
+		return "", errors.NewUnauthorized("Invalid token claims", nil)
 	}
 
 	scope, ok := claims["scope"].(string)
 	if !ok || scope != expectedScope {
-		return errors.NewForbidden("Token does not grant required scope", nil)
+		return "", errors.NewForbidden("Token does not grant required scope", nil)
 	}
 
-	return nil
+	return claims["sub"].(string), nil
 }
 
 func (p *jwtProvider) validate(token string) (*jwt.Token, errors.Error) {

@@ -8,7 +8,7 @@ import (
 )
 
 type UseCase interface {
-	Execute(ctx context.Context, accessToken string) (string, errors.Error)
+	Execute(ctx context.Context, token string) (string, errors.Error)
 }
 
 type useCase struct {
@@ -18,13 +18,13 @@ type useCase struct {
 }
 
 func (uc *useCase) Execute(
-	ctx context.Context, accessToken string,
+	ctx context.Context, token string,
 ) (string, errors.Error) {
-	if err := uc.validateAccessToken(accessToken); err != nil {
+	if err := uc.validateAccessToken(token); err != nil {
 		return "", err
 	}
 
-	subject, err := uc.tokenProvider.ValidateAccessToken(ctx, accessToken)
+	subject, err := uc.tokenProvider.ValidateAccessToken(ctx, token)
 	if err != nil {
 		return "", err
 	}
@@ -32,9 +32,9 @@ func (uc *useCase) Execute(
 	return subject, nil
 }
 
-func (uc *useCase) validateAccessToken(accessToken string) errors.Error {
+func (uc *useCase) validateAccessToken(token string) errors.Error {
 	return uc.validator.ValidateVariable(
-		accessToken,
+		token,
 		"access_token",
 		"required,jwt",
 		map[string]string{

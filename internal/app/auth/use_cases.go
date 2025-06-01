@@ -6,6 +6,7 @@ import (
 	passwordchange "github.com/MAD-py/pandora-core/internal/app/auth/password_change"
 	"github.com/MAD-py/pandora-core/internal/app/auth/reauthenticate"
 	resetcheck "github.com/MAD-py/pandora-core/internal/app/auth/reset_check"
+	scopedtokenvalidation "github.com/MAD-py/pandora-core/internal/app/auth/scoped_token_validation"
 	"github.com/MAD-py/pandora-core/internal/validator"
 )
 
@@ -47,9 +48,9 @@ func NewResetPasswordUseCase(
 
 type TokenValidationUseCase = accesstokenvalidation.UseCase
 
-func NewTokenValidationUseCase(
+func NewAccessTokenValidationUseCase(
 	validator validator.Validator,
-	tokenProvider TokenValidationProvider,
+	tokenProvider AccessTokenValidationProvider,
 ) TokenValidationUseCase {
 	return accesstokenvalidation.NewUseCase(validator, tokenProvider)
 }
@@ -64,4 +65,15 @@ func NewReauthenticateUseCase(
 	credentialsRepo CredentialsReauthenticateRepository,
 ) ReauthenticateUseCase {
 	return reauthenticate.NewUseCase(validator, tokenProvider, credentialsRepo)
+}
+
+// ... Scoped Token Validation Use Case ...
+
+type ScopedTokenValidationUseCase = scopedtokenvalidation.UseCase
+
+func NewScopedTokenValidationUseCase(
+	validator validator.Validator,
+	tokenProvider ScopedTokenValidationProvider,
+) ScopedTokenValidationUseCase {
+	return scopedtokenvalidation.NewUseCase(validator, tokenProvider)
 }

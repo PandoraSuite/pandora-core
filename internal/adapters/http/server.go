@@ -70,7 +70,7 @@ func (s *Server) Run() error {
 	v1Protected := v1.Group("")
 	v1Protected.Use(
 		middlewares.ValidateAccessToken(
-			auth.NewTokenValidationUseCase(
+			auth.NewAccessTokenValidationUseCase(
 				s.deps.Validator, s.deps.TokenProvider,
 			),
 		),

@@ -14,5 +14,5 @@ type TokenProvider interface {
 
 	// ... Validate ...
 	ValidateAccessToken(ctx context.Context, token string) (string, errors.Error)
-	ValidateScopedToken(ctx context.Context, token, expectedScope string) errors.Error
+	ValidateScopedToken(ctx context.Context, token, expectedScope string) (string, errors.Error)
 }
