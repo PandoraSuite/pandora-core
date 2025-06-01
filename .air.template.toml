@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 [build]
   pre_cmd = ["swag init -d internal/adapters/http,internal/domain/errors,internal/domain/enums -g server.go -o internal/adapters/http/docs"]
 
-  cmd = "go build -gcflags=\"all=-N -l\" -o ./tmp/main ./cmd/http/main.go"
+  cmd = "go build -gcflags=\"all=-N -l\" -o ./tmp/main ./cmd/main.go"
 
   bin = "tmp/main"
   full_bin = "dlv exec ./tmp/main --headless --listen=:2345 --api-version=2 --accept-multiclient"
