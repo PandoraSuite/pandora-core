@@ -75,9 +75,9 @@ func (uc *useCase) validateID(id int) errors.Error {
 	return uc.validator.ValidateVariable(
 		id,
 		"id",
-		"required,gt",
+		"required,gt=0",
 		map[string]string{
-			"gt=0":     "id must be greater than 0",
+			"gt":       "id must be greater than 0",
 			"required": "id is required",
 		},
 	)

@@ -38,8 +38,8 @@ func (uc *useCase) validateAccessToken(token string) errors.Error {
 		"access_token",
 		"required,jwt",
 		map[string]string{
-			"access_token.jwt":      "access_token must be a valid JWT",
-			"access_token.required": "access_token is required",
+			"jwt":      "access_token must be a valid JWT",
+			"required": "access_token is required",
 		},
 	)
 }
