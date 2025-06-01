@@ -1452,6 +1452,10 @@ securityDefinitions:
     flow: password
     tokenUrl: /api/v1/auth/login
     type: oauth2
+  ScopedToken:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
 tags:
 - name: Authentication

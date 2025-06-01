@@ -2243,6 +2243,11 @@ const docTemplate = `{
             "type": "oauth2",
             "flow": "password",
             "tokenUrl": "/api/v1/auth/login"
+        },
+        "ScopedToken": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     },
     "tags": [
