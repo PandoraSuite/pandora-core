@@ -80,3 +80,36 @@ func APIKeyUpdate(useCase apikey.UpdateUseCase) gin.HandlerFunc {
 		c.JSON(http.StatusOK, dto.APIKeyResponseFromDomain(apiKey))
 	}
 }
+
+// APIKeyRevealKey godoc
+// @Summary Reveals the API Key
+// @Description Retrieves the actual API Key value for a specific API key by ID
+// @Tags API Keys
+// @Security ScopedToken
+// @Accept json
+// @Produce json
+// @Param id path int true "API Key ID"
+// @Success 200 {object} dto.APIKeyRevealKeyResponse
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
+// @Router /api/v1/api-keys/{id}/reveal/key [get]
+func APIKeyRevealKey(useCase apikey.RevealKeyUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		apiKeyID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid api key id",
+				),
+			)
+			return
+		}
+
+		apiKey, err := useCase.Execute(c.Request.Context(), apiKeyID)
+		if err != nil {
+			c.Error(err)
+			return
+		}
+
+		c.JSON(http.StatusOK, dto.APIKeyRevealKeyResponseFromDomain(apiKey))
+	}
+}

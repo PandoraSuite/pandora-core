@@ -80,13 +80,12 @@ func (s *Server) Run() error {
 		routes.RegisterAuthRoutes(v1Protected, s.deps)
 	}
 
-	v1Protected.Use(
-		middlewares.ForcePasswordReset(
-			auth.NewResetPasswordUseCase(
-				s.deps.Validator, s.deps.CredentialsRepo,
-			),
+	passwordResetMiddleware := middlewares.ForcePasswordReset(
+		auth.NewResetPasswordUseCase(
+			s.deps.Validator, s.deps.CredentialsRepo,
 		),
 	)
+	v1Protected.Use(passwordResetMiddleware)
 
 	{
 		routes.RegisterServiceRoutes(v1Protected, s.deps)
@@ -94,6 +93,10 @@ func (s *Server) Run() error {
 		routes.RegisterProjectRoutes(v1Protected, s.deps)
 		routes.RegisterEnvironmentRoutes(v1Protected, s.deps)
 		routes.RegisterAPIKeyRoutes(v1Protected, s.deps)
+	}
+
+	{
+		routes.RegisterAPIKeySensitiveRoutes(v1, s.deps, passwordResetMiddleware)
 	}
 
 	s.server = &http.Server{

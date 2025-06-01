@@ -53,3 +53,13 @@ func APIKeyResponseFromDomain(apiKey *dto.APIKeyResponse) *APIKeyResponse {
 		CreatedAt:     apiKey.CreatedAt,
 	}
 }
+
+type APIKeyRevealKeyResponse struct {
+	Key string `json:"key"`
+}
+
+func APIKeyRevealKeyResponseFromDomain(apiKey *dto.APIKeyRevealKeyResponse) *APIKeyRevealKeyResponse {
+	return &APIKeyRevealKeyResponse{
+		Key: apiKey.Key,
+	}
+}

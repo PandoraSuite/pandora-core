@@ -121,6 +121,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/api-keys/{id}/reveal/key": {
+            "get": {
+                "security": [
+                    {
+                        "ScopedToken": []
+                    }
+                ],
+                "description": "Retrieves the actual API Key value for a specific API key by ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "API Keys"
+                ],
+                "summary": "Reveals the API Key",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "API Key ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.APIKeyRevealKeyResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/errors.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/auth/change-password": {
             "post": {
                 "security": [
@@ -1589,6 +1632,14 @@ const docTemplate = `{
                         "disabled",
                         "deprecated"
                     ]
+                }
+            }
+        },
+        "dto.APIKeyRevealKeyResponse": {
+            "type": "object",
+            "properties": {
+                "key": {
+                    "type": "string"
                 }
             }
         },
