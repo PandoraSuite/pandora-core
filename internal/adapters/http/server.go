@@ -34,6 +34,10 @@ import (
 // @securitydefinitions.oauth2.password OAuth2Password
 // @tokenUrl /api/v1/auth/login
 
+// @securitydefinitions.apikey ScopedToken
+// @in header
+// @name Authorization
+
 type Server struct {
 	addr string
 
@@ -65,7 +69,7 @@ func (s *Server) Run() error {
 
 	v1Protected := v1.Group("")
 	v1Protected.Use(
-		middlewares.ValidateToken(
+		middlewares.ValidateAccessToken(
 			auth.NewTokenValidationUseCase(
 				s.deps.Validator, s.deps.TokenProvider,
 			),

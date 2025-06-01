@@ -9,7 +9,7 @@ import (
 	"github.com/MAD-py/pandora-core/internal/app/auth"
 )
 
-func ValidateToken(useCase auth.TokenValidationUseCase) gin.HandlerFunc {
+func ValidateAccessToken(useCase auth.TokenValidationUseCase) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
