@@ -8,7 +8,7 @@ updates:
     commit-message:
       prefix: "⬆"
       include: "scope"
-    assignees:
+    reviewers:
       - MAD-py
     labels:
       - dependencies
@@ -21,7 +21,7 @@ updates:
     commit-message:
       prefix: "⬆"
       include: "scope"
-    assignees:
+    reviewers:
       - MAD-py
     labels:
       - dependencies
