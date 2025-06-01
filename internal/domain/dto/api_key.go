@@ -26,6 +26,10 @@ type APIKeyUpdate struct {
 
 // ... Responses ...
 
+type APIKeyRevealKeyResponse struct {
+	Key string `name:"key"`
+}
+
 type APIKeyValidateClientResponse struct {
 	ID   int    `name:"id"`
 	Name string `name:"name"`

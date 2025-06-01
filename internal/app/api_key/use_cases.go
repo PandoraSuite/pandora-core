@@ -2,6 +2,7 @@ package apikey
 
 import (
 	"github.com/MAD-py/pandora-core/internal/app/api_key/create"
+	revealkey "github.com/MAD-py/pandora-core/internal/app/api_key/reveal_key"
 	"github.com/MAD-py/pandora-core/internal/app/api_key/update"
 	validateconsume "github.com/MAD-py/pandora-core/internal/app/api_key/validate_consume"
 	validateonly "github.com/MAD-py/pandora-core/internal/app/api_key/validate_only"
@@ -70,4 +71,14 @@ func NewValidateConsumeUseCase(
 		requestRepo,
 		environmentRepo,
 	)
+}
+
+// ... Reveal Key Use Case ...
+
+type RevealKeyUseCase = revealkey.UseCase
+
+func NewRevealKeyUseCase(
+	validator validator.Validator, repo APIKeyRevealKeyRepository,
+) RevealKeyUseCase {
+	return revealkey.NewUseCase(validator, repo)
 }

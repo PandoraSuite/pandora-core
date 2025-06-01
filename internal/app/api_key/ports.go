@@ -2,6 +2,7 @@ package apikey
 
 import (
 	"github.com/MAD-py/pandora-core/internal/app/api_key/create"
+	revealkey "github.com/MAD-py/pandora-core/internal/app/api_key/reveal_key"
 	"github.com/MAD-py/pandora-core/internal/app/api_key/update"
 	validateconsume "github.com/MAD-py/pandora-core/internal/app/api_key/validate_consume"
 	validateonly "github.com/MAD-py/pandora-core/internal/app/api_key/validate_only"
@@ -30,3 +31,7 @@ type RequestValidateConsumeRepository = validateconsume.RequestRepository
 type ServiceValidateConsumeRepository = validateconsume.ServiceRepository
 type ProjectValidateConsumeRepository = validateconsume.ProjectRepository
 type EnvironmentValidateConsumeRepository = validateconsume.EnvironmentRepository
+
+// ... Reveal Key Use Case ...
+
+type APIKeyRevealKeyRepository = revealkey.APIKeyRepository
