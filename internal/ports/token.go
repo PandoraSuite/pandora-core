@@ -10,7 +10,7 @@ import (
 type TokenProvider interface {
 	// ... Generate ...
 	GenerateAccessToken(ctx context.Context, subject string) (*dto.TokenResponse, errors.Error)
-	GenerateScopedJWT(ctx context.Context, subject, scope string) (*dto.TokenResponse, errors.Error)
+	GenerateScopedToken(ctx context.Context, subject, scope string) (*dto.TokenResponse, errors.Error)
 
 	// ... Validate ...
 	ValidateAccessToken(ctx context.Context, token string) (string, errors.Error)

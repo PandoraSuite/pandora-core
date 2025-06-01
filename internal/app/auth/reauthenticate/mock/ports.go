@@ -82,17 +82,17 @@ func (m *MockTokenProvider) EXPECT() *MockTokenProviderMockRecorder {
 	return m.recorder
 }
 
-// ValidateScopedToken mocks base method.
-func (m *MockTokenProvider) ValidateScopedToken(ctx context.Context, subject, scope string) (*dto.TokenResponse, errors.Error) {
+// GenerateScopedToken mocks base method.
+func (m *MockTokenProvider) GenerateScopedToken(ctx context.Context, subject, scope string) (*dto.TokenResponse, errors.Error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ValidateScopedToken", ctx, subject, scope)
+	ret := m.ctrl.Call(m, "GenerateScopedToken", ctx, subject, scope)
 	ret0, _ := ret[0].(*dto.TokenResponse)
 	ret1, _ := ret[1].(errors.Error)
 	return ret0, ret1
 }
 
-// ValidateScopedToken indicates an expected call of ValidateScopedToken.
-func (mr *MockTokenProviderMockRecorder) ValidateScopedToken(ctx, subject, scope any) *gomock.Call {
+// GenerateScopedToken indicates an expected call of GenerateScopedToken.
+func (mr *MockTokenProviderMockRecorder) GenerateScopedToken(ctx, subject, scope any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateScopedToken", reflect.TypeOf((*MockTokenProvider)(nil).ValidateScopedToken), ctx, subject, scope)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GenerateScopedToken", reflect.TypeOf((*MockTokenProvider)(nil).GenerateScopedToken), ctx, subject, scope)
 }

@@ -22,9 +22,13 @@ func RegisterAuthRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
 	passChangeUC := auth.NewPasswordChangeUseCase(
 		deps.Validator, deps.CredentialsRepo,
 	)
+	reauthenticateUC := auth.NewReauthenticateUseCase(
+		deps.Validator, deps.TokenProvider, deps.CredentialsRepo,
+	)
 
 	auth := rg.Group("/auth")
 	{
 		auth.POST("/change-password", handlers.ChangePassword(passChangeUC))
+		auth.POST("/reauthenticate", handlers.Reauthenticate(reauthenticateUC))
 	}
 }

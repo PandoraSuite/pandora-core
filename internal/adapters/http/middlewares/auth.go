@@ -28,7 +28,7 @@ func ValidateToken(useCase auth.TokenValidationUseCase) gin.HandlerFunc {
 			return
 		}
 
-		username, err := useCase.Execute(c.Request.Context(), parts[0])
+		username, err := useCase.Execute(c.Request.Context(), parts[1])
 		if err != nil {
 			c.Error(err)
 			c.Abort()

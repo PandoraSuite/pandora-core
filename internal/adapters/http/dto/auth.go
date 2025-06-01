@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
+	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
 // ... Requests ...
@@ -23,7 +24,7 @@ func (a *Authenticate) ToDomain() *dto.Authenticate {
 }
 
 type ChangePassword struct {
-	Username        string `json:"username" binding:"required"`
+	Username        string `json:"-" swaggerignore:"true"`
 	NewPassword     string `json:"new_password" binding:"required"`
 	ConfirmPassword string `json:"confirm_password" binding:"required"`
 }
@@ -37,7 +38,19 @@ func (c *ChangePassword) ToDomain() *dto.ChangePassword {
 }
 
 type Reauthenticate struct {
-	Password string `form:"password" binding:"required"`
+	Action   string `json:"action" binding:"required" enums:"REVEAL_API_KEY"`
+	Username string `json:"-" swaggerignore:"true"`
+	Password string `json:"password" binding:"required"`
+}
+
+func (r *Reauthenticate) ToDomain() *dto.Reauthenticate {
+	return &dto.Reauthenticate{
+		Action: enums.SensitiveAction(r.Action),
+		Credentials: &dto.Credentials{
+			Username: r.Username,
+			Password: r.Password,
+		},
+	}
 }
 
 // ... Responses ...
@@ -49,7 +62,7 @@ type TokenReponse struct {
 }
 
 type AuthenticateResponse struct {
-	*TokenReponse      `json:"-"`
+	*TokenReponse
 	ForcePasswordReset bool `json:"force_password_reset"`
 }
 
@@ -65,7 +78,7 @@ func AuthenticateResponseFromDomain(auth *dto.AuthenticateResponse) *Authenticat
 }
 
 type ReauthenticateResponse struct {
-	*TokenReponse `json:"-"`
+	*TokenReponse
 }
 
 func ReauthenticateResponseFromDomain(auth *dto.ReauthenticateResponse) *ReauthenticateResponse {

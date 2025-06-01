@@ -17,7 +17,7 @@ import (
 // @Security OAuth2Password
 // @Accept json
 // @Produce json
-// @Param request body dto.ChangePassword true "New password and confirmation"
+// @Param body body dto.ChangePassword true "Change password request"
 // @Success 204
 // @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/auth/change-password [post]
@@ -72,5 +72,41 @@ func Authenticate(useCase auth.AutenticateUseCase) gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusOK, dto.AuthenticateResponseFromDomain(res))
+	}
+}
+
+// Reauthenticate godoc
+// @Summary Reauthenticate user
+// @Description Reauthenticates the user for sensitive actions like revealing API keys.
+// @Tags Authentication
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param body body dto.Reauthenticate true "Reauthentication request"
+// @Success 200 {object} dto.ReauthenticateResponse
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
+// @Router /api/v1/auth/reauthenticate [post]
+func Reauthenticate(useCase auth.ReauthenticateUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		username := c.GetString("username")
+		if username == "" {
+			c.Error(errors.NewInternal("Username not found in context"))
+			return
+		}
+
+		var req dto.Reauthenticate
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.Error(errors.BindJSONToHTTPError(req, err))
+			return
+		}
+
+		req.Username = username
+		res, err := useCase.Execute(c.Request.Context(), req.ToDomain())
+		if err != nil {
+			c.Error(err)
+			return
+		}
+
+		c.JSON(http.StatusOK, dto.ReauthenticateResponseFromDomain(res))
 	}
 }

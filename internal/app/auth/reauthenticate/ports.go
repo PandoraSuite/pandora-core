@@ -13,5 +13,5 @@ type CredentialsRepository interface {
 }
 
 type TokenProvider interface {
-	ValidateScopedToken(ctx context.Context, token, expectedScope string) (*dto.TokenResponse, errors.Error)
+	GenerateScopedToken(ctx context.Context, subject, scope string) (*dto.TokenResponse, errors.Error)
 }

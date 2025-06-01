@@ -141,8 +141,8 @@ const docTemplate = `{
                 "summary": "Change password",
                 "parameters": [
                     {
-                        "description": "New password and confirmation",
-                        "name": "request",
+                        "description": "Change password request",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -197,6 +197,51 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/dto.AuthenticateResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/errors.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/reauthenticate": {
+            "post": {
+                "security": [
+                    {
+                        "OAuth2Password": []
+                    }
+                ],
+                "description": "Reauthenticates the user for sensitive actions like revealing API keys.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Reauthenticate user",
+                "parameters": [
+                    {
+                        "description": "Reauthentication request",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.Reauthenticate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ReauthenticateResponse"
                         }
                     },
                     "default": {
@@ -1576,17 +1621,13 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "confirm_password",
-                "new_password",
-                "username"
+                "new_password"
             ],
             "properties": {
                 "confirm_password": {
                     "type": "string"
                 },
                 "new_password": {
-                    "type": "string"
-                },
-                "username": {
                     "type": "string"
                 }
             }
@@ -1943,6 +1984,38 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Reauthenticate": {
+            "type": "object",
+            "required": [
+                "action",
+                "password"
+            ],
+            "properties": {
+                "action": {
+                    "type": "string",
+                    "enum": [
+                        "REVEAL_API_KEY"
+                    ]
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ReauthenticateResponse": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "type": "string"
+                },
+                "expires_in": {
+                    "type": "string"
+                },
+                "token_type": {
                     "type": "string"
                 }
             }

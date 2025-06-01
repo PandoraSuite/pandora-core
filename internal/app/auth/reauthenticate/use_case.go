@@ -44,7 +44,7 @@ func (uc *useCase) Execute(
 		return nil, err
 	}
 
-	token, err := uc.tokenProvider.ValidateScopedToken(
+	token, err := uc.tokenProvider.GenerateScopedToken(
 		ctx, req.Username, string(scope),
 	)
 	if err != nil {

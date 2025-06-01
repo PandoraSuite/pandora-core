@@ -32,7 +32,7 @@ func (p *jwtProvider) GenerateAccessToken(
 	return p.signToken(claims, expTime)
 }
 
-func (p *jwtProvider) GenerateScopedJWT(
+func (p *jwtProvider) GenerateScopedToken(
 	ctx context.Context, subject, scope string,
 ) (*dto.TokenResponse, errors.Error) {
 	now := time.Now()
