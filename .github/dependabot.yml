@@ -10,9 +10,6 @@ updates:
       include: "scope"
     labels:
       - dependencies
-    ignore:
-      - dependency-name: "*"
-    security-updates: true
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
@@ -24,6 +21,3 @@ updates:
       include: "scope"
     labels:
       - dependencies
-    ignore:
-      - dependency-name: "*"
-    security-updates: true
