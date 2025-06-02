@@ -1,0 +1,12 @@
+*
+
+!go.mod
+!go.sum
+
+!cmd/
+!internal/
+
+!db/init.sql
+
+!docker/healthcheck.sh
+!docker/docker-entrypoint.sh
