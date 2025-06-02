@@ -78,18 +78,48 @@ air
 
 If using Visual Studio Code, you can create or edit `.vscode/launch.json`:
 
+**Local Debugging Configuration**
+  
 ```json
 {
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Connect to server",
+      "name": "Connect to server [Local]",
       "type": "go",
       "request": "attach",
       "mode": "remote",
       "remotePath": "${workspaceFolder}",
       "port": 2345,
       "host": "127.0.0.1",
+      "apiVersion": 2,
+      "showLog": true,
+      "trace": "verbose"
+    }
+  ]
+}
+```
+
+**Docker Debugging Configuration**
+  
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Connect to server [Docker]",
+      "type": "go",
+      "request": "attach",
+      "mode": "remote",
+      "remotePath": "/app",
+      "port": 2345,
+      "host": "127.0.0.1",
+      "substitutePath": [
+        {
+          "from": "${workspaceFolder}",
+          "to": "/app"
+        }
+      ],
       "apiVersion": 2,
       "showLog": true,
       "trace": "verbose"
@@ -120,7 +150,7 @@ You can export them manually in your shell before starting the application
 While running locally, **Pandora Core** may generate:
 
 * `./tmp/` — temporary directory for compiled binaries when using Air
-* `./storage/adminPanel/credentials.json` — root admin credentials file (created on first run)
+* `./{$PANDORA_DIR}/adminPanel/credentials.json` — root admin credentials file (created on first run)
 
 
 ## :whale: Running with Docker Compose
@@ -128,10 +158,10 @@ While running locally, **Pandora Core** may generate:
 **Pandora Core** provides a `docker-compose.yml` setup for local development. To run the service in a containerized environment, you'll need **Docker** and **Docker Compose** installed on your system.
 
 ```bash
-docker-compose -f docker/docker-compose.yml up --build
+docker compose -f docker/docker-compose.yml up --build
 ```
 
-To attach a debugger to the container: You can read the same configuration in [VSCode](#-vscode-example).
+**To attach a debugger to the container**: You can see the section [VSCode Example](#-vscode-example).
 
 ## :test_tube: Running Tests
 
@@ -149,7 +179,7 @@ We encourage writing tests for new features and keeping existing tests passing.
 pandora-core/
 ├── cmd/                  # Entrypoints: HTTP, gRPC, or combined
 ├── db/                   # Init scripts and database Dockerfile
-├── docker/               # docker-compose setup
+├── docker/               # Docker setup
 ├── internal/
 │   ├── adapters/         # HTTP, gRPC, persistence, security
 │   ├── app/              # Use case orchestration per domain
@@ -161,6 +191,7 @@ pandora-core/
 │   └── version/          # Build/versioning info
 ├── proto/                # Protocol Buffers definitions
 ```
+
 ## :raising_hand: Contributing
 
 We welcome contributions! Please see [`CONTRIBUTING.md`](./CONTRIBUTING.md) for guidelines.
