@@ -25,7 +25,7 @@ If you find a bug or unexpected behavior, please [open an issue](https://github.
 
 > Note: At the moment we don't use issue templates — just be as clear and concise as possible.
 
-## :box: Submitting Pull Requests
+## :package: Submitting Pull Requests
 
 We welcome pull requests to fix bugs, improve code quality, or add new functionality. Before submitting a PR:
 

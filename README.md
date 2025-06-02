@@ -27,7 +27,7 @@ Thanks to its architecture and clean design, **Pandora Core** offers an efficien
      madpydev/pandora-core:v0.1.0-beta.1
    ```
 
-   Pandora Core will start and expose ports **80** (HTTP) and **50051** (gRPC).
+   **Pandora Core** will start and expose ports **80** (HTTP) and **50051** (gRPC).
 
    > :rocket: **Tip:** To customize Pandora even further, check out the [Pandora Environment Variables](#gear-pandora-environment-variables) section below!
 
@@ -58,7 +58,7 @@ Thanks to its architecture and clean design, **Pandora Core** offers an efficien
 
 ## :thought_balloon: Use Cases
 
-Pandora Core provides centralized API Key generation, validation, and quota management for client projects and environments. It addresses the need to secure and monitor access to your services—particularly microservices and AI agents—by enabling fine-grained control over usage and simplifying authentication workflows.
+**Pandora Core** provides centralized API Key generation, validation, and quota management for client projects and environments. It addresses the need to secure and monitor access to your services—particularly microservices and AI agents—by enabling fine-grained control over usage and simplifying authentication workflows.
 
 * **Quickly onboard new customers** to your agents and LLM-based microservices by issuing API keys and applying specific usage limits for each of your customers' environments.
 
@@ -77,7 +77,7 @@ Pandora Core provides centralized API Key generation, validation, and quota mana
   * Manage clients, projects, environments and revoke/regenerate keys without using the REST API directly.
 
 * **Python SDK (Beta)**
-  A Python package to simplify integration with Pandora Core. Key features include:
+  A Python package to simplify integration with **Pandora Core**. Key features include:
 
   * **FastAPI integration** for seamless authentication and authorization out of the box.
   * **Automatic request** logging and quota enforcement at the service level.
@@ -92,7 +92,7 @@ Ready to dive in? For a full guide on setting up your development environment, r
 
 ## :compass: Project Status
 
-Pandora Core is under active development.
+**Pandora Core** is under active development.
 
 We're continuously working to enhance its capabilities.
 
