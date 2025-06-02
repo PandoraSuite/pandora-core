@@ -12,7 +12,6 @@ func getDir() string {
 		return value
 	}
 
-	log.Println("[WARNING] No configuration directory was provided. Using default path: /etc/pandora")
 	return "/etc/pandora"
 }
 
