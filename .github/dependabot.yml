@@ -8,8 +8,6 @@ updates:
     commit-message:
       prefix: "⬆"
       include: "scope"
-    reviewers:
-      - MAD-py
     labels:
       - dependencies
     ignore:
@@ -24,8 +22,6 @@ updates:
     commit-message:
       prefix: "⬆"
       include: "scope"
-    reviewers:
-      - MAD-py
     labels:
       - dependencies
     ignore:
