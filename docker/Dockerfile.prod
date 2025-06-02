@@ -1,0 +1,47 @@
+FROM golang:1.23.4-alpine AS builder
+
+RUN apk add --no-cache git
+
+WORKDIR /src
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+ARG VERSION
+
+RUN go build -o /pandora-core \
+  -ldflags "-X 'github.com/MAD-py/pandora-core/internal/version.Version=${VERSION}'" \
+  ./cmd
+
+FROM postgres:17.5-alpine
+
+RUN apk add --no-cache tini wget
+
+ENV GRPC_HEALTH_PROBE_VERSION=v0.4.38
+
+RUN wget -O /usr/local/bin/grpc_health_probe \
+  https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${GRPC_HEALTH_PROBE_VERSION}/grpc_health_probe-linux-amd64 \
+  && chmod +x /usr/local/bin/grpc_health_probe
+
+RUN addgroup -S pandora && adduser -S pandora -G pandora
+
+RUN mkdir -p /etc/pandora /var/lib/pandora /var/log/pandora
+
+COPY --from=builder /pandora-core /usr/local/bin/pandora-core
+
+COPY db/init.sql /docker-entrypoint-initdb.d
+COPY docker/healthcheck.sh /usr/local/bin/healthcheck.sh
+COPY docker/docker-entrypoint.sh /usr/local/bin/pandora-entrypoint.sh
+
+RUN chmod +x /usr/local/bin/pandora-entrypoint.sh \
+  && chmod +x /usr/local/bin/healthcheck.sh
+
+
+ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/pandora-entrypoint.sh"]
+
+EXPOSE 80 50051
+
+# HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+#   CMD /usr/local/bin/healthcheck.sh

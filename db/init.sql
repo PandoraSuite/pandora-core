@@ -1,6 +1,3 @@
-CREATE DATABASE pandora;
-
-\c pandora;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE IF NOT EXISTS service(
