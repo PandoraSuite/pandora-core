@@ -12,7 +12,7 @@ COPY . .
 ARG VERSION
 
 RUN go build -o /pandora-core \
-  -ldflags "-X 'github.com/MAD-py/pandora-core/internal/version.Version=${VERSION}'" \
+  -ldflags="-s -w -X 'github.com/MAD-py/pandora-core/internal/version.Version=${VERSION}'" \
   ./cmd
 
 FROM postgres:17.5-alpine
