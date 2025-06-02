@@ -13,7 +13,7 @@ Thanks to its architecture and clean design, **Pandora Core** offers an efficien
 1. **Pull the Docker image**
 
    ```bash
-   docker pull madpaydev/pandora-core:v0.1.0-beta.1
+   docker pull madpydev/pandora-core:v0.1.0-beta.1
    ```
 
 2. **Run the container**
