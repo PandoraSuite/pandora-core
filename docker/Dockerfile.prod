@@ -38,6 +38,8 @@ COPY docker/docker-entrypoint.sh /usr/local/bin/pandora-entrypoint.sh
 RUN chmod +x /usr/local/bin/pandora-entrypoint.sh \
   && chmod +x /usr/local/bin/healthcheck.sh
 
+ENV PANDORA_DB_USER=pandora
+ENV PANDORA_DB_NAME=pandora
 
 ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/pandora-entrypoint.sh"]
 

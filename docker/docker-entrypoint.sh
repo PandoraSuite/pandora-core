@@ -1,6 +1,12 @@
 #!/bin/sh
 set -e
 
+export POSTGRES_USER="$PANDORA_DB_USER"
+export POSTGRES_PASSWORD="$PANDORA_DB_PASSWORD"
+export POSTGRES_DB="$PANDORA_DB_NAME"
+
+export PANDORA_DB_DNS="host=localhost port=5432 user=$POSTGRES_USER password=$POSTGRES_PASSWORD dbname=$POSTGRES_DB sslmode=disable timezone=UTC"
+
 echo "[INFO] Launching PostgreSQL..."
 
 /usr/local/bin/docker-entrypoint.sh postgres > /var/log/pandora/postgres.log 2>&1 &
