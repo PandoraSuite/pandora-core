@@ -198,7 +198,7 @@ Follow this typical sequence to configure **Pandora Core**:
 
 3. **Update Request Status**: Update the status of a previously logged request after processing by the service.
 
-For detailed method signatures and message definitions, consult the `.proto` files in [pandora-proto](https://github.com/your_org/pandora-proto).
+For detailed method signatures and message definitions, consult the `.proto` files in [pandora-proto](https://github.com/PandoraSuite/pandora-proto).
 
 ## :package: Deployment
 
