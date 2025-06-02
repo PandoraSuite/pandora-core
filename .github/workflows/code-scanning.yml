@@ -8,7 +8,12 @@ on:
 
 jobs:
   scan:
+    name: Vet and Staticcheck
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
     steps:
       - uses: actions/checkout@v4
 

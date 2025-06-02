@@ -8,9 +8,15 @@ on:
 
 jobs:
   build:
+    name: Build and Test
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Extract Go version from go.mod
         id: go-version
@@ -21,11 +27,13 @@ jobs:
         with:
           go-version: ${{ steps.go-version.outputs.version }}
 
-      - name: Install dependencies
-        run: go mod tidy
+      - name: Ensure clean dependencies
+        run: |
+          go mod tidy
+          git diff --exit-code || (echo "::error::Uncommitted changes after tidy"; exit 1)
 
       - name: Build
         run: go build -v ./...
 
-      - name: Test
+      - name: Run tests
         run: go test -v ./...
