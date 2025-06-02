@@ -9,7 +9,7 @@ import (
 // ... Requests ...
 
 type APIKeyCreate struct {
-	ExpiresAt     time.Time `json:"expires_at"`
+	ExpiresAt     time.Time `json:"expires_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
 	EnvironmentID int       `json:"environment_id" binding:"required"`
 }
 
