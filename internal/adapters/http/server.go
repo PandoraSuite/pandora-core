@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -164,6 +165,17 @@ func (s *Server) Run(exposeVersion bool) {
 	gin.SetMode(gin.ReleaseMode)
 
 	router := gin.Default()
+
+	router.Use(
+		cors.New(
+			cors.Config{
+				AllowOrigins:     []string{"*"},
+				AllowMethods:     []string{"*"},
+				AllowHeaders:     []string{"*"},
+				AllowCredentials: false,
+			},
+		),
+	)
 
 	if exposeVersion {
 		router.Use(middleware.VersionHeader())
