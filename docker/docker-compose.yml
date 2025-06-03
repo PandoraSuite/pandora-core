@@ -11,3 +11,23 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+    networks:
+      - pandora-net
+
+  pandora:
+    build:
+      context: ..
+      dockerfile: ./docker/dockerfile
+    command: ["/app/server"]
+    ports:
+      - "8000:80"
+    depends_on:
+      - pandora-db
+    environment:
+      - PANDORA_DB_DNS=postgres://postgres:postgres@pandora-db:5432/pandora?sslmode=disable
+    networks:
+      - pandora-net
+
+networks:
+  pandora-net:
+    driver: bridge
