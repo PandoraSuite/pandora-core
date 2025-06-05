@@ -1,4 +1,4 @@
-name: Code Scanning
+name: Code Scanning with Vet & Staticcheck
 
 on:
   push:
@@ -8,14 +8,15 @@ on:
 
 jobs:
   scan:
-    name: Vet and Staticcheck
+    name: Analyze Go Code Quality
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Extract Go version from go.mod
         id: go-version
@@ -30,7 +31,9 @@ jobs:
         run: go vet ./...
 
       - name: Install staticcheck
-        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@latest
+          echo "${GOPATH}/bin" >> $GITHUB_PATH
 
       - name: Run staticcheck
         run: staticcheck ./...
