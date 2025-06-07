@@ -9,8 +9,8 @@ import (
 // ... Requests ...
 
 type EnvironmentService struct {
-	ID         int `name:"id" validate:"required,gt=0"`
-	MaxRequest int `name:"max_request" validate:"omitempty,gte=-1"`
+	ID          int `name:"id" validate:"required,gt=0"`
+	MaxRequests int `name:"max_requests" validate:"omitempty,gte=-1"`
 }
 
 type EnvironmentCreate struct {
@@ -25,7 +25,7 @@ type EnvironmentUpdate struct {
 }
 
 type EnvironmentServiceUpdateInput struct {
-	MaxRequest int `name:"max_request" validate:"omitempty,gte=-1"`
+	MaxRequests int `name:"max_requests" validate:"omitempty,gte=-1"`
 }
 
 // ... Responses ...
@@ -34,7 +34,7 @@ type EnvironmentServiceResponse struct {
 	ID               int       `name:"id"`
 	Name             string    `name:"name"`
 	Version          string    `name:"version"`
-	MaxRequest       int       `name:"max_request"`
+	MaxRequests      int       `name:"max_requests"`
 	AvailableRequest int       `name:"available_request"`
 	AssignedAt       time.Time `name:"assigned_at"`
 }
@@ -60,7 +60,7 @@ type EnvironmentServiceReset struct {
 // ... Internal ...
 
 type DecrementAvailableRequest struct {
-	MaxRequest       int `name:"max_request"`
+	MaxRequests      int `name:"max_requests"`
 	AvailableRequest int `name:"available_request"`
 }
 
@@ -70,6 +70,6 @@ type QuotaUsage struct {
 }
 
 type EnvironmentServiceUpdate struct {
-	MaxRequest       int `name:"max_request"`
+	MaxRequests      int `name:"max_requests"`
 	AvailableRequest int `name:"available_request"`
 }

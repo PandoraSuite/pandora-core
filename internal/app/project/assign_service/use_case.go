@@ -29,7 +29,7 @@ func (uc *useCase) Execute(
 
 	service := &entities.ProjectService{
 		ID:             req.ID,
-		MaxRequest:     req.MaxRequest,
+		MaxRequests:    req.MaxRequests,
 		ResetFrequency: req.ResetFrequency,
 	}
 
@@ -51,7 +51,7 @@ func (uc *useCase) Execute(
 		Name:           service.Name,
 		Version:        service.Version,
 		NextReset:      service.NextReset,
-		MaxRequest:     service.MaxRequest,
+		MaxRequests:    service.MaxRequests,
 		ResetFrequency: service.ResetFrequency,
 		AssignedAt:     service.AssignedAt,
 	}, nil
@@ -91,7 +91,7 @@ func (uc *useCase) validateReq(req *dto.ProjectService) errors.Error {
 		map[string]string{
 			"id.gt":                 "id must be greater than 0",
 			"id.required":           "id is required",
-			"max_request.gte":       "max_request must be greater than or equal to -1",
+			"max_requests.gte":      "max_requests must be greater than or equal to -1",
 			"reset_frequency.enums": "reset_frequency must be one of the following: , daily, weekly, biweekly, monthly",
 		},
 	)
@@ -100,25 +100,25 @@ func (uc *useCase) validateReq(req *dto.ProjectService) errors.Error {
 		err = errors.Aggregate(err, validationErr)
 	}
 
-	if req.MaxRequest == -1 && req.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
+	if req.MaxRequests == -1 && req.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
 		err = errors.Aggregate(
 			err,
 			errors.NewAttributeValidationFailed(
 				"ProjectService",
 				"reset_frequency",
-				"reset_frequency must be null when max_request is -1 (unlimited)",
+				"reset_frequency must be null when max_requests is -1 (unlimited)",
 				nil,
 			),
 		)
 	}
 
-	if req.MaxRequest > -1 && req.ResetFrequency == enums.ProjectServiceResetFrequencyNull {
+	if req.MaxRequests > -1 && req.ResetFrequency == enums.ProjectServiceResetFrequencyNull {
 		err = errors.Aggregate(
 			err,
 			errors.NewAttributeValidationFailed(
 				"ProjectService",
 				"reset_frequency",
-				"reset_frequency is required when max_request is greater than -1 (unlimited)",
+				"reset_frequency is required when max_requests is greater than -1 (unlimited)",
 				nil,
 			),
 		)

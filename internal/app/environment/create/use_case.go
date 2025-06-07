@@ -63,26 +63,26 @@ func (uc *useCase) Execute(
 		}
 
 		if quota.MaxAllowed > -1 {
-			if service.MaxRequest == -1 {
+			if service.MaxRequests == -1 {
 				errs = errors.Aggregate(
 					errs,
 					errors.NewAttributeValidationFailed(
 						"EnvironmentCreate",
-						fmt.Sprintf("services[%d].max_request", i),
-						"max_request cannot be -1 (unlimited) if the project has a defined limit",
+						fmt.Sprintf("services[%d].max_requests", i),
+						"max_requests cannot be -1 (unlimited) if the project has a defined limit",
 						nil,
 					),
 				)
 				continue
 			}
 
-			if quota.CurrentAllocated+service.MaxRequest > quota.MaxAllowed {
+			if quota.CurrentAllocated+service.MaxRequests > quota.MaxAllowed {
 				errs = errors.Aggregate(
 					errs,
 					errors.NewAttributeValidationFailed(
 						"EnvironmentCreate",
-						fmt.Sprintf("services[%d].max_request", i),
-						"max_request exceeded for service in project",
+						fmt.Sprintf("services[%d].max_requests", i),
+						"max_requests exceeded for service in project",
 						nil,
 					),
 				)
@@ -92,8 +92,8 @@ func (uc *useCase) Execute(
 
 		services[i] = &entities.EnvironmentService{
 			ID:               service.ID,
-			MaxRequest:       service.MaxRequest,
-			AvailableRequest: service.MaxRequest,
+			MaxRequests:      service.MaxRequests,
+			AvailableRequest: service.MaxRequests,
 		}
 	}
 
@@ -120,7 +120,7 @@ func (uc *useCase) Execute(
 			ID:               service.ID,
 			Name:             service.Name,
 			Version:          service.Version,
-			MaxRequest:       service.MaxRequest,
+			MaxRequests:      service.MaxRequests,
 			AvailableRequest: service.AvailableRequest,
 			AssignedAt:       service.AssignedAt,
 		}
@@ -140,12 +140,12 @@ func (uc *useCase) validateReq(req *dto.EnvironmentCreate) errors.Error {
 	return uc.validator.ValidateStruct(
 		req,
 		map[string]string{
-			"name.required":              "name is required",
-			"project_id.gt":              "project_id must be greater than 0",
-			"services[].id.gt":           "id must be greater than 0",
-			"project_id.required":        "project_id is required",
-			"services[].id.required":     "id is required",
-			"services[].max_request.gte": "max_request must be greater than or equal to -1",
+			"name.required":               "name is required",
+			"project_id.gt":               "project_id must be greater than 0",
+			"services[].id.gt":            "id must be greater than 0",
+			"project_id.required":         "project_id is required",
+			"services[].id.required":      "id is required",
+			"services[].max_requests.gte": "max_requests must be greater than or equal to -1",
 		},
 	)
 }

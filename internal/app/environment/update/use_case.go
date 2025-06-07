@@ -38,7 +38,7 @@ func (uc *useCase) Execute(
 			ID:               service.ID,
 			Name:             service.Name,
 			Version:          service.Version,
-			MaxRequest:       service.MaxRequest,
+			MaxRequests:      service.MaxRequests,
 			AvailableRequest: service.AvailableRequest,
 			AssignedAt:       service.AssignedAt,
 		}

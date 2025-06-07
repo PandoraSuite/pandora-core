@@ -37,7 +37,7 @@ func (uc *useCase) Execute(
 
 		s := &entities.ProjectService{
 			ID:             service.ID,
-			MaxRequest:     service.MaxRequest,
+			MaxRequests:    service.MaxRequests,
 			ResetFrequency: service.ResetFrequency,
 		}
 		s.CalculateNextReset()
@@ -68,7 +68,7 @@ func (uc *useCase) Execute(
 			Name:           service.Name,
 			Version:        service.Version,
 			NextReset:      service.NextReset,
-			MaxRequest:     service.MaxRequest,
+			MaxRequests:    service.MaxRequests,
 			ResetFrequency: service.ResetFrequency,
 			AssignedAt:     service.AssignedAt,
 		}
@@ -94,7 +94,7 @@ func (uc *useCase) validateReq(req *dto.ProjectCreate) errors.Error {
 			"client_id.required":               "client_id is required",
 			"services[].id.gt":                 "id must be greater than 0",
 			"services[].id.required":           "id is required",
-			"services[].max_request.gte":       "max_request must be greater than or equal to -1",
+			"services[].max_requests.gte":      "max_requests must be greater than or equal to -1",
 			"services[].reset_frequency.enums": "reset_frequency must be one of the following: , daily, weekly, biweekly, monthly",
 		},
 	)
@@ -103,25 +103,25 @@ func (uc *useCase) validateReq(req *dto.ProjectCreate) errors.Error {
 func (uc *useCase) validateService(req *dto.ProjectService) errors.Error {
 	var err errors.Error
 
-	if req.MaxRequest == -1 && req.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
+	if req.MaxRequests == -1 && req.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
 		err = errors.Aggregate(
 			err,
 			errors.NewAttributeValidationFailed(
 				"ProjectService",
 				"reset_frequency",
-				"reset_frequency must be null when max_request is -1 (unlimited)",
+				"reset_frequency must be null when max_requests is -1 (unlimited)",
 				nil,
 			),
 		)
 	}
 
-	if req.MaxRequest > -1 && req.ResetFrequency == enums.ProjectServiceResetFrequencyNull {
+	if req.MaxRequests > -1 && req.ResetFrequency == enums.ProjectServiceResetFrequencyNull {
 		err = errors.Aggregate(
 			err,
 			errors.NewAttributeValidationFailed(
 				"ProjectService",
 				"reset_frequency",
-				"reset_frequency is required when max_request is greater than -1 (unlimited)",
+				"reset_frequency is required when max_requests is greater than -1 (unlimited)",
 				nil,
 			),
 		)

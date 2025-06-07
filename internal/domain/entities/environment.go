@@ -11,7 +11,7 @@ type EnvironmentService struct {
 
 	Name             string
 	Version          string
-	MaxRequest       int
+	MaxRequests      int
 	AvailableRequest int
 
 	AssignedAt time.Time

@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS project_service(
     CONSTRAINT project_service_reset_frequency_check
         CHECK (reset_frequency IN ('daily', 'weekly', 'biweekly', 'monthly')),
 
-    max_request INTEGER,
+    max_requests INTEGER,
     next_reset TIMESTAMPTZ,
 
     created_at TIMESTAMPTZ DEFAULT NOW()
@@ -111,15 +111,15 @@ CREATE TABLE IF NOT EXISTS environment_service(
 
     CONSTRAINT environment_service_unique UNIQUE (environment_id, service_id),
 
-    max_request INTEGER,
+    max_requests INTEGER,
     available_request INTEGER,
     CONSTRAINT check_available_less_than_or_equal_max
-        CHECK (available_request <= max_request),
+        CHECK (available_request <= max_requests),
     CONSTRAINT check_max_and_available_present_together
         CHECK (
-            (max_request IS NOT NULL AND available_request IS NOT NULL)
+            (max_requests IS NOT NULL AND available_request IS NOT NULL)
             OR
-            (max_request IS NULL AND available_request IS NULL)
+            (max_requests IS NULL AND available_request IS NULL)
         ),
 
     created_at TIMESTAMPTZ DEFAULT NOW()

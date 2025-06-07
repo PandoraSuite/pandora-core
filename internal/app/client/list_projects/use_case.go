@@ -56,7 +56,7 @@ func (uc *useCase) Execute(
 				Name:           service.Name,
 				Version:        service.Version,
 				NextReset:      service.NextReset,
-				MaxRequest:     service.MaxRequest,
+				MaxRequests:    service.MaxRequests,
 				ResetFrequency: service.ResetFrequency,
 				AssignedAt:     service.AssignedAt,
 			}

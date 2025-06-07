@@ -29,7 +29,7 @@ func (uc *useCase) Execute(
 
 	if req.NextReset.IsZero() {
 		service := entities.ProjectService{
-			MaxRequest:     req.MaxRequest,
+			MaxRequests:    req.MaxRequests,
 			ResetFrequency: req.ResetFrequency,
 		}
 
@@ -72,12 +72,12 @@ func (uc *useCase) Execute(
 		return nil, err
 	}
 
-	if req.MaxRequest != -1 {
-		if req.MaxRequest < quota.CurrentAllocated {
+	if req.MaxRequests != -1 {
+		if req.MaxRequests < quota.CurrentAllocated {
 			return nil, errors.NewAttributeValidationFailed(
 				"ProjectServiceUpdate",
-				"max_request",
-				"max_request is below the total allocated to environments",
+				"max_requests",
+				"max_requests is below the total allocated to environments",
 				nil,
 			)
 		}
@@ -90,7 +90,7 @@ func (uc *useCase) Execute(
 
 		if hasInfinite {
 			return nil, errors.NewValidationFailed(
-				"cannot set a finite max_request while some environments have infinite quota",
+				"cannot set a finite max_requests while some environments have infinite quota",
 				nil,
 			)
 		}
@@ -106,7 +106,7 @@ func (uc *useCase) Execute(
 		Name:           service.Name,
 		Version:        service.Version,
 		NextReset:      service.NextReset,
-		MaxRequest:     service.MaxRequest,
+		MaxRequests:    service.MaxRequests,
 		ResetFrequency: service.ResetFrequency,
 		AssignedAt:     service.AssignedAt,
 	}, nil
@@ -161,7 +161,7 @@ func (uc *useCase) validateReq(req *dto.ProjectServiceUpdate) errors.Error {
 		req,
 		map[string]string{
 			"next_reset.utc":        "next_reset must be a valid UTC datetime",
-			"max_request.gte":       "max_request must be greater than or equal to -1",
+			"max_requests.gte":      "max_requests must be greater than or equal to -1",
 			"reset_frequency.enums": "reset_frequency must be one of the following: , daily, weekly, biweekly, monthly",
 		},
 	)
@@ -170,25 +170,25 @@ func (uc *useCase) validateReq(req *dto.ProjectServiceUpdate) errors.Error {
 		err = errors.Aggregate(err, validationErr)
 	}
 
-	if req.MaxRequest == -1 && req.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
+	if req.MaxRequests == -1 && req.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
 		err = errors.Aggregate(
 			err,
 			errors.NewAttributeValidationFailed(
 				"ProjectServiceUpdate",
 				"reset_frequency",
-				"reset_frequency must be null when max_request is -1 (unlimited)",
+				"reset_frequency must be null when max_requests is -1 (unlimited)",
 				nil,
 			),
 		)
 	}
 
-	if req.MaxRequest > -1 && req.ResetFrequency == enums.ProjectServiceResetFrequencyNull {
+	if req.MaxRequests > -1 && req.ResetFrequency == enums.ProjectServiceResetFrequencyNull {
 		err = errors.Aggregate(
 			err,
 			errors.NewAttributeValidationFailed(
 				"ProjectServiceUpdate",
 				"reset_frequency",
-				"reset_frequency is required when max_request is greater than -1 (unlimited)",
+				"reset_frequency is required when max_requests is greater than -1 (unlimited)",
 				nil,
 			),
 		)
@@ -206,13 +206,13 @@ func (uc *useCase) validateReq(req *dto.ProjectServiceUpdate) errors.Error {
 				),
 			)
 		}
-		if req.MaxRequest == -1 {
+		if req.MaxRequests == -1 {
 			err = errors.Aggregate(
 				err,
 				errors.NewAttributeValidationFailed(
 					"ProjectServiceUpdate",
 					"next_reset",
-					"next_reset must be null when max_request is -1 (unlimited)",
+					"next_reset must be null when max_requests is -1 (unlimited)",
 					nil,
 				),
 			)

@@ -70,28 +70,28 @@ func (uc *useCase) Execute(
 	}
 
 	if quota.MaxAllowed != -1 {
-		if req.MaxRequest == -1 {
+		if req.MaxRequests == -1 {
 			return nil, errors.NewAttributeValidationFailed(
 				"EnvironmentServiceUpdateInput",
-				"max_request",
-				"max_request cannot be -1 (unlimited) if the project has a defined limit",
+				"max_requests",
+				"max_requests cannot be -1 (unlimited) if the project has a defined limit",
 				nil,
 			)
 		}
 
-		if quota.CurrentAllocated-service.MaxRequest+req.MaxRequest > quota.MaxAllowed {
+		if quota.CurrentAllocated-service.MaxRequests+req.MaxRequests > quota.MaxAllowed {
 			return nil, errors.NewAttributeValidationFailed(
 				"EnvironmentCreate",
-				"max_request",
-				"max_request exceeded for service in project",
+				"max_requests",
+				"max_requests exceeded for service in project",
 				nil,
 			)
 		}
 	}
 
-	update := &dto.EnvironmentServiceUpdate{MaxRequest: req.MaxRequest}
-	if service.AvailableRequest == -1 || service.AvailableRequest > req.MaxRequest {
-		update.AvailableRequest = req.MaxRequest
+	update := &dto.EnvironmentServiceUpdate{MaxRequests: req.MaxRequests}
+	if service.AvailableRequest == -1 || service.AvailableRequest > req.MaxRequests {
+		update.AvailableRequest = req.MaxRequests
 	} else {
 		update.AvailableRequest = service.AvailableRequest
 	}
@@ -107,7 +107,7 @@ func (uc *useCase) Execute(
 		ID:               service.ID,
 		Name:             service.Name,
 		Version:          service.Version,
-		MaxRequest:       service.MaxRequest,
+		MaxRequests:      service.MaxRequests,
 		AvailableRequest: service.AvailableRequest,
 		AssignedAt:       service.AssignedAt,
 	}, nil
@@ -161,7 +161,7 @@ func (uc *useCase) validateReq(req *dto.EnvironmentServiceUpdateInput) errors.Er
 	return uc.validator.ValidateStruct(
 		req,
 		map[string]string{
-			"max_request.gte": "max_request must be greater than or equal to -1",
+			"max_requests.gte": "max_requests must be greater than or equal to -1",
 		},
 	)
 }

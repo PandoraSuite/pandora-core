@@ -13,7 +13,7 @@ type ProjectService struct {
 	Name           string
 	Version        string
 	NextReset      time.Time
-	MaxRequest     int
+	MaxRequests    int
 	ResetFrequency enums.ProjectServiceResetFrequency
 
 	AssignedAt time.Time

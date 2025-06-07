@@ -44,7 +44,7 @@ func (uc *useCase) Execute(ctx context.Context, id int) (*dto.EnvironmentRespons
 			ID:               service.ID,
 			Name:             service.Name,
 			Version:          service.Version,
-			MaxRequest:       service.MaxRequest,
+			MaxRequests:      service.MaxRequests,
 			AvailableRequest: service.AvailableRequest,
 			AssignedAt:       service.AssignedAt,
 		}

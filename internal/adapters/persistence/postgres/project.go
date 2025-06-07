@@ -108,18 +108,18 @@ func (r *ProjectRepository) resetAvailableRequestsForEnvsService(
 	query := `
 		WITH updated AS (
 			UPDATE environment_service es
-			SET available_request = max_request
+			SET available_request = max_requests
 			FROM project p
 				JOIN environment e ON e.project_id = p.id
 			WHERE es.environment_id = e.id AND p.id = $1 AND es.service_id = $2
-			RETURNING e.id, e.name, e.status, es.max_request,
+			RETURNING e.id, e.name, e.status, es.max_requests,
 				es.available_request, es.created_at, es.service_id
 		)
 		SELECT u.id, u.name, u.status, JSON_BUILD_OBJECT(
 			'id', s.id,
 			'name', s.name,
 			'version', s.version,
-			'max_request', COALESCE(u.max_request, -1),
+			'max_requests', COALESCE(u.max_requests, -1),
 			'available_request', COALESCE(u.available_request, -1),
 			'assigned_at', u.created_at
 		)
@@ -170,7 +170,7 @@ func (r *ProjectRepository) GetServiceByID(
 ) (*entities.ProjectService, errors.Error) {
 	query := `
 		SELECT s.id, s.name, s.version,
-			COALESCE(ps.max_request, -1),
+			COALESCE(ps.max_requests, -1),
 			COALESCE(ps.reset_frequency, ''),
 			COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
 			ps.created_at
@@ -185,7 +185,7 @@ func (r *ProjectRepository) GetServiceByID(
 		&service.ID,
 		&service.Name,
 		&service.Version,
-		&service.MaxRequest,
+		&service.MaxRequests,
 		&service.ResetFrequency,
 		&service.NextReset,
 		&service.AssignedAt,
@@ -207,12 +207,12 @@ func (r *ProjectRepository) UpdateService(
 	query := `
 		WITH updated AS (
 			UPDATE project_service
-			SET max_request = $3, reset_frequency = $4, next_reset = $5
+			SET max_requests = $3, reset_frequency = $4, next_reset = $5
 			WHERE project_id = $1 AND service_id = $2
 			RETURNING *
 		)
 		SELECT s.id, s.name, s.version,
-			COALESCE(u.max_request, -1),
+			COALESCE(u.max_requests, -1),
 			COALESCE(u.reset_frequency, ''),
 			COALESCE(u.next_reset, '0001-01-01 00:00:00.0+00'),
 			u.created_at
@@ -226,8 +226,8 @@ func (r *ProjectRepository) UpdateService(
 	}
 
 	var maxRequest any
-	if update.MaxRequest != -1 {
-		maxRequest = update.MaxRequest
+	if update.MaxRequests != -1 {
+		maxRequest = update.MaxRequests
 	}
 
 	var nextReset any
@@ -248,7 +248,7 @@ func (r *ProjectRepository) UpdateService(
 		&service.ID,
 		&service.Name,
 		&service.Version,
-		&service.MaxRequest,
+		&service.MaxRequests,
 		&service.ResetFrequency,
 		&service.NextReset,
 		&service.AssignedAt,
@@ -383,7 +383,7 @@ func (r *ProjectRepository) GetProjectServiceQuotaUsage(
 	ctx context.Context, id, serviceID int,
 ) (*dto.QuotaUsage, errors.Error) {
 	query := `
-		SELECT COALESCE(ps.max_request, -1), COALESCE(SUM(es.max_request), 0)
+		SELECT COALESCE(ps.max_requests, -1), COALESCE(SUM(es.max_requests), 0)
 		FROM project_service ps
 			LEFT JOIN environment e
 				ON e.project_id = ps.project_id
@@ -391,7 +391,7 @@ func (r *ProjectRepository) GetProjectServiceQuotaUsage(
 				ON es.environment_id = e.id
 				AND es.service_id = ps.service_id
 		WHERE ps.project_id = $1 AND ps.service_id = $2
-		GROUP BY ps.max_request;
+		GROUP BY ps.max_requests;
 	`
 
 	quota := new(dto.QuotaUsage)
@@ -414,7 +414,7 @@ func (r *ProjectRepository) GetByID(
 						'name', s.name,
 						'version', s.version,
 						'nextReset', COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
-						'maxRequest', COALESCE(ps.max_request, -1),
+						'maxRequest', COALESCE(ps.max_requests, -1),
 						'resetFrequency', COALESCE(ps.reset_frequency, ''),
 						'assignedAt', ps.created_at
 					)
@@ -455,7 +455,7 @@ func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, erro
 						'name', s.name,
 						'version', s.version,
 						'nextReset', COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
-						'maxRequest', COALESCE(ps.max_request, -1),
+						'maxRequest', COALESCE(ps.max_requests, -1),
 						'resetFrequency', COALESCE(ps.reset_frequency, ''),
 						'assignedAt', ps.created_at
 					)
@@ -514,7 +514,7 @@ func (r *ProjectRepository) ListByClient(
 						'name', s.name,
 						'version', s.version,
 						'nextReset', COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
-						'maxRequest', COALESCE(ps.max_request, -1),
+						'maxRequest', COALESCE(ps.max_requests, -1),
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
 					)
@@ -569,7 +569,7 @@ func (r *ProjectRepository) AddService(
 ) errors.Error {
 	query := `
 		WITH inserted AS (
-			INSERT INTO project_service (project_id, service_id, max_request, reset_frequency, next_reset)
+			INSERT INTO project_service (project_id, service_id, max_requests, reset_frequency, next_reset)
 			VALUES ($1, $2, $3, $4, $5)
 			RETURNING service_id, created_at
 		)
@@ -585,8 +585,8 @@ func (r *ProjectRepository) AddService(
 	}
 
 	var maxRequest any
-	if service.MaxRequest != -1 {
-		maxRequest = service.MaxRequest
+	if service.MaxRequests != -1 {
+		maxRequest = service.MaxRequests
 	}
 
 	err := r.pool.QueryRow(
@@ -679,8 +679,8 @@ func (r *ProjectRepository) createProjectServices(
 		}
 
 		var maxRequest any
-		if service.MaxRequest != -1 {
-			maxRequest = service.MaxRequest
+		if service.MaxRequests != -1 {
+			maxRequest = service.MaxRequests
 		}
 
 		var nextReset any
@@ -703,14 +703,14 @@ func (r *ProjectRepository) createProjectServices(
 		`
 			WITH inserted AS (
 				INSERT INTO project_service (
-					project_id, service_id, max_request, reset_frequency, next_reset
+					project_id, service_id, max_requests, reset_frequency, next_reset
 				)
 				VALUES %s
 				RETURNING *
 			)
 			SELECT s.id, s.name, s.version, i.created_at,
 				COALESCE(i.reset_frequency, ''),
-				COALESCE(i.max_request, -1),
+				COALESCE(i.max_requests, -1),
 				COALESCE(i.next_reset, '0001-01-01 00:00:00.0+00')
 			FROM inserted i
 				JOIN service s ON i.service_id = s.id;
@@ -735,7 +735,7 @@ func (r *ProjectRepository) createProjectServices(
 			&service.Version,
 			&service.AssignedAt,
 			&service.ResetFrequency,
-			&service.MaxRequest,
+			&service.MaxRequests,
 			&service.NextReset,
 		)
 		if err != nil {

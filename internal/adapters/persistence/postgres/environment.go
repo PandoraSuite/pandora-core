@@ -29,7 +29,7 @@ func (r *EnvironmentRepository) ExistsServiceWithInfiniteMaxRequest(
 			FROM environment_service es
 				JOIN environment e ON es.environment_id = e.id
 			WHERE e.project_id = $1 AND es.service_id = $2
-				AND es.max_request IS NULL
+				AND es.max_requests IS NULL
 		);
 	`
 
@@ -48,12 +48,12 @@ func (r *EnvironmentRepository) ResetAvailableRequests(
 	query := `
 		WITH updated AS (
 			UPDATE environment_service
-			SET available_request = max_request
+			SET available_request = max_requests
 			WHERE environment_id = $1 AND service_id = $2
 			RETURNING *
 		)
 		SELECT s.id, s.name, s.version, u.created_at,
-			COALESCE(u.max_request, -1),
+			COALESCE(u.max_requests, -1),
 			COALESCE(u.available_request, -1)
 		FROM updated u
 			JOIN service s ON u.service_id = s.id;
@@ -65,7 +65,7 @@ func (r *EnvironmentRepository) ResetAvailableRequests(
 		&service.Name,
 		&service.Version,
 		&service.AssignedAt,
-		&service.MaxRequest,
+		&service.MaxRequests,
 		&service.AvailableRequest,
 	)
 	return service, r.errorMapper(err, r.auxServiceTableName)
@@ -141,12 +141,12 @@ func (r *EnvironmentRepository) UpdateService(
 	query := `
 		WITH updated AS (
 			UPDATE environment_service
-			SET max_request = $3, available_request = $4
+			SET max_requests = $3, available_request = $4
 			WHERE environment_id = $1 AND service_id = $2
 			RETURNING *
 		)
 		SELECT s.id, s.name, s.version, u.created_at,
-			COALESCE(u.max_request, -1),
+			COALESCE(u.max_requests, -1),
 			COALESCE(u.available_request, -1)
 		FROM updated u
 			JOIN service s
@@ -154,8 +154,8 @@ func (r *EnvironmentRepository) UpdateService(
 	`
 
 	var maxRequest any
-	if update.MaxRequest != -1 {
-		maxRequest = update.MaxRequest
+	if update.MaxRequests != -1 {
+		maxRequest = update.MaxRequests
 	}
 
 	var availableRequest any
@@ -176,7 +176,7 @@ func (r *EnvironmentRepository) UpdateService(
 		&service.Name,
 		&service.Version,
 		&service.AssignedAt,
-		&service.MaxRequest,
+		&service.MaxRequests,
 		&service.AvailableRequest,
 	)
 	if err != nil {
@@ -308,7 +308,7 @@ func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
 	ctx context.Context, id, serviceID int,
 ) (*dto.QuotaUsage, errors.Error) {
 	query := `
-		SELECT COALESCE(ps.max_request, -1), COALESCE(SUM(es.max_request), 0)
+		SELECT COALESCE(ps.max_requests, -1), COALESCE(SUM(es.max_requests), 0)
 		FROM environment e_target
 			JOIN project_service ps
 				ON ps.project_id = e_target.project_id
@@ -319,7 +319,7 @@ func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
 				ON es.environment_id = e.id
 				AND es.service_id = ps.service_id
 		WHERE e_target.id = $1
-		GROUP BY ps.max_request;
+		GROUP BY ps.max_requests;
 	`
 
 	quota := new(dto.QuotaUsage)
@@ -343,7 +343,7 @@ func (r *EnvironmentRepository) IncreaseAvailableRequest(
 			END
 		WHERE environment_id = $1 AND service_id = $2
 			AND (available_request IS NULL OR available_request > 0)
-		RETURNING COALESCE(max_request, -1), COALESCE(available_request, -1);
+		RETURNING COALESCE(max_requests, -1), COALESCE(available_request, -1);
 	`
 
 	result, err := r.pool.Exec(
@@ -375,13 +375,13 @@ func (r *EnvironmentRepository) DecrementAvailableRequest(
 			END
 		WHERE environment_id = $1 AND service_id = $2
 			AND (available_request IS NULL OR available_request > 0)
-		RETURNING COALESCE(max_request, -1), COALESCE(available_request, -1);
+		RETURNING COALESCE(max_requests, -1), COALESCE(available_request, -1);
 	`
 
 	result := new(dto.DecrementAvailableRequest)
 	err := r.pool.QueryRow(ctx, query, id, serviceID).
 		Scan(
-			&result.MaxRequest,
+			&result.MaxRequests,
 			&result.AvailableRequest,
 		)
 
@@ -417,7 +417,7 @@ func (r *EnvironmentRepository) GetServiceByID(
 ) (*entities.EnvironmentService, errors.Error) {
 	query := `
 		SELECT s.id, s.name, s.version, es.created_at,
-			COALESCE(es.max_request, -1),
+			COALESCE(es.max_requests, -1),
 			COALESCE(es.available_request, -1)
 		FROM environment_service es
 			JOIN service s ON s.id = es.service_id
@@ -430,7 +430,7 @@ func (r *EnvironmentRepository) GetServiceByID(
 		&service.Name,
 		&service.Version,
 		&service.AssignedAt,
-		&service.MaxRequest,
+		&service.MaxRequests,
 		&service.AvailableRequest,
 	)
 	if err != nil {
@@ -451,7 +451,7 @@ func (r *EnvironmentRepository) GetByID(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'maxRequest', COALESCE(es.max_request, -1),
+						'maxRequest', COALESCE(es.max_requests, -1),
 						'availableRequest', COALESCE(es.available_request, -1),
 						'assignedAt', es.created_at
 					)
@@ -492,7 +492,7 @@ func (r *EnvironmentRepository) ListByProject(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'maxRequest', COALESCE(es.max_request, -1),
+						'maxRequest', COALESCE(es.max_requests, -1),
 						'availableRequest', COALESCE(es.available_request, -1),
 						'assignedAt', es.created_at
 					)
@@ -547,7 +547,7 @@ func (r *EnvironmentRepository) AddService(
 	query := `
 		WITH inserted AS (
 			INSERT INTO environment_service (
-				environment_id, service_id, max_request, available_request
+				environment_id, service_id, max_requests, available_request
 			)
 			VALUES ($1, $2, $3, $4)
 			RETURNING service_id, created_at
@@ -558,8 +558,8 @@ func (r *EnvironmentRepository) AddService(
 	`
 
 	var maxRequest any
-	if service.MaxRequest != -1 {
-		maxRequest = service.MaxRequest
+	if service.MaxRequests != -1 {
+		maxRequest = service.MaxRequests
 	}
 
 	var availableRequest any
@@ -650,8 +650,8 @@ func (r *EnvironmentRepository) createEnvironmentServices(
 		)
 
 		var maxRequest any
-		if service.MaxRequest != -1 {
-			maxRequest = service.MaxRequest
+		if service.MaxRequests != -1 {
+			maxRequest = service.MaxRequests
 		}
 
 		var availableRequest any
@@ -673,13 +673,13 @@ func (r *EnvironmentRepository) createEnvironmentServices(
 		`
 			WITH inserted AS (
 				INSERT INTO environment_service (
-					environment_id, service_id, max_request, available_request
+					environment_id, service_id, max_requests, available_request
 				)
 				VALUES %s
 				RETURNING *
 			)
 			SELECT s.id, s.name, s.version, i.created_at,
-				COALESCE(i.max_request, -1),
+				COALESCE(i.max_requests, -1),
 				COALESCE(i.available_request, -1)
 			FROM inserted i
 				JOIN service s ON i.service_id = s.id;
@@ -703,7 +703,7 @@ func (r *EnvironmentRepository) createEnvironmentServices(
 			&service.Name,
 			&service.Version,
 			&service.AssignedAt,
-			&service.MaxRequest,
+			&service.MaxRequests,
 			&service.AvailableRequest,
 		)
 		if err != nil {

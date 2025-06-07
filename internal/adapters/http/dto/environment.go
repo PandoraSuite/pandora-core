@@ -9,14 +9,14 @@ import (
 // ... Requests ...
 
 type EnvironmentService struct {
-	ID         int `json:"id" binding:"required"`
-	MaxRequest int `json:"max_requests" binding:"required"`
+	ID          int `json:"id" binding:"required"`
+	MaxRequests int `json:"max_requests" binding:"required"`
 }
 
 func (e *EnvironmentService) ToDomain() *dto.EnvironmentService {
 	return &dto.EnvironmentService{
-		ID:         e.ID,
-		MaxRequest: e.MaxRequest,
+		ID:          e.ID,
+		MaxRequests: e.MaxRequests,
 	}
 }
 
@@ -51,12 +51,12 @@ func (e *EnvironmentUpdate) ToDomain() *dto.EnvironmentUpdate {
 }
 
 type EnvironmentServiceUpdate struct {
-	MaxRequest int `json:"max_requests"`
+	MaxRequests int `json:"max_requests"`
 }
 
 func (e *EnvironmentServiceUpdate) ToDomain() *dto.EnvironmentServiceUpdateInput {
 	return &dto.EnvironmentServiceUpdateInput{
-		MaxRequest: e.MaxRequest,
+		MaxRequests: e.MaxRequests,
 	}
 }
 
@@ -66,7 +66,7 @@ type EnvironmentServiceResponse struct {
 	ID               int       `json:"id"`
 	Name             string    `json:"name"`
 	Version          string    `json:"version"`
-	MaxRequest       int       `json:"max_requests"`
+	MaxRequests      int       `json:"max_requests"`
 	AvailableRequest int       `json:"available_requests"`
 	AssignedAt       time.Time `json:"assigned_at"`
 }
@@ -78,7 +78,7 @@ func EnvironmentServiceResponseFromDomain(
 		ID:               service.ID,
 		Name:             service.Name,
 		Version:          service.Version,
-		MaxRequest:       service.MaxRequest,
+		MaxRequests:      service.MaxRequests,
 		AvailableRequest: service.AvailableRequest,
 		AssignedAt:       service.AssignedAt,
 	}
