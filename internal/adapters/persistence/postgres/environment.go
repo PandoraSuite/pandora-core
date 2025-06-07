@@ -20,6 +20,26 @@ type EnvironmentRepository struct {
 	auxServiceTableName string
 }
 
+func (r *EnvironmentRepository) Delete(
+	ctx context.Context, id int,
+) errors.Error {
+	query := `
+		DELETE FROM environment
+		WHERE id = $1;
+	`
+
+	result, err := r.pool.Exec(ctx, query, id)
+	if err != nil {
+		return r.errorMapper(err, r.tableName)
+	}
+
+	if result.RowsAffected() == 0 {
+		return r.entityNotFoundError(r.tableName, map[string]any{"id": id})
+	}
+
+	return nil
+}
+
 func (r *EnvironmentRepository) ExistsServiceWithInfiniteMaxRequest(
 	ctx context.Context, projectID, serviceID int,
 ) (bool, errors.Error) {
