@@ -139,9 +139,10 @@ func (s *Suite) TestRepositoryError() {
 		Return(nil).
 		Times(1)
 
+	repositoryErr := errors.NewInternal("Repository Error", nil)
 	s.serviceRepo.EXPECT().
 		Create(s.ctx, gomock.Any()).
-		Return(errors.NewInternal("Repository Error", nil)).
+		Return().
 		Times(1)
 
 	resp, err := s.useCase.Execute(s.ctx, &req)
@@ -150,6 +151,7 @@ func (s *Suite) TestRepositoryError() {
 	s.Require().Error(err)
 
 	s.Equal(errors.CodeInternal, err.Code())
+	s.Equal(repositoryErr, err)
 }
 
 func TestServiceCreateSuite(t *testing.T) {
