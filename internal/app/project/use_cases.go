@@ -3,6 +3,7 @@ package project
 import (
 	assignservice "github.com/MAD-py/pandora-core/internal/app/project/assign_service"
 	"github.com/MAD-py/pandora-core/internal/app/project/create"
+	"github.com/MAD-py/pandora-core/internal/app/project/delete"
 	"github.com/MAD-py/pandora-core/internal/app/project/get"
 	"github.com/MAD-py/pandora-core/internal/app/project/list"
 	listenvironments "github.com/MAD-py/pandora-core/internal/app/project/list_environments"
@@ -31,6 +32,16 @@ func NewCreateUseCase(
 	validator validator.Validator, projectRepo ProjectCreateRepository,
 ) CreateUseCase {
 	return create.NewUseCase(validator, projectRepo)
+}
+
+// ... Delete Use Case ...
+
+type DeleteUseCase = delete.UseCase
+
+func NewDeleteUseCase(
+	validator validator.Validator, projectRepo ProjectDeleteRepository,
+) DeleteUseCase {
+	return delete.NewUseCase(validator, projectRepo)
 }
 
 // ... Get Use Case ...

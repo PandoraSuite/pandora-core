@@ -3,6 +3,7 @@ package project
 import (
 	assignservice "github.com/MAD-py/pandora-core/internal/app/project/assign_service"
 	"github.com/MAD-py/pandora-core/internal/app/project/create"
+	"github.com/MAD-py/pandora-core/internal/app/project/delete"
 	"github.com/MAD-py/pandora-core/internal/app/project/get"
 	"github.com/MAD-py/pandora-core/internal/app/project/list"
 	listenvironments "github.com/MAD-py/pandora-core/internal/app/project/list_environments"
@@ -19,6 +20,10 @@ type ProjectAssignServiceRepository = assignservice.ProjectRepository
 // ... Create Use Case ...
 
 type ProjectCreateRepository = create.ProjectRepository
+
+// ... Delete Use Case ...
+
+type ProjectDeleteRepository = delete.ProjectRepository
 
 // ... Get Use Case ...
 
