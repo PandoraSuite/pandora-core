@@ -28,6 +28,9 @@ type APIKeyRepository interface {
 	Update(ctx context.Context, id int, update *dto.APIKeyUpdate) (*entities.APIKey, errors.Error)
 	UpdateStatus(ctx context.Context, id int, status enums.APIKeyStatus) errors.Error
 	UpdateLastUsed(ctx context.Context, key string) errors.Error
+
+	// ... Delete ...
+	Delete(ctx context.Context, id int) errors.Error
 }
 
 type ClientRepository interface {
@@ -45,6 +48,9 @@ type ClientRepository interface {
 
 	// ... Update ...
 	Update(ctx context.Context, id int, update *dto.ClientUpdate) (*entities.Client, errors.Error)
+
+	// ... Delete ...
+	Delete(ctx context.Context, id int) errors.Error
 }
 
 type EnvironmentRepository interface {
@@ -76,6 +82,7 @@ type EnvironmentRepository interface {
 	DecrementAvailableRequest(ctx context.Context, id, serviceID int) (*dto.DecrementAvailableRequest, errors.Error)
 
 	// ... Delete ...
+	Delete(ctx context.Context, id int) errors.Error
 	RemoveService(ctx context.Context, id, serviceID int) (int64, errors.Error)
 	RemoveServiceFromProjectEnvironments(ctx context.Context, projectID, serviceID int) (int64, errors.Error)
 }
@@ -107,6 +114,7 @@ type ProjectRepository interface {
 	ResetAvailableRequestsForEnvsService(ctx context.Context, id, serviceID int) ([]*dto.EnvironmentServiceReset, errors.Error)
 
 	// ... Delete ...
+	Delete(ctx context.Context, id int) errors.Error
 	RemoveService(ctx context.Context, id, serviceID int) (int64, errors.Error)
 }
 
