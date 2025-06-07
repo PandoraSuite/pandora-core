@@ -20,6 +20,9 @@ func RegisterClientRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
 	updateUC := client.NewUpdateUseCase(
 		deps.Validator, deps.Repositories.Client(),
 	)
+	deleteUC := client.NewDeleteUseCase(
+		deps.Validator, deps.Repositories.Client(),
+	)
 	listProjectsUC := client.NewListProjectsUseCase(
 		deps.Validator,
 		deps.Repositories.Client(),
@@ -32,6 +35,7 @@ func RegisterClientRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
 		clients.POST("", handlers.ClientCreate(createUC))
 		clients.GET("/:id", handlers.ClientGet(getUC))
 		clients.PATCH("/:id", handlers.ClientUpdate(updateUC))
+		clients.DELETE("/:id", handlers.ClientDelete(deleteUC))
 		clients.GET(
 			"/:id/projects",
 			handlers.ClientListProjects(listProjectsUC),
