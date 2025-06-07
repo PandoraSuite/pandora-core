@@ -18,6 +18,9 @@ func RegisterProjectRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
 	updateUC := project.NewUpdateUseCase(
 		deps.Validator, deps.Repositories.Project(),
 	)
+	deleteUC := project.NewDeleteUseCase(
+		deps.Validator, deps.Repositories.Project(),
+	)
 	resetRequest := project.NewResetRequestUseCase(
 		deps.Validator, deps.Repositories.Project(),
 	)
@@ -46,6 +49,7 @@ func RegisterProjectRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
 		projects.POST("", handlers.ProjectCreate(createUC))
 		projects.GET("/:id", handlers.ProjectGet(getUC))
 		projects.PATCH("/:id", handlers.ProjectUpdate(updateUC))
+		projects.DELETE("/:id", handlers.ProjectDelete(deleteUC))
 		projects.GET(
 			"/:id/environments",
 			handlers.ProjectListEnvironments(listEvntiromentsUC),
