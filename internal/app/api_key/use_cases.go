@@ -2,6 +2,7 @@ package apikey
 
 import (
 	"github.com/MAD-py/pandora-core/internal/app/api_key/create"
+	"github.com/MAD-py/pandora-core/internal/app/api_key/delete"
 	revealkey "github.com/MAD-py/pandora-core/internal/app/api_key/reveal_key"
 	"github.com/MAD-py/pandora-core/internal/app/api_key/update"
 	validateconsume "github.com/MAD-py/pandora-core/internal/app/api_key/validate_consume"
@@ -17,6 +18,16 @@ func NewCreateUseCase(
 	validator validator.Validator, repo APIKeyCreateRepository,
 ) CreateUseCase {
 	return create.NewUseCase(validator, repo)
+}
+
+// ... Delete Use Case ...
+
+type DeleteUseCase = delete.UseCase
+
+func NewDeleteUseCase(
+	validator validator.Validator, repo APIKeyDeleteRepository,
+) DeleteUseCase {
+	return delete.NewUseCase(validator, repo)
 }
 
 // ... Update Use Case ...

@@ -2,6 +2,7 @@ package apikey
 
 import (
 	"github.com/MAD-py/pandora-core/internal/app/api_key/create"
+	"github.com/MAD-py/pandora-core/internal/app/api_key/delete"
 	revealkey "github.com/MAD-py/pandora-core/internal/app/api_key/reveal_key"
 	"github.com/MAD-py/pandora-core/internal/app/api_key/update"
 	validateconsume "github.com/MAD-py/pandora-core/internal/app/api_key/validate_consume"
@@ -11,6 +12,10 @@ import (
 // ... Create Use Case ...
 
 type APIKeyCreateRepository = create.APIKeyRepository
+
+// ... Delete Use Case ...
+
+type APIKeyDeleteRepository = delete.APIKeyRepository
 
 // ... Update Use Case ...
 
