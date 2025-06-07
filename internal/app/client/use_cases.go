@@ -19,6 +19,15 @@ func NewCreateUseCase(
 	return create.NewUseCase(validator, clientRepo)
 }
 
+// ... Delete Use Case ...
+type DeleteUseCase = create.UseCase
+
+func NewDeleteUseCase(
+	validator validator.Validator, clientRepo ClientDeleteRepository,
+) DeleteUseCase {
+	return create.NewUseCase(validator, clientRepo)
+}
+
 // ... Get Use Case ...
 
 type GetUseCase = get.UseCase
