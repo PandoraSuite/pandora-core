@@ -17,6 +17,26 @@ type APIKeyRepository struct {
 	talbeName string
 }
 
+func (r *APIKeyRepository) Delete(
+	ctx context.Context, id int,
+) errors.Error {
+	query := `
+		DELETE FROM api_key
+		WHERE id = $1;
+	`
+
+	result, err := r.pool.Exec(ctx, query, id)
+	if err != nil {
+		return r.errorMapper(err, r.talbeName)
+	}
+
+	if result.RowsAffected() == 0 {
+		return r.entityNotFoundError(r.talbeName, map[string]any{"id": id})
+	}
+
+	return nil
+}
+
 func (r *APIKeyRepository) UpdateStatus(
 	ctx context.Context, id int, status enums.APIKeyStatus,
 ) errors.Error {
