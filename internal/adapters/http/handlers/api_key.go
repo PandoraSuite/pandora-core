@@ -81,6 +81,38 @@ func APIKeyUpdate(useCase apikey.UpdateUseCase) gin.HandlerFunc {
 	}
 }
 
+// APIKeyDelete godoc
+// @Summary Deletes an API key
+// @Description Deletes a specific API key by ID
+// @Tags API Keys
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "API Key ID"
+// @Success 204 "No Content"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
+// @Router /api/v1/api-keys/{id} [delete]
+func APIKeyDelete(useCase apikey.DeleteUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		apiKeyID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid api key id",
+				),
+			)
+			return
+		}
+
+		if err := useCase.Execute(c.Request.Context(), apiKeyID); err != nil {
+			c.Error(err)
+			return
+		}
+
+		c.Status(http.StatusNoContent)
+	}
+}
+
 // APIKeyRevealKey godoc
 // @Summary Reveals the API Key
 // @Description Retrieves the actual API Key value for a specific API key by ID
