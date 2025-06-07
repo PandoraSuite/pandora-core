@@ -17,11 +17,15 @@ func RegisterAPIKeyRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
 	updateUC := apikey.NewUpdateUseCase(
 		deps.Validator, deps.Repositories.APIKey(),
 	)
+	deleteUC := apikey.NewDeleteUseCase(
+		deps.Validator, deps.Repositories.APIKey(),
+	)
 
 	apiKeys := rg.Group("/api-keys")
 	{
 		apiKeys.POST("", handlers.APIKeyCreate(createUC))
 		apiKeys.PUT("/:id", handlers.APIKeyUpdate(updateUC))
+		apiKeys.DELETE("/:id", handlers.APIKeyDelete(deleteUC))
 	}
 }
 
