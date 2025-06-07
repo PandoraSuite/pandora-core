@@ -3,6 +3,7 @@ package environment
 import (
 	assignservice "github.com/MAD-py/pandora-core/internal/app/environment/assign_service"
 	"github.com/MAD-py/pandora-core/internal/app/environment/create"
+	"github.com/MAD-py/pandora-core/internal/app/environment/delete"
 	"github.com/MAD-py/pandora-core/internal/app/environment/get"
 	listapikey "github.com/MAD-py/pandora-core/internal/app/environment/list_api_key"
 	removeservice "github.com/MAD-py/pandora-core/internal/app/environment/remove_service"
@@ -19,6 +20,9 @@ type EnvironmentAssignServiceRepository = assignservice.EnvironmentRepository
 
 type EnvironmentCreateRepository = create.EnvironmentRepository
 type ProjectQuotaRepository = create.ProjectRepository
+
+// ... Delete Use Case ...
+type EnvironmentDeleteRepository = delete.EnvironmentRepository
 
 // ... Get Use Case ...
 
