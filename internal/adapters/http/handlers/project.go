@@ -141,6 +141,38 @@ func ProjectUpdate(useCase project.UpdateUseCase) gin.HandlerFunc {
 	}
 }
 
+// ProjectDelete godoc
+// @Summary Deletes a project
+// @Description Removes a specific project from the system by ID
+// @Tags Projects
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "Project ID"
+// @Success 204
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
+// @Router /api/v1/projects/{id} [delete]
+func ProjectDelete(useCase project.DeleteUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		projectID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid project id",
+				),
+			)
+			return
+		}
+
+		if err := useCase.Execute(c.Request.Context(), projectID); err != nil {
+			c.Error(err)
+			return
+		}
+
+		c.Status(http.StatusNoContent)
+	}
+}
+
 // ProjectListEnvironments godoc
 // @Summary Retrieves all environments for a specific project
 // @Description Fetches a list of environments associated with a given project
