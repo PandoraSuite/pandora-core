@@ -13,6 +13,7 @@ import (
 type ClientCreateRepository = create.ClientRepository
 
 // ... Delete Use Case ...
+
 type ClientDeleteRepository = create.ClientRepository
 
 // ... Get Use Case ...

@@ -20,6 +20,7 @@ func NewCreateUseCase(
 }
 
 // ... Delete Use Case ...
+
 type DeleteUseCase = create.UseCase
 
 func NewDeleteUseCase(
