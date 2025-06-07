@@ -19,6 +19,9 @@ func RegisterEnvironmentRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies
 	updateUC := environment.NewUpdateUseCase(
 		deps.Validator, deps.Repositories.Environment(),
 	)
+	deleteUC := environment.NewDeleteUseCase(
+		deps.Validator, deps.Repositories.Environment(),
+	)
 	listAPIKeysUC := environment.NewListAPIKeyUseCase(
 		deps.Validator,
 		deps.Repositories.APIKey(),
@@ -47,6 +50,9 @@ func RegisterEnvironmentRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies
 		)
 		environments.PATCH(
 			"/:id", handlers.EnvironmentUpdate(updateUC),
+		)
+		environments.DELETE(
+			"/:id", handlers.EnvironmentDelete(deleteUC),
 		)
 		environments.GET(
 			"/:id/api-keys",
