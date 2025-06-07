@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/MAD-py/pandora-core/internal/app/client/create"
+	"github.com/MAD-py/pandora-core/internal/app/client/delete"
 	"github.com/MAD-py/pandora-core/internal/app/client/get"
 	"github.com/MAD-py/pandora-core/internal/app/client/list"
 	listprojects "github.com/MAD-py/pandora-core/internal/app/client/list_projects"
@@ -14,7 +15,7 @@ type ClientCreateRepository = create.ClientRepository
 
 // ... Delete Use Case ...
 
-type ClientDeleteRepository = create.ClientRepository
+type ClientDeleteRepository = delete.ClientRepository
 
 // ... Get Use Case ...
 

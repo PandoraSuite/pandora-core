@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/MAD-py/pandora-core/internal/app/client/create"
+	"github.com/MAD-py/pandora-core/internal/app/client/delete"
 	"github.com/MAD-py/pandora-core/internal/app/client/get"
 	"github.com/MAD-py/pandora-core/internal/app/client/list"
 	listprojects "github.com/MAD-py/pandora-core/internal/app/client/list_projects"
@@ -21,12 +22,12 @@ func NewCreateUseCase(
 
 // ... Delete Use Case ...
 
-type DeleteUseCase = create.UseCase
+type DeleteUseCase = delete.UseCase
 
 func NewDeleteUseCase(
 	validator validator.Validator, clientRepo ClientDeleteRepository,
 ) DeleteUseCase {
-	return create.NewUseCase(validator, clientRepo)
+	return delete.NewUseCase(validator, clientRepo)
 }
 
 // ... Get Use Case ...
