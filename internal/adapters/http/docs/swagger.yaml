@@ -264,7 +264,7 @@ definitions:
         type: string
       id:
         type: integer
-      max_request:
+      max_requests:
         type: integer
       name:
         type: string
@@ -514,6 +514,30 @@ paths:
       tags:
       - API Keys
   /api/v1/api-keys/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes a specific API key by ID
+      parameters:
+      - description: API Key ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+      security:
+      - OAuth2Password: []
+      summary: Deletes an API key
+      tags:
+      - API Keys
     patch:
       consumes:
       - application/json
@@ -716,6 +740,30 @@ paths:
       tags:
       - Clients
   /api/v1/clients/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Removes a specific client from the system using its ID
+      parameters:
+      - description: Client ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+      security:
+      - OAuth2Password: []
+      summary: Deletes a client by ID
+      tags:
+      - Clients
     get:
       consumes:
       - application/json
@@ -830,6 +878,30 @@ paths:
       tags:
       - Environments
   /api/v1/environments/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Removes an environment from the system by its ID
+      parameters:
+      - description: Environment ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+      security:
+      - OAuth2Password: []
+      summary: Deletes an environment
+      tags:
+      - Environments
     get:
       consumes:
       - application/json
@@ -1097,6 +1169,30 @@ paths:
       tags:
       - Projects
   /api/v1/projects/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Removes a specific project from the system by ID
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+      security:
+      - OAuth2Password: []
+      summary: Deletes a project
+      tags:
+      - Projects
     get:
       consumes:
       - application/json
