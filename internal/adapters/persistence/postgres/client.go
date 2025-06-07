@@ -17,6 +17,26 @@ type ClientRepository struct {
 	tableName string
 }
 
+func (r *ClientRepository) Delete(
+	ctx context.Context, id int,
+) errors.Error {
+	query := `
+		DELETE FROM client
+		WHERE id = $1;
+	`
+
+	result, err := r.pool.Exec(ctx, query, id)
+	if err != nil {
+		return r.errorMapper(err, r.tableName)
+	}
+
+	if result.RowsAffected() == 0 {
+		return r.entityNotFoundError(r.tableName, map[string]any{"id": id})
+	}
+
+	return nil
+}
+
 func (r *ClientRepository) Update(
 	ctx context.Context, id int, update *dto.ClientUpdate,
 ) (*entities.Client, errors.Error) {
