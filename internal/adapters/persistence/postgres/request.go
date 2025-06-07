@@ -17,6 +17,26 @@ type RequestRepository struct {
 	tableName string
 }
 
+func (r *RequestRepository) Delete(
+	ctx context.Context, id string,
+) errors.Error {
+	query := `
+		DELETE FROM request
+		WHERE id = $1;
+	`
+
+	result, err := r.pool.Exec(ctx, query, id)
+	if err != nil {
+		return r.errorMapper(err, r.tableName)
+	}
+
+	if result.RowsAffected() == 0 {
+		return r.entityNotFoundError(r.tableName, map[string]any{"id": id})
+	}
+
+	return nil
+}
+
 func (r *RequestRepository) DeleteByService(
 	ctx context.Context, serviceID int,
 ) errors.Error {
