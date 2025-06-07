@@ -115,6 +115,38 @@ func EnvironmentUpdate(useCase environment.UpdateUseCase) gin.HandlerFunc {
 	}
 }
 
+// EnvironmentDelete godoc
+// @Summary Deletes an environment
+// @Description Removes an environment from the system by its ID
+// @Tags Environments
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "Environment ID"
+// @Success 204
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
+// @Router /api/v1/environments/{id} [delete]
+func EnvironmentDelete(useCase environment.DeleteUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		environmentID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid environment id",
+				),
+			)
+			return
+		}
+
+		if err := useCase.Execute(c.Request.Context(), environmentID); err != nil {
+			c.Error(err)
+			return
+		}
+
+		c.Status(http.StatusNoContent)
+	}
+}
+
 // EnvironmentListAPIKeys godoc
 // @Summary Retrieves all API Keys for an environment
 // @Description Returns a list of API Keys associated with a specific environment
