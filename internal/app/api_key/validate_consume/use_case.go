@@ -99,7 +99,10 @@ func (uc *useCase) Execute(
 
 	if validateResponse.Valid {
 		if err := uc.apiKeyRepo.UpdateLastUsed(ctx, req.APIKey); err != nil {
-			log.Printf("[WARN] Failed to update last_used for API Key %s: %v", req.APIKey, err)
+			log.Printf(
+				"[WARN] Failed to update last_used for API Key %v: %v",
+				request.APIKey.ID, err,
+			)
 		}
 	}
 	return &response, nil
