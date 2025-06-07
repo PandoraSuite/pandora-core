@@ -141,8 +141,8 @@ func (s *Suite) TestRepositoryError() {
 
 	repositoryErr := errors.NewInternal("Repository Error", nil)
 	s.serviceRepo.EXPECT().
-		Create(s.ctx, gomock.Any()).
-		Return().
+		Create(s.ctx, gomock.AssignableToTypeOf(&entities.Service{})).
+		Return(repositoryErr).
 		Times(1)
 
 	resp, err := s.useCase.Execute(s.ctx, &req)
