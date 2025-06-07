@@ -142,6 +142,38 @@ func ClientUpdate(useCase client.UpdateUseCase) gin.HandlerFunc {
 	}
 }
 
+// ClientDelete godoc
+// @Summary Deletes a client by ID
+// @Description Removes a specific client from the system using its ID
+// @Tags Clients
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "Client ID"
+// @Success 204 "No Content"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
+// @Router /api/v1/clients/{id} [delete]
+func ClientDelete(useCase client.DeleteUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		clientID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid client id",
+				),
+			)
+			return
+		}
+
+		if err := useCase.Execute(c.Request.Context(), clientID); err != nil {
+			c.Error(err)
+			return
+		}
+
+		c.Status(http.StatusNoContent)
+	}
+}
+
 // ClientListProjects godoc
 // @Summary Retrieves all projects for a specific client
 // @Description Fetches a list of projects associated with a given client
