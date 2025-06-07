@@ -1,6 +1,1 @@
-# Go Modules updated by Dependabot
-go.mod @MAD-py
-go.sum @MAD-py
-
-# GitHub Actions workflows updated by Dependabot
-.github/workflows/* @MAD-py
+* @MAD-py

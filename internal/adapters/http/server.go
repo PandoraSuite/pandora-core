@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/http/bootstrap"
@@ -52,6 +53,17 @@ func (s *Server) Run() error {
 	gin.SetMode(gin.ReleaseMode)
 
 	engine := gin.Default()
+
+	engine.Use(
+		cors.New(
+			cors.Config{
+				AllowOrigins:     []string{"*"},
+				AllowMethods:     []string{"*"},
+				AllowHeaders:     []string{"*"},
+				AllowCredentials: false,
+			},
+		),
+	)
 
 	setupSwagger(engine)
 
