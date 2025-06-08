@@ -20,14 +20,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RequestService_SetRequestStatus_FullMethodName = "/request.v1.RequestService/SetRequestStatus"
+	RequestService_UpdateExecutionStatus_FullMethodName = "/request.v1.RequestService/UpdateExecutionStatus"
 )
 
 // RequestServiceClient is the client API for RequestService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RequestServiceClient interface {
-	SetRequestStatus(ctx context.Context, in *SetRequestStatusRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateExecutionStatus(ctx context.Context, in *RequestExecutionStatusUpdate, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type requestServiceClient struct {
@@ -38,10 +38,10 @@ func NewRequestServiceClient(cc grpc.ClientConnInterface) RequestServiceClient {
 	return &requestServiceClient{cc}
 }
 
-func (c *requestServiceClient) SetRequestStatus(ctx context.Context, in *SetRequestStatusRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *requestServiceClient) UpdateExecutionStatus(ctx context.Context, in *RequestExecutionStatusUpdate, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
-	err := c.cc.Invoke(ctx, RequestService_SetRequestStatus_FullMethodName, in, out, cOpts...)
+	err := c.cc.Invoke(ctx, RequestService_UpdateExecutionStatus_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func (c *requestServiceClient) SetRequestStatus(ctx context.Context, in *SetRequ
 // All implementations must embed UnimplementedRequestServiceServer
 // for forward compatibility.
 type RequestServiceServer interface {
-	SetRequestStatus(context.Context, *SetRequestStatusRequest) (*emptypb.Empty, error)
+	UpdateExecutionStatus(context.Context, *RequestExecutionStatusUpdate) (*emptypb.Empty, error)
 	mustEmbedUnimplementedRequestServiceServer()
 }
 
@@ -63,8 +63,8 @@ type RequestServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRequestServiceServer struct{}
 
-func (UnimplementedRequestServiceServer) SetRequestStatus(context.Context, *SetRequestStatusRequest) (*emptypb.Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SetRequestStatus not implemented")
+func (UnimplementedRequestServiceServer) UpdateExecutionStatus(context.Context, *RequestExecutionStatusUpdate) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateExecutionStatus not implemented")
 }
 func (UnimplementedRequestServiceServer) mustEmbedUnimplementedRequestServiceServer() {}
 func (UnimplementedRequestServiceServer) testEmbeddedByValue()                        {}
@@ -87,20 +87,20 @@ func RegisterRequestServiceServer(s grpc.ServiceRegistrar, srv RequestServiceSer
 	s.RegisterService(&RequestService_ServiceDesc, srv)
 }
 
-func _RequestService_SetRequestStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SetRequestStatusRequest)
+func _RequestService_UpdateExecutionStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RequestExecutionStatusUpdate)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RequestServiceServer).SetRequestStatus(ctx, in)
+		return srv.(RequestServiceServer).UpdateExecutionStatus(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: RequestService_SetRequestStatus_FullMethodName,
+		FullMethod: RequestService_UpdateExecutionStatus_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RequestServiceServer).SetRequestStatus(ctx, req.(*SetRequestStatusRequest))
+		return srv.(RequestServiceServer).UpdateExecutionStatus(ctx, req.(*RequestExecutionStatusUpdate))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -113,8 +113,8 @@ var RequestService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*RequestServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SetRequestStatus",
-			Handler:    _RequestService_SetRequestStatus_Handler,
+			MethodName: "UpdateExecutionStatus",
+			Handler:    _RequestService_UpdateExecutionStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
