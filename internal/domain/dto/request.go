@@ -11,7 +11,7 @@ import (
 type RequestFilter struct {
 	RequestTimeTo   time.Time                    `name:"request_time_to" validate:"omitempty,gtetime=RequestTimeTo"`
 	RequestTimeFrom time.Time                    `name:"request_time_from" validate:"omitempty"`
-	ExecutionStatus enums.RequestExecutionStatus `name:"execution_status" validate:"omitempty,enums=success forwarded client_error service_error unauthorized quota_exceeded"`
+	ExecutionStatus enums.RequestExecutionStatus `name:"execution_status" validate:"omitempty,enums=success forwarded client_error server_error unauthorized quota_exceeded"`
 }
 
 type RequestIncomingMetadata struct {
@@ -30,9 +30,9 @@ type RequestIncoming struct {
 }
 
 type RequestExecutionStatusUpdate struct {
-	Detail          string                       `name:"detail" validate:"required_unless=execution_status success"`
+	Detail          string                       `name:"detail" validate:"required_unless=ExecutionStatus success"`
 	StatusCode      int                          `name:"status_code" validate:"required"`
-	ExecutionStatus enums.RequestExecutionStatus `name:"execution_status" validate:"required,enums=success client_error service_error"`
+	ExecutionStatus enums.RequestExecutionStatus `name:"execution_status" validate:"required,enums=success client_error server_error"`
 }
 
 // ... Responses ...

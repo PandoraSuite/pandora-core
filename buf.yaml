@@ -10,6 +10,12 @@ lint:
   use:
     - STANDARD
 
+  ignore_only:
+    RPC_REQUEST_STANDARD_NAME:
+      - proto/api_key/v1/api_key.proto
+    RPC_REQUEST_RESPONSE_UNIQUE:
+      - proto/api_key/v1/api_key.proto
+
 breaking:
   use:
     - FILE

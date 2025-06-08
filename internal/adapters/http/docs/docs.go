@@ -1650,7 +1650,7 @@ const docTemplate = `{
                             "success",
                             "forwarded",
                             "client_error",
-                            "service_error",
+                            "server_error",
                             "unauthorized",
                             "quota_exceeded"
                         ],
@@ -2274,7 +2274,7 @@ const docTemplate = `{
                         "success",
                         "forwarded",
                         "client_error",
-                        "service_error",
+                        "server_error",
                         "unauthorized",
                         "quota_exceeded"
                     ]

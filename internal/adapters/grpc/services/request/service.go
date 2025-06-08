@@ -11,18 +11,17 @@ import (
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc/errors"
 	pb "github.com/MAD-py/pandora-core/internal/adapters/grpc/services/request/v1"
 	"github.com/MAD-py/pandora-core/internal/app/request"
-	"github.com/MAD-py/pandora-core/internal/domain/enums"
 )
 
 type service struct {
 	pb.RequestServiceServer
 
-	updateStatusUC request.UpdateStatusUseCase
+	updateStatusUC request.UpdateExecutionStatusUseCase
 }
 
-func (s *service) SetRequestStatus(ctx context.Context, req *pb.SetRequestStatusRequest) (*emptypb.Empty, error) {
+func (s *service) UpdateExecutionStatus(ctx context.Context, req *pb.UpdateExecutionStatusRequest) (*emptypb.Empty, error) {
 	err := s.updateStatusUC.Execute(
-		ctx, req.GetId(), enums.RequestExecutionStatus(req.GetStatus()),
+		ctx, req.GetId(), updateExecutionStatusRequestToDomain(req),
 	)
 	if err != nil {
 		return nil, status.Error(
@@ -35,7 +34,7 @@ func (s *service) SetRequestStatus(ctx context.Context, req *pb.SetRequestStatus
 
 func RegisterService(s *grpc.Server, deps *bootstrap.Dependencies) {
 	service := &service{
-		updateStatusUC: request.NewUpdateStatusUseCase(
+		updateStatusUC: request.NewUpdateExecutionStatusUseCase(
 			deps.Validator,
 			deps.Repositories.Request(),
 		),

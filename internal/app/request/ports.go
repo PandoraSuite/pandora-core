@@ -1,9 +1,9 @@
 package request
 
 import (
-	updatestatus "github.com/MAD-py/pandora-core/internal/app/request/update_status"
+	updateexecutionstatus "github.com/MAD-py/pandora-core/internal/app/request/update_execution_status"
 )
 
-// ... Update Status Use Case ...
+// ... Update Execution Status Use Case ...
 
-type RequestUpdateStatusRepository = updatestatus.RequestRepository
+type RequestUpdateExecutionStatusRepository = updateexecutionstatus.RequestRepository

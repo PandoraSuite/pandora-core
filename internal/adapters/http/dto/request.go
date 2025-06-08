@@ -12,7 +12,7 @@ import (
 type RequestFilter struct {
 	RequestTimeTo   time.Time `form:"request_time_to"`
 	RequestTimeFrom time.Time `form:"request_time_from"`
-	ExecutionStatus string    `form:"execution_status" enums:"success,forwarded,client_error,service_error,unauthorized,quota_exceeded"`
+	ExecutionStatus string    `form:"execution_status" enums:"success,forwarded,client_error,server_error,unauthorized,quota_exceeded"`
 }
 
 func (r *RequestFilter) ToDomain() *dto.RequestFilter {
@@ -54,7 +54,7 @@ type RequestResponse struct {
 	Environment        *RequestEnvironmentResponse `json:"environment"`
 	Service            *RequestServiceResponse     `json:"service"`
 	StatusCode         int                         `json:"status_code"`
-	ExecutionStatus    string                      `json:"execution_status" enums:"success,forwarded,client_error,service_error,unauthorized,quota_exceeded"`
+	ExecutionStatus    string                      `json:"execution_status" enums:"success,forwarded,client_error,server_error,unauthorized,quota_exceeded"`
 	UnauthorizedReason string                      `json:"unauthorized_reason" enums:"API_KEY_INVALID,QUOTA_EXCEEDED,API_KEY_EXPIRED,API_KEY_DISABLED,SERVICE_MISMATCH,ENVIRONMENT_MISMATCH,ENVIRONMENT_DISABLED"`
 	RequestTime        time.Time                   `json:"request_time"`
 	Path               string                      `json:"path"`

@@ -1,4 +1,4 @@
-package updatestatus
+package updateexecutionstatus
 
 import (
 	"context"

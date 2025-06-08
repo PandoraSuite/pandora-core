@@ -113,7 +113,7 @@ func (uc *useCase) validateReq(req *dto.RequestFilter) errors.Error {
 		map[string]string{
 			"request_time_from.gtetime": "request_time_from must be greater than request_time_to",
 			"request_time_to":           "request_time_to is required",
-			"execution_status.enums":    "execution_status must be one of the following: success, forwarded, client_error, service_error, unauthorized, quota_exceeded",
+			"execution_status.enums":    "execution_status must be one of the following: success, forwarded, client_error, server_error, unauthorized, quota_exceeded",
 		},
 	)
 }

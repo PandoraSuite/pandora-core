@@ -27,7 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RequestServiceClient interface {
-	UpdateExecutionStatus(ctx context.Context, in *RequestExecutionStatusUpdate, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	UpdateExecutionStatus(ctx context.Context, in *UpdateExecutionStatusRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type requestServiceClient struct {
@@ -38,7 +38,7 @@ func NewRequestServiceClient(cc grpc.ClientConnInterface) RequestServiceClient {
 	return &requestServiceClient{cc}
 }
 
-func (c *requestServiceClient) UpdateExecutionStatus(ctx context.Context, in *RequestExecutionStatusUpdate, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *requestServiceClient) UpdateExecutionStatus(ctx context.Context, in *UpdateExecutionStatusRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, RequestService_UpdateExecutionStatus_FullMethodName, in, out, cOpts...)
@@ -52,7 +52,7 @@ func (c *requestServiceClient) UpdateExecutionStatus(ctx context.Context, in *Re
 // All implementations must embed UnimplementedRequestServiceServer
 // for forward compatibility.
 type RequestServiceServer interface {
-	UpdateExecutionStatus(context.Context, *RequestExecutionStatusUpdate) (*emptypb.Empty, error)
+	UpdateExecutionStatus(context.Context, *UpdateExecutionStatusRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedRequestServiceServer()
 }
 
@@ -63,7 +63,7 @@ type RequestServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRequestServiceServer struct{}
 
-func (UnimplementedRequestServiceServer) UpdateExecutionStatus(context.Context, *RequestExecutionStatusUpdate) (*emptypb.Empty, error) {
+func (UnimplementedRequestServiceServer) UpdateExecutionStatus(context.Context, *UpdateExecutionStatusRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateExecutionStatus not implemented")
 }
 func (UnimplementedRequestServiceServer) mustEmbedUnimplementedRequestServiceServer() {}
@@ -88,7 +88,7 @@ func RegisterRequestServiceServer(s grpc.ServiceRegistrar, srv RequestServiceSer
 }
 
 func _RequestService_UpdateExecutionStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RequestExecutionStatusUpdate)
+	in := new(UpdateExecutionStatusRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -100,7 +100,7 @@ func _RequestService_UpdateExecutionStatus_Handler(srv interface{}, ctx context.
 		FullMethod: RequestService_UpdateExecutionStatus_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RequestServiceServer).UpdateExecutionStatus(ctx, req.(*RequestExecutionStatusUpdate))
+		return srv.(RequestServiceServer).UpdateExecutionStatus(ctx, req.(*UpdateExecutionStatusRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

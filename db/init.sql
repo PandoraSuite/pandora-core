@@ -168,12 +168,12 @@ CREATE TABLE IF NOT EXISTS request(
                 'forwarded',
                 'unauthorized',
                 'client_error',
-                'service_error'
+                'server_error'
             )
         ),
     CONSTRAINT request_status_code_required_check
         CHECK (
-            execution_status NOT IN ('success', 'client_error', 'service_error')
+            execution_status NOT IN ('success', 'client_error', 'server_error')
             OR status_code IS NOT NULL
         ),
 

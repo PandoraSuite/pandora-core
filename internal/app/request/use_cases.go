@@ -1,16 +1,16 @@
 package request
 
 import (
-	updatestatus "github.com/MAD-py/pandora-core/internal/app/request/update_status"
+	updateexecutionstatus "github.com/MAD-py/pandora-core/internal/app/request/update_execution_status"
 	"github.com/MAD-py/pandora-core/internal/validator"
 )
 
-// ... Update Status Use Case ...
+// ... Update Execution Status Use Case ...
 
-type UpdateStatusUseCase = updatestatus.UseCase
+type UpdateExecutionStatusUseCase = updateexecutionstatus.UseCase
 
-func NewUpdateStatusUseCase(
-	validator validator.Validator, requestRepo RequestUpdateStatusRepository,
-) UpdateStatusUseCase {
-	return updatestatus.NewUseCase(validator, requestRepo)
+func NewUpdateExecutionStatusUseCase(
+	validator validator.Validator, requestRepo RequestUpdateExecutionStatusRepository,
+) UpdateExecutionStatusUseCase {
+	return updateexecutionstatus.NewUseCase(validator, requestRepo)
 }

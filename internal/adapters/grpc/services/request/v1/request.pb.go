@@ -23,7 +23,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type RequestExecutionStatusUpdate struct {
+type UpdateExecutionStatusRequest struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Id              string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Detail          string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
@@ -33,20 +33,20 @@ type RequestExecutionStatusUpdate struct {
 	sizeCache       protoimpl.SizeCache
 }
 
-func (x *RequestExecutionStatusUpdate) Reset() {
-	*x = RequestExecutionStatusUpdate{}
+func (x *UpdateExecutionStatusRequest) Reset() {
+	*x = UpdateExecutionStatusRequest{}
 	mi := &file_request_v1_request_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *RequestExecutionStatusUpdate) String() string {
+func (x *UpdateExecutionStatusRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*RequestExecutionStatusUpdate) ProtoMessage() {}
+func (*UpdateExecutionStatusRequest) ProtoMessage() {}
 
-func (x *RequestExecutionStatusUpdate) ProtoReflect() protoreflect.Message {
+func (x *UpdateExecutionStatusRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_request_v1_request_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -58,33 +58,33 @@ func (x *RequestExecutionStatusUpdate) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use RequestExecutionStatusUpdate.ProtoReflect.Descriptor instead.
-func (*RequestExecutionStatusUpdate) Descriptor() ([]byte, []int) {
+// Deprecated: Use UpdateExecutionStatusRequest.ProtoReflect.Descriptor instead.
+func (*UpdateExecutionStatusRequest) Descriptor() ([]byte, []int) {
 	return file_request_v1_request_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *RequestExecutionStatusUpdate) GetId() string {
+func (x *UpdateExecutionStatusRequest) GetId() string {
 	if x != nil {
 		return x.Id
 	}
 	return ""
 }
 
-func (x *RequestExecutionStatusUpdate) GetDetail() string {
+func (x *UpdateExecutionStatusRequest) GetDetail() string {
 	if x != nil {
 		return x.Detail
 	}
 	return ""
 }
 
-func (x *RequestExecutionStatusUpdate) GetStatusCode() int64 {
+func (x *UpdateExecutionStatusRequest) GetStatusCode() int64 {
 	if x != nil {
 		return x.StatusCode
 	}
 	return 0
 }
 
-func (x *RequestExecutionStatusUpdate) GetExecutionStatus() string {
+func (x *UpdateExecutionStatusRequest) GetExecutionStatus() string {
 	if x != nil {
 		return x.ExecutionStatus
 	}
@@ -97,14 +97,14 @@ const file_request_v1_request_proto_rawDesc = "" +
 	"\n" +
 	"\x18request/v1/request.proto\x12\n" +
 	"request.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1bgoogle/protobuf/empty.proto\"\xbe\x01\n" +
-	"\x1cRequestExecutionStatusUpdate\x12\x0e\n" +
+	"\x1cUpdateExecutionStatusRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x16\n" +
 	"\x06detail\x18\x02 \x01(\tR\x06detail\x12\x1f\n" +
 	"\vstatus_code\x18\x03 \x01(\x03R\n" +
 	"statusCode\x12U\n" +
 	"\x10execution_status\x18\x04 \x01(\tB*\xbaH'r%R\asuccessR\fclient_errorR\fserver_errorR\x0fexecutionStatus2k\n" +
 	"\x0eRequestService\x12Y\n" +
-	"\x15UpdateExecutionStatus\x12(.request.v1.RequestExecutionStatusUpdate\x1a\x16.google.protobuf.EmptyB\fZ\n" +
+	"\x15UpdateExecutionStatus\x12(.request.v1.UpdateExecutionStatusRequest\x1a\x16.google.protobuf.EmptyB\fZ\n" +
 	"request/pbb\x06proto3"
 
 var (
@@ -121,11 +121,11 @@ func file_request_v1_request_proto_rawDescGZIP() []byte {
 
 var file_request_v1_request_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
 var file_request_v1_request_proto_goTypes = []any{
-	(*RequestExecutionStatusUpdate)(nil), // 0: request.v1.RequestExecutionStatusUpdate
+	(*UpdateExecutionStatusRequest)(nil), // 0: request.v1.UpdateExecutionStatusRequest
 	(*emptypb.Empty)(nil),                // 1: google.protobuf.Empty
 }
 var file_request_v1_request_proto_depIdxs = []int32{
-	0, // 0: request.v1.RequestService.UpdateExecutionStatus:input_type -> request.v1.RequestExecutionStatusUpdate
+	0, // 0: request.v1.RequestService.UpdateExecutionStatus:input_type -> request.v1.UpdateExecutionStatusRequest
 	1, // 1: request.v1.RequestService.UpdateExecutionStatus:output_type -> google.protobuf.Empty
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type

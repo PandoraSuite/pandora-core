@@ -1642,7 +1642,7 @@
                             "success",
                             "forwarded",
                             "client_error",
-                            "service_error",
+                            "server_error",
                             "unauthorized",
                             "quota_exceeded"
                         ],
@@ -2266,7 +2266,7 @@
                         "success",
                         "forwarded",
                         "client_error",
-                        "service_error",
+                        "server_error",
                         "unauthorized",
                         "quota_exceeded"
                     ]

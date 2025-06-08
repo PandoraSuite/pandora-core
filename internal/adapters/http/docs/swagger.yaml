@@ -354,7 +354,7 @@ definitions:
         - success
         - forwarded
         - client_error
-        - service_error
+        - server_error
         - unauthorized
         - quota_exceeded
         type: string
@@ -1512,7 +1512,7 @@ paths:
         - success
         - forwarded
         - client_error
-        - service_error
+        - server_error
         - unauthorized
         - quota_exceeded
         in: query

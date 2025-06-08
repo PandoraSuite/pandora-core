@@ -1,4 +1,4 @@
-package updatestatus
+package updateexecutionstatus
 
 import (
 	"context"
@@ -68,7 +68,7 @@ func (uc *useCase) validateReq(req *dto.RequestExecutionStatusUpdate) errors.Err
 		map[string]string{
 			"status_code.required":      "status_code is required",
 			"detail.required_unless":    "detail is required unless execution_status is 'success'",
-			"execution_status.enums":    "execution_status must be one of the following: success, client_error, service_error",
+			"execution_status.enums":    "execution_status must be one of the following: success, client_error, server_error",
 			"execution_status.required": "execution_status is required",
 		},
 	)
@@ -102,14 +102,14 @@ func (uc *useCase) validateReq(req *dto.RequestExecutionStatusUpdate) errors.Err
 				),
 			)
 		}
-	case enums.RequestExecutionStatusServiceError:
+	case enums.RequestExecutionStatusServerError:
 		if req.StatusCode < 500 || req.StatusCode >= 600 {
 			errors.Aggregate(
 				err,
 				errors.NewAttributeValidationFailed(
 					"RequestExecutionStatusUpdate",
 					"status_code",
-					"status_code must be in the range of 500-599 when execution_status is 'service_error'",
+					"status_code must be in the range of 500-599 when execution_status is 'server_error'",
 					nil,
 				),
 			)

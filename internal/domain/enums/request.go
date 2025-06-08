@@ -7,7 +7,7 @@ const (
 	RequestExecutionStatusSuccess      RequestExecutionStatus = "success"
 	RequestExecutionStatusForwarded    RequestExecutionStatus = "forwarded"
 	RequestExecutionStatusClientError  RequestExecutionStatus = "client_error"
-	RequestExecutionStatusServiceError RequestExecutionStatus = "service_error"
+	RequestExecutionStatusServerError  RequestExecutionStatus = "server_error"
 	RequestExecutionStatusUnauthorized RequestExecutionStatus = "unauthorized"
 )
 
@@ -17,7 +17,7 @@ func ParseRequestExecutionStatus(status string) (RequestExecutionStatus, bool) {
 		RequestExecutionStatusSuccess,
 		RequestExecutionStatusForwarded,
 		RequestExecutionStatusClientError,
-		RequestExecutionStatusServiceError,
+		RequestExecutionStatusServerError,
 		RequestExecutionStatusUnauthorized:
 		return s, true
 	default:
