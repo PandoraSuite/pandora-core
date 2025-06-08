@@ -127,7 +127,7 @@ type RequestRepository interface {
 	CreateAsInitialPoint(ctx context.Context, request *entities.Request) errors.Error
 
 	// ... Update ...
-	UpdateExecutionStatus(ctx context.Context, id string, executionStatus enums.RequestExecutionStatus) errors.Error
+	UpdateExecutionStatus(ctx context.Context, id string, update *dto.RequestExecutionStatusUpdate) errors.Error
 
 	// ... Delete ...
 	DeleteByService(ctx context.Context, serviceID int) errors.Error
