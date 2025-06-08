@@ -20,9 +20,7 @@ type useCase struct {
 }
 
 func (uc *useCase) Execute(
-	ctx context.Context,
-	id string,
-	req *dto.RequestExecutionStatusUpdate,
+	ctx context.Context, id string, req *dto.RequestExecutionStatusUpdate,
 ) errors.Error {
 	if err := uc.validateInput(id, req); err != nil {
 		return err
@@ -32,8 +30,7 @@ func (uc *useCase) Execute(
 }
 
 func (uc *useCase) validateInput(
-	id string,
-	req *dto.RequestExecutionStatusUpdate,
+	id string, req *dto.RequestExecutionStatusUpdate,
 ) errors.Error {
 	var err errors.Error
 
