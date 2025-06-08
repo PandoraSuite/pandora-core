@@ -54,15 +54,26 @@ func (r *RequestRepository) DeleteByService(
 }
 
 func (r *RequestRepository) UpdateExecutionStatus(
-	ctx context.Context, id string, executionStatus enums.RequestExecutionStatus,
+	ctx context.Context, id string, update *dto.RequestExecutionStatusUpdate,
 ) errors.Error {
+	if update == nil {
+		return nil
+	}
+
+	var detail any
+	if update.Detail != "" {
+		detail = update.Detail
+	}
+
 	query := `
 		UPDATE request
-		SET execution_status = $1
-		WHERE id = $2;
+		SET execution_status = $2, status_code = $3, detail = $4
+		WHERE id = $1;
 	`
 
-	result, err := r.pool.Exec(ctx, query, executionStatus, id)
+	result, err := r.pool.Exec(
+		ctx, query, id, update.ExecutionStatus, update.StatusCode, detail,
+	)
 	if err != nil {
 		return r.errorMapper(err, r.tableName)
 	}
@@ -81,8 +92,8 @@ func (r *RequestRepository) ListByService(
 		SELECT id, COALESCE(start_point::text, ''), api_key, COALESCE(api_key_id, 0),
 			COALESCE(project_name, ''), COALESCE(project_id, 0),
 			COALESCE(environment_name, ''), COALESCE(environment_id, 0),
-			service_name, service_version, COALESCE(service_id, 0), COALESCE(status_code, 0),
-			execution_status, request_time, path, method, ip_address,
+			service_name, service_version, COALESCE(service_id, 0), COALESCE(detail, ''),
+			COALESCE(status_code, 0), execution_status, request_time, path, method, ip_address,
 			COALESCE(unauthorized_reason, ''), created_at
 		FROM request
 		WHERE service_id = $1
@@ -146,6 +157,7 @@ func (r *RequestRepository) ListByService(
 			&request.Service.Name,
 			&request.Service.Version,
 			&request.Service.ID,
+			&request.Detail,
 			&request.StatusCode,
 			&request.ExecutionStatus,
 			&request.RequestTime,
