@@ -3,6 +3,7 @@ package validateconsume
 import (
 	"context"
 	"log"
+	"net/http"
 
 	"github.com/MAD-py/pandora-core/internal/app/api_key/shared"
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
@@ -75,6 +76,8 @@ func (uc *useCase) Execute(
 		request.ExecutionStatus = enums.RequestExecutionStatusForwarded
 	} else {
 		request.ExecutionStatus = enums.RequestExecutionStatusUnauthorized
+
+		request.StatusCode = http.StatusUnauthorized
 		request.UnauthorizedReason = validateResponse.FailureCode
 	}
 
