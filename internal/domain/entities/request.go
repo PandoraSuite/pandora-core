@@ -50,6 +50,7 @@ type Request struct {
 	Project            *RequestProject
 	Environment        *RequestEnvironment
 	Service            *RequestService
+	Detail             string
 	StatusCode         int
 	ExecutionStatus    enums.RequestExecutionStatus
 	UnauthorizedReason enums.APIKeyValidationFailureCode

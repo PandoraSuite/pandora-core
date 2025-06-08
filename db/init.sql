@@ -158,6 +158,7 @@ CREATE TABLE IF NOT EXISTS request(
     CONSTRAINT request_service_id_fk
         FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE,
 
+    detail TEXT,
     status_code INTEGER,
     execution_status TEXT NOT NULL,
     CONSTRAINT request_execution_status_check
