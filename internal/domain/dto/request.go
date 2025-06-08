@@ -29,6 +29,12 @@ type RequestIncoming struct {
 	RequestTime time.Time                `name:"request_time" validate:"required,utc" time_format:"2006-01-02T15:04:05Z" time_utc:"1"`
 }
 
+type RequestExecutionStatusUpdate struct {
+	Detail          string                       `name:"detail" validate:"required_unless=execution_status success"`
+	StatusCode      int                          `name:"status_code" validate:"required"`
+	ExecutionStatus enums.RequestExecutionStatus `name:"execution_status" validate:"required,enums=success client_error service_error"`
+}
+
 // ... Responses ...
 
 type RequestAPIKeyResponse struct {
@@ -59,6 +65,7 @@ type RequestResponse struct {
 	Project            *RequestProjectResponse           `name:"project"`
 	Environment        *RequestEnvironmentResponse       `name:"environment"`
 	Service            *RequestServiceResponse           `name:"service"`
+	Detail             string                            `name:"detail"`
 	StatusCode         int                               `name:"status_code"`
 	ExecutionStatus    enums.RequestExecutionStatus      `name:"execution_status"`
 	UnauthorizedReason enums.APIKeyValidationFailureCode `name:"unauthorized_reason"`
