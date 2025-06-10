@@ -14,7 +14,7 @@ type ServiceFilter struct {
 
 type ServiceCreate struct {
 	Name    string `name:"name" validate:"required"`
-	Version string `name:"version" validate:"required,max=16"`
+	Version string `name:"version" validate:"required,max=25"`
 }
 
 // ... Responses ...

@@ -2347,7 +2347,7 @@ const docTemplate = `{
                 },
                 "version": {
                     "type": "string",
-                    "maxLength": 16
+                    "maxLength": 25
                 }
             }
         },
@@ -2373,7 +2373,7 @@ const docTemplate = `{
                 },
                 "version": {
                     "type": "string",
-                    "maxLength": 16
+                    "maxLength": 25
                 }
             }
         },

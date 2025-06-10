@@ -2339,7 +2339,7 @@
                 },
                 "version": {
                     "type": "string",
-                    "maxLength": 16
+                    "maxLength": 25
                 }
             }
         },
@@ -2365,7 +2365,7 @@
                 },
                 "version": {
                     "type": "string",
-                    "maxLength": 16
+                    "maxLength": 25
                 }
             }
         },

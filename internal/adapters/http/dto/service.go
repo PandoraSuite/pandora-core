@@ -21,7 +21,7 @@ func (s *ServiceFilter) ToDomain() *dto.ServiceFilter {
 
 type ServiceCreate struct {
 	Name    string `json:"name" binding:"required"`
-	Version string `json:"version" binding:"required" maxLength:"16"`
+	Version string `json:"version" binding:"required" maxLength:"25"`
 }
 
 func (s *ServiceCreate) ToDomain() *dto.ServiceCreate {
@@ -41,7 +41,7 @@ type ServiceResponse struct {
 	ID        int       `json:"id"`
 	Name      string    `json:"name"`
 	Status    string    `json:"status" enums:"enabled,disabled,deprecated"`
-	Version   string    `json:"version" maxLength:"16"`
+	Version   string    `json:"version" maxLength:"25"`
 	CreatedAt time.Time `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
 }
 

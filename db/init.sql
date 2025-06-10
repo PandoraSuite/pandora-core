@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS service(
     id SERIAL PRIMARY KEY,
 
     name TEXT NOT NULL,
-    version VARCHAR(16) NOT NULL,
+    version VARCHAR(25) NOT NULL,
     CONSTRAINT service_name_version_unique UNIQUE (name, version),
 
     status TEXT NOT NULL,

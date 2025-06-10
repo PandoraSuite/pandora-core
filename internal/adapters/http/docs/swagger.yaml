@@ -402,7 +402,7 @@ definitions:
       name:
         type: string
       version:
-        maxLength: 16
+        maxLength: 25
         type: string
     required:
     - name
@@ -423,7 +423,7 @@ definitions:
         - deprecated
         type: string
       version:
-        maxLength: 16
+        maxLength: 25
         type: string
     type: object
   dto.ServiceStatusUpdate:
