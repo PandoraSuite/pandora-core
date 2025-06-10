@@ -5,7 +5,6 @@ import (
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
-	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/validator"
 )
@@ -89,39 +88,16 @@ func (uc *useCase) validateReq(req *dto.ProjectService) errors.Error {
 	validationErr := uc.validator.ValidateStruct(
 		req,
 		map[string]string{
-			"id.gt":                 "id must be greater than 0",
-			"id.required":           "id is required",
-			"max_requests.gte":      "max_requests must be greater than or equal to -1",
-			"reset_frequency.enums": "reset_frequency must be one of the following: , daily, weekly, biweekly, monthly",
+			"id.gt":                    "id must be greater than 0",
+			"id.required":              "id is required",
+			"max_requests.gte":         "max_requests must be greater than or equal to -1",
+			"reset_frequency.enums":    "reset_frequency must be one of the following: daily, weekly, biweekly, monthly",
+			"reset_frequency.required": "reset_frequency is required",
 		},
 	)
 
 	if validationErr != nil {
 		err = errors.Aggregate(err, validationErr)
-	}
-
-	if req.MaxRequests == -1 && req.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
-		err = errors.Aggregate(
-			err,
-			errors.NewAttributeValidationFailed(
-				"ProjectService",
-				"reset_frequency",
-				"reset_frequency must be null when max_requests is -1 (unlimited)",
-				nil,
-			),
-		)
-	}
-
-	if req.MaxRequests > -1 && req.ResetFrequency == enums.ProjectServiceResetFrequencyNull {
-		err = errors.Aggregate(
-			err,
-			errors.NewAttributeValidationFailed(
-				"ProjectService",
-				"reset_frequency",
-				"reset_frequency is required when max_requests is greater than -1 (unlimited)",
-				nil,
-			),
-		)
 	}
 
 	return err
