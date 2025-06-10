@@ -173,9 +173,9 @@ func (r *EnvironmentRepository) UpdateService(
 				ON s.id = u.service_id;
 	`
 
-	var maxRequest any
+	var maxRequests any
 	if update.MaxRequests != -1 {
-		maxRequest = update.MaxRequests
+		maxRequests = update.MaxRequests
 	}
 
 	var availableRequest any
@@ -189,7 +189,7 @@ func (r *EnvironmentRepository) UpdateService(
 		query,
 		id,
 		serviceID,
-		maxRequest,
+		maxRequests,
 		availableRequest,
 	).Scan(
 		&service.ID,
@@ -471,7 +471,7 @@ func (r *EnvironmentRepository) GetByID(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'maxRequest', COALESCE(es.max_requests, -1),
+						'maxRequests', COALESCE(es.max_requests, -1),
 						'availableRequest', COALESCE(es.available_request, -1),
 						'assignedAt', es.created_at
 					)
@@ -512,7 +512,7 @@ func (r *EnvironmentRepository) ListByProject(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'maxRequest', COALESCE(es.max_requests, -1),
+						'maxRequests', COALESCE(es.max_requests, -1),
 						'availableRequest', COALESCE(es.available_request, -1),
 						'assignedAt', es.created_at
 					)
@@ -577,9 +577,9 @@ func (r *EnvironmentRepository) AddService(
 			JOIN service s ON i.service_id = s.id;
 	`
 
-	var maxRequest any
+	var maxRequests any
 	if service.MaxRequests != -1 {
-		maxRequest = service.MaxRequests
+		maxRequests = service.MaxRequests
 	}
 
 	var availableRequest any
@@ -592,7 +592,7 @@ func (r *EnvironmentRepository) AddService(
 		query,
 		id,
 		service.ID,
-		maxRequest,
+		maxRequests,
 		availableRequest,
 	).Scan(&service.Name, &service.Version, &service.AssignedAt)
 
@@ -669,9 +669,9 @@ func (r *EnvironmentRepository) createEnvironmentServices(
 			),
 		)
 
-		var maxRequest any
+		var maxRequests any
 		if service.MaxRequests != -1 {
-			maxRequest = service.MaxRequests
+			maxRequests = service.MaxRequests
 		}
 
 		var availableRequest any
@@ -683,7 +683,7 @@ func (r *EnvironmentRepository) createEnvironmentServices(
 			args,
 			environmentID,
 			service.ID,
-			maxRequest,
+			maxRequests,
 			availableRequest,
 		)
 		argIndex += 4

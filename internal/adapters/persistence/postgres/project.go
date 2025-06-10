@@ -245,9 +245,9 @@ func (r *ProjectRepository) UpdateService(
 		resetFrequency = update.ResetFrequency
 	}
 
-	var maxRequest any
+	var maxRequests any
 	if update.MaxRequests != -1 {
-		maxRequest = update.MaxRequests
+		maxRequests = update.MaxRequests
 	}
 
 	var nextReset any
@@ -261,7 +261,7 @@ func (r *ProjectRepository) UpdateService(
 		query,
 		id,
 		serviceID,
-		maxRequest,
+		maxRequests,
 		resetFrequency,
 		nextReset,
 	).Scan(
@@ -434,7 +434,7 @@ func (r *ProjectRepository) GetByID(
 						'name', s.name,
 						'version', s.version,
 						'nextReset', COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
-						'maxRequest', COALESCE(ps.max_requests, -1),
+						'maxRequests', COALESCE(ps.max_requests, -1),
 						'resetFrequency', COALESCE(ps.reset_frequency, ''),
 						'assignedAt', ps.created_at
 					)
@@ -475,7 +475,7 @@ func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, erro
 						'name', s.name,
 						'version', s.version,
 						'nextReset', COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
-						'maxRequest', COALESCE(ps.max_requests, -1),
+						'maxRequests', COALESCE(ps.max_requests, -1),
 						'resetFrequency', COALESCE(ps.reset_frequency, ''),
 						'assignedAt', ps.created_at
 					)
@@ -534,7 +534,7 @@ func (r *ProjectRepository) ListByClient(
 						'name', s.name,
 						'version', s.version,
 						'nextReset', COALESCE(ps.next_reset, '0001-01-01 00:00:00.0+00'),
-						'maxRequest', COALESCE(ps.max_requests, -1),
+						'maxRequests', COALESCE(ps.max_requests, -1),
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
 					)
@@ -604,9 +604,9 @@ func (r *ProjectRepository) AddService(
 		resetFrequency = service.ResetFrequency
 	}
 
-	var maxRequest any
+	var maxRequests any
 	if service.MaxRequests != -1 {
-		maxRequest = service.MaxRequests
+		maxRequests = service.MaxRequests
 	}
 
 	err := r.pool.QueryRow(
@@ -614,7 +614,7 @@ func (r *ProjectRepository) AddService(
 		query,
 		id,
 		service.ID,
-		maxRequest,
+		maxRequests,
 		resetFrequency,
 		service.NextReset,
 	).Scan(&service.Name, &service.Version, &service.AssignedAt)
@@ -698,9 +698,9 @@ func (r *ProjectRepository) createProjectServices(
 			resetFrequency = service.ResetFrequency
 		}
 
-		var maxRequest any
+		var maxRequests any
 		if service.MaxRequests != -1 {
-			maxRequest = service.MaxRequests
+			maxRequests = service.MaxRequests
 		}
 
 		var nextReset any
@@ -712,7 +712,7 @@ func (r *ProjectRepository) createProjectServices(
 			args,
 			projectID,
 			service.ID,
-			maxRequest,
+			maxRequests,
 			resetFrequency,
 			nextReset,
 		)
