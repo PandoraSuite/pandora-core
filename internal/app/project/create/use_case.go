@@ -2,7 +2,6 @@ package create
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/MAD-py/pandora-core/internal/domain/dto"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
@@ -24,17 +23,12 @@ type useCase struct {
 func (uc *useCase) Execute(
 	ctx context.Context, req *dto.ProjectCreate,
 ) (*dto.ProjectResponse, errors.Error) {
-	validationErr := uc.validateReq(req)
+	if err := uc.validateReq(req); err != nil {
+		return nil, err
+	}
+
 	services := make([]*entities.ProjectService, len(req.Services))
 	for i, service := range req.Services {
-		if err := uc.validateService(service); err != nil {
-			if err, ok := err.(*errors.AttributeError); ok {
-				err.PrefixLoc(fmt.Sprintf("services[%d]", i))
-			}
-			validationErr = errors.Aggregate(validationErr, err)
-			continue
-		}
-
 		s := &entities.ProjectService{
 			ID:             service.ID,
 			MaxRequests:    service.MaxRequests,
@@ -42,10 +36,6 @@ func (uc *useCase) Execute(
 		}
 		s.CalculateNextReset()
 		services[i] = s
-	}
-
-	if validationErr != nil {
-		return nil, validationErr
 	}
 
 	project := entities.Project{
@@ -88,46 +78,17 @@ func (uc *useCase) validateReq(req *dto.ProjectCreate) errors.Error {
 	return uc.validator.ValidateStruct(
 		req,
 		map[string]string{
-			"name.required":                    "name is required",
-			"client_id.gt":                     "client_id must be greater than 0",
-			"status.required":                  "status is required",
-			"client_id.required":               "client_id is required",
-			"services[].id.gt":                 "id must be greater than 0",
-			"services[].id.required":           "id is required",
-			"services[].max_requests.gte":      "max_requests must be greater than or equal to -1",
-			"services[].reset_frequency.enums": "reset_frequency must be one of the following: , daily, weekly, biweekly, monthly",
+			"name.required":                       "name is required",
+			"client_id.gt":                        "client_id must be greater than 0",
+			"status.required":                     "status is required",
+			"client_id.required":                  "client_id is required",
+			"services[].id.gt":                    "id must be greater than 0",
+			"services[].id.required":              "id is required",
+			"services[].max_requests.gte":         "max_requests must be greater than or equal to -1",
+			"services[].reset_frequency.enums":    "reset_frequency must be one of the following: daily, weekly, biweekly, monthly",
+			"services[].reset_frequency.required": "reset_frequency is required",
 		},
 	)
-}
-
-func (uc *useCase) validateService(req *dto.ProjectService) errors.Error {
-	var err errors.Error
-
-	if req.MaxRequests == -1 && req.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
-		err = errors.Aggregate(
-			err,
-			errors.NewAttributeValidationFailed(
-				"ProjectService",
-				"reset_frequency",
-				"reset_frequency must be null when max_requests is -1 (unlimited)",
-				nil,
-			),
-		)
-	}
-
-	if req.MaxRequests > -1 && req.ResetFrequency == enums.ProjectServiceResetFrequencyNull {
-		err = errors.Aggregate(
-			err,
-			errors.NewAttributeValidationFailed(
-				"ProjectService",
-				"reset_frequency",
-				"reset_frequency is required when max_requests is greater than -1 (unlimited)",
-				nil,
-			),
-		)
-	}
-
-	return err
 }
 
 func NewUseCase(

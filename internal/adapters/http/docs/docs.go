@@ -2111,7 +2111,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "id",
-                "max_requests"
+                "max_requests",
+                "reset_frequency"
             ],
             "properties": {
                 "id": {

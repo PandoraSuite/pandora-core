@@ -257,6 +257,7 @@ definitions:
     required:
     - id
     - max_requests
+    - reset_frequency
     type: object
   dto.ProjectServiceResponse:
     properties:

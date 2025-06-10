@@ -11,7 +11,7 @@ import (
 type ProjectService struct {
 	ID             int                                `name:"id" validate:"required,gt=0"`
 	MaxRequests    int                                `name:"max_requests" validate:"omitempty,gte=-1"`
-	ResetFrequency enums.ProjectServiceResetFrequency `name:"reset_frequency" validate:"omitempty,enums=daily weekly biweekly monthly"`
+	ResetFrequency enums.ProjectServiceResetFrequency `name:"reset_frequency" validate:"required,enums=daily weekly biweekly monthly"`
 }
 
 type ProjectCreate struct {

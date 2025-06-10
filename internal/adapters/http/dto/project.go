@@ -12,7 +12,7 @@ import (
 type ProjectService struct {
 	ID             int    `json:"id" binding:"required"`
 	MaxRequests    int    `json:"max_requests" binding:"required"`
-	ResetFrequency string `json:"reset_frequency" enums:"daily,weekly,biweekly,monthly"`
+	ResetFrequency string `json:"reset_frequency" binding:"required" enums:"daily,weekly,biweekly,monthly"`
 }
 
 func (p *ProjectService) ToDomain() *dto.ProjectService {
