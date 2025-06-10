@@ -224,55 +224,62 @@ func (r *ProjectRepository) UpdateService(
 		return r.GetServiceByID(ctx, id, serviceID)
 	}
 
-	query := `
-		WITH updated AS (
-			UPDATE project_service
-			SET max_requests = $3, reset_frequency = $4, next_reset = $5
-			WHERE project_id = $1 AND service_id = $2
-			RETURNING *
-		)
-		SELECT s.id, s.name, s.version,
-			COALESCE(u.max_requests, -1),
-			COALESCE(u.reset_frequency, ''),
-			COALESCE(u.next_reset, '0001-01-01 00:00:00.0+00'),
-			u.created_at
-		FROM updated u
-			JOIN service s ON s.id = u.service_id;
-	`
+	var updates []string
+	args := []any{id, serviceID}
+	argIndex := 3
 
-	var resetFrequency any
 	if update.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
-		resetFrequency = update.ResetFrequency
+		updates = append(updates, fmt.Sprintf("reset_frequency = $%d", argIndex))
+		args = append(args, update.ResetFrequency)
+		argIndex++
 	}
 
-	var maxRequests any
 	if update.MaxRequests != -1 {
-		maxRequests = update.MaxRequests
+		updates = append(updates, fmt.Sprintf("max_requests = $%d", argIndex))
+		args = append(args, update.MaxRequests)
+		argIndex++
 	}
 
-	var nextReset any
 	if !update.NextReset.IsZero() {
-		nextReset = update.NextReset
+		updates = append(updates, fmt.Sprintf("next_reset = $%d", argIndex))
+		args = append(args, update.NextReset)
+		argIndex++
 	}
+
+	if len(updates) == 0 {
+		return r.GetServiceByID(ctx, id, serviceID)
+	}
+
+	query := fmt.Sprintf(
+		`
+			WITH updated AS (
+				UPDATE project_service
+				SET %s
+				WHERE project_id = $1 AND service_id = $2
+				RETURNING *
+			)
+			SELECT s.id, s.name, s.version,
+				COALESCE(u.max_requests, -1),
+				COALESCE(u.reset_frequency, ''),
+				COALESCE(u.next_reset, '0001-01-01 00:00:00.0+00'),
+				u.created_at
+			FROM updated u
+				JOIN service s ON s.id = u.service_id;
+		`,
+		strings.Join(updates, ", "),
+	)
 
 	service := new(entities.ProjectService)
-	err := r.pool.QueryRow(
-		ctx,
-		query,
-		id,
-		serviceID,
-		maxRequests,
-		resetFrequency,
-		nextReset,
-	).Scan(
-		&service.ID,
-		&service.Name,
-		&service.Version,
-		&service.MaxRequests,
-		&service.ResetFrequency,
-		&service.NextReset,
-		&service.AssignedAt,
-	)
+	err := r.pool.QueryRow(ctx, query, args...).
+		Scan(
+			&service.ID,
+			&service.Name,
+			&service.Version,
+			&service.MaxRequests,
+			&service.ResetFrequency,
+			&service.NextReset,
+			&service.AssignedAt,
+		)
 	if err != nil {
 		return nil, r.errorMapper(err, r.auxServiceTableName)
 	}

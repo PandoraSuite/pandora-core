@@ -26,8 +26,7 @@ type useCase struct {
 func (uc *useCase) Execute(
 	ctx context.Context, id, serviceID int, req *dto.ProjectServiceUpdate,
 ) (*dto.ProjectServiceResponse, errors.Error) {
-
-	if req.NextReset.IsZero() {
+	if req.NextReset.IsZero() && req.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
 		service := entities.ProjectService{
 			MaxRequests:    req.MaxRequests,
 			ResetFrequency: req.ResetFrequency,
@@ -170,30 +169,6 @@ func (uc *useCase) validateReq(req *dto.ProjectServiceUpdate) errors.Error {
 		err = errors.Aggregate(err, validationErr)
 	}
 
-	if req.MaxRequests == -1 && req.ResetFrequency != enums.ProjectServiceResetFrequencyNull {
-		err = errors.Aggregate(
-			err,
-			errors.NewAttributeValidationFailed(
-				"ProjectServiceUpdate",
-				"reset_frequency",
-				"reset_frequency must be null when max_requests is -1 (unlimited)",
-				nil,
-			),
-		)
-	}
-
-	if req.MaxRequests > -1 && req.ResetFrequency == enums.ProjectServiceResetFrequencyNull {
-		err = errors.Aggregate(
-			err,
-			errors.NewAttributeValidationFailed(
-				"ProjectServiceUpdate",
-				"reset_frequency",
-				"reset_frequency is required when max_requests is greater than -1 (unlimited)",
-				nil,
-			),
-		)
-	}
-
 	if !req.NextReset.IsZero() {
 		if req.NextReset.Before(utils.TruncateToDay(time.Now())) {
 			err = errors.Aggregate(
@@ -202,17 +177,6 @@ func (uc *useCase) validateReq(req *dto.ProjectServiceUpdate) errors.Error {
 					"ProjectServiceUpdate",
 					"next_reset",
 					"next_reset must be in the future",
-					nil,
-				),
-			)
-		}
-		if req.MaxRequests == -1 {
-			err = errors.Aggregate(
-				err,
-				errors.NewAttributeValidationFailed(
-					"ProjectServiceUpdate",
-					"next_reset",
-					"next_reset must be null when max_requests is -1 (unlimited)",
 					nil,
 				),
 			)
