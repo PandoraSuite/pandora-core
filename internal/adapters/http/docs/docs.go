@@ -2122,11 +2122,13 @@ const docTemplate = `{
         "dto.ProjectCreate": {
             "type": "object",
             "required": [
-                "client_id"
+                "client_id",
+                "name"
             ],
             "properties": {
                 "client_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "name": {
                     "type": "string"
@@ -2206,10 +2208,12 @@ const docTemplate = `{
             ],
             "properties": {
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "max_requests": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": -1
                 },
                 "reset_frequency": {
                     "type": "string",

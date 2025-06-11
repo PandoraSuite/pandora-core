@@ -275,6 +275,7 @@ definitions:
   dto.ProjectCreate:
     properties:
       client_id:
+        minimum: 1
         type: integer
       name:
         type: string
@@ -284,6 +285,7 @@ definitions:
         type: array
     required:
     - client_id
+    - name
     type: object
   dto.ProjectResetRequest:
     properties:
@@ -326,8 +328,10 @@ definitions:
   dto.ProjectService:
     properties:
       id:
+        minimum: 1
         type: integer
       max_requests:
+        minimum: -1
         type: integer
       reset_frequency:
         enum:
