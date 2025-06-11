@@ -34,19 +34,19 @@ func (a *APIKeyUpdate) ToDomain() *dto.APIKeyUpdate {
 // ... Responses ...
 
 type APIKeyResponse struct {
-	ID int `json:"id" minimum:"1"`
+	ID int `json:"id" validate:"required" minimum:"1"`
 
-	Key string `json:"key" maxLength:"11" minLength:"11" example:"xxxx...xxxx"`
+	Key string `json:"key" validate:"required" maxLength:"11" minLength:"11" example:"xxxx...xxxx"`
 
-	Status string `json:"status" enums:"enabled,disabled,deprecated"`
+	Status string `json:"status" validate:"required" enums:"enabled,disabled,deprecated"`
 
 	LastUsed time.Time `json:"last_used" format:"date-time" extensions:"x-timezone=utc"`
 
 	ExpiresAt time.Time `json:"expires_at" format:"date-time" extensions:"x-timezone=utc"`
 
-	EnvironmentID int `json:"environment_id" minimum:"1"`
+	EnvironmentID int `json:"environment_id" validate:"required" minimum:"1"`
 
-	CreatedAt time.Time `json:"created_at" format:"date-time" extensions:"x-timezone=utc"`
+	CreatedAt time.Time `json:"created_at" validate:"required" format:"date-time" extensions:"x-timezone=utc"`
 }
 
 func APIKeyResponseFromDomain(apiKey *dto.APIKeyResponse) *APIKeyResponse {
@@ -62,7 +62,7 @@ func APIKeyResponseFromDomain(apiKey *dto.APIKeyResponse) *APIKeyResponse {
 }
 
 type APIKeyRevealKeyResponse struct {
-	Key string `json:"key" example:"xxxxxxxxxxxxx"`
+	Key string `json:"key" validate:"required" example:"xxxxxxxxxxxxx"`
 }
 
 func APIKeyRevealKeyResponseFromDomain(apiKey *dto.APIKeyRevealKeyResponse) *APIKeyRevealKeyResponse {

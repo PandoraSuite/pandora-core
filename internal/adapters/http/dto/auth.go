@@ -61,16 +61,16 @@ func (r *Reauthenticate) ToDomain() *dto.Reauthenticate {
 // ... Responses ...
 
 type TokenReponse struct {
-	TokenType string `json:"token_type"`
+	TokenType string `json:"token_type" validate:"required"`
 
-	ExpiresIn time.Time `json:"expires_in" format:"date-time" extensions:"x-timezone=utc"`
+	ExpiresIn time.Time `json:"expires_in" validate:"required" format:"date-time" extensions:"x-timezone=utc"`
 
-	AccessToken string `json:"access_token" format:"jwt"`
+	AccessToken string `json:"access_token" validate:"required" format:"jwt"`
 }
 
 type AuthenticateResponse struct {
 	*TokenReponse
-	ForcePasswordReset bool `json:"force_password_reset"`
+	ForcePasswordReset bool `json:"force_password_reset" validate:"required"`
 }
 
 func AuthenticateResponseFromDomain(auth *dto.AuthenticateResponse) *AuthenticateResponse {

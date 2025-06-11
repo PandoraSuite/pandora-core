@@ -9,8 +9,9 @@ import (
 // ... Requests ...
 
 type EnvironmentService struct {
-	ID          int `json:"id" binding:"required"`
-	MaxRequests int `json:"max_requests" binding:"required"`
+	ID int `json:"id" validate:"required" minimum:"1"`
+
+	MaxRequests int `json:"max_requests" validate:"required" minimum:"-1"`
 }
 
 func (e *EnvironmentService) ToDomain() *dto.EnvironmentService {
@@ -21,8 +22,9 @@ func (e *EnvironmentService) ToDomain() *dto.EnvironmentService {
 }
 
 type EnvironmentCreate struct {
-	Name      string `json:"name" binding:"required"`
-	ProjectID int    `json:"project_id" binding:"required"`
+	Name string `json:"name" validate:"required"`
+
+	ProjectID int `json:"project_id" validate:"required" minimum:"1"`
 
 	Services []*EnvironmentService `json:"services"`
 }
@@ -51,7 +53,7 @@ func (e *EnvironmentUpdate) ToDomain() *dto.EnvironmentUpdate {
 }
 
 type EnvironmentServiceUpdate struct {
-	MaxRequests int `json:"max_requests"`
+	MaxRequests int `json:"max_requests" validate:"required" minimum:"-1"`
 }
 
 func (e *EnvironmentServiceUpdate) ToDomain() *dto.EnvironmentServiceUpdateInput {
@@ -63,12 +65,17 @@ func (e *EnvironmentServiceUpdate) ToDomain() *dto.EnvironmentServiceUpdateInput
 // ... Responses ...
 
 type EnvironmentServiceResponse struct {
-	ID               int       `json:"id"`
-	Name             string    `json:"name"`
-	Version          string    `json:"version"`
-	MaxRequests      int       `json:"max_requests"`
-	AvailableRequest int       `json:"available_requests"`
-	AssignedAt       time.Time `json:"assigned_at"`
+	ID int `json:"id" validate:"required" minimum:"1"`
+
+	Name string `json:"name" validate:"required"`
+
+	Version string `json:"version" validate:"required" maxLength:"25"`
+
+	MaxRequests int `json:"max_requests" validate:"required" minimum:"-1"`
+
+	AvailableRequest int `json:"available_requests" validate:"required" minimum:"-1"`
+
+	AssignedAt time.Time `json:"assigned_at" validate:"required" format:"date-time" extensions:"x-timezone=utc"`
 }
 
 func EnvironmentServiceResponseFromDomain(
@@ -85,12 +92,17 @@ func EnvironmentServiceResponseFromDomain(
 }
 
 type EnvironmentResponse struct {
-	ID        int                           `json:"id"`
-	Name      string                        `json:"name"`
-	Status    string                        `json:"status" enums:"enabled,disabled,deprecated"`
-	ProjectID int                           `json:"project_id"`
-	CreatedAt time.Time                     `json:"created_at"`
-	Services  []*EnvironmentServiceResponse `json:"services"`
+	ID int `json:"id" validate:"required" minimum:"1"`
+
+	Name string `json:"name" validate:"required"`
+
+	Status string `json:"status" validate:"required" enums:"enabled,disabled,deprecated"`
+
+	ProjectID int `json:"project_id" validate:"required" minimum:"1"`
+
+	CreatedAt time.Time `json:"created_at" validate:"required" format:"date-time" extensions:"x-timezone=utc"`
+
+	Services []*EnvironmentServiceResponse `json:"services"`
 }
 
 func EnvironmentResponseFromDomain(
@@ -112,9 +124,12 @@ func EnvironmentResponseFromDomain(
 }
 
 type EnvironmentServiceReset struct {
-	ID      int                         `json:"id"`
-	Name    string                      `json:"name"`
-	Status  string                      `json:"status" enums:"enabled,disabled,deprecated"`
+	ID int `json:"id" validate:"required" minimum:"1"`
+
+	Name string `json:"name" validate:"required"`
+
+	Status string `json:"status" validate:"required" enums:"enabled,disabled,deprecated"`
+
 	Service *EnvironmentServiceResponse `json:"service"`
 }
 

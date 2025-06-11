@@ -54,15 +54,15 @@ func (c *ClientUpdate) ToDomain() *dto.ClientUpdate {
 // ... Responses ...
 
 type ClientResponse struct {
-	ID int `json:"id" minimum:"1"`
+	ID int `json:"id" validate:"required" minimum:"1"`
 
-	Type string `json:"type" enums:"developer,organization"`
+	Type string `json:"type" validate:"required" enums:"developer,organization"`
 
-	Name string `json:"name"`
+	Name string `json:"name" validate:"required"`
 
-	Email string `json:"email" format:"email"`
+	Email string `json:"email" validate:"required" format:"email"`
 
-	CreatedAt time.Time `json:"created_at" format:"date-time" extensions:"x-timezone=utc"`
+	CreatedAt time.Time `json:"created_at" validate:"required" format:"date-time" extensions:"x-timezone=utc"`
 }
 
 func ClientResponseFromDomain(client *dto.ClientResponse) *ClientResponse {
