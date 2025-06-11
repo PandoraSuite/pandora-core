@@ -73,8 +73,7 @@ func (r *EnvironmentRepository) ResetAvailableRequests(
 			RETURNING *
 		)
 		SELECT s.id, s.name, s.version, u.created_at,
-			COALESCE(u.max_requests, -1),
-			COALESCE(u.available_request, -1)
+			u.max_requests, u.available_request
 		FROM updated u
 			JOIN service s ON u.service_id = s.id;
 	`
@@ -166,22 +165,11 @@ func (r *EnvironmentRepository) UpdateService(
 			RETURNING *
 		)
 		SELECT s.id, s.name, s.version, u.created_at,
-			COALESCE(u.max_requests, -1),
-			COALESCE(u.available_request, -1)
+			u.max_requests, u.available_request
 		FROM updated u
 			JOIN service s
 				ON s.id = u.service_id;
 	`
-
-	var maxRequests any
-	if update.MaxRequests != -1 {
-		maxRequests = update.MaxRequests
-	}
-
-	var availableRequest any
-	if update.AvailableRequest != -1 {
-		availableRequest = update.AvailableRequest
-	}
 
 	service := new(entities.EnvironmentService)
 	err := r.pool.QueryRow(
@@ -189,8 +177,8 @@ func (r *EnvironmentRepository) UpdateService(
 		query,
 		id,
 		serviceID,
-		maxRequests,
-		availableRequest,
+		service.MaxRequests,
+		service.AvailableRequest,
 	).Scan(
 		&service.ID,
 		&service.Name,
@@ -280,7 +268,9 @@ func (r *EnvironmentRepository) IsEnabled(
 	`
 
 	var exists bool
-	err := r.pool.QueryRow(ctx, query, id, enums.EnvironmentStatusEnabled).Scan(&exists)
+	err := r.pool.QueryRow(
+		ctx, query, id, enums.EnvironmentStatusEnabled,
+	).Scan(&exists)
 	if err != nil {
 		return false, r.errorMapper(err, r.tableName)
 	}
@@ -302,21 +292,17 @@ func (r *EnvironmentRepository) MissingResourceDiagnosis(
 		EXISTS (
 			SELECT 1 FROM environment_service 
 			WHERE environment_id = $1 AND service_id = $2
-			AND (available_request IS NULL OR available_request > 0)
+			AND available_request > 0
 		) 
 		AS has_available_requests;
 	`
 
 	var environment_service_found, has_available_requests bool
-	err := r.pool.QueryRow(
-		ctx,
-		query,
-		id,
-		serviceID,
-	).Scan(
-		&environment_service_found,
-		&has_available_requests,
-	)
+	err := r.pool.QueryRow(ctx, query, id, serviceID).
+		Scan(
+			&environment_service_found,
+			&has_available_requests,
+		)
 	if err != nil {
 		return false, false, r.errorMapper(err, r.auxServiceTableName)
 	}
@@ -328,18 +314,20 @@ func (r *EnvironmentRepository) GetProjectServiceQuotaUsage(
 	ctx context.Context, id, serviceID int,
 ) (*dto.QuotaUsage, errors.Error) {
 	query := `
-		SELECT COALESCE(ps.max_requests, -1), COALESCE(SUM(es.max_requests), 0)
+		SELECT ps.max_requests,
+			COALESCE((
+				SELECT SUM(es.max_requests)
+				FROM environment_service es
+					JOIN environment e 
+						ON e.id = es.environment_id
+				WHERE e.project_id = ps.project_id
+					AND es.service_id = ps.service_id
+					AND es.max_requests >= 0
+			), 0)
 		FROM environment e_target
-			JOIN project_service ps
-				ON ps.project_id = e_target.project_id
-				AND ps.service_id = $2
-			LEFT JOIN environment e
-				ON e.project_id = ps.project_id
-			LEFT JOIN environment_service es
-				ON es.environment_id = e.id
-				AND es.service_id = ps.service_id
-		WHERE e_target.id = $1
-		GROUP BY ps.max_requests;
+		JOIN project_service ps
+			ON ps.project_id = e_target.project_id AND ps.service_id = $2
+		WHERE e_target.id = $1;
 	`
 
 	quota := new(dto.QuotaUsage)
@@ -357,13 +345,13 @@ func (r *EnvironmentRepository) IncreaseAvailableRequest(
 		UPDATE environment_service
 		SET available_request =
 			CASE
-				WHEN available_request IS NOT NULL AND available_request > 0
+				WHEN available_request > 0
 				THEN available_request + 1
 				ELSE available_request
 			END
 		WHERE environment_id = $1 AND service_id = $2
-			AND (available_request IS NULL OR available_request > 0)
-		RETURNING COALESCE(max_requests, -1), COALESCE(available_request, -1);
+			AND available_request > 0
+		RETURNING max_requests, available_request, -1;
 	`
 
 	result, err := r.pool.Exec(
@@ -389,13 +377,13 @@ func (r *EnvironmentRepository) DecrementAvailableRequest(
 		UPDATE environment_service
 		SET available_request =
 			CASE
-				WHEN available_request IS NOT NULL AND available_request > 0
+				WHEN available_request > 0
 				THEN available_request - 1
 				ELSE available_request
 			END
 		WHERE environment_id = $1 AND service_id = $2
-			AND (available_request IS NULL OR available_request > 0)
-		RETURNING COALESCE(max_requests, -1), COALESCE(available_request, -1);
+			AND available_request > 0
+		RETURNING max_requests, available_request;
 	`
 
 	result := new(dto.DecrementAvailableRequest)
@@ -437,8 +425,7 @@ func (r *EnvironmentRepository) GetServiceByID(
 ) (*entities.EnvironmentService, errors.Error) {
 	query := `
 		SELECT s.id, s.name, s.version, es.created_at,
-			COALESCE(es.max_requests, -1),
-			COALESCE(es.available_request, -1)
+			es.max_requests, es.available_request
 		FROM environment_service es
 			JOIN service s ON s.id = es.service_id
 		WHERE es.environment_id = $1 AND es.service_id = $2;
@@ -471,8 +458,8 @@ func (r *EnvironmentRepository) GetByID(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'maxRequests', COALESCE(es.max_requests, -1),
-						'availableRequest', COALESCE(es.available_request, -1),
+						'maxRequests', es.max_requests,
+						'availableRequest', es.available_request,
 						'assignedAt', es.created_at
 					)
 				) FILTER (WHERE s.id IS NOT NULL), '[]'
@@ -480,7 +467,8 @@ func (r *EnvironmentRepository) GetByID(
 		FROM environment e
 			LEFT JOIN environment_service es
 				ON es.environment_id = e.id
-			LEFT JOIN service s ON s.id = es.service_id
+			LEFT JOIN service s
+				ON s.id = es.service_id
 		WHERE e.id = $1
 		GROUP BY e.id;
 	`
@@ -512,8 +500,8 @@ func (r *EnvironmentRepository) ListByProject(
 						'id', s.id,
 						'name', s.name,
 						'version', s.version,
-						'maxRequests', COALESCE(es.max_requests, -1),
-						'availableRequest', COALESCE(es.available_request, -1),
+						'maxRequests', es.max_requests,
+						'availableRequest', es.available_request,
 						'assignedAt', es.created_at
 					)
 				) FILTER (WHERE s.id IS NOT NULL), '[]'
@@ -523,7 +511,8 @@ func (r *EnvironmentRepository) ListByProject(
 				ON p.id = e.project_id
 			LEFT JOIN environment_service es
 				ON es.environment_id = e.id
-			LEFT JOIN service s ON s.id = es.service_id
+			LEFT JOIN service s
+				ON s.id = es.service_id
 		WHERE p.id = $1
 		GROUP BY e.id;
 	`
@@ -577,23 +566,13 @@ func (r *EnvironmentRepository) AddService(
 			JOIN service s ON i.service_id = s.id;
 	`
 
-	var maxRequests any
-	if service.MaxRequests != -1 {
-		maxRequests = service.MaxRequests
-	}
-
-	var availableRequest any
-	if service.AvailableRequest != -1 {
-		availableRequest = service.AvailableRequest
-	}
-
 	err := r.pool.QueryRow(
 		ctx,
 		query,
 		id,
 		service.ID,
-		maxRequests,
-		availableRequest,
+		service.MaxRequests,
+		service.AvailableRequest,
 	).Scan(&service.Name, &service.Version, &service.AssignedAt)
 
 	return r.errorMapper(err, r.auxServiceTableName)
@@ -669,22 +648,12 @@ func (r *EnvironmentRepository) createEnvironmentServices(
 			),
 		)
 
-		var maxRequests any
-		if service.MaxRequests != -1 {
-			maxRequests = service.MaxRequests
-		}
-
-		var availableRequest any
-		if service.AvailableRequest != -1 {
-			availableRequest = service.AvailableRequest
-		}
-
 		args = append(
 			args,
 			environmentID,
 			service.ID,
-			maxRequests,
-			availableRequest,
+			service.MaxRequests,
+			service.AvailableRequest,
 		)
 		argIndex += 4
 	}
@@ -699,8 +668,7 @@ func (r *EnvironmentRepository) createEnvironmentServices(
 				RETURNING *
 			)
 			SELECT s.id, s.name, s.version, i.created_at,
-				COALESCE(i.max_requests, -1),
-				COALESCE(i.available_request, -1)
+				i.max_requests, i.available_request
 			FROM inserted i
 				JOIN service s ON i.service_id = s.id;
 		`,
