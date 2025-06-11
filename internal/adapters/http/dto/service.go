@@ -20,8 +20,9 @@ func (s *ServiceFilter) ToDomain() *dto.ServiceFilter {
 }
 
 type ServiceCreate struct {
-	Name    string `json:"name" binding:"required"`
-	Version string `json:"version" binding:"required" maxLength:"25"`
+	Name string `json:"name" validate:"required"`
+
+	Version string `json:"version" validate:"required" maxLength:"25"`
 }
 
 func (s *ServiceCreate) ToDomain() *dto.ServiceCreate {
@@ -32,17 +33,21 @@ func (s *ServiceCreate) ToDomain() *dto.ServiceCreate {
 }
 
 type ServiceStatusUpdate struct {
-	Status string `json:"status" binding:"required" enums:"enabled,disabled,deprecated"`
+	Status string `json:"status" validate:"required" enums:"enabled,disabled,deprecated"`
 }
 
 // ... Responses ...
 
 type ServiceResponse struct {
-	ID        int       `json:"id"`
-	Name      string    `json:"name"`
-	Status    string    `json:"status" enums:"enabled,disabled,deprecated"`
-	Version   string    `json:"version" maxLength:"25"`
-	CreatedAt time.Time `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	ID int `json:"id" validate:"required" minimum:"1"`
+
+	Name string `json:"name" validate:"required"`
+
+	Status string `json:"status" validate:"required" enums:"enabled,disabled,deprecated"`
+
+	Version string `json:"version" validate:"required" maxLength:"25"`
+
+	CreatedAt time.Time `json:"created_at" validate:"required" format:"date-time" extensions:"x-timezone=utc"`
 }
 
 func ServiceResponseFromDomain(service *dto.ServiceResponse) *ServiceResponse {

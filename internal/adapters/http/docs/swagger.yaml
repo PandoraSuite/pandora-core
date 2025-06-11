@@ -303,15 +303,23 @@ definitions:
       project_service:
         $ref: '#/definitions/dto.ProjectServiceResponse'
       reset_count:
+        minimum: 0
         type: integer
+    required:
+    - project_service
+    - reset_count
     type: object
   dto.ProjectResponse:
     properties:
       client_id:
+        minimum: 1
         type: integer
       created_at:
+        format: date-time
         type: string
+        x-timezone: utc
       id:
+        minimum: 1
         type: integer
       name:
         type: string
@@ -324,6 +332,12 @@ definitions:
         - enabled
         - disabled
         type: string
+    required:
+    - client_id
+    - created_at
+    - id
+    - name
+    - status
     type: object
   dto.ProjectService:
     properties:
@@ -348,15 +362,21 @@ definitions:
   dto.ProjectServiceResponse:
     properties:
       assigned_at:
+        format: date-time
         type: string
+        x-timezone: utc
       id:
+        minimum: 1
         type: integer
       max_requests:
+        minimum: -1
         type: integer
       name:
         type: string
       next_reset:
+        format: date-time
         type: string
+        x-timezone: utc
       reset_frequency:
         enum:
         - daily
@@ -366,6 +386,14 @@ definitions:
         type: string
       version:
         type: string
+    required:
+    - assigned_at
+    - id
+    - max_requests
+    - name
+    - next_reset
+    - reset_frequency
+    - version
     type: object
   dto.ProjectServiceUpdate:
     properties:
@@ -422,30 +450,45 @@ definitions:
   dto.RequestAPIKeyResponse:
     properties:
       id:
+        minimum: 1
         type: integer
       key:
+        maxLength: 11
+        minLength: 11
         type: string
+    required:
+    - key
     type: object
   dto.RequestEnvironmentResponse:
     properties:
       id:
+        minimum: 1
         type: integer
       name:
         type: string
+    required:
+    - id
+    - name
     type: object
   dto.RequestProjectResponse:
     properties:
       id:
+        minimum: 1
         type: integer
       name:
         type: string
+    required:
+    - id
+    - name
     type: object
   dto.RequestResponse:
     properties:
       api_key:
         $ref: '#/definitions/dto.RequestAPIKeyResponse'
       created_at:
+        format: date-time
         type: string
+        x-timezone: utc
       environment:
         $ref: '#/definitions/dto.RequestEnvironmentResponse'
       execution_status:
@@ -458,17 +501,31 @@ definitions:
         - quota_exceeded
         type: string
       id:
+        format: uuid
         type: string
       ip_address:
+        format: ipv4,ipv6
         type: string
       method:
+        enum:
+        - GET
+        - HEAD
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - CONNECT
+        - OPTIONS
+        - TRACE
         type: string
       path:
         type: string
       project:
         $ref: '#/definitions/dto.RequestProjectResponse'
       request_time:
+        format: date-time
         type: string
+        x-timezone: utc
       service:
         $ref: '#/definitions/dto.RequestServiceResponse'
       start_point:
@@ -485,15 +542,30 @@ definitions:
         - ENVIRONMENT_MISMATCH
         - ENVIRONMENT_DISABLED
         type: string
+    required:
+    - api_key
+    - created_at
+    - execution_status
+    - id
+    - ip_address
+    - method
+    - path
+    - request_time
+    - service
     type: object
   dto.RequestServiceResponse:
     properties:
       id:
+        minimum: 1
         type: integer
       name:
         type: string
       version:
+        maxLength: 25
         type: string
+    required:
+    - name
+    - version
     type: object
   dto.ServiceCreate:
     properties:
@@ -509,8 +581,11 @@ definitions:
   dto.ServiceResponse:
     properties:
       created_at:
+        format: date-time
         type: string
+        x-timezone: utc
       id:
+        minimum: 1
         type: integer
       name:
         type: string
@@ -523,6 +598,12 @@ definitions:
       version:
         maxLength: 25
         type: string
+    required:
+    - created_at
+    - id
+    - name
+    - status
+    - version
     type: object
   dto.ServiceStatusUpdate:
     properties:
@@ -1617,12 +1698,16 @@ paths:
         in: query
         name: execution_status
         type: string
-      - in: query
+      - format: date-time
+        in: query
         name: request_time_from
         type: string
-      - in: query
+        x-timezone: utc
+      - format: date-time
+        in: query
         name: request_time_to
         type: string
+        x-timezone: utc
       produces:
       - application/json
       responses:

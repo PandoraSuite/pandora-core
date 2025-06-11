@@ -79,19 +79,19 @@ func (p *ProjectServiceUpdate) ToDomain() *dto.ProjectServiceUpdate {
 // ... Reponses ...
 
 type ProjectServiceResponse struct {
-	ID int `json:"id"`
+	ID int `json:"id" validate:"required" minimum:"1"`
 
-	Name string `json:"name"`
+	Name string `json:"name" validate:"required"`
 
-	Version string `json:"version"`
+	Version string `json:"version" validate:"required" maxlength:"25"`
 
-	NextReset time.Time `json:"next_reset"`
+	NextReset time.Time `json:"next_reset" validate:"required" format:"date-time" extensions:"x-timezone=utc"`
 
-	MaxRequests int `json:"max_requests"`
+	MaxRequests int `json:"max_requests" validate:"required" minimum:"-1"`
 
-	ResetFrequency string `json:"reset_frequency" enums:"daily,weekly,biweekly,monthly"`
+	ResetFrequency string `json:"reset_frequency" validate:"required" enums:"daily,weekly,biweekly,monthly"`
 
-	AssignedAt time.Time `json:"assigned_at"`
+	AssignedAt time.Time `json:"assigned_at" validate:"required" format:"date-time" extensions:"x-timezone=utc"`
 }
 
 func ProjectServiceResponseFromDomain(service *dto.ProjectServiceResponse) *ProjectServiceResponse {
@@ -107,15 +107,15 @@ func ProjectServiceResponseFromDomain(service *dto.ProjectServiceResponse) *Proj
 }
 
 type ProjectResponse struct {
-	ID int `json:"id"`
+	ID int `json:"id" validate:"required" minimum:"1"`
 
-	Name string `json:"name"`
+	Name string `json:"name" validate:"required"`
 
-	Status string `json:"status" enums:"enabled,disabled"`
+	Status string `json:"status" validate:"required" enums:"enabled,disabled"`
 
-	ClientID int `json:"client_id"`
+	ClientID int `json:"client_id" validate:"required" minimum:"1"`
 
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"created_at" validate:"required" format:"date-time" extensions:"x-timezone=utc"`
 
 	Services []*ProjectServiceResponse `json:"services"`
 }
@@ -137,9 +137,9 @@ func ProjectResponseFromDomain(project *dto.ProjectResponse) *ProjectResponse {
 }
 
 type ProjectResetRequestResponse struct {
-	ResetCount int `json:"reset_count"`
+	ResetCount int `json:"reset_count" validate:"required" minimum:"0"`
 
-	ProjectService *ProjectServiceResponse `json:"project_service"`
+	ProjectService *ProjectServiceResponse `json:"project_service" validate:"required"`
 
 	EnvironmentServices []*EnvironmentServiceReset `json:"environment_services"`
 }

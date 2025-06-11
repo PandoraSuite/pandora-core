@@ -10,9 +10,11 @@ import (
 // ... Requests ...
 
 type RequestFilter struct {
-	RequestTimeTo   time.Time `form:"request_time_to"`
-	RequestTimeFrom time.Time `form:"request_time_from"`
-	ExecutionStatus string    `form:"execution_status" enums:"success,forwarded,client_error,server_error,unauthorized,quota_exceeded"`
+	RequestTimeTo time.Time `form:"request_time_to" format:"date-time" extensions:"x-timezone=utc"`
+
+	RequestTimeFrom time.Time `form:"request_time_from" format:"date-time" extensions:"x-timezone=utc"`
+
+	ExecutionStatus string `form:"execution_status" enums:"success,forwarded,client_error,server_error,unauthorized,quota_exceeded"`
 }
 
 func (r *RequestFilter) ToDomain() *dto.RequestFilter {
@@ -26,41 +28,59 @@ func (r *RequestFilter) ToDomain() *dto.RequestFilter {
 // ... Responses ...
 
 type RequestAPIKeyResponse struct {
-	ID  int    `name:"id"`
-	Key string `name:"key"`
+	ID int `json:"id" minimum:"1"`
+
+	Key string `json:"key" validate:"required" minLength:"11" maxLength:"11"`
 }
 
 type RequestServiceResponse struct {
-	ID      int    `name:"id"`
-	Name    string `name:"name"`
-	Version string `name:"version"`
+	ID int `json:"id" minimum:"1"`
+
+	Name string `json:"name" validate:"required"`
+
+	Version string `json:"version" validate:"required" maxLength:"25"`
 }
 
 type RequestEnvironmentResponse struct {
-	ID   int    `name:"id"`
-	Name string `name:"name"`
+	ID int `json:"id" validate:"required" minimum:"1"`
+
+	Name string `json:"name" validate:"required"`
 }
 
 type RequestProjectResponse struct {
-	ID   int    `name:"id"`
-	Name string `name:"name"`
+	ID int `json:"id" validate:"required" minimum:"1"`
+
+	Name string `json:"name" validate:"required"`
 }
 
 type RequestResponse struct {
-	ID                 string                      `json:"id"`
-	StartPoint         string                      `json:"start_point"`
-	APIKey             *RequestAPIKeyResponse      `json:"api_key"`
-	Project            *RequestProjectResponse     `json:"project"`
-	Environment        *RequestEnvironmentResponse `json:"environment"`
-	Service            *RequestServiceResponse     `json:"service"`
-	StatusCode         int                         `json:"status_code"`
-	ExecutionStatus    string                      `json:"execution_status" enums:"success,forwarded,client_error,server_error,unauthorized,quota_exceeded"`
-	UnauthorizedReason string                      `json:"unauthorized_reason" enums:"API_KEY_INVALID,QUOTA_EXCEEDED,API_KEY_EXPIRED,API_KEY_DISABLED,SERVICE_MISMATCH,ENVIRONMENT_MISMATCH,ENVIRONMENT_DISABLED"`
-	RequestTime        time.Time                   `json:"request_time"`
-	Path               string                      `json:"path"`
-	Method             string                      `json:"method"`
-	IPAddress          string                      `json:"ip_address"`
-	CreateAt           time.Time                   `json:"created_at"`
+	ID string `json:"id" validate:"required" format:"uuid"`
+
+	StartPoint string `json:"start_point"`
+
+	APIKey *RequestAPIKeyResponse `json:"api_key" validate:"required"`
+
+	Project *RequestProjectResponse `json:"project"`
+
+	Environment *RequestEnvironmentResponse `json:"environment"`
+
+	Service *RequestServiceResponse `json:"service" validate:"required"`
+
+	StatusCode int `json:"status_code"`
+
+	ExecutionStatus string `json:"execution_status" validate:"required" enums:"success,forwarded,client_error,server_error,unauthorized,quota_exceeded"`
+
+	UnauthorizedReason string `json:"unauthorized_reason" enums:"API_KEY_INVALID,QUOTA_EXCEEDED,API_KEY_EXPIRED,API_KEY_DISABLED,SERVICE_MISMATCH,ENVIRONMENT_MISMATCH,ENVIRONMENT_DISABLED"`
+
+	RequestTime time.Time `json:"request_time" validate:"required" format:"date-time" extensions:"x-timezone=utc"`
+
+	Path string `json:"path" validate:"required"`
+
+	Method string `json:"method" validate:"required" enums:"GET,HEAD,POST,PUT,PATCH,DELETE,CONNECT,OPTIONS,TRACE"`
+
+	IPAddress string `json:"ip_address" validate:"required" format:"ipv4,ipv6"`
+
+	CreateAt time.Time `json:"created_at" validate:"required" format:"date-time" extensions:"x-timezone=utc"`
 }
 
 func RequestResponseFromDomain(request *dto.RequestResponse) *RequestResponse {

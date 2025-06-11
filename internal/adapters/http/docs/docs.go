@@ -1660,11 +1660,15 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
+                        "format": "date-time",
+                        "x-timezone": "utc",
                         "name": "request_time_from",
                         "in": "query"
                     },
                     {
                         "type": "string",
+                        "format": "date-time",
+                        "x-timezone": "utc",
                         "name": "request_time_to",
                         "in": "query"
                     }
@@ -2154,6 +2158,10 @@ const docTemplate = `{
         },
         "dto.ProjectResetRequestResponse": {
             "type": "object",
+            "required": [
+                "project_service",
+                "reset_count"
+            ],
             "properties": {
                 "environment_services": {
                     "type": "array",
@@ -2165,21 +2173,33 @@ const docTemplate = `{
                     "$ref": "#/definitions/dto.ProjectServiceResponse"
                 },
                 "reset_count": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 0
                 }
             }
         },
         "dto.ProjectResponse": {
             "type": "object",
+            "required": [
+                "client_id",
+                "created_at",
+                "id",
+                "name",
+                "status"
+            ],
             "properties": {
                 "client_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "name": {
                     "type": "string"
@@ -2228,21 +2248,36 @@ const docTemplate = `{
         },
         "dto.ProjectServiceResponse": {
             "type": "object",
+            "required": [
+                "assigned_at",
+                "id",
+                "max_requests",
+                "name",
+                "next_reset",
+                "reset_frequency",
+                "version"
+            ],
             "properties": {
                 "assigned_at": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "max_requests": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": -1
                 },
                 "name": {
                     "type": "string"
                 },
                 "next_reset": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "reset_frequency": {
                     "type": "string",
@@ -2334,20 +2369,31 @@ const docTemplate = `{
         },
         "dto.RequestAPIKeyResponse": {
             "type": "object",
+            "required": [
+                "key"
+            ],
             "properties": {
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "key": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 11,
+                    "minLength": 11
                 }
             }
         },
         "dto.RequestEnvironmentResponse": {
             "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
             "properties": {
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "name": {
                     "type": "string"
@@ -2356,9 +2402,14 @@ const docTemplate = `{
         },
         "dto.RequestProjectResponse": {
             "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
             "properties": {
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "name": {
                     "type": "string"
@@ -2367,12 +2418,25 @@ const docTemplate = `{
         },
         "dto.RequestResponse": {
             "type": "object",
+            "required": [
+                "api_key",
+                "created_at",
+                "execution_status",
+                "id",
+                "ip_address",
+                "method",
+                "path",
+                "request_time",
+                "service"
+            ],
             "properties": {
                 "api_key": {
                     "$ref": "#/definitions/dto.RequestAPIKeyResponse"
                 },
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "environment": {
                     "$ref": "#/definitions/dto.RequestEnvironmentResponse"
@@ -2389,13 +2453,26 @@ const docTemplate = `{
                     ]
                 },
                 "id": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "uuid"
                 },
                 "ip_address": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "ipv4,ipv6"
                 },
                 "method": {
-                    "type": "string"
+                    "type": "string",
+                    "enum": [
+                        "GET",
+                        "HEAD",
+                        "POST",
+                        "PUT",
+                        "PATCH",
+                        "DELETE",
+                        "CONNECT",
+                        "OPTIONS",
+                        "TRACE"
+                    ]
                 },
                 "path": {
                     "type": "string"
@@ -2404,7 +2481,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/dto.RequestProjectResponse"
                 },
                 "request_time": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "service": {
                     "$ref": "#/definitions/dto.RequestServiceResponse"
@@ -2431,15 +2510,21 @@ const docTemplate = `{
         },
         "dto.RequestServiceResponse": {
             "type": "object",
+            "required": [
+                "name",
+                "version"
+            ],
             "properties": {
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "name": {
                     "type": "string"
                 },
                 "version": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 25
                 }
             }
         },
@@ -2461,12 +2546,22 @@ const docTemplate = `{
         },
         "dto.ServiceResponse": {
             "type": "object",
+            "required": [
+                "created_at",
+                "id",
+                "name",
+                "status",
+                "version"
+            ],
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "name": {
                     "type": "string"
