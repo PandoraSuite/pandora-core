@@ -5,25 +5,25 @@ definitions:
         minimum: 1
         type: integer
       expires_at:
-        description: UTC
         format: date-time
         type: string
+        x-timezone: utc
     required:
     - environment_id
     type: object
   dto.APIKeyResponse:
     properties:
       created_at:
-        description: UTC
         format: date-time
         type: string
+        x-timezone: utc
       environment_id:
         minimum: 1
         type: integer
       expires_at:
-        description: UTC
         format: date-time
         type: string
+        x-timezone: utc
       id:
         minimum: 1
         type: integer
@@ -33,9 +33,9 @@ definitions:
         minLength: 11
         type: string
       last_used:
-        description: UTC
         format: date-time
         type: string
+        x-timezone: utc
       status:
         enum:
         - enabled
@@ -52,15 +52,18 @@ definitions:
   dto.APIKeyUpdate:
     properties:
       expires_at:
-        description: UTC
         format: date-time
         type: string
+        x-timezone: utc
     type: object
   dto.AuthenticateResponse:
     properties:
       access_token:
+        format: jwt
         type: string
       expires_in:
+        description: UTC
+        format: date-time
         type: string
       force_password_reset:
         type: boolean
@@ -70,8 +73,12 @@ definitions:
   dto.ChangePassword:
     properties:
       confirm_password:
+        format: password
+        minLength: 12
         type: string
       new_password:
+        format: password
+        minLength: 12
         type: string
     required:
     - confirm_password
@@ -328,6 +335,8 @@ definitions:
         - REVEAL_API_KEY
         type: string
       password:
+        format: password
+        minLength: 12
         type: string
     required:
     - action
@@ -336,8 +345,11 @@ definitions:
   dto.ReauthenticateResponse:
     properties:
       access_token:
+        format: jwt
         type: string
       expires_in:
+        description: UTC
+        format: date-time
         type: string
       token_type:
         type: string
@@ -651,14 +663,14 @@ paths:
       - application/x-www-form-urlencoded
       description: Authenticates the administrator and returns a token.
       parameters:
-      - description: Login username
+      - format: password
         in: formData
-        name: username
+        minLength: 12
+        name: password
         required: true
         type: string
-      - description: Login password
-        in: formData
-        name: password
+      - in: formData
+        name: username
         required: true
         type: string
       produces:

@@ -251,16 +251,16 @@
                 "summary": "Authenticate user",
                 "parameters": [
                     {
+                        "minLength": 12,
                         "type": "string",
-                        "description": "Login username",
-                        "name": "username",
+                        "format": "password",
+                        "name": "password",
                         "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Login password",
-                        "name": "password",
+                        "name": "username",
                         "in": "formData",
                         "required": true
                     }
@@ -1745,9 +1745,9 @@
                     "minimum": 1
                 },
                 "expires_at": {
-                    "description": "UTC",
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 }
             }
         },
@@ -1755,18 +1755,18 @@
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "UTC",
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "environment_id": {
                     "type": "integer",
                     "minimum": 1
                 },
                 "expires_at": {
-                    "description": "UTC",
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "id": {
                     "type": "integer",
@@ -1779,9 +1779,9 @@
                     "example": "xxxx...xxxx"
                 },
                 "last_used": {
-                    "description": "UTC",
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "status": {
                     "type": "string",
@@ -1806,9 +1806,9 @@
             "type": "object",
             "properties": {
                 "expires_at": {
-                    "description": "UTC",
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 }
             }
         },
@@ -1816,10 +1816,13 @@
             "type": "object",
             "properties": {
                 "access_token": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "jwt"
                 },
                 "expires_in": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "force_password_reset": {
                     "type": "boolean"
@@ -1837,10 +1840,14 @@
             ],
             "properties": {
                 "confirm_password": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 12
                 },
                 "new_password": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 12
                 }
             }
         },
@@ -2221,7 +2228,9 @@
                     ]
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 12
                 }
             }
         },
@@ -2229,10 +2238,13 @@
             "type": "object",
             "properties": {
                 "access_token": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "jwt"
                 },
                 "expires_in": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "token_type": {
                     "type": "string"

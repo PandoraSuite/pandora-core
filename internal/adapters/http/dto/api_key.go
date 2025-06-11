@@ -9,8 +9,7 @@ import (
 // ... Requests ...
 
 type APIKeyCreate struct {
-	// UTC
-	ExpiresAt time.Time `json:"expires_at" format:"date-time"`
+	ExpiresAt time.Time `json:"expires_at" format:"date-time" extensions:"x-timezone=utc"`
 
 	EnvironmentID int `json:"environment_id" validate:"required" minimum:"1"`
 }
@@ -23,8 +22,7 @@ func (a *APIKeyCreate) ToDomain() *dto.APIKeyCreate {
 }
 
 type APIKeyUpdate struct {
-	// UTC
-	ExpiresAt time.Time `json:"expires_at" format:"date-time"`
+	ExpiresAt time.Time `json:"expires_at" format:"date-time" extensions:"x-timezone=utc"`
 }
 
 func (a *APIKeyUpdate) ToDomain() *dto.APIKeyUpdate {
@@ -42,16 +40,13 @@ type APIKeyResponse struct {
 
 	Status string `json:"status" enums:"enabled,disabled,deprecated"`
 
-	// UTC
-	LastUsed time.Time `json:"last_used" format:"date-time"`
+	LastUsed time.Time `json:"last_used" format:"date-time" extensions:"x-timezone=utc"`
 
-	// UTC
-	ExpiresAt time.Time `json:"expires_at" format:"date-time"`
+	ExpiresAt time.Time `json:"expires_at" format:"date-time" extensions:"x-timezone=utc"`
 
 	EnvironmentID int `json:"environment_id" minimum:"1"`
 
-	// UTC
-	CreatedAt time.Time `json:"created_at" format:"date-time"`
+	CreatedAt time.Time `json:"created_at" format:"date-time" extensions:"x-timezone=utc"`
 }
 
 func APIKeyResponseFromDomain(apiKey *dto.APIKeyResponse) *APIKeyResponse {

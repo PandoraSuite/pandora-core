@@ -259,16 +259,16 @@ const docTemplate = `{
                 "summary": "Authenticate user",
                 "parameters": [
                     {
+                        "minLength": 12,
                         "type": "string",
-                        "description": "Login username",
-                        "name": "username",
+                        "format": "password",
+                        "name": "password",
                         "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Login password",
-                        "name": "password",
+                        "name": "username",
                         "in": "formData",
                         "required": true
                     }
@@ -1753,9 +1753,9 @@ const docTemplate = `{
                     "minimum": 1
                 },
                 "expires_at": {
-                    "description": "UTC",
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 }
             }
         },
@@ -1763,18 +1763,18 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "description": "UTC",
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "environment_id": {
                     "type": "integer",
                     "minimum": 1
                 },
                 "expires_at": {
-                    "description": "UTC",
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "id": {
                     "type": "integer",
@@ -1787,9 +1787,9 @@ const docTemplate = `{
                     "example": "xxxx...xxxx"
                 },
                 "last_used": {
-                    "description": "UTC",
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "status": {
                     "type": "string",
@@ -1814,9 +1814,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "expires_at": {
-                    "description": "UTC",
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 }
             }
         },
@@ -1824,10 +1824,13 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "access_token": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "jwt"
                 },
                 "expires_in": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "force_password_reset": {
                     "type": "boolean"
@@ -1845,10 +1848,14 @@ const docTemplate = `{
             ],
             "properties": {
                 "confirm_password": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 12
                 },
                 "new_password": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 12
                 }
             }
         },
@@ -2229,7 +2236,9 @@ const docTemplate = `{
                     ]
                 },
                 "password": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "password",
+                    "minLength": 12
                 }
             }
         },
@@ -2237,10 +2246,13 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "access_token": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "jwt"
                 },
                 "expires_in": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "token_type": {
                     "type": "string"
