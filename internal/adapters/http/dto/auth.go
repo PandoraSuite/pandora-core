@@ -10,8 +10,9 @@ import (
 // ... Requests ...
 
 type Authenticate struct {
-	Username string `form:"username" binding:"required"`
-	Password string `form:"password" binding:"required"`
+	Username string `form:"username" validate:"required"`
+
+	Password string `form:"password" validate:"required" format:"password" minLength:"12"`
 }
 
 func (a *Authenticate) ToDomain() *dto.Authenticate {
@@ -24,9 +25,11 @@ func (a *Authenticate) ToDomain() *dto.Authenticate {
 }
 
 type ChangePassword struct {
-	Username        string `json:"-" swaggerignore:"true"`
-	NewPassword     string `json:"new_password" binding:"required"`
-	ConfirmPassword string `json:"confirm_password" binding:"required"`
+	Username string `json:"-" swaggerignore:"true"`
+
+	NewPassword string `json:"new_password" validate:"required" format:"password" minLength:"12"`
+
+	ConfirmPassword string `json:"confirm_password" validate:"required" format:"password" minLength:"12"`
 }
 
 func (c *ChangePassword) ToDomain() *dto.ChangePassword {
@@ -38,9 +41,11 @@ func (c *ChangePassword) ToDomain() *dto.ChangePassword {
 }
 
 type Reauthenticate struct {
-	Action   string `json:"action" binding:"required" enums:"REVEAL_API_KEY"`
 	Username string `json:"-" swaggerignore:"true"`
-	Password string `json:"password" binding:"required"`
+
+	Action string `json:"action" validate:"required" enums:"REVEAL_API_KEY"`
+
+	Password string `json:"password" validate:"required" format:"password" minLength:"12"`
 }
 
 func (r *Reauthenticate) ToDomain() *dto.Reauthenticate {
@@ -56,9 +61,12 @@ func (r *Reauthenticate) ToDomain() *dto.Reauthenticate {
 // ... Responses ...
 
 type TokenReponse struct {
-	TokenType   string    `json:"token_type"`
-	ExpiresIn   time.Time `json:"expires_in" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	AccessToken string    `json:"access_token"`
+	TokenType string `json:"token_type"`
+
+	// UTC
+	ExpiresIn time.Time `json:"expires_in" format:"date-time"`
+
+	AccessToken string `json:"access_token" format:"jwt"`
 }
 
 type AuthenticateResponse struct {

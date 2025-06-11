@@ -52,8 +52,7 @@ func ChangePassword(useCase auth.PasswordChangeUseCase) gin.HandlerFunc {
 // @Tags Authentication
 // @Accept x-www-form-urlencoded
 // @Produce json
-// @Param username formData string true "Login username"
-// @Param password formData string true "Login password"
+// @Param credentials formData dto.Authenticate true "Credenciales de acceso"
 // @Success 200 {object} dto.AuthenticateResponse
 // @Failure default {object} errors.HTTPError "Default error response for all failures"
 // @Router /api/v1/auth/login [post]
