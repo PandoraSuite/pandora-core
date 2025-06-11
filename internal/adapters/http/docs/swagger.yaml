@@ -2,8 +2,11 @@ definitions:
   dto.APIKeyCreate:
     properties:
       environment_id:
+        minimum: 1
         type: integer
       expires_at:
+        description: UTC
+        format: date-time
         type: string
     required:
     - environment_id
@@ -11,16 +14,27 @@ definitions:
   dto.APIKeyResponse:
     properties:
       created_at:
+        description: UTC
+        format: date-time
         type: string
       environment_id:
+        minimum: 1
         type: integer
       expires_at:
+        description: UTC
+        format: date-time
         type: string
       id:
+        minimum: 1
         type: integer
       key:
+        example: xxxx...xxxx
+        maxLength: 11
+        minLength: 11
         type: string
       last_used:
+        description: UTC
+        format: date-time
         type: string
       status:
         enum:
@@ -32,11 +46,14 @@ definitions:
   dto.APIKeyRevealKeyResponse:
     properties:
       key:
+        example: xxxxxxxxxxxxx
         type: string
     type: object
   dto.APIKeyUpdate:
     properties:
       expires_at:
+        description: UTC
+        format: date-time
         type: string
     type: object
   dto.AuthenticateResponse:
@@ -183,6 +200,8 @@ definitions:
     properties:
       max_requests:
         type: integer
+    required:
+    - max_requests
     type: object
   dto.EnvironmentUpdate:
     properties:
@@ -201,7 +220,6 @@ definitions:
         type: array
     required:
     - client_id
-    - name
     type: object
   dto.ProjectResetRequest:
     properties:
@@ -286,6 +304,7 @@ definitions:
       max_requests:
         type: integer
       next_reset:
+        format: date
         type: string
       reset_frequency:
         enum:
@@ -294,6 +313,8 @@ definitions:
         - biweekly
         - monthly
         type: string
+    required:
+    - max_requests
     type: object
   dto.ProjectUpdate:
     properties:

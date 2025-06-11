@@ -1749,10 +1749,13 @@ const docTemplate = `{
             ],
             "properties": {
                 "environment_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "expires_at": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 }
             }
         },
@@ -1760,22 +1763,33 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "environment_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "expires_at": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "key": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 11,
+                    "minLength": 11,
+                    "example": "xxxx...xxxx"
                 },
                 "last_used": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "status": {
                     "type": "string",
@@ -1791,7 +1805,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "key": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx"
                 }
             }
         },
@@ -1799,7 +1814,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "expires_at": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 }
             }
         },
@@ -2014,6 +2031,9 @@ const docTemplate = `{
         },
         "dto.EnvironmentServiceUpdate": {
             "type": "object",
+            "required": [
+                "max_requests"
+            ],
             "properties": {
                 "max_requests": {
                     "type": "integer"
@@ -2031,8 +2051,7 @@ const docTemplate = `{
         "dto.ProjectCreate": {
             "type": "object",
             "required": [
-                "client_id",
-                "name"
+                "client_id"
             ],
             "properties": {
                 "client_id": {
@@ -2166,12 +2185,16 @@ const docTemplate = `{
         },
         "dto.ProjectServiceUpdate": {
             "type": "object",
+            "required": [
+                "max_requests"
+            ],
             "properties": {
                 "max_requests": {
                     "type": "integer"
                 },
                 "next_reset": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date"
                 },
                 "reset_frequency": {
                     "type": "string",

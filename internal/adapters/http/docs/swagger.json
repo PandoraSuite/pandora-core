@@ -1741,10 +1741,13 @@
             ],
             "properties": {
                 "environment_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "expires_at": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 }
             }
         },
@@ -1752,22 +1755,33 @@
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "environment_id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "expires_at": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "key": {
-                    "type": "string"
+                    "type": "string",
+                    "maxLength": 11,
+                    "minLength": 11,
+                    "example": "xxxx...xxxx"
                 },
                 "last_used": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 },
                 "status": {
                     "type": "string",
@@ -1783,7 +1797,8 @@
             "type": "object",
             "properties": {
                 "key": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "xxxxxxxxxxxxx"
                 }
             }
         },
@@ -1791,7 +1806,9 @@
             "type": "object",
             "properties": {
                 "expires_at": {
-                    "type": "string"
+                    "description": "UTC",
+                    "type": "string",
+                    "format": "date-time"
                 }
             }
         },
@@ -2006,6 +2023,9 @@
         },
         "dto.EnvironmentServiceUpdate": {
             "type": "object",
+            "required": [
+                "max_requests"
+            ],
             "properties": {
                 "max_requests": {
                     "type": "integer"
@@ -2023,8 +2043,7 @@
         "dto.ProjectCreate": {
             "type": "object",
             "required": [
-                "client_id",
-                "name"
+                "client_id"
             ],
             "properties": {
                 "client_id": {
@@ -2158,12 +2177,16 @@
         },
         "dto.ProjectServiceUpdate": {
             "type": "object",
+            "required": [
+                "max_requests"
+            ],
             "properties": {
                 "max_requests": {
                     "type": "integer"
                 },
                 "next_reset": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date"
                 },
                 "reset_frequency": {
                     "type": "string",

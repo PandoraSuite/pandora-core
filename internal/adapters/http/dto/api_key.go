@@ -9,8 +9,10 @@ import (
 // ... Requests ...
 
 type APIKeyCreate struct {
-	ExpiresAt     time.Time `json:"expires_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	EnvironmentID int       `json:"environment_id" binding:"required"`
+	// UTC
+	ExpiresAt time.Time `json:"expires_at" format:"date-time"`
+
+	EnvironmentID int `json:"environment_id" validate:"required" minimum:"1"`
 }
 
 func (a *APIKeyCreate) ToDomain() *dto.APIKeyCreate {
@@ -21,7 +23,8 @@ func (a *APIKeyCreate) ToDomain() *dto.APIKeyCreate {
 }
 
 type APIKeyUpdate struct {
-	ExpiresAt time.Time `json:"expires_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	// UTC
+	ExpiresAt time.Time `json:"expires_at" format:"date-time"`
 }
 
 func (a *APIKeyUpdate) ToDomain() *dto.APIKeyUpdate {
@@ -33,13 +36,22 @@ func (a *APIKeyUpdate) ToDomain() *dto.APIKeyUpdate {
 // ... Responses ...
 
 type APIKeyResponse struct {
-	ID            int       `json:"id"`
-	Key           string    `json:"key"`
-	Status        string    `json:"status" enums:"enabled,disabled,deprecated"`
-	LastUsed      time.Time `json:"last_used" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	ExpiresAt     time.Time `json:"expires_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
-	EnvironmentID int       `json:"environment_id"`
-	CreatedAt     time.Time `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	ID int `json:"id" minimum:"1"`
+
+	Key string `json:"key" maxLength:"11" minLength:"11" example:"xxxx...xxxx"`
+
+	Status string `json:"status" enums:"enabled,disabled,deprecated"`
+
+	// UTC
+	LastUsed time.Time `json:"last_used" format:"date-time"`
+
+	// UTC
+	ExpiresAt time.Time `json:"expires_at" format:"date-time"`
+
+	EnvironmentID int `json:"environment_id" minimum:"1"`
+
+	// UTC
+	CreatedAt time.Time `json:"created_at" format:"date-time"`
 }
 
 func APIKeyResponseFromDomain(apiKey *dto.APIKeyResponse) *APIKeyResponse {
@@ -55,7 +67,7 @@ func APIKeyResponseFromDomain(apiKey *dto.APIKeyResponse) *APIKeyResponse {
 }
 
 type APIKeyRevealKeyResponse struct {
-	Key string `json:"key"`
+	Key string `json:"key" example:"xxxxxxxxxxxxx"`
 }
 
 func APIKeyRevealKeyResponseFromDomain(apiKey *dto.APIKeyRevealKeyResponse) *APIKeyRevealKeyResponse {
