@@ -20,9 +20,11 @@ func (c *ClientFilter) ToDomain() *dto.ClientFilter {
 }
 
 type ClientCreate struct {
-	Type  string `json:"type" binding:"required" enums:"developer,organization"`
-	Name  string `json:"name" binding:"required"`
-	Email string `json:"email" binding:"required"`
+	Type string `json:"type" validate:"required" enums:"developer,organization"`
+
+	Name string `json:"name" validate:"required"`
+
+	Email string `json:"email" validate:"required" format:"email"`
 }
 
 func (c *ClientCreate) ToDomain() *dto.ClientCreate {
@@ -34,9 +36,11 @@ func (c *ClientCreate) ToDomain() *dto.ClientCreate {
 }
 
 type ClientUpdate struct {
-	Type  string `json:"type" enums:"developer,organization"`
-	Name  string `json:"name"`
-	Email string `json:"email"`
+	Type string `json:"type" enums:"developer,organization"`
+
+	Name string `json:"name"`
+
+	Email string `json:"email" format:"email"`
 }
 
 func (c *ClientUpdate) ToDomain() *dto.ClientUpdate {
@@ -50,11 +54,15 @@ func (c *ClientUpdate) ToDomain() *dto.ClientUpdate {
 // ... Responses ...
 
 type ClientResponse struct {
-	ID        int       `json:"id"`
-	Type      string    `json:"type" enums:"developer,organization"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"created_at" time_format:"2006-01-02T15:04:05Z07:00" time_utc:"1"`
+	ID int `json:"id" minimum:"1"`
+
+	Type string `json:"type" enums:"developer,organization"`
+
+	Name string `json:"name"`
+
+	Email string `json:"email" format:"email"`
+
+	CreatedAt time.Time `json:"created_at" format:"date-time" extensions:"x-timezone=utc"`
 }
 
 func ClientResponseFromDomain(client *dto.ClientResponse) *ClientResponse {

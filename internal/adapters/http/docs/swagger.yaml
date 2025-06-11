@@ -62,9 +62,9 @@ definitions:
         format: jwt
         type: string
       expires_in:
-        description: UTC
         format: date-time
         type: string
+        x-timezone: utc
       force_password_reset:
         type: boolean
       token_type:
@@ -87,6 +87,7 @@ definitions:
   dto.ClientCreate:
     properties:
       email:
+        format: email
         type: string
       name:
         type: string
@@ -103,10 +104,14 @@ definitions:
   dto.ClientResponse:
     properties:
       created_at:
+        format: date-time
         type: string
+        x-timezone: utc
       email:
+        format: email
         type: string
       id:
+        minimum: 1
         type: integer
       name:
         type: string
@@ -119,6 +124,7 @@ definitions:
   dto.ClientUpdate:
     properties:
       email:
+        format: email
         type: string
       name:
         type: string
@@ -348,9 +354,9 @@ definitions:
         format: jwt
         type: string
       expires_in:
-        description: UTC
         format: date-time
         type: string
+        x-timezone: utc
       token_type:
         type: string
     type: object

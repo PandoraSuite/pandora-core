@@ -63,8 +63,7 @@ func (r *Reauthenticate) ToDomain() *dto.Reauthenticate {
 type TokenReponse struct {
 	TokenType string `json:"token_type"`
 
-	// UTC
-	ExpiresIn time.Time `json:"expires_in" format:"date-time"`
+	ExpiresIn time.Time `json:"expires_in" format:"date-time" extensions:"x-timezone=utc"`
 
 	AccessToken string `json:"access_token" format:"jwt"`
 }

@@ -1828,9 +1828,9 @@ const docTemplate = `{
                     "format": "jwt"
                 },
                 "expires_in": {
-                    "description": "UTC",
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "force_password_reset": {
                     "type": "boolean"
@@ -1868,7 +1868,8 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "email"
                 },
                 "name": {
                     "type": "string"
@@ -1886,13 +1887,17 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "created_at": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "email"
                 },
                 "id": {
-                    "type": "integer"
+                    "type": "integer",
+                    "minimum": 1
                 },
                 "name": {
                     "type": "string"
@@ -1910,7 +1915,8 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "email": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "email"
                 },
                 "name": {
                     "type": "string"
@@ -2250,9 +2256,9 @@ const docTemplate = `{
                     "format": "jwt"
                 },
                 "expires_in": {
-                    "description": "UTC",
                     "type": "string",
-                    "format": "date-time"
+                    "format": "date-time",
+                    "x-timezone": "utc"
                 },
                 "token_type": {
                     "type": "string"
