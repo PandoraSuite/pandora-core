@@ -39,7 +39,7 @@ func (e AggregateError) Unwrap() error {
 		return e[0]
 	}
 
-	return e
+	return nil
 }
 
 func (e AggregateError) PriorityCode() ErrorCode {
