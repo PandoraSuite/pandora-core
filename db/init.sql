@@ -237,3 +237,12 @@ CREATE INDEX IF NOT EXISTS idx_request_project_id ON request(project_id);
 CREATE INDEX IF NOT EXISTS idx_request_service_id ON request(service_id);
 CREATE INDEX IF NOT EXISTS idx_reservation_api_key ON reservation(api_key);
 CREATE INDEX IF NOT EXISTS idx_request_environment_id ON request(environment_id);
+
+CREATE INDEX IF NOT EXISTS idx_service_created_at_desc ON service (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_client_created_at_desc ON client (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_project_created_at_desc ON project (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_environment_created_at_desc ON environment (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_api_key_created_at_desc ON api_key (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_project_service_created_at_desc ON project_service (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_environment_service_created_at_desc ON environment_service (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_request_created_at_desc ON request (created_at DESC);
