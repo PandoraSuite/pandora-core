@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/postgres"
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports"
 )
 
@@ -17,7 +18,22 @@ type postgresRepositories struct {
 	reservationRepo ports.ReservationRepository
 }
 
-func (r *postgresRepositories) Close() { r.driver.Close() }
+func (r *postgresRepositories) Close() {
+	if r.driver == nil {
+		return
+	}
+
+	r.driver.Close()
+}
+
+func (r *postgresRepositories) Ping() errors.Error {
+	if r.driver == nil {
+		return errors.NewInternal(
+			"postgres driver is not initialized", nil,
+		)
+	}
+	return r.driver.Ping()
+}
 
 func (r *postgresRepositories) APIKey() ports.APIKeyRepository {
 	if r.apiKeyRepo == nil {

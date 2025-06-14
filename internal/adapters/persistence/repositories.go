@@ -1,6 +1,9 @@
 package persistence
 
-import "github.com/MAD-py/pandora-core/internal/ports"
+import (
+	"github.com/MAD-py/pandora-core/internal/domain/errors"
+	"github.com/MAD-py/pandora-core/internal/ports"
+)
 
 type DriverType string
 
@@ -11,6 +14,7 @@ const (
 type Repositories interface {
 	// ... Helpers ...
 	Close()
+	Ping() errors.Error
 
 	// ... Repositories ...
 	APIKey() ports.APIKeyRepository
