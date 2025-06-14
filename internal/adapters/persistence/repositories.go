@@ -13,8 +13,9 @@ const (
 
 type Repositories interface {
 	// ... Helpers ...
-	Close()
 	Ping() errors.Error
+	Close()
+	Latency() (int64, errors.Error)
 
 	// ... Repositories ...
 	APIKey() ports.APIKeyRepository

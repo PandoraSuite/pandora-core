@@ -1,6 +1,9 @@
 package persistence
 
 import (
+	"context"
+	"time"
+
 	"github.com/MAD-py/pandora-core/internal/adapters/persistence/postgres"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"
 	"github.com/MAD-py/pandora-core/internal/ports"
@@ -19,20 +22,48 @@ type postgresRepositories struct {
 }
 
 func (r *postgresRepositories) Close() {
-	if r.driver == nil {
-		return
+	if pool := r.driver.Pool(); pool != nil {
+		pool.Close()
 	}
-
-	r.driver.Close()
 }
 
 func (r *postgresRepositories) Ping() errors.Error {
-	if r.driver == nil {
+	pool := r.driver.Pool()
+
+	if pool == nil {
+		return errors.NewInternal("pool is not initialized", nil)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := pool.Ping(ctx); err != nil {
 		return errors.NewInternal(
-			"driver is not initialized", nil,
+			"failed to ping Postgres database",
+			err,
 		)
 	}
-	return r.driver.Ping()
+	return nil
+}
+
+func (r *postgresRepositories) Latency() (int64, errors.Error) {
+	pool := r.driver.Pool()
+	if pool == nil {
+		return 0, errors.NewInternal("pool is not initialized", nil)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	start := time.Now()
+	err := pool.QueryRow(ctx, "SELECT 1").Scan(new(int))
+	latency := time.Since(start).Milliseconds()
+
+	if err != nil {
+		return 0, errors.NewInternal("failed to measure DB latency", err)
+	}
+
+	return latency, nil
 }
 
 func (r *postgresRepositories) APIKey() ports.APIKeyRepository {

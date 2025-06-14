@@ -17,27 +17,8 @@ type Driver struct {
 	pool *pgxpool.Pool
 }
 
-func (d *Driver) Close() {
-	if d.pool != nil {
-		d.pool.Close()
-	}
-}
-
-func (d *Driver) Ping() domainErr.Error {
-	if d.pool == nil {
-		return domainErr.NewInternal("pool is not initialized", nil)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := d.pool.Ping(ctx); err != nil {
-		return domainErr.NewInternal(
-			"failed to ping Postgres database",
-			err,
-		)
-	}
-	return nil
+func (d *Driver) Pool() *pgxpool.Pool {
+	return d.pool
 }
 
 func (d *Driver) entityMapper(table string) string {
