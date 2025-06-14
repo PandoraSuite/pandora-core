@@ -38,10 +38,7 @@ func (r *postgresRepositories) Ping() errors.Error {
 	defer cancel()
 
 	if err := pool.Ping(ctx); err != nil {
-		return errors.NewInternal(
-			"failed to ping Postgres database",
-			err,
-		)
+		return errors.NewInternal("failed to ping database", err)
 	}
 	return nil
 }
