@@ -137,7 +137,8 @@ func (r *APIKeyRepository) ListByEnvironment(
 			COALESCE(expires_at, '0001-01-01 00:00:00.0+00'),
 			COALESCE(last_used, '0001-01-01 00:00:00.0+00')
 		FROM api_key
-		WHERE environment_id = $1;
+		WHERE environment_id = $1
+		ORDER BY created_at DESC;
 	`
 
 	rows, err := r.pool.Query(ctx, query, environmentID)

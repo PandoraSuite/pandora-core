@@ -97,6 +97,7 @@ func (r *RequestRepository) ListByService(
 			COALESCE(unauthorized_reason, ''), created_at
 		FROM request
 		WHERE service_id = $1
+		ORDER BY created_at DESC;
 	`
 
 	args := []any{serviceID}

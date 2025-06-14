@@ -504,6 +504,7 @@ func (r *EnvironmentRepository) ListByProject(
 						'availableRequest', es.available_request,
 						'assignedAt', es.created_at
 					)
+					ORDER BY es.created_at DESC;
 				) FILTER (WHERE s.id IS NOT NULL), '[]'
 			)
 		FROM environment e
@@ -514,7 +515,8 @@ func (r *EnvironmentRepository) ListByProject(
 			LEFT JOIN service s
 				ON s.id = es.service_id
 		WHERE p.id = $1
-		GROUP BY e.id;
+		GROUP BY e.id
+		ORDER BY created_at DESC;
 	`
 
 	rows, err := r.pool.Query(ctx, query, projectID)

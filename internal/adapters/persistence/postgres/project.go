@@ -471,6 +471,7 @@ func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, erro
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
 					)
+					ORDER BY ps.created_at DESC;
 				) FILTER (WHERE s.id IS NOT NULL), '[]'
 			)
 		FROM project p
@@ -478,7 +479,8 @@ func (r *ProjectRepository) List(ctx context.Context) ([]*entities.Project, erro
 				ON ps.project_id = p.id
 			LEFT JOIN service s
 				ON s.id = ps.service_id
-		GROUP BY p.id;
+		GROUP BY p.id
+		ORDER BY created_at DESC;
 	`
 
 	rows, err := r.pool.Query(ctx, query)
@@ -530,6 +532,7 @@ func (r *ProjectRepository) ListByClient(
 						'resetFrequency', ps.reset_frequency,
 						'assignedAt', ps.created_at
 					)
+					ORDER BY ps.created_at DESC;
 				) FILTER (WHERE s.id IS NOT NULL), '[]'
 			)
 		FROM project p
@@ -540,7 +543,8 @@ func (r *ProjectRepository) ListByClient(
 			LEFT JOIN service s
 				ON s.id = ps.service_id
 		WHERE c.id = $1
-		GROUP BY p.id;
+		GROUP BY p.id
+		ORDER BY created_at DESC;
 	`
 
 	rows, err := r.pool.Query(ctx, query, clientID)

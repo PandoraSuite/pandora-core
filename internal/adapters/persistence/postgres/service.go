@@ -112,6 +112,7 @@ func (r *ServiceRepository) List(
 	query := `
 		SELECT id, name, version, status, created_at
 		FROM service
+		ORDER BY created_at DESC;
 	`
 
 	var args []any

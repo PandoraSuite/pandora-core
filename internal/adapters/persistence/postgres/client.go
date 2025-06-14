@@ -145,6 +145,7 @@ func (r *ClientRepository) List(
 	query := `
 		SELECT id, type, name, email, created_at
 		FROM client
+		ORDER BY created_at DESC;
 	`
 
 	var args []any
