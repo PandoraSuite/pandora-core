@@ -1,4 +1,4 @@
-package disabled
+package disable
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/mock/gomock"
 
-	"github.com/MAD-py/pandora-core/internal/app/api_key/disabled/mock"
+	"github.com/MAD-py/pandora-core/internal/app/api_key/disable/mock"
 	"github.com/MAD-py/pandora-core/internal/domain/entities"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/MAD-py/pandora-core/internal/domain/errors"

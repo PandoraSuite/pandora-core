@@ -1,4 +1,4 @@
-package enabled
+package enable
 
 import (
 	"context"

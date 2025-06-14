@@ -1,4 +1,4 @@
-package disabled
+package disable
 
 import (
 	"context"
