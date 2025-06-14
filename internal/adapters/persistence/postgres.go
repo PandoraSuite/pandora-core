@@ -29,7 +29,7 @@ func (r *postgresRepositories) Close() {
 func (r *postgresRepositories) Ping() errors.Error {
 	if r.driver == nil {
 		return errors.NewInternal(
-			"postgres driver is not initialized", nil,
+			"driver is not initialized", nil,
 		)
 	}
 	return r.driver.Ping()
