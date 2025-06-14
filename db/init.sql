@@ -90,6 +90,8 @@ CREATE TABLE IF NOT EXISTS project_service(
     CONSTRAINT project_service_service_id_fk
         FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE,
 
+    PRIMARY KEY (project_id, service_id),
+
     reset_frequency TEXT NOT NULL,
     CONSTRAINT project_service_reset_frequency_check
         CHECK (reset_frequency IN ('daily', 'weekly', 'biweekly', 'monthly')),
@@ -108,6 +110,8 @@ CREATE TABLE IF NOT EXISTS environment_service(
     service_id INTEGER NOT NULL,
     CONSTRAINT environment_service_service_id_fk
         FOREIGN KEY (service_id) REFERENCES service(id) ON DELETE CASCADE,
+
+    PRIMARY KEY (environment_id, service_id),
 
     CONSTRAINT environment_service_unique UNIQUE (environment_id, service_id),
 
