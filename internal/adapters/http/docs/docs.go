@@ -1104,6 +1104,41 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/health": {
+            "get": {
+                "description": "Check the health status of the application",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Health"
+                ],
+                "summary": "Health Check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.HealthCheckResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/dto.HealthCheckResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "Default error response for all failures",
+                        "schema": {
+                            "$ref": "#/definitions/errors.HTTPError"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/projects": {
             "get": {
                 "security": [
@@ -1959,6 +1994,37 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.CheckResponse": {
+            "type": "object",
+            "required": [
+                "database"
+            ],
+            "properties": {
+                "database": {
+                    "$ref": "#/definitions/dto.CheckStatusResponse"
+                }
+            }
+        },
+        "dto.CheckStatusResponse": {
+            "type": "object",
+            "required": [
+                "latency",
+                "message",
+                "status"
+            ],
+            "properties": {
+                "latency": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/enums.HealthStatus"
+                }
+            }
+        },
         "dto.ClientCreate": {
             "type": "object",
             "required": [
@@ -2199,6 +2265,25 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.HealthCheckResponse": {
+            "type": "object",
+            "required": [
+                "check",
+                "status",
+                "timestamp"
+            ],
+            "properties": {
+                "check": {
+                    "$ref": "#/definitions/dto.CheckResponse"
+                },
+                "status": {
+                    "$ref": "#/definitions/enums.HealthStatus"
+                },
+                "timestamp": {
                     "type": "string"
                 }
             }
@@ -2676,6 +2761,21 @@ const docTemplate = `{
                 }
             }
         },
+        "enums.HealthStatus": {
+            "type": "string",
+            "enum": [
+                "",
+                "OK",
+                "DOWN",
+                "DEGRADED"
+            ],
+            "x-enum-varnames": [
+                "HealthStatusNull",
+                "HealthStatusOK",
+                "HealthStatusDown",
+                "HealthStatusDegraded"
+            ]
+        },
         "errors.ErrorCode": {
             "type": "string",
             "enum": [
@@ -2738,6 +2838,9 @@ const docTemplate = `{
         }
     },
     "tags": [
+        {
+            "name": "Health"
+        },
         {
             "name": "Authentication"
         },

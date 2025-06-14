@@ -97,6 +97,27 @@ definitions:
     - confirm_password
     - new_password
     type: object
+  dto.CheckResponse:
+    properties:
+      database:
+        $ref: '#/definitions/dto.CheckStatusResponse'
+    required:
+    - database
+    type: object
+  dto.CheckStatusResponse:
+    properties:
+      latency:
+        minimum: 0
+        type: integer
+      message:
+        type: string
+      status:
+        $ref: '#/definitions/enums.HealthStatus'
+    required:
+    - latency
+    - message
+    - status
+    type: object
   dto.ClientCreate:
     properties:
       email:
@@ -271,6 +292,19 @@ definitions:
     properties:
       name:
         type: string
+    type: object
+  dto.HealthCheckResponse:
+    properties:
+      check:
+        $ref: '#/definitions/dto.CheckResponse'
+      status:
+        $ref: '#/definitions/enums.HealthStatus'
+      timestamp:
+        type: string
+    required:
+    - check
+    - status
+    - timestamp
     type: object
   dto.ProjectCreate:
     properties:
@@ -616,6 +650,18 @@ definitions:
     required:
     - status
     type: object
+  enums.HealthStatus:
+    enum:
+    - ""
+    - OK
+    - DOWN
+    - DEGRADED
+    type: string
+    x-enum-varnames:
+    - HealthStatusNull
+    - HealthStatusOK
+    - HealthStatusDown
+    - HealthStatusDegraded
   errors.ErrorCode:
     enum:
     - NOT_FOUND
@@ -1350,6 +1396,29 @@ paths:
       summary: Resets request quota for a service in an environment
       tags:
       - Environments
+  /api/v1/health:
+    get:
+      consumes:
+      - application/json
+      description: Check the health status of the application
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.HealthCheckResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/dto.HealthCheckResponse'
+        default:
+          description: Default error response for all failures
+          schema:
+            $ref: '#/definitions/errors.HTTPError'
+      summary: Health Check
+      tags:
+      - Health
   /api/v1/projects:
     get:
       description: Fetches a complete list of projects in the system
@@ -1820,6 +1889,7 @@ securityDefinitions:
     type: apiKey
 swagger: "2.0"
 tags:
+- name: Health
 - name: Authentication
 - name: Services
 - name: Clients
