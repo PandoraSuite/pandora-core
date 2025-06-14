@@ -18,6 +18,7 @@ import (
 // @description API for centralized API key management and service access control.
 // @termsOfService http://example.com/terms/
 
+// @tag.name Health
 // @tag.name Authentication
 // @tag.name Services
 // @tag.name Clients
@@ -76,6 +77,7 @@ func (s *Server) Run() error {
 	v1 := engine.Group("/api/v1")
 
 	{
+		routes.RegisterHealthRoutes(v1, s.deps)
 		routes.RegisterLoginRoutes(v1, s.deps)
 	}
 
