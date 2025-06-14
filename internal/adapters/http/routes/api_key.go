@@ -5,6 +5,8 @@ import (
 	"github.com/MAD-py/pandora-core/internal/adapters/http/handlers"
 	"github.com/MAD-py/pandora-core/internal/adapters/http/middlewares"
 	apikey "github.com/MAD-py/pandora-core/internal/app/api_key"
+	"github.com/MAD-py/pandora-core/internal/app/api_key/disable"
+	"github.com/MAD-py/pandora-core/internal/app/api_key/enable"
 	"github.com/MAD-py/pandora-core/internal/app/auth"
 	"github.com/MAD-py/pandora-core/internal/domain/enums"
 	"github.com/gin-gonic/gin"
@@ -20,12 +22,23 @@ func RegisterAPIKeyRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
 	deleteUC := apikey.NewDeleteUseCase(
 		deps.Validator, deps.Repositories.APIKey(),
 	)
+	disableUC := disable.NewUseCase(
+		deps.Validator,
+		deps.Repositories.APIKey(),
+	)
+	enableUC := enable.NewUseCase(
+		deps.Validator,
+		deps.Repositories.APIKey(),
+		deps.Repositories.Environment(),
+	)
 
 	apiKeys := rg.Group("/api-keys")
 	{
 		apiKeys.POST("", handlers.APIKeyCreate(createUC))
 		apiKeys.PUT("/:id", handlers.APIKeyUpdate(updateUC))
 		apiKeys.DELETE("/:id", handlers.APIKeyDelete(deleteUC))
+		apiKeys.POST("/:id/disable", handlers.APIKeyDisable(disableUC))
+		apiKeys.POST("/:id/enable", handlers.APIKeyEnable(enableUC))
 	}
 }
 

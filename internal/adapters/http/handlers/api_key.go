@@ -113,6 +113,70 @@ func APIKeyDelete(useCase apikey.DeleteUseCase) gin.HandlerFunc {
 	}
 }
 
+// APIKeyDisable godoc
+// @Summary Disables an API key
+// @Description Disables a specific API key by ID
+// @Tags API Keys
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "API Key ID"
+// @Success 204 "No Content"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
+// @Router /api/v1/api-keys/{id}/disable [post]
+func APIKeyDisable(useCase apikey.DisableUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		apiKeyID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid api key id",
+				),
+			)
+			return
+		}
+
+		if err := useCase.Execute(c.Request.Context(), apiKeyID); err != nil {
+			c.Error(err)
+			return
+		}
+
+		c.Status(http.StatusNoContent)
+	}
+}
+
+// APIKeyEnables godoc
+// @Summary Enables an API key
+// @Description Enables a specific API key by ID
+// @Tags API Keys
+// @Security OAuth2Password
+// @Accept json
+// @Produce json
+// @Param id path int true "API Key ID"
+// @Success 204 "No Content"
+// @Failure default {object} errors.HTTPError "Default error response for all failures"
+// @Router /api/v1/api-keys/{id}/enable [post]
+func APIKeyEnable(useCase apikey.EnableUseCase) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		apiKeyID, paramErr := strconv.Atoi(c.Param("id"))
+		if paramErr != nil {
+			c.Error(
+				errors.NewValidationFailed(
+					"path", "id", "Invalid api key id",
+				),
+			)
+			return
+		}
+
+		if err := useCase.Execute(c.Request.Context(), apiKeyID); err != nil {
+			c.Error(err)
+			return
+		}
+
+		c.Status(http.StatusNoContent)
+	}
+}
+
 // APIKeyRevealKey godoc
 // @Summary Reveals the API Key
 // @Description Retrieves the actual API Key value for a specific API key by ID
