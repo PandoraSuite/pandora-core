@@ -3,6 +3,8 @@ package apikey
 import (
 	"github.com/MAD-py/pandora-core/internal/app/api_key/create"
 	"github.com/MAD-py/pandora-core/internal/app/api_key/delete"
+	"github.com/MAD-py/pandora-core/internal/app/api_key/disable"
+	"github.com/MAD-py/pandora-core/internal/app/api_key/enable"
 	revealkey "github.com/MAD-py/pandora-core/internal/app/api_key/reveal_key"
 	"github.com/MAD-py/pandora-core/internal/app/api_key/update"
 	validateconsume "github.com/MAD-py/pandora-core/internal/app/api_key/validate_consume"
@@ -82,6 +84,28 @@ func NewValidateConsumeUseCase(
 		requestRepo,
 		environmentRepo,
 	)
+}
+
+// ... Disable Use Case ...
+
+type DisableUseCase = disable.UseCase
+
+func NewDisableUseCase(
+	validator validator.Validator, repo APIKeyDisableRepository,
+) DisableUseCase {
+	return disable.NewUseCase(validator, repo)
+}
+
+// ... Enable Use Case ...
+
+type EnableUseCase = enable.UseCase
+
+func NewEnableUseCase(
+	validator validator.Validator,
+	apiKeyRepo APIKeyEnableRepository,
+	environmentRepo EnvironmentEnableRepository,
+) EnableUseCase {
+	return enable.NewUseCase(validator, apiKeyRepo, environmentRepo)
 }
 
 // ... Reveal Key Use Case ...
