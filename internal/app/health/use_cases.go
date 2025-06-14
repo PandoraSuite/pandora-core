@@ -6,6 +6,6 @@ import "github.com/MAD-py/pandora-core/internal/app/health/check"
 
 type CheckUseCase = check.UseCase
 
-func NewHealthCheckUseCase(database CheckDatabase) CheckUseCase {
+func NewCheckUseCase(database CheckDatabase) CheckUseCase {
 	return check.NewUseCase(database)
 }
