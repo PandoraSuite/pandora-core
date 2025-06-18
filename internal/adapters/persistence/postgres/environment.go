@@ -177,8 +177,8 @@ func (r *EnvironmentRepository) UpdateService(
 		query,
 		id,
 		serviceID,
-		service.MaxRequests,
-		service.AvailableRequest,
+		update.MaxRequests,
+		update.AvailableRequest,
 	).Scan(
 		&service.ID,
 		&service.Name,
@@ -504,7 +504,7 @@ func (r *EnvironmentRepository) ListByProject(
 						'availableRequest', es.available_request,
 						'assignedAt', es.created_at
 					)
-					ORDER BY es.created_at DESC;
+					ORDER BY es.created_at DESC
 				) FILTER (WHERE s.id IS NOT NULL), '[]'
 			)
 		FROM environment e
