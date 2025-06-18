@@ -35,7 +35,7 @@ func RegisterAPIKeyRoutes(rg *gin.RouterGroup, deps *bootstrap.Dependencies) {
 	apiKeys := rg.Group("/api-keys")
 	{
 		apiKeys.POST("", handlers.APIKeyCreate(createUC))
-		apiKeys.PUT("/:id", handlers.APIKeyUpdate(updateUC))
+		apiKeys.PATCH("/:id", handlers.APIKeyUpdate(updateUC))
 		apiKeys.DELETE("/:id", handlers.APIKeyDelete(deleteUC))
 		apiKeys.POST("/:id/disable", handlers.APIKeyDisable(disableUC))
 		apiKeys.POST("/:id/enable", handlers.APIKeyEnable(enableUC))
