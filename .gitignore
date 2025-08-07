@@ -32,3 +32,6 @@ storage/
 
 .air*
 !.air.template.toml
+
+*CLAUDE*
+*claude*
