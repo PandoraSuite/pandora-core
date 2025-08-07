@@ -101,6 +101,7 @@ type ProjectRepository interface {
 	// ... List ...
 	List(ctx context.Context) ([]*entities.Project, errors.Error)
 	ListByClient(ctx context.Context, clientID int) ([]*entities.Project, errors.Error)
+	ListProjectServiceDueForReset(ctx context.Context, today time.Time) ([]*entities.Project, errors.Error)
 
 	// ... Create ...
 	Create(ctx context.Context, project *entities.Project) errors.Error

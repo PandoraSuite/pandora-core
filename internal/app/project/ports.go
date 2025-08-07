@@ -8,6 +8,7 @@ import (
 	"github.com/MAD-py/pandora-core/internal/app/project/list"
 	listenvironments "github.com/MAD-py/pandora-core/internal/app/project/list_environments"
 	removeservice "github.com/MAD-py/pandora-core/internal/app/project/remove_service"
+	resetduerequests "github.com/MAD-py/pandora-core/internal/app/project/reset_due_requests"
 	resetrequests "github.com/MAD-py/pandora-core/internal/app/project/reset_requests"
 	"github.com/MAD-py/pandora-core/internal/app/project/update"
 	updateservice "github.com/MAD-py/pandora-core/internal/app/project/update_service"
@@ -46,6 +47,10 @@ type EnvironmentRemoveServiceRepository = removeservice.EnvironmentRepository
 // ... Reset Request Use Case ...
 
 type ProjectResetRequestRepository = resetrequests.ProjectRepository
+
+// ... Reset Due Requests Use Case ...
+
+type ProjectResetDueRequestsRepository = resetduerequests.ProjectRepository
 
 // ... Update Use Case ...
 

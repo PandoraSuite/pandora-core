@@ -65,3 +65,11 @@ type ProjectClientInfoResponse struct {
 	ClientID    int    `name:"client_id"`
 	ClientName  string `name:"client_name"`
 }
+
+type ProjectReset struct {
+	ID     int                 `name:"id"`
+	Name   string              `name:"name"`
+	Status enums.ProjectStatus `name:"status"`
+
+	EnvironmentServices []*EnvironmentServiceReset `name:"environment_services"`
+}

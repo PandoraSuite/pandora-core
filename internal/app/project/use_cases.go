@@ -8,6 +8,7 @@ import (
 	"github.com/MAD-py/pandora-core/internal/app/project/list"
 	listenvironments "github.com/MAD-py/pandora-core/internal/app/project/list_environments"
 	removeservice "github.com/MAD-py/pandora-core/internal/app/project/remove_service"
+	resetduerequests "github.com/MAD-py/pandora-core/internal/app/project/reset_due_requests"
 	resetrequests "github.com/MAD-py/pandora-core/internal/app/project/reset_requests"
 	"github.com/MAD-py/pandora-core/internal/app/project/update"
 	updateservice "github.com/MAD-py/pandora-core/internal/app/project/update_service"
@@ -95,6 +96,16 @@ func NewResetRequestUseCase(
 	projectRepo ProjectResetRequestRepository,
 ) ResetRequestUseCase {
 	return resetrequests.NewUseCase(validator, projectRepo)
+}
+
+// ... Reset Due Requests Use Case ...
+
+type ResetDueRequestsUseCase = resetduerequests.UseCase
+
+func NewResetDueRequestsUseCase(
+	projectRepo ProjectResetDueRequestsRepository,
+) ResetDueRequestsUseCase {
+	return resetduerequests.NewUseCase(projectRepo)
 }
 
 // ... Update Use Case ...
