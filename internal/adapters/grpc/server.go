@@ -10,8 +10,9 @@ import (
 	protovalidator "github.com/bufbuild/protovalidate-go"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/protovalidate"
-
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 
 	"github.com/MAD-py/pandora-core/internal/adapters/grpc/bootstrap"
 	apikey "github.com/MAD-py/pandora-core/internal/adapters/grpc/services/api_key"
@@ -28,6 +29,12 @@ type Server struct {
 }
 
 func (s *Server) setupServices() {
+	// Register standard gRPC health service for compatibility with grpc_health_probe
+	healthServer := health.NewServer()
+	healthServer.SetServingStatus("", grpc_health_v1.HealthCheckResponse_SERVING)
+	grpc_health_v1.RegisterHealthServer(s.server, healthServer)
+
+	// Register our application services
 	apikey.RegisterService(s.server, s.deps)
 	request.RegisterService(s.server, s.deps)
 	reservation.RegisterService(s.server, s.deps)
