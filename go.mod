@@ -4,6 +4,7 @@ go 1.23.4
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250307204501-0409229c3780.1
+	github.com/MAD-py/go-taskengine v0.2.0-beta.1
 	github.com/bufbuild/protovalidate-go v0.9.1
 	github.com/gin-contrib/cors v1.7.5
 	github.com/gin-gonic/gin v1.10.1
@@ -27,6 +28,7 @@ require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
+	github.com/adhocore/gronx v1.19.6 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.0 // indirect
 	github.com/bytedance/sonic v1.13.2 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect

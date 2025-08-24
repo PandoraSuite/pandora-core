@@ -22,6 +22,13 @@ func getDBDNS() string {
 	return "host=localhost port=5436 user=pandora password= dbname=pandora sslmode=disable timezone=UTC"
 }
 
+func getTaskEngineDBDNS() string {
+	if value, exists := os.LookupEnv("PANDORA_TASKENGINE_DB_DNS"); exists {
+		return value
+	}
+	return getDBDNS()
+}
+
 func getJWTSecrt() string {
 	if value, exists := os.LookupEnv("PANDORA_JWT_SECRET"); exists {
 		return value

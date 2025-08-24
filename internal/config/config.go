@@ -1,8 +1,9 @@
 package config
 
 type Config struct {
-	http *HTTPConfig
-	grpc *GRPCConfig
+	http       *HTTPConfig
+	grpc       *GRPCConfig
+	taskEngine *TaskEngineConfig
 }
 
 func (c *Config) DBDNS() string {
@@ -21,9 +22,13 @@ func (c *Config) HTTPConfig() *HTTPConfig { return c.http }
 
 func (c *Config) GRPCConfig() *GRPCConfig { return c.grpc }
 
+func (c *Config) TaskEngineConfig() *TaskEngineConfig { return c.taskEngine }
+
 type baseConfig struct {
 	dbDNS string
 }
+
+func (c *baseConfig) DBDNS() string { return c.dbDNS }
 
 type HTTPConfig struct {
 	*baseConfig
@@ -38,8 +43,6 @@ type HTTPConfig struct {
 
 	credentialsFile string
 }
-
-func (c *HTTPConfig) DBDNS() string { return c.dbDNS }
 
 func (c *HTTPConfig) Dir() string { return c.dir }
 
@@ -57,29 +60,28 @@ type GRPCConfig struct {
 	port string
 }
 
-func (c *GRPCConfig) DBDNS() string { return c.dbDNS }
-
 func (c *GRPCConfig) Port() string { return c.port }
 
-func loadBaseConfig() *baseConfig {
-	return &baseConfig{
-		dbDNS: getDBDNS(),
-	}
+type TaskEngineConfig struct {
+	*baseConfig
 }
 
 func LoadConfig() *Config {
 	return &Config{
-		http: LoadHTTPConfig(),
-		grpc: LoadGRPCConfig(),
+		http:       LoadHTTPConfig(),
+		grpc:       LoadGRPCConfig(),
+		taskEngine: LoadTaskEngineConfig(),
 	}
 }
 
 func LoadHTTPConfig() *HTTPConfig {
 	return &HTTPConfig{
-		dir:             getDir(),
-		port:            getHTTPPort(),
-		jwtSecret:       getJWTSecrt(),
-		baseConfig:      loadBaseConfig(),
+		dir:       getDir(),
+		port:      getHTTPPort(),
+		jwtSecret: getJWTSecrt(),
+		baseConfig: &baseConfig{
+			dbDNS: getDBDNS(),
+		},
 		exposeVersion:   getExposeVersion(),
 		credentialsFile: getCredentialsFilePath(getDir()),
 	}
@@ -87,7 +89,17 @@ func LoadHTTPConfig() *HTTPConfig {
 
 func LoadGRPCConfig() *GRPCConfig {
 	return &GRPCConfig{
-		port:       getGRPCPort(),
-		baseConfig: loadBaseConfig(),
+		port: getGRPCPort(),
+		baseConfig: &baseConfig{
+			dbDNS: getDBDNS(),
+		},
+	}
+}
+
+func LoadTaskEngineConfig() *TaskEngineConfig {
+	return &TaskEngineConfig{
+		baseConfig: &baseConfig{
+			dbDNS: getTaskEngineDBDNS(),
+		},
 	}
 }

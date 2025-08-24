@@ -14,6 +14,7 @@ services:
       - "2345:2345"
     environment:
       - PANDORA_DB_DNS=postgres://pandora:pandora@postgres:5432/pandora?sslmode=disable&timezone=UTC
+      - PANDORA_TASKENGINE_DB_DNS=postgres://pandora:pandora@postgres:5432/pandora?sslmode=disable&timezone=UTC
       - PANDORA_JWT_SECRET=your_jwt_secret
       - PANDORA_EXPOSE_VERSION=true
     depends_on:
