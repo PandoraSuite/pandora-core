@@ -3,7 +3,7 @@ module github.com/MAD-py/pandora-core
 go 1.23.4
 
 require (
-	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.6-20250307204501-0409229c3780.1
+	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.8-20250717185734-6c6e0d3c608e.1
 	github.com/MAD-py/go-taskengine v0.2.0-beta.1
 	github.com/bufbuild/protovalidate-go v0.9.1
 	github.com/gin-contrib/cors v1.7.6
@@ -20,7 +20,7 @@ require (
 	golang.org/x/crypto v0.39.0
 	golang.org/x/sync v0.16.0
 	google.golang.org/grpc v1.73.0
-	google.golang.org/protobuf v1.36.6
+	google.golang.org/protobuf v1.36.8
 )
 
 require (
