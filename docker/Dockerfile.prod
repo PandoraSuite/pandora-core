@@ -17,7 +17,7 @@ RUN go build -o /pandora-core \
 
 FROM postgres:17.5-alpine
 
-RUN apk add --no-cache tini wget
+RUN apk add --no-cache tini curl
 
 ENV GRPC_HEALTH_PROBE_VERSION=v0.4.38
 
@@ -40,10 +40,11 @@ RUN chmod +x /usr/local/bin/pandora-entrypoint.sh \
 
 ENV PANDORA_DB_USER=pandora
 ENV PANDORA_DB_NAME=pandora
+ENV PANDORA_TASKENGINE_DB_NAME=taskengine
 
 ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/pandora-entrypoint.sh"]
 
 EXPOSE 80 50051
 
-# HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-#   CMD /usr/local/bin/healthcheck.sh
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD /usr/local/bin/healthcheck.sh

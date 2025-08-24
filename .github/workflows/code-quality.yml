@@ -32,7 +32,7 @@ jobs:
 
       - name: Install staticcheck
         run: |
-          go install honnef.co/go/tools/cmd/staticcheck@latest
+          go install honnef.co/go/tools/cmd/staticcheck@v0.6.0
           echo "${GOPATH}/bin" >> $GITHUB_PATH
 
       - name: Run staticcheck

@@ -21,6 +21,66 @@ type ProjectRepository struct {
 	auxServiceTableName string
 }
 
+func (r *ProjectRepository) ListProjectServiceDueForReset(
+	ctx context.Context, today time.Time,
+) ([]*entities.Project, errors.Error) {
+	query := `
+		SELECT p.id, p.name, p.status, p.client_id, p.created_at,
+			COALESCE(
+				JSON_AGG(
+					JSON_BUILD_OBJECT(
+						'id', s.id,
+						'name', s.name,
+						'version', s.version,
+						'nextReset', ps.next_reset,
+						'maxRequests', ps.max_requests,
+						'resetFrequency', ps.reset_frequency,
+						'assignedAt', ps.created_at
+					)
+				) FILTER (WHERE s.id IS NOT NULL), '[]'
+			)
+		FROM project p
+			LEFT JOIN project_service ps
+				ON ps.project_id = p.id
+			LEFT JOIN service s
+				ON s.id = ps.service_id
+		WHERE ps.next_reset <= $1
+		GROUP BY p.id; 
+	`
+
+	rows, err := r.pool.Query(ctx, query, today)
+	if err != nil {
+		return nil, r.errorMapper(err, r.tableName)
+	}
+
+	defer rows.Close()
+
+	var projects []*entities.Project
+	for rows.Next() {
+		project := new(entities.Project)
+
+		err = rows.Scan(
+			&project.ID,
+			&project.Name,
+			&project.Status,
+			&project.ClientID,
+			&project.CreatedAt,
+			&project.Services,
+		)
+		if err != nil {
+			return nil, r.errorMapper(err, r.tableName)
+		}
+
+		projects = append(projects, project)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, r.errorMapper(err, r.tableName)
+	}
+
+	return projects, nil
+}
+
 func (r *ProjectRepository) Delete(
 	ctx context.Context, id int,
 ) errors.Error {

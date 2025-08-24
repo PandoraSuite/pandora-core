@@ -138,6 +138,7 @@ Press `F5` to attach the debugger.
 
 * `PANDORA_DIR` — (optional) (default: `/etc/pandora`)
 * `PANDORA_DB_DNS` — (optional) PostgreSQL connection string (default: `host=localhost port=5432 user=postgres password= dbname=pandora sslmode=disable timezone=UTC`)
+* `PANDORA_TASKENGINE_DB_DNS` — (optional) TaskEngine PostgreSQL connection string (defaults to `PANDORA_DB_DNS` if not set)
 * `PANDORA_JWT_SECRET` — (optional) Secret key used for signing authentication tokens (default: Randomly generated on startup. Consider setting a fixed value for consistent local development)
 * `PANDORA_HTTP_PORT` — (optional) HTTP server port (default: `80`)
 * `PANDORA_GRPC_PORT` — (optional) gRPC server port (default: `50051`)

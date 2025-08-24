@@ -235,7 +235,10 @@ For detailed method signatures and message definitions, consult the `.proto` fil
 * **`PANDORA_DB_USER`** (optional) Change the database username.
   * Default: `pandora`
 
-* **`PANDORA_DIR`** (optional) Specify a custom directory for storing Pandora’s configuration and secrets.
+* **`PANDORA_TASKENGINE_DB_DNS`** (optional) TaskEngine PostgreSQL connection string. Use this to configure a separate database for the task engine.
+  * Default: Uses database `taskengine` (created automatically in production)
+
+* **`PANDORA_DIR`** (optional) Specify a custom directory for storing Pandora's configuration and secrets.
   * Default: `/etc/pandora`
 
 * **`PANDORA_JWT_SECRET`** (optional) Provide a fixed secret key for signing JWT authentication tokens. If omitted, Pandora generates a random one at startup (not recommended for consistent development).
