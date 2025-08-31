@@ -42,6 +42,7 @@ func (uc *useCase) Execute(
 	if req.Request.Metadata != nil {
 		requestMetadata = entities.RequestMetadata{
 			QueryParams:     req.Request.Metadata.QueryParams,
+			Cookies:         req.Request.Metadata.Cookies,
 			Headers:         req.Request.Metadata.Headers,
 			Body:            req.Request.Metadata.Body,
 			BodyContentType: req.Request.Metadata.BodyContentType,
