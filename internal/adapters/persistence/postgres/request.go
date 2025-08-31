@@ -246,6 +246,7 @@ func (r *RequestRepository) Create(
 	metadata := make(map[string]any)
 	if request.Metadata != nil {
 		metadata["body"] = request.Metadata.Body
+		metadata["cookies"] = request.Metadata.Cookies
 		metadata["headers"] = request.Metadata.Headers
 		metadata["queryParams"] = request.Metadata.QueryParams
 		metadata["bodyContentType"] = request.Metadata.BodyContentType
@@ -343,12 +344,14 @@ func (r *RequestRepository) CreateAsInitialPoint(
 
 	metadata := map[string]any{
 		"body":            "",
+		"cookies":         "",
 		"headers":         "",
 		"queryParams":     "",
 		"bodyContentType": enums.RequestBodyContentTypeNull,
 	}
 	if request.Metadata != nil {
 		metadata["body"] = request.Metadata.Body
+		metadata["cookies"] = request.Metadata.Cookies
 		metadata["headers"] = request.Metadata.Headers
 		metadata["queryParams"] = request.Metadata.QueryParams
 		metadata["bodyContentType"] = request.Metadata.BodyContentType
