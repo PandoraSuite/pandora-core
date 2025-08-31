@@ -9,6 +9,7 @@ import (
 type RequestMetadata struct {
 	Body            string
 	BodyContentType enums.RequestBodyContentType
+	Cookies         string
 	Headers         string
 	QueryParams     string
 }

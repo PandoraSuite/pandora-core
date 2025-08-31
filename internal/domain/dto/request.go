@@ -16,6 +16,7 @@ type RequestFilter struct {
 
 type RequestIncomingMetadata struct {
 	QueryParams     string                       `name:"query_params" validate:"omitempty"`
+	Cookies         string                       `name:"cookies" validate:"omitempty"`
 	Headers         string                       `name:"headers" validate:"omitempty"`
 	Body            string                       `name:"body" validate:"omitempty"`
 	BodyContentType enums.RequestBodyContentType `name:"body_content_type" validate:"omitempty,enums=application/xml application/json text/plain text/html multipart/form-data application/x-www-form-urlencoded application/octet-stream"`
@@ -79,6 +80,7 @@ type RequestResponse struct {
 type RequestDetailsReponse struct {
 	Body            string                       `name:"body"`
 	BodyContentType enums.RequestBodyContentType `name:"body_content_type"`
+	Cookies         string                       `name:"cookies"`
 	Headers         string                       `name:"headers"`
 	QueryParams     string                       `name:"query_params"`
 }

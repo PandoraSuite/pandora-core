@@ -14,6 +14,7 @@ func validateRequestToDomain(req *pb.ValidateRequest) *dto.APIKeyValidate {
 		if req.Request.Metadata != nil {
 			metadata = &dto.RequestIncomingMetadata{
 				Body:            req.Request.Metadata.Body,
+				Cookies:         req.Request.Metadata.Cookies,
 				Headers:         req.Request.Metadata.Headers,
 				QueryParams:     req.Request.Metadata.QueryParams,
 				BodyContentType: enums.RequestBodyContentType(req.Request.Metadata.BodyContentType),
