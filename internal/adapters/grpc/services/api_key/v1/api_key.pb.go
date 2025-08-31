@@ -26,9 +26,10 @@ const (
 type RequestMetadata struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Body            string                 `protobuf:"bytes,1,opt,name=body,proto3" json:"body,omitempty"`
-	Headers         string                 `protobuf:"bytes,2,opt,name=headers,proto3" json:"headers,omitempty"`
-	QueryParams     string                 `protobuf:"bytes,3,opt,name=query_params,json=queryParams,proto3" json:"query_params,omitempty"`
-	BodyContentType string                 `protobuf:"bytes,4,opt,name=body_content_type,json=bodyContentType,proto3" json:"body_content_type,omitempty"`
+	Cookies         string                 `protobuf:"bytes,2,opt,name=cookies,proto3" json:"cookies,omitempty"`
+	Headers         string                 `protobuf:"bytes,3,opt,name=headers,proto3" json:"headers,omitempty"`
+	QueryParams     string                 `protobuf:"bytes,4,opt,name=query_params,json=queryParams,proto3" json:"query_params,omitempty"`
+	BodyContentType string                 `protobuf:"bytes,5,opt,name=body_content_type,json=bodyContentType,proto3" json:"body_content_type,omitempty"`
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -66,6 +67,13 @@ func (*RequestMetadata) Descriptor() ([]byte, []int) {
 func (x *RequestMetadata) GetBody() string {
 	if x != nil {
 		return x.Body
+	}
+	return ""
+}
+
+func (x *RequestMetadata) GetCookies() string {
+	if x != nil {
+		return x.Cookies
 	}
 	return ""
 }
@@ -532,12 +540,13 @@ var File_api_key_v1_api_key_proto protoreflect.FileDescriptor
 const file_api_key_v1_api_key_proto_rawDesc = "" +
 	"\n" +
 	"\x18api_key/v1/api_key.proto\x12\n" +
-	"api_key.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xa5\x02\n" +
+	"api_key.v1\x1a\x1bbuf/validate/validate.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xc1\x02\n" +
 	"\x0fRequestMetadata\x12\x12\n" +
 	"\x04body\x18\x01 \x01(\tR\x04body\x12\x18\n" +
-	"\aheaders\x18\x02 \x01(\tR\aheaders\x12!\n" +
-	"\fquery_params\x18\x03 \x01(\tR\vqueryParams\x12\xc0\x01\n" +
-	"\x11body_content_type\x18\x04 \x01(\tB\x93\x01\xbaH\x8f\x01r\x8c\x01R\x0fapplication/xmlR\x10application/jsonR\n" +
+	"\acookies\x18\x02 \x01(\tR\acookies\x12\x18\n" +
+	"\aheaders\x18\x03 \x01(\tR\aheaders\x12!\n" +
+	"\fquery_params\x18\x04 \x01(\tR\vqueryParams\x12\xc2\x01\n" +
+	"\x11body_content_type\x18\x05 \x01(\tB\x95\x01\xbaH\x91\x01r\x8e\x01R\x00R\x0fapplication/xmlR\x10application/jsonR\n" +
 	"text/plainR\ttext/htmlR\x13multipart/form-dataR!application/x-www-form-urlencodedR\x18application/octet-streamR\x0fbodyContentType\"\x91\x02\n" +
 	"\aRequest\x12\x12\n" +
 	"\x04path\x18\x01 \x01(\tR\x04path\x12[\n" +
